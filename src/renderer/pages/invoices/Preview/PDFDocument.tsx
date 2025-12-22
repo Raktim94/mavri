@@ -1,5 +1,6 @@
-import { Document, Font, Page } from '@react-pdf/renderer';
+import { Document, Font, Page, View } from '@react-pdf/renderer';
 import { memo, type FC } from 'react';
+import { LayoutType } from '../../../shared/enums/layoutType';
 import type { InvoiceFromData } from '../../../shared/types/invoice';
 import type { Settings } from '../../../shared/types/settings';
 import RobotoBold from './../../../assets/roboto/static/Roboto-Bold.ttf';
@@ -10,6 +11,7 @@ import { FinancialInfo } from './FinancialInfo';
 import { Header } from './Header';
 import { Items } from './Items';
 import { Notes } from './Notes';
+import { PaymentInfo } from './PaymentInfo';
 
 Font.register({
   family: 'Roboto',
@@ -44,7 +46,11 @@ const PDFDocumentComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
       >
         <Header invoiceForm={invoiceForm} storeSettings={storeSettings} />
         <Items invoiceForm={invoiceForm} storeSettings={storeSettings} />
-        <FinancialInfo invoiceForm={invoiceForm} storeSettings={storeSettings} />
+        <View style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart, PDF_STYLES.mt10]}>
+          {invoiceForm?.customizationLayout === LayoutType.compact && <PaymentInfo invoiceForm={invoiceForm} />}
+          {invoiceForm?.customizationLayout !== LayoutType.compact && <View style={PDF_STYLES.flexGrow} />}
+          <FinancialInfo invoiceForm={invoiceForm} storeSettings={storeSettings} />
+        </View>
         <Notes invoiceForm={invoiceForm} />
       </Page>
     </Document>

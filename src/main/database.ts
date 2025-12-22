@@ -235,7 +235,7 @@ const init = async () => {
       shippingFeeCents INTEGER NOT NULL DEFAULT 0,
       invoicePrefixSnapshot TEXT,
       invoiceSuffixSnapshot TEXT,
-      customizationColor TEXT NOT NULL DEFAULT '#f0f0f0',
+      customizationColor TEXT NOT NULL DEFAULT '#006400',
       customizationLogoSize TEXT NOT NULL DEFAULT 'medium',
       customizationFontSizeSize TEXT NOT NULL DEFAULT 'medium',
       customizationLayout TEXT NOT NULL DEFAULT 'classic',

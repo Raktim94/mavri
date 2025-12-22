@@ -42,11 +42,11 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
   );
 
   return (
-    <View style={[PDF_STYLES.mt10]}>
+    <View style={PDF_STYLES.w50}>
       {(discountAmount > 0 || totalTax > 0 || shippingAmount > 0) && (
-        <View style={[PDF_STYLES.row]}>
+        <View style={[PDF_STYLES.row, PDF_STYLES.mb5]}>
           <View style={PDF_STYLES.flexGrow} />
-          <View style={[PDF_STYLES.row, PDF_STYLES.w40]}>
+          <View style={[PDF_STYLES.row, PDF_STYLES.w60]}>
             <View
               style={[
                 PDF_STYLES.regularBold,
@@ -71,9 +71,9 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
       )}
 
       {discountAmount > 0 && (
-        <View style={[PDF_STYLES.row, PDF_STYLES.mt5]}>
+        <View style={[PDF_STYLES.row, PDF_STYLES.mb5]}>
           <View style={PDF_STYLES.flexGrow} />
-          <View style={[PDF_STYLES.row, PDF_STYLES.w40]}>
+          <View style={[PDF_STYLES.row, PDF_STYLES.w60]}>
             <View
               style={[
                 PDF_STYLES.regular,
@@ -103,7 +103,7 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
       )}
 
       {totalTax > 0 && (
-        <View style={[PDF_STYLES.row, PDF_STYLES.mt5]}>
+        <View style={[PDF_STYLES.row, PDF_STYLES.mb5]}>
           <View style={PDF_STYLES.flexGrow} />
           <View style={[PDF_STYLES.row, PDF_STYLES.w40]}>
             <View
@@ -156,9 +156,9 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
       )}
 
       {shippingAmount > 0 && (
-        <View style={[PDF_STYLES.row, PDF_STYLES.mt5]}>
+        <View style={[PDF_STYLES.row, PDF_STYLES.mb5]}>
           <View style={PDF_STYLES.flexGrow} />
-          <View style={[PDF_STYLES.row, PDF_STYLES.w40]}>
+          <View style={[PDF_STYLES.row, PDF_STYLES.w60]}>
             <View
               style={[
                 PDF_STYLES.regular,
@@ -185,16 +185,16 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
       {(discountAmount > 0 || totalTax > 0 || shippingAmount > 0) && (
         <View style={[PDF_STYLES.row, PDF_STYLES.mt5, PDF_STYLES.mb5]}>
           <View style={PDF_STYLES.flexGrow} />
-          <View style={[PDF_STYLES.border, PDF_STYLES.w40]} />
+          <View style={[PDF_STYLES.border, PDF_STYLES.w60]} />
         </View>
       )}
 
       {(totalAmountPaid > 0 ||
         invoiceForm?.status === InvoiceStatus.paid ||
         invoiceForm?.invoiceType === InvoiceType.quotation) && (
-        <View style={[PDF_STYLES.row]}>
+        <View style={[PDF_STYLES.row, PDF_STYLES.mb5]}>
           <View style={PDF_STYLES.flexGrow} />
-          <View style={[PDF_STYLES.row, PDF_STYLES.w40]}>
+          <View style={[PDF_STYLES.row, PDF_STYLES.w60]}>
             <View
               style={[
                 PDF_STYLES.regularBold,
@@ -221,9 +221,9 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
       {totalAmountPaid > 0 &&
         invoiceForm?.invoiceType === InvoiceType.invoice &&
         invoiceForm?.status !== InvoiceStatus.paid && (
-          <View style={[PDF_STYLES.row, PDF_STYLES.mt5]}>
+          <View style={[PDF_STYLES.row, PDF_STYLES.mb5]}>
             <View style={PDF_STYLES.flexGrow} />
-            <View style={[PDF_STYLES.row, PDF_STYLES.w40]}>
+            <View style={[PDF_STYLES.row, PDF_STYLES.w60]}>
               <View
                 style={[
                   PDF_STYLES.regular,
@@ -248,9 +248,9 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
         )}
 
       {invoiceForm?.invoiceType === InvoiceType.invoice && invoiceForm?.status !== InvoiceStatus.paid && (
-        <View style={[PDF_STYLES.row, PDF_STYLES.mt5]}>
+        <View style={[PDF_STYLES.row, PDF_STYLES.mb5]}>
           <View style={PDF_STYLES.flexGrow} />
-          <View style={[PDF_STYLES.row, PDF_STYLES.w40]}>
+          <View style={[PDF_STYLES.row, PDF_STYLES.w60]}>
             <View
               style={[
                 PDF_STYLES.regularBold,

@@ -12,9 +12,10 @@ import {
   useTheme
 } from '@mui/material';
 import { MuiColorInput } from 'mui-color-input';
-import { memo, useEffect, type FC } from 'react';
+import { memo, useEffect, useRef, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '../../../../shared/components/layout/pageHeader/PageHeader';
+import { LayoutType } from '../../../../shared/enums/layoutType';
 import { PageFormat } from '../../../../shared/enums/pageFormat';
 import { SizeType } from '../../../../shared/enums/sizeType';
 import { TableHeaderStyle } from '../../../../shared/enums/tableHeaderStyle';
@@ -33,15 +34,30 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onClose, onOp
   const { t } = useTranslation();
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
-
-  const { form, update } = useForm<CustomizationForm>(data ?? {});
+  const { form, setForm, update } = useForm<CustomizationForm>(data ?? {});
+  const lastEmittedRef = useRef<CustomizationForm | undefined>(data);
 
   useEffect(() => {
-    if (onClick) {
-      onClick(form);
+    if (isOpen && data) {
+      setForm(data);
+      lastEmittedRef.current = data;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form]);
+  }, [isOpen, data, setForm]);
+
+  useEffect(() => {
+    if (!form) return;
+    try {
+      const prev = lastEmittedRef.current;
+      const prevStr = prev ? JSON.stringify(prev) : undefined;
+      const formStr = JSON.stringify(form);
+      if (formStr === prevStr) return;
+      onClick?.(form);
+      lastEmittedRef.current = form;
+    } catch {
+      onClick?.(form);
+      lastEmittedRef.current = form;
+    }
+  }, [form, onClick]);
 
   return (
     <>
@@ -72,7 +88,7 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onClose, onOp
           <PageHeader
             title={t('invoices.customization')}
             showBack={false}
-            showSave={true}
+            showSave={false}
             showClose={true}
             onClose={onClose}
           />
@@ -164,6 +180,22 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onClose, onOp
                 <FormControlLabel value={TableRowStyle.bordered} control={<Radio />} label={t('common.bordered')} />
                 <FormControlLabel value={TableRowStyle.classic} control={<Radio />} label={t('common.classic')} />
                 <FormControlLabel value={TableRowStyle.stripped} control={<Radio />} label={t('common.stripped')} />
+              </RadioGroup>
+            </FormControl>
+          </Grid>
+          <Grid size={{ xs: 12, md: 12 }}>
+            <FormControl component="fieldset">
+              <FormLabel component="legend">{t('common.layout')}</FormLabel>
+              <RadioGroup
+                row
+                value={form.customizationLayout}
+                onChange={(_e, newValue) => {
+                  update('customizationLayout', newValue as LayoutType);
+                }}
+              >
+                <FormControlLabel value={LayoutType.classic} control={<Radio />} label={t('common.classic')} />
+                <FormControlLabel value={LayoutType.modern} control={<Radio />} label={t('common.modern')} />
+                <FormControlLabel value={LayoutType.compact} control={<Radio />} label={t('common.compact')} />
               </RadioGroup>
             </FormControl>
           </Grid>
