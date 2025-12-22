@@ -29,3 +29,4 @@ nsis:
   perMachine: false
   allowElevation: false
   allowToChangeInstallationDirectory: false
+  autoInstallOnAppQuit: false

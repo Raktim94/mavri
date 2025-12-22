@@ -30,7 +30,7 @@ export const Updater: FC = () => {
       dispatch(setUpdateMessage(t('common.noUpdate')));
     });
     const unsub3 = window.electronAPI.onUpdateProgress(p => {
-      dispatch(setUpdateMessage(t('common.progress', { prct: p.percent })));
+      dispatch(setUpdateMessage(t('common.progress', { prct: Math.trunc(p.percent) })));
     });
     const unsub4 = window.electronAPI.onUpdateDownloaded(updateVersion => {
       dispatch(setNewVersion(updateVersion));
