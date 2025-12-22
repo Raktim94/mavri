@@ -17,6 +17,22 @@ export const CropModal: React.FC<Props> = ({ onClose = () => {}, imageSrc, isOpe
   const imgRef = useRef<HTMLImageElement | null>(null);
   const theme = useTheme();
 
+  const sanitizeImageSrc = (url?: string) => {
+    if (!url) return '';
+
+    try {
+      const parsed = new URL(url);
+
+      if (['http:', 'https:', 'blob:', 'file:'].includes(parsed.protocol)) {
+        return url;
+      }
+    } catch (e) {
+      console.log(e);
+    }
+
+    return '';
+  };
+
   const handleImageLoad = (img: HTMLImageElement) => {
     imgRef.current = img;
   };
@@ -89,7 +105,7 @@ export const CropModal: React.FC<Props> = ({ onClose = () => {}, imageSrc, isOpe
       <DialogContent sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <ReactCrop crop={crop} aspect={1} onChange={newCrop => setCrop(newCrop)} circularCrop={false} keepSelection>
           <img
-            src={imageSrc}
+            src={sanitizeImageSrc(imageSrc)}
             alt={t('common.crop')}
             ref={handleImageLoad as unknown as React.RefObject<HTMLImageElement>}
           />
