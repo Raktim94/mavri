@@ -25,7 +25,7 @@ win:
     - nsis
 
 nsis:
-  oneClick: false
+  oneClick: true
   perMachine: false
   allowElevation: false
-  allowToChangeInstallationDirectory: true
+  allowToChangeInstallationDirectory: false

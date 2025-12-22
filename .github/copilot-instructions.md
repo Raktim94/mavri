@@ -34,9 +34,12 @@ Developer workflows (exact commands)
 
 Environment specifics
 
-- `VITE_DEV_SERVER_URL` — if present main loads dev server URL instead of built `dist/index.html`.
-- `VITE_DB_NAME` / `VITE_APP_NAME` — used by default setup; the app also supports user-chosen DB path via the UI.
 - `VITE_ENABLE_MOCKS` — toggles MSW mocks in renderer.
+
+Application configuration
+
+- `DB_NAME` — 'invoice_builder.db' specifies the default database filename for the app. Used in the Electron main process to initialize or open the database.
+- `DEV_SERVER_URL` — 'http://localhost:5173' Provides the URL of the Vite dev server for development. Used in the Electron main process to load the renderer window during development.
 
 IPC / change pattern (exact steps)
 

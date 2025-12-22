@@ -7,6 +7,7 @@ export default defineConfig(({ mode }) => {
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
 
   return {
+    base: './',
     plugins: [react()],
     css: {
       preprocessorOptions: {

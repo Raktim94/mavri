@@ -2,15 +2,20 @@ import { config } from 'dotenv';
 import { app, BrowserWindow } from 'electron';
 import { dirname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
+import { APP_CONFIG } from './config';
 import { initDBDialogsHandlers } from './ipc/dbDialogs';
 
 config();
 
-const devServer = process.env.VITE_DEV_SERVER_URL;
-const dbName = process.env.VITE_DB_NAME || 'app_database.db';
+const isDev = !app.isPackaged;
+const devServer = APP_CONFIG.DEV_SERVER_URL;
+const dbName = APP_CONFIG.DB_NAME;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const preloadPath = join(resolve(), 'dist-electron/preload/preload.cjs');
+const preloadPath = isDev
+  ? join(resolve(), 'dist-electron/preload/preload.cjs')
+  : join(app.getAppPath(), 'dist-electron/preload/preload.cjs');
+const indexHtmlPath = isDev ? devServer : join(app.getAppPath(), 'dist/index.html');
 
 let mainWindow: BrowserWindow;
 
@@ -28,11 +33,11 @@ const createWindow = () => {
     }
   });
 
-  if (devServer) {
+  if (isDev) {
     mainWindow.loadURL(devServer);
     mainWindow.webContents.openDevTools();
   } else {
-    mainWindow.loadFile(join(__dirname, '../../dist/index.html'));
+    if (indexHtmlPath) mainWindow.loadFile(indexHtmlPath);
   }
 
   mainWindow.once('ready-to-show', () => {
