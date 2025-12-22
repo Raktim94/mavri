@@ -46,7 +46,9 @@ const resetIPCHandlers = () => {
     'duplicate-invoice',
     'export-all-data',
     'import-all-data',
-    'restart-app'
+    'restart-app',
+    'get-app-version',
+    'check-for-updates'
   ];
 
   handlers.forEach(handler => ipcMain.removeHandler(handler));

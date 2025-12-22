@@ -323,7 +323,7 @@ export const initInvoicesHandlers = (db: Database) => {
           businessRoleSnapshot, businessEmailSnapshot, businessPhoneSnapshot,
           businessAdditionalSnapshot, customizationColor, customizationLogoSize,
           customizationFontSizeSize, customizationLayout,
-          customizationTablerHeaderStyle, customizationPageFormat, customizationLabelUpperCase,
+          customizationTableHeaderStyle, customizationPageFormat, customizationLabelUpperCase,
           customizationWatermarkFileName, customizationWatermarkFileType, customizationWatermarkFileSize,
           customizationWatermarkFileData, customizationPaidWatermarkFileName,
           customizationPaidWatermarkFileType, customizationPaidWatermarkFileSize, customizationPaidWatermarkFileData,
@@ -344,7 +344,7 @@ export const initInvoicesHandlers = (db: Database) => {
           businessRoleSnapshot, businessEmailSnapshot, businessPhoneSnapshot,
           businessAdditionalSnapshot, customizationColor, customizationLogoSize,
           customizationFontSizeSize, customizationLayout,
-          customizationTablerHeaderStyle, customizationPageFormat, customizationLabelUpperCase,
+          customizationTableHeaderStyle, customizationPageFormat, customizationLabelUpperCase,
           customizationWatermarkFileName, customizationWatermarkFileType, customizationWatermarkFileSize,
           customizationWatermarkFileData, customizationPaidWatermarkFileName,
           customizationPaidWatermarkFileType, customizationPaidWatermarkFileSize, customizationPaidWatermarkFileData,
@@ -373,10 +373,10 @@ export const initInvoicesHandlers = (db: Database) => {
             INSERT INTO invoice_items (
               parentInvoiceId, itemId, itemNameSnapshot, unitPriceCentsSnapshot,
               unitNameSnapshot,
-              quantity, taxName, taxRate, taxType
+              quantity, taxRate, taxType
             )
             SELECT ?, itemId, itemNameSnapshot, unitPriceCentsSnapshot,
-              unitNameSnapshot, quantity, taxName, taxRate, taxType
+              unitNameSnapshot, quantity, taxRate, taxType
             FROM invoice_items WHERE parentInvoiceId = ?;
           `,
         [newInvoiceId, invoiceId]
