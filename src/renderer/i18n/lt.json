@@ -384,7 +384,7 @@
       "turnReports": "Ataskaitos",
       "tutorial": "Pamoka"
     },
-    "updateConfirmText": "Ar tikrai norite atnaujinti ({{currentVersion}} ⇒ {{newVersion}})?"
+    "updateConfirmText": "Nauja versija ({{newVersion}}) paruošta. Perkrauti dabar, kad atnaujintumėte iš {{currentVersion}}? Atšaukę, atnaujinimas bus kitą kartą paleidus programą."
   },
   "units": {
     "add": "Pridėti vienetą",

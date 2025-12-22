@@ -386,7 +386,7 @@
       "turnReports": "Reports",
       "tutorial": "Tutorial"
     },
-    "updateConfirmText": "Are you sure you want to update ({{currentVersion}} => {{newVersion}})?"
+    "updateConfirmText": "A new version ({{newVersion}}) is ready. Restart now to update from {{currentVersion}}? You can cancel and update will apply on next launch."
   },
   "units": {
     "add": "Add unit",
