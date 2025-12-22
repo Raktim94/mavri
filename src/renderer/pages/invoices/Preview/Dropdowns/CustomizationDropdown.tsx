@@ -16,6 +16,7 @@ import { memo, useEffect, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '../../../../shared/components/layout/pageHeader/PageHeader';
 import { PageFormat } from '../../../../shared/enums/pageFormat';
+import { SizeType } from '../../../../shared/enums/sizeType';
 import { TableHeaderStyle } from '../../../../shared/enums/tableHeaderStyle';
 import { TableRowStyle } from '../../../../shared/enums/tableRowStyle';
 import { useForm } from '../../../../shared/hooks/useForm';
@@ -115,6 +116,38 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onClose, onOp
                 <FormControlLabel value={TableHeaderStyle.dark} control={<Radio />} label={t('common.dark')} />
                 <FormControlLabel value={TableHeaderStyle.light} control={<Radio />} label={t('common.light')} />
                 <FormControlLabel value={TableHeaderStyle.outline} control={<Radio />} label={t('common.outline')} />
+              </RadioGroup>
+            </FormControl>
+          </Grid>
+          <Grid size={{ xs: 12, md: 12 }}>
+            <FormControl component="fieldset">
+              <FormLabel component="legend">{t('common.fontSizeStyle')}</FormLabel>
+              <RadioGroup
+                row
+                value={form.customizationFontSizeSize}
+                onChange={(_e, newValue) => {
+                  update('customizationFontSizeSize', newValue as SizeType);
+                }}
+              >
+                <FormControlLabel value={SizeType.small} control={<Radio />} label={t('common.small')} />
+                <FormControlLabel value={SizeType.medium} control={<Radio />} label={t('common.medium')} />
+                <FormControlLabel value={SizeType.large} control={<Radio />} label={t('common.large')} />
+              </RadioGroup>
+            </FormControl>
+          </Grid>
+          <Grid size={{ xs: 12, md: 12 }}>
+            <FormControl component="fieldset">
+              <FormLabel component="legend">{t('common.logoSizeStyle')}</FormLabel>
+              <RadioGroup
+                row
+                value={form.customizationLogoSize}
+                onChange={(_e, newValue) => {
+                  update('customizationLogoSize', newValue as SizeType);
+                }}
+              >
+                <FormControlLabel value={SizeType.small} control={<Radio />} label={t('common.small')} />
+                <FormControlLabel value={SizeType.medium} control={<Radio />} label={t('common.medium')} />
+                <FormControlLabel value={SizeType.large} control={<Radio />} label={t('common.large')} />
               </RadioGroup>
             </FormControl>
           </Grid>

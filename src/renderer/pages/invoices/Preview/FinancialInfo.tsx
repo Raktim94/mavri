@@ -8,7 +8,7 @@ import { useUppercaseTranslation } from '../../../shared/hooks/useUppercaseTrans
 import type { InvoiceFromData } from '../../../shared/types/invoice';
 import type { Settings } from '../../../shared/types/settings';
 import { getFinancialData } from '../../../shared/utils/invoiceFunctions';
-import { PDF_STYLES } from './constant';
+import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './constant';
 
 interface Props {
   invoiceForm?: InvoiceFromData;
@@ -47,10 +47,23 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
         <View style={[PDF_STYLES.row]}>
           <View style={PDF_STYLES.flexGrow} />
           <View style={[PDF_STYLES.row, PDF_STYLES.w40]}>
-            <View style={[PDF_STYLES.regularBold, PDF_STYLES.w50]}>
+            <View
+              style={[
+                PDF_STYLES.regularBold,
+                PDF_STYLES.w50,
+                { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
+              ]}
+            >
               <Text>{tt('invoices.subTotal')}</Text>
             </View>
-            <View style={[PDF_STYLES.regularBold, PDF_STYLES.w50, PDF_STYLES.alignEnd]}>
+            <View
+              style={[
+                PDF_STYLES.regularBold,
+                PDF_STYLES.w50,
+                PDF_STYLES.alignEnd,
+                { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
+              ]}
+            >
               <Text>{formattedSubTotalAmount}</Text>
             </View>
           </View>
@@ -61,7 +74,13 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
         <View style={[PDF_STYLES.row, PDF_STYLES.mt5]}>
           <View style={PDF_STYLES.flexGrow} />
           <View style={[PDF_STYLES.row, PDF_STYLES.w40]}>
-            <View style={[PDF_STYLES.regular, PDF_STYLES.w50]}>
+            <View
+              style={[
+                PDF_STYLES.regular,
+                PDF_STYLES.w50,
+                { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regular }
+              ]}
+            >
               <Text>
                 {invoiceForm?.discountType === DiscountType.percentage &&
                   tt('invoices.discountPrct', { prct: invoiceForm.discountPercent })}
@@ -69,7 +88,14 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
                 {invoiceForm?.discountType !== DiscountType.percentage && tt('invoices.discount')}
               </Text>
             </View>
-            <View style={[PDF_STYLES.regular, PDF_STYLES.w50, PDF_STYLES.alignEnd]}>
+            <View
+              style={[
+                PDF_STYLES.regular,
+                PDF_STYLES.w50,
+                PDF_STYLES.alignEnd,
+                { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regular }
+              ]}
+            >
               <Text>{discountAmountFormatted}</Text>
             </View>
           </View>
@@ -80,7 +106,13 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
         <View style={[PDF_STYLES.row, PDF_STYLES.mt5]}>
           <View style={PDF_STYLES.flexGrow} />
           <View style={[PDF_STYLES.row, PDF_STYLES.w40]}>
-            <View style={[PDF_STYLES.regular, PDF_STYLES.w50]}>
+            <View
+              style={[
+                PDF_STYLES.regular,
+                PDF_STYLES.w50,
+                { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regular }
+              ]}
+            >
               <Text>
                 {(invoiceForm?.taxType === InvoiceTaxType.deducted ||
                   invoiceForm?.taxType === InvoiceTaxType.exclusive) &&
@@ -109,7 +141,14 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
                   tt('invoices.tax', { prct: invoiceForm?.taxRate ?? 0 })}
               </Text>
             </View>
-            <View style={[PDF_STYLES.regular, PDF_STYLES.w50, PDF_STYLES.alignEnd]}>
+            <View
+              style={[
+                PDF_STYLES.regular,
+                PDF_STYLES.w50,
+                PDF_STYLES.alignEnd,
+                { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regular }
+              ]}
+            >
               <Text>{formattedTotalTaxAmount}</Text>
             </View>
           </View>
@@ -120,10 +159,23 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
         <View style={[PDF_STYLES.row, PDF_STYLES.mt5]}>
           <View style={PDF_STYLES.flexGrow} />
           <View style={[PDF_STYLES.row, PDF_STYLES.w40]}>
-            <View style={[PDF_STYLES.regular, PDF_STYLES.w50]}>
+            <View
+              style={[
+                PDF_STYLES.regular,
+                PDF_STYLES.w50,
+                { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regular }
+              ]}
+            >
               <Text>{tt('invoices.shippingFee')}</Text>
             </View>
-            <View style={[PDF_STYLES.regular, PDF_STYLES.w50, PDF_STYLES.alignEnd]}>
+            <View
+              style={[
+                PDF_STYLES.regular,
+                PDF_STYLES.w50,
+                PDF_STYLES.alignEnd,
+                { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regular }
+              ]}
+            >
               <Text>{shippingAmountFormatted}</Text>
             </View>
           </View>
@@ -143,10 +195,23 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
         <View style={[PDF_STYLES.row]}>
           <View style={PDF_STYLES.flexGrow} />
           <View style={[PDF_STYLES.row, PDF_STYLES.w40]}>
-            <View style={[PDF_STYLES.regularBold, PDF_STYLES.w50]}>
+            <View
+              style={[
+                PDF_STYLES.regularBold,
+                PDF_STYLES.w50,
+                { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
+              ]}
+            >
               <Text>{tt('invoices.total')}</Text>
             </View>
-            <View style={[PDF_STYLES.regularBold, PDF_STYLES.w50, PDF_STYLES.alignEnd]}>
+            <View
+              style={[
+                PDF_STYLES.regularBold,
+                PDF_STYLES.w50,
+                PDF_STYLES.alignEnd,
+                { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
+              ]}
+            >
               <Text>{totalAmountFormatted}</Text>
             </View>
           </View>
@@ -159,10 +224,23 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
           <View style={[PDF_STYLES.row, PDF_STYLES.mt5]}>
             <View style={PDF_STYLES.flexGrow} />
             <View style={[PDF_STYLES.row, PDF_STYLES.w40]}>
-              <View style={[PDF_STYLES.regular, PDF_STYLES.w50]}>
+              <View
+                style={[
+                  PDF_STYLES.regular,
+                  PDF_STYLES.w50,
+                  { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regular }
+                ]}
+              >
                 <Text>{tt('invoices.paid')}</Text>
               </View>
-              <View style={[PDF_STYLES.regular, PDF_STYLES.w50, PDF_STYLES.alignEnd]}>
+              <View
+                style={[
+                  PDF_STYLES.regular,
+                  PDF_STYLES.w50,
+                  PDF_STYLES.alignEnd,
+                  { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regular }
+                ]}
+              >
                 <Text>{totalAmountPaidFormatted}</Text>
               </View>
             </View>
@@ -173,7 +251,13 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
         <View style={[PDF_STYLES.row, PDF_STYLES.mt5]}>
           <View style={PDF_STYLES.flexGrow} />
           <View style={[PDF_STYLES.row, PDF_STYLES.w40]}>
-            <View style={[PDF_STYLES.regularBold, PDF_STYLES.w50]}>
+            <View
+              style={[
+                PDF_STYLES.regularBold,
+                PDF_STYLES.w50,
+                { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
+              ]}
+            >
               <Text>{tt('invoices.balanceDue')}</Text>
             </View>
             <View
@@ -181,7 +265,10 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
                 PDF_STYLES.regularBold,
                 PDF_STYLES.w50,
                 PDF_STYLES.alignEnd,
-                { color: invoiceForm?.customizationColor }
+                {
+                  color: invoiceForm?.customizationColor,
+                  fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold
+                }
               ]}
             >
               <Text>{balanceDueFormatted}</Text>

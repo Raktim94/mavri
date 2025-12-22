@@ -7,7 +7,7 @@ import type { InvoiceFromData } from '../../../shared/types/invoice';
 import type { Settings } from '../../../shared/types/settings';
 import { createCurrencyFormatter } from '../../../shared/utils/formatFunctions';
 import { getItemFinancialData } from '../../../shared/utils/invoiceFunctions';
-import { PDF_STYLES } from './constant';
+import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './constant';
 
 interface Props {
   invoiceForm?: InvoiceFromData;
@@ -103,19 +103,54 @@ const ItemsComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
         ]}
       >
         <View style={[PDF_STYLES.tableCol, PDF_STYLES.w5, { borderLeft: rowStyle.borderCell }]}>
-          <Text style={PDF_STYLES.tableCellHeader}>#</Text>
+          <Text
+            style={[
+              PDF_STYLES.tableCellHeader,
+              { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].tableCellHeader }
+            ]}
+          >
+            #
+          </Text>
         </View>
         <View style={[PDF_STYLES.tableCol, PDF_STYLES.w35, { borderLeft: rowStyle.borderCell }]}>
-          <Text style={PDF_STYLES.tableCellHeader}>{tt('common.item')}</Text>
+          <Text
+            style={[
+              PDF_STYLES.tableCellHeader,
+              { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].tableCellHeader }
+            ]}
+          >
+            {tt('common.item')}
+          </Text>
         </View>
         <View style={[PDF_STYLES.tableCol, PDF_STYLES.w15, PDF_STYLES.textEnd, { borderLeft: rowStyle.borderCell }]}>
-          <Text style={PDF_STYLES.tableCellHeader}>{tt('common.unit')}</Text>
+          <Text
+            style={[
+              PDF_STYLES.tableCellHeader,
+              { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].tableCellHeader }
+            ]}
+          >
+            {tt('common.unit')}
+          </Text>
         </View>
         <View style={[PDF_STYLES.tableCol, PDF_STYLES.w15, PDF_STYLES.textEnd, { borderLeft: rowStyle.borderCell }]}>
-          <Text style={PDF_STYLES.tableCellHeader}>{tt('common.qty')}</Text>
+          <Text
+            style={[
+              PDF_STYLES.tableCellHeader,
+              { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].tableCellHeader }
+            ]}
+          >
+            {tt('common.qty')}
+          </Text>
         </View>
         <View style={[PDF_STYLES.tableCol, PDF_STYLES.w15, PDF_STYLES.textEnd, { borderLeft: rowStyle.borderCell }]}>
-          <Text style={PDF_STYLES.tableCellHeader}>{tt('common.unitCost')}</Text>
+          <Text
+            style={[
+              PDF_STYLES.tableCellHeader,
+              { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].tableCellHeader }
+            ]}
+          >
+            {tt('common.unitCost')}
+          </Text>
         </View>
         <View
           style={[
@@ -125,7 +160,14 @@ const ItemsComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
             { borderLeft: rowStyle.borderCell, borderRight: rowStyle.borderCell }
           ]}
         >
-          <Text style={PDF_STYLES.tableCellHeader}>{tt('common.total')}</Text>
+          <Text
+            style={[
+              PDF_STYLES.tableCellHeader,
+              { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].tableCellHeader }
+            ]}
+          >
+            {tt('common.total')}
+          </Text>
         </View>
       </View>
       {invoiceForm?.invoiceItems?.map((item, index) => {
@@ -153,12 +195,31 @@ const ItemsComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
             ]}
           >
             <View style={[PDF_STYLES.tableCol, PDF_STYLES.w5, { borderLeft: rowStyle.borderCell }]}>
-              <Text style={PDF_STYLES.tableCell}>{index + 1}</Text>
+              <Text
+                style={[
+                  { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].tableCell }
+                ]}
+              >
+                {index + 1}
+              </Text>
             </View>
             <View style={[PDF_STYLES.tableCol, PDF_STYLES.w35, { borderLeft: rowStyle.borderCell }]}>
-              <Text style={PDF_STYLES.tableCell}>{itemNameSnapshot}</Text>
+              <Text
+                style={[
+                  { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].tableCell }
+                ]}
+              >
+                {itemNameSnapshot}
+              </Text>
               {taxType && (
-                <Text style={PDF_STYLES.tableCellSubtle}>
+                <Text
+                  style={[
+                    PDF_STYLES.tableCellSubtle,
+                    {
+                      fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].tableCellSubtle
+                    }
+                  ]}
+                >
                   {tt('invoices.itemTax', {
                     rate: taxRate,
                     amount: formattedTax
@@ -169,17 +230,35 @@ const ItemsComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
             <View
               style={[PDF_STYLES.tableCol, PDF_STYLES.w15, PDF_STYLES.textEnd, { borderLeft: rowStyle.borderCell }]}
             >
-              <Text style={PDF_STYLES.tableCell}>{unitNameSnapshot}</Text>
+              <Text
+                style={[
+                  { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].tableCell }
+                ]}
+              >
+                {unitNameSnapshot}
+              </Text>
             </View>
             <View
               style={[PDF_STYLES.tableCol, PDF_STYLES.w15, PDF_STYLES.textEnd, { borderLeft: rowStyle.borderCell }]}
             >
-              <Text style={PDF_STYLES.tableCell}>{quantity}</Text>
+              <Text
+                style={[
+                  { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].tableCell }
+                ]}
+              >
+                {quantity}
+              </Text>
             </View>
             <View
               style={[PDF_STYLES.tableCol, PDF_STYLES.w15, PDF_STYLES.textEnd, { borderLeft: rowStyle.borderCell }]}
             >
-              <Text style={PDF_STYLES.tableCell}>{formattedUnitPrice}</Text>
+              <Text
+                style={[
+                  { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].tableCell }
+                ]}
+              >
+                {formattedUnitPrice}
+              </Text>
             </View>
             <View
               style={[
@@ -189,7 +268,13 @@ const ItemsComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
                 { borderLeft: rowStyle.borderCell, borderRight: rowStyle.borderCell }
               ]}
             >
-              <Text style={PDF_STYLES.tableCell}>{formattedTotal}</Text>
+              <Text
+                style={[
+                  { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].tableCell }
+                ]}
+              >
+                {formattedTotal}
+              </Text>
             </View>
           </View>
         );

@@ -15,7 +15,8 @@ export default [
       'index.html',
       '.eslintrc.js',
       'public/**',
-      'public/mockServiceWorker.js'
+      'public/mockServiceWorker.js',
+      '.github/**'
     ]
   },
 

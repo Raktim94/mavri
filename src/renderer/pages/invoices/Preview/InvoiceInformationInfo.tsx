@@ -5,7 +5,7 @@ import { useUppercaseTranslation } from '../../../shared/hooks/useUppercaseTrans
 import type { InvoiceFromData } from '../../../shared/types/invoice';
 import type { Settings } from '../../../shared/types/settings';
 import { formatDate } from '../../../shared/utils/formatFunctions';
-import { PDF_STYLES } from './constant';
+import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './constant';
 
 interface Props {
   invoiceForm?: InvoiceFromData;
@@ -16,14 +16,34 @@ const InvoiceInformationInfoComponent: FC<Props> = ({ invoiceForm, storeSettings
 
   return (
     <View style={[PDF_STYLES.alignEnd, PDF_STYLES.gap4, PDF_STYLES.w50]}>
-      <Text style={[PDF_STYLES.title, { color: invoiceForm?.customizationColor }]}>
+      <Text
+        style={[
+          PDF_STYLES.title,
+          {
+            color: invoiceForm?.customizationColor,
+            fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].title
+          }
+        ]}
+      >
         {invoiceForm?.invoiceType === InvoiceType.invoice ? tt('invoices.pdfINVOICE') : tt('invoices.pdfQUOTE')}
       </Text>
 
       <View style={[PDF_STYLES.gap3, PDF_STYLES.alignEnd]}>
         <View style={[PDF_STYLES.row, PDF_STYLES.alignEnd]}>
-          <Text style={PDF_STYLES.regularBold}>{tt('common.invoiceNumber')}: </Text>
-          <Text style={PDF_STYLES.regular}>
+          <Text
+            style={[
+              PDF_STYLES.regularBold,
+              { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
+            ]}
+          >
+            {tt('common.invoiceNumber')}:{' '}
+          </Text>
+          <Text
+            style={[
+              PDF_STYLES.regular,
+              { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regular }
+            ]}
+          >
             {invoiceForm?.invoicePrefixSnapshot}
             {invoiceForm?.invoiceNumber}
             {invoiceForm?.invoiceSuffixSnapshot}
@@ -31,14 +51,42 @@ const InvoiceInformationInfoComponent: FC<Props> = ({ invoiceForm, storeSettings
         </View>
         {storeSettings && invoiceForm?.issuedAt && (
           <View style={[PDF_STYLES.row, PDF_STYLES.alignEnd]}>
-            <Text style={PDF_STYLES.regularBold}>{tt('common.date')}: </Text>
-            <Text style={PDF_STYLES.regular}>{formatDate(invoiceForm.issuedAt, storeSettings.dateFormat)}</Text>
+            <Text
+              style={[
+                PDF_STYLES.regularBold,
+                { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
+              ]}
+            >
+              {tt('common.date')}:{' '}
+            </Text>
+            <Text
+              style={[
+                PDF_STYLES.regular,
+                { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regular }
+              ]}
+            >
+              {formatDate(invoiceForm.issuedAt, storeSettings.dateFormat)}
+            </Text>
           </View>
         )}
         {storeSettings && invoiceForm?.dueDate && (
           <View style={[PDF_STYLES.row, PDF_STYLES.alignEnd]}>
-            <Text style={PDF_STYLES.regularBold}>{tt('common.dueDate')}: </Text>
-            <Text style={PDF_STYLES.regular}>{formatDate(invoiceForm.dueDate, storeSettings.dateFormat)}</Text>
+            <Text
+              style={[
+                PDF_STYLES.regularBold,
+                { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
+              ]}
+            >
+              {tt('common.dueDate')}:{' '}
+            </Text>
+            <Text
+              style={[
+                PDF_STYLES.regular,
+                { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regular }
+              ]}
+            >
+              {formatDate(invoiceForm.dueDate, storeSettings.dateFormat)}
+            </Text>
           </View>
         )}
       </View>

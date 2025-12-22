@@ -4,3 +4,4 @@ public/**
 **/azure-pipelines.yml
 **/bitbucket-pipelines.yml
 *.yml
+.github/**

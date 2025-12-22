@@ -1,9 +1,54 @@
 import { StyleSheet } from '@react-pdf/renderer';
+import { SizeType } from '../../../shared/enums/sizeType';
+
+export const DEFAULT_FONT_SIZES = SizeType.medium;
+export const DEFAULT_LOGO_SIZES = SizeType.medium;
+
+export const LOGO_SIZES = {
+  small: { width: 48, height: 48 },
+  medium: { width: 64, height: 64 },
+  large: { width: 80, height: 80 }
+};
+
+export const FONT_SIZES = {
+  small: {
+    page: 10,
+    business: 12,
+    businessText: 8,
+    title: 16,
+    regular: 8,
+    regularBold: 8,
+    tableCellHeader: 8,
+    tableCell: 7,
+    tableCellSubtle: 6
+  },
+  medium: {
+    page: 12,
+    business: 14,
+    businessText: 10,
+    title: 20,
+    regular: 10,
+    regularBold: 10,
+    tableCellHeader: 10,
+    tableCell: 9,
+    tableCellSubtle: 8
+  },
+  large: {
+    page: 14,
+    business: 16,
+    businessText: 12,
+    title: 24,
+    regular: 12,
+    regularBold: 12,
+    tableCellHeader: 12,
+    tableCell: 11,
+    tableCellSubtle: 10
+  }
+};
 
 export const PDF_STYLES = StyleSheet.create({
   page: {
     padding: 32,
-    fontSize: 12,
     fontFamily: 'Roboto'
   },
   header: { marginBottom: 16 },
@@ -27,12 +72,11 @@ export const PDF_STYLES = StyleSheet.create({
   maxw50: { maxWidth: '50%' },
   alignStart: { alignItems: 'flex-start' },
   alignEnd: { alignItems: 'flex-end' },
-  business: { fontSize: 14, fontWeight: 500 },
-  businessText: { fontSize: 10, fontWeight: 400, color: '#808080' },
-  businessLogo: { width: 64, height: 64 },
-  title: { fontSize: 20, fontWeight: 700 },
-  regular: { fontSize: 10, fontWeight: 400 },
-  regularBold: { fontSize: 10, fontWeight: 600, color: '#333333' },
+  business: { fontWeight: 500 },
+  businessText: { fontWeight: 400, color: '#808080' },
+  title: { fontWeight: 700 },
+  regular: { fontWeight: 400 },
+  regularBold: { fontWeight: 600, color: '#333333' },
   italic: { fontStyle: 'italic' },
   table: {
     width: '100%',
@@ -42,14 +86,9 @@ export const PDF_STYLES = StyleSheet.create({
     padding: 6
   },
   tableCellHeader: {
-    fontSize: 10,
     fontWeight: 'bold'
   },
-  tableCell: {
-    fontSize: 9
-  },
   tableCellSubtle: {
-    color: '#808080',
-    fontSize: 8
+    color: '#808080'
   }
 });
