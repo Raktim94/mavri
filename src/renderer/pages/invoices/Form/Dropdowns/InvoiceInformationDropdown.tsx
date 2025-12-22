@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import type { InvoiceInfo } from '../../../../../main/types/invoice';
 import { Datepicker } from '../../../../shared/components/inputs/datepicker/Datepicker';
 import { PageHeader } from '../../../../shared/components/layout/pageHeader/PageHeader';
+import { InvoiceType } from '../../../../shared/enums/invoiceType';
 import { useForm } from '../../../../shared/hooks/useForm';
 import { validators } from '../../../../shared/utils/validatorFunctions';
 import { useAppSelector } from '../../../../state/configureStore';
@@ -112,7 +113,9 @@ const InvoiceInformationDropdownComponent: FC<Props> = ({ isOpen, onClose, onOpe
           </Grid>
           <Grid size={{ xs: 12, md: 4 }}>
             <TextField
-              label={t('common.invoiceNumber')}
+              label={
+                information.invoiceType === InvoiceType.quotation ? t('common.quoteNumber') : t('common.invoiceNumber')
+              }
               fullWidth
               required
               value={form.invoiceNumber}

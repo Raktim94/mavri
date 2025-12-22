@@ -1,11 +1,13 @@
 import { Text, View } from '@react-pdf/renderer';
 import { memo, type FC } from 'react';
 import { InvoiceType } from '../../../shared/enums/invoiceType';
+import { LayoutType } from '../../../shared/enums/layoutType';
 import { useUppercaseTranslation } from '../../../shared/hooks/useUppercaseTranslation';
 import type { InvoiceFromData } from '../../../shared/types/invoice';
 import type { Settings } from '../../../shared/types/settings';
 import { formatDate } from '../../../shared/utils/formatFunctions';
 import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './constant';
+import { Title } from './Title';
 
 interface Props {
   invoiceForm?: InvoiceFromData;
@@ -16,28 +18,32 @@ const InvoiceInformationInfoComponent: FC<Props> = ({ invoiceForm, storeSettings
 
   return (
     <View style={[PDF_STYLES.alignEnd, PDF_STYLES.gap4, PDF_STYLES.w50]}>
-      <Text
+      {invoiceForm?.customizationLayout === LayoutType.classic && <Title invoiceForm={invoiceForm} />}
+
+      <View
         style={[
-          PDF_STYLES.title,
-          {
-            color: invoiceForm?.customizationColor,
-            fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].title
-          }
+          PDF_STYLES.gap3,
+          PDF_STYLES.alignEnd,
+          invoiceForm?.customizationLayout === LayoutType.modern
+            ? {
+                backgroundColor: '#e0e0e0',
+                padding: 5,
+                borderRadius: 5
+              }
+            : {}
         ]}
       >
-        {invoiceForm?.invoiceType === InvoiceType.invoice ? tt('invoices.pdfINVOICE') : tt('invoices.pdfQUOTE')}
-      </Text>
-
-      <View style={[PDF_STYLES.gap3, PDF_STYLES.alignEnd]}>
         <View style={[PDF_STYLES.row, PDF_STYLES.alignEnd]}>
-          <Text
-            style={[
-              PDF_STYLES.regularBold,
-              { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
-            ]}
-          >
-            {tt('common.invoiceNumber')}:{' '}
-          </Text>
+          {invoiceForm?.customizationLayout !== LayoutType.classic && (
+            <Text
+              style={[
+                PDF_STYLES.regularBold,
+                { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
+              ]}
+            >
+              {invoiceForm?.invoiceType === InvoiceType.invoice ? tt('common.invoiceNo') : tt('common.quoteNo')}:{' '}
+            </Text>
+          )}
           <Text
             style={[
               PDF_STYLES.regular,

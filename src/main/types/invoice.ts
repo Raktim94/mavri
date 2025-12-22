@@ -115,6 +115,7 @@ export interface InvoiceItem {
 export interface InvoiceInfo {
   id?: number;
   issuedAt?: string;
+  invoiceType?: InvoiceType;
   invoiceNumber?: string;
   dueDate?: string;
   invoicePrefix?: string;

@@ -71,6 +71,7 @@ const InvoiceFormComponent: FC<Props> = ({
   const invoiceInformation = useMemo(
     () => ({
       id: invoiceForm?.id,
+      invoiceType: invoiceForm?.invoiceType,
       issuedAt: invoiceForm?.issuedAt,
       invoiceNumber: invoiceForm?.invoiceNumber,
       dueDate: invoiceForm?.dueDate,
@@ -79,6 +80,7 @@ const InvoiceFormComponent: FC<Props> = ({
     }),
     [
       invoiceForm?.id,
+      invoiceForm?.invoiceType,
       invoiceForm?.issuedAt,
       invoiceForm?.invoiceNumber,
       invoiceForm?.dueDate,

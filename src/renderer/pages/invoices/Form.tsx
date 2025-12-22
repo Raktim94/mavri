@@ -67,7 +67,7 @@ const InvoiceFormComponent: FC<Props> = ({
           invoiceItems: [],
           invoicePayments: [],
           invoiceAttachments: [],
-          customizationColor: '#f0f0f0',
+          customizationColor: '#006400',
           customizationLogoSize: SizeType.medium,
           customizationFontSizeSize: SizeType.medium,
           customizationLayout: LayoutType.classic,
