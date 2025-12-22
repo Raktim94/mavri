@@ -72,7 +72,7 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onClose, onOp
         slotProps={{
           paper: {
             sx: {
-              maxWidth: isDesktop ? '40%' : '100%',
+              maxWidth: isDesktop ? '60%' : '100%',
               height: isDesktop ? '40%' : '60%',
               mx: 'auto',
               borderTopLeftRadius: 16,
@@ -94,7 +94,7 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onClose, onOp
           />
         </Box>
         <Grid container spacing={2}>
-          <Grid size={{ xs: 12, md: 12 }}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <MuiColorInput
               value={form.customizationColor ?? ''}
               label={t('common.color')}
@@ -104,12 +104,12 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onClose, onOp
               }}
             />
           </Grid>
-          <Grid size={{ xs: 12, md: 12 }}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <FormControl component="fieldset">
               <FormLabel component="legend">{t('common.pageFormat')}</FormLabel>
               <RadioGroup
                 row
-                value={form.customizationPageFormat}
+                value={form.customizationPageFormat ?? ''}
                 onChange={(_e, newValue) => {
                   update('customizationPageFormat', newValue as PageFormat);
                 }}
@@ -119,12 +119,12 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onClose, onOp
               </RadioGroup>
             </FormControl>
           </Grid>
-          <Grid size={{ xs: 12, md: 12 }}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <FormControl component="fieldset">
               <FormLabel component="legend">{t('common.tableHeaderStyle')}</FormLabel>
               <RadioGroup
                 row
-                value={form.customizationTableHeaderStyle}
+                value={form.customizationTableHeaderStyle ?? ''}
                 onChange={(_e, newValue) => {
                   update('customizationTableHeaderStyle', newValue as TableHeaderStyle);
                 }}
@@ -135,12 +135,28 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onClose, onOp
               </RadioGroup>
             </FormControl>
           </Grid>
-          <Grid size={{ xs: 12, md: 12 }}>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <FormControl component="fieldset">
+              <FormLabel component="legend">{t('common.tableRowStyle')}</FormLabel>
+              <RadioGroup
+                row
+                value={form.customizationTableRowStyle ?? ''}
+                onChange={(_e, newValue) => {
+                  update('customizationTableRowStyle', newValue as TableRowStyle);
+                }}
+              >
+                <FormControlLabel value={TableRowStyle.bordered} control={<Radio />} label={t('common.bordered')} />
+                <FormControlLabel value={TableRowStyle.classic} control={<Radio />} label={t('common.classic')} />
+                <FormControlLabel value={TableRowStyle.stripped} control={<Radio />} label={t('common.stripped')} />
+              </RadioGroup>
+            </FormControl>
+          </Grid>
+          <Grid size={{ xs: 12, md: 6 }}>
             <FormControl component="fieldset">
               <FormLabel component="legend">{t('common.fontSizeStyle')}</FormLabel>
               <RadioGroup
                 row
-                value={form.customizationFontSizeSize}
+                value={form.customizationFontSizeSize ?? ''}
                 onChange={(_e, newValue) => {
                   update('customizationFontSizeSize', newValue as SizeType);
                 }}
@@ -151,12 +167,12 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onClose, onOp
               </RadioGroup>
             </FormControl>
           </Grid>
-          <Grid size={{ xs: 12, md: 12 }}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <FormControl component="fieldset">
               <FormLabel component="legend">{t('common.logoSizeStyle')}</FormLabel>
               <RadioGroup
                 row
-                value={form.customizationLogoSize}
+                value={form.customizationLogoSize ?? ''}
                 onChange={(_e, newValue) => {
                   update('customizationLogoSize', newValue as SizeType);
                 }}
@@ -169,26 +185,10 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onClose, onOp
           </Grid>
           <Grid size={{ xs: 12, md: 12 }}>
             <FormControl component="fieldset">
-              <FormLabel component="legend">{t('common.tableRowStyle')}</FormLabel>
-              <RadioGroup
-                row
-                value={form.customizationTableRowStyle}
-                onChange={(_e, newValue) => {
-                  update('customizationTableRowStyle', newValue as TableRowStyle);
-                }}
-              >
-                <FormControlLabel value={TableRowStyle.bordered} control={<Radio />} label={t('common.bordered')} />
-                <FormControlLabel value={TableRowStyle.classic} control={<Radio />} label={t('common.classic')} />
-                <FormControlLabel value={TableRowStyle.stripped} control={<Radio />} label={t('common.stripped')} />
-              </RadioGroup>
-            </FormControl>
-          </Grid>
-          <Grid size={{ xs: 12, md: 12 }}>
-            <FormControl component="fieldset">
               <FormLabel component="legend">{t('common.layout')}</FormLabel>
               <RadioGroup
                 row
-                value={form.customizationLayout}
+                value={form.customizationLayout ?? ''}
                 onChange={(_e, newValue) => {
                   update('customizationLayout', newValue as LayoutType);
                 }}
@@ -203,7 +203,7 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onClose, onOp
             <FormControlLabel
               control={
                 <Switch
-                  checked={form.customizationLabelUpperCase}
+                  checked={form.customizationLabelUpperCase ?? false}
                   onChange={(_e, newValue) => {
                     update('customizationLabelUpperCase', newValue);
                   }}
