@@ -21,8 +21,8 @@ let mainWindow: BrowserWindow;
 
 const createWindow = () => {
   mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1280,
+    height: 768,
     show: false,
     autoHideMenuBar: true,
     icon: join(__dirname, 'assets', 'icon.png'),

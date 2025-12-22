@@ -2,7 +2,7 @@ import { Text, View } from '@react-pdf/renderer';
 import { memo, type FC } from 'react';
 import { useUppercaseTranslation } from '../../../shared/hooks/useUppercaseTranslation';
 import type { InvoiceFromData } from '../../../shared/types/invoice';
-import { PDF_STYLES } from './constant';
+import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './constant';
 
 interface Props {
   invoiceForm?: InvoiceFromData;
@@ -12,13 +12,62 @@ const ClientInfoComponent: FC<Props> = ({ invoiceForm }) => {
 
   return (
     <View style={[PDF_STYLES.alignStart, PDF_STYLES.gap4, PDF_STYLES.w50]}>
-      <Text style={PDF_STYLES.regularBold}>{tt('invoices.billTo')}:</Text>
-      <Text style={PDF_STYLES.businessText}>{invoiceForm?.clientNameSnapshot}</Text>
-      <Text style={PDF_STYLES.businessText}>{invoiceForm?.clientAddressSnapshot}</Text>
-      <Text style={PDF_STYLES.businessText}>{invoiceForm?.clientEmailSnapshot}</Text>
-      <Text style={PDF_STYLES.businessText}>{invoiceForm?.clientPhoneSnapshot}</Text>
-      <Text style={PDF_STYLES.businessText}>{invoiceForm?.clientCodeSnapshot}</Text>
-      <Text style={PDF_STYLES.businessText}>{invoiceForm?.clientAdditionalSnapshot}</Text>
+      <Text
+        style={[
+          PDF_STYLES.regularBold,
+          { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
+        ]}
+      >
+        {tt('invoices.billTo')}:
+      </Text>
+      <Text
+        style={[
+          PDF_STYLES.businessText,
+          { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].businessText }
+        ]}
+      >
+        {invoiceForm?.clientNameSnapshot}
+      </Text>
+      <Text
+        style={[
+          PDF_STYLES.businessText,
+          { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].businessText }
+        ]}
+      >
+        {invoiceForm?.clientAddressSnapshot}
+      </Text>
+      <Text
+        style={[
+          PDF_STYLES.businessText,
+          { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].businessText }
+        ]}
+      >
+        {invoiceForm?.clientEmailSnapshot}
+      </Text>
+      <Text
+        style={[
+          PDF_STYLES.businessText,
+          { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].businessText }
+        ]}
+      >
+        {invoiceForm?.clientPhoneSnapshot}
+      </Text>
+      <Text
+        style={[
+          PDF_STYLES.businessText,
+          { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].businessText }
+        ]}
+      >
+        {invoiceForm?.clientCodeSnapshot}
+      </Text>
+      <Text
+        style={[
+          PDF_STYLES.businessText,
+          { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].businessText }
+        ]}
+      >
+        {invoiceForm?.clientAdditionalSnapshot}
+      </Text>
     </View>
   );
 };
