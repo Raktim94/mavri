@@ -8,15 +8,14 @@ import ShareIcon from '@mui/icons-material/Share';
 import SupportAgentIcon from '@mui/icons-material/SupportAgent';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import { Box, Card, CardContent, Grid, Typography, useTheme } from '@mui/material';
-import { useCallback, useContext, useEffect, useState, type FC } from 'react';
+import { useContext, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ThemeContext } from '../../../shared/components/layout/theme/ThemeProviderWrapper';
 import { MenuList } from '../../../shared/components/lists/menuList/MenuList';
-import { Confirmation } from '../../../shared/components/modals/confirmation';
 import { MenuItemSettings } from '../../../shared/enums/menuItemSettings';
 import { Themes } from '../../../shared/enums/themes';
-import { useAppSelector } from '../../../state/configureStore';
-import { selectSettings, selectVersion } from '../../../state/pageSlice';
+import { useAppDispatch, useAppSelector } from '../../../state/configureStore';
+import { selectSettings, selectUpdateMessage, setUpdateMessage } from '../../../state/pageSlice';
 
 interface Props {
   onSelected?: (key: MenuItemSettings | undefined) => void;
@@ -40,20 +39,8 @@ export const Menu: FC<Props> = ({
   const { t } = useTranslation();
   const theme = useTheme();
   const storeSettings = useAppSelector(selectSettings);
-  const [updateMessage, setUpdateMessage] = useState<string | undefined>(undefined);
-  const [showImportConfirm, setShowImportConfirm] = useState(false);
-  const version = useAppSelector(selectVersion);
-  const [newVersion, setNewVersion] = useState<string | undefined>(undefined);
-
-  const handleCancelUpdate = useCallback(() => {
-    setShowImportConfirm(false);
-    setUpdateMessage(undefined);
-  }, []);
-
-  const handleConfirmUpdate = useCallback(() => {
-    handleCancelUpdate();
-    window.electronAPI.restartApp();
-  }, [handleCancelUpdate]);
+  const updateMessage = useAppSelector(selectUpdateMessage);
+  const dispatch = useAppDispatch();
 
   const personalization = [
     {
@@ -185,39 +172,14 @@ export const Menu: FC<Props> = ({
       isToggle: false,
       isSelected: false,
       onClick: () => {
-        setUpdateMessage(t('common.checking'));
+        dispatch(setUpdateMessage(t('common.checking')));
         window.electronAPI.checkForUpdates();
       }
     }
   ];
 
-  useEffect(() => {
-    window.electronAPI.onUpdateAvailable(() => {
-      setUpdateMessage(t('common.Downloading'));
-    });
-    window.electronAPI.onUpdateNotAvailable(() => {
-      setUpdateMessage(t('common.noUpdate'));
-    });
-    window.electronAPI.onUpdateProgress(p => {
-      setUpdateMessage(t('common.noUpdate', { prct: p.percent }));
-    });
-    window.electronAPI.onUpdateDownloaded(updateVersion => {
-      setNewVersion(updateVersion);
-      setShowImportConfirm(true);
-    });
-  }, [t]);
-
   return (
     <>
-      <Confirmation
-        onCancel={handleCancelUpdate}
-        onConfirm={handleConfirmUpdate}
-        isOpen={showImportConfirm}
-        text={t('settingsMenuItems.updateConfirmText', {
-          currentVersion: version,
-          newVersion: newVersion
-        })}
-      />
       <Grid size={{ xs: 12, md: 4 }} component="div">
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
           <Typography

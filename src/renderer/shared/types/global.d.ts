@@ -22,11 +22,11 @@ declare global {
       getAppVersion: () => Promise<string>;
 
       checkForUpdates: () => Promise<void>;
-      onUpdateProgress: (callback: (data: ProgressInfo) => void) => Promise<void>;
-      onUpdateAvailable: (callback: () => void) => Promise<void>;
-      onUpdateNotAvailable: (callback: () => void) => Promise<void>;
-      onUpdateDownloaded: (callback: (version: string) => void) => Promise<void>;
       restartApp: () => void;
+      onUpdateProgress: (callback: (data: ProgressInfo) => void) => () => void;
+      onUpdateAvailable: (callback: () => void) => () => void;
+      onUpdateNotAvailable: (callback: () => void) => () => void;
+      onUpdateDownloaded: (callback: (version: string) => void) => () => void;
 
       openUrl: (url: string) => Promise<void>;
       selectDatabase: () => Promise<Response<DBSelector>>;

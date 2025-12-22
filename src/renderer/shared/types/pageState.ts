@@ -10,4 +10,6 @@ export interface PageState {
   clientSnapshotOptions?: Array<{ label: string; value: string }>;
   businessSnapshotOptions?: Array<{ label: string; value: string }>;
   version?: string;
+  newVersion?: string;
+  updateMessage?: string;
 }

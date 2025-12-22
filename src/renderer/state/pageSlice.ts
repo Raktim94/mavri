@@ -16,7 +16,9 @@ const initialState: PageState = {
   unitOptions: [],
   clientSnapshotOptions: [],
   businessSnapshotOptions: [],
-  version: undefined
+  version: undefined,
+  updateMessage: undefined,
+  newVersion: undefined
 };
 
 export const pageSlice = createSlice({
@@ -37,6 +39,12 @@ export const pageSlice = createSlice({
     },
     setVersion: (state, action: PayloadAction<string>) => {
       state.version = action.payload;
+    },
+    setNewVersion: (state, action: PayloadAction<string | undefined>) => {
+      state.newVersion = action.payload;
+    },
+    setUpdateMessage: (state, action: PayloadAction<string | undefined>) => {
+      state.updateMessage = action.payload;
     },
     addToast: (state, action: PayloadAction<ToastProps>) => {
       state.toasts.push({
@@ -131,6 +139,8 @@ export const selectUnitsOptions = createSelector(selectState, state => state.uni
 export const selectClientsSnapshotsOptions = createSelector(selectState, state => state.clientSnapshotOptions);
 export const selectBusinessesSnapshotsOptions = createSelector(selectState, state => state.businessSnapshotOptions);
 export const selectVersion = createSelector(selectState, state => state.version);
+export const selectNewVersion = createSelector(selectState, state => state.newVersion);
+export const selectUpdateMessage = createSelector(selectState, state => state.updateMessage);
 
 export const {
   enableLoading,
@@ -144,6 +154,8 @@ export const {
   setQuotes,
   setReports,
   setVersion,
+  setNewVersion,
+  setUpdateMessage,
   setCustomInvoiseSettings,
   setLanguageDate,
   setCategoryOptions,

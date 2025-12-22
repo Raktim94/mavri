@@ -18,14 +18,27 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getAppVersion: () => ipcRenderer.invoke('get-app-version'),
 
   checkForUpdates: () => ipcRenderer.send('check-for-updates'),
-  onUpdateProgress: (callback: (data: ProgressInfo) => void) =>
-    ipcRenderer.on('update-progress', (_, data) => callback(data)),
-  onUpdateAvailable: (callback: () => void) => ipcRenderer.on('update-available', callback),
-  onUpdateDownloaded: (callback: (version: string) => void) =>
-    ipcRenderer.on('update-downloaded', (_, version) => callback(version)),
-  onUpdateNotAvailable: (callback: () => void) => ipcRenderer.on('update-not-available', callback),
-
   restartApp: () => ipcRenderer.send('restart-app'),
+  onUpdateProgress: (callback: (data: ProgressInfo) => void) => {
+    const listener = (_: Electron.IpcRendererEvent, data: ProgressInfo) => callback(data);
+    ipcRenderer.on('update-progress', listener);
+    return () => ipcRenderer.removeListener('update-progress', listener);
+  },
+  onUpdateAvailable: (callback: () => void) => {
+    const listener = () => callback();
+    ipcRenderer.on('update-available', listener);
+    return () => ipcRenderer.removeListener('update-available', listener);
+  },
+  onUpdateNotAvailable: (callback: () => void) => {
+    const listener = () => callback();
+    ipcRenderer.on('update-not-available', listener);
+    return () => ipcRenderer.removeListener('update-not-available', listener);
+  },
+  onUpdateDownloaded: (callback: (version: string) => void) => {
+    const listener = (_: Electron.IpcRendererEvent, version: string) => callback(version);
+    ipcRenderer.on('update-downloaded', listener);
+    return () => ipcRenderer.removeListener('update-downloaded', listener);
+  },
 
   selectDatabase: () => ipcRenderer.invoke('show-save-db-dialog'),
   openDatabase: () => ipcRenderer.invoke('show-open-db-dialog'),
