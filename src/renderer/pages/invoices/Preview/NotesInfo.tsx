@@ -7,7 +7,7 @@ import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './constant';
 interface Props {
   invoiceForm?: InvoiceFromData;
 }
-const NotesComponent: FC<Props> = ({ invoiceForm }) => {
+const NotesInfoComponent: FC<Props> = ({ invoiceForm }) => {
   const { tt } = useUppercaseTranslation(invoiceForm?.customizationLabelUpperCase);
 
   return (
@@ -66,4 +66,4 @@ const NotesComponent: FC<Props> = ({ invoiceForm }) => {
     </View>
   );
 };
-export const Notes = memo(NotesComponent);
+export const NotesInfo = memo(NotesInfoComponent);

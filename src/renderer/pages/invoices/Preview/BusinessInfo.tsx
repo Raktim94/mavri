@@ -3,7 +3,7 @@ import { memo, type FC } from 'react';
 import { LayoutType } from '../../../shared/enums/layoutType';
 import type { InvoiceFromData } from '../../../shared/types/invoice';
 import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './constant';
-import { Logo } from './Logo';
+import { LogoInfo } from './LogoInfo';
 
 interface Props {
   invoiceForm?: InvoiceFromData;
@@ -11,7 +11,7 @@ interface Props {
 const BusinessInfoComponent: FC<Props> = ({ invoiceForm }) => {
   return (
     <View style={[PDF_STYLES.row, PDF_STYLES.alignStart, PDF_STYLES.gap5]}>
-      {invoiceForm?.customizationLayout === LayoutType.classic && <Logo invoiceForm={invoiceForm} />}
+      {invoiceForm?.customizationLayout === LayoutType.classic && <LogoInfo invoiceForm={invoiceForm} />}
 
       <View style={[PDF_STYLES.gap4, PDF_STYLES.alignStart, PDF_STYLES.w50]}>
         <Text

@@ -8,9 +8,9 @@ import RobotoItalic from './../../../assets/roboto/static/Roboto-Italic.ttf';
 import RobotoRegular from './../../../assets/roboto/static/Roboto-Regular.ttf';
 import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './constant';
 import { FinancialInfo } from './FinancialInfo';
-import { Header } from './Header';
-import { Items } from './Items';
-import { Notes } from './Notes';
+import { HeaderInfo } from './HeaderInfo';
+import { ItemsInfo } from './ItemsInfo';
+import { NotesInfo } from './NotesInfo';
 import { PaymentInfo } from './PaymentInfo';
 
 Font.register({
@@ -44,14 +44,14 @@ const PDFDocumentComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
           { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].page }
         ]}
       >
-        <Header invoiceForm={invoiceForm} storeSettings={storeSettings} />
-        <Items invoiceForm={invoiceForm} storeSettings={storeSettings} />
+        <HeaderInfo invoiceForm={invoiceForm} storeSettings={storeSettings} />
+        <ItemsInfo invoiceForm={invoiceForm} storeSettings={storeSettings} />
         <View style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart, PDF_STYLES.mt10]}>
           {invoiceForm?.customizationLayout === LayoutType.compact && <PaymentInfo invoiceForm={invoiceForm} />}
           {invoiceForm?.customizationLayout !== LayoutType.compact && <View style={PDF_STYLES.flexGrow} />}
           <FinancialInfo invoiceForm={invoiceForm} storeSettings={storeSettings} />
         </View>
-        <Notes invoiceForm={invoiceForm} />
+        <NotesInfo invoiceForm={invoiceForm} />
       </Page>
     </Document>
   );

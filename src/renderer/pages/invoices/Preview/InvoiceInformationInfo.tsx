@@ -7,7 +7,7 @@ import type { InvoiceFromData } from '../../../shared/types/invoice';
 import type { Settings } from '../../../shared/types/settings';
 import { formatDate } from '../../../shared/utils/formatFunctions';
 import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './constant';
-import { Title } from './Title';
+import { Title } from './TitleInfo';
 
 interface Props {
   invoiceForm?: InvoiceFromData;

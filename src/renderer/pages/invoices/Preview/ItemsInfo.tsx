@@ -13,7 +13,7 @@ interface Props {
   invoiceForm?: InvoiceFromData;
   storeSettings?: Settings;
 }
-const ItemsComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
+const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
   const { tt } = useUppercaseTranslation(invoiceForm?.customizationLabelUpperCase);
 
   const format = useMemo(
@@ -282,4 +282,4 @@ const ItemsComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
     </>
   );
 };
-export const Items = memo(ItemsComponent);
+export const ItemsInfo = memo(ItemsInfoComponent);

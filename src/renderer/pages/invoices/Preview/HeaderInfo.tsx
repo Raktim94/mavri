@@ -7,27 +7,27 @@ import { BusinessInfo } from './BusinessInfo';
 import { ClientInfo } from './ClientInfo';
 import { PDF_STYLES } from './constant';
 import { InvoiceInformationInfo } from './InvoiceInformationInfo';
-import { Logo } from './Logo';
+import { LogoInfo } from './LogoInfo';
 import { PaymentInfo } from './PaymentInfo';
-import { Title } from './Title';
+import { TitleInfo } from './TitleInfo';
 
 interface Props {
   invoiceForm?: InvoiceFromData;
   storeSettings?: Settings;
 }
-const HeaderComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
+const HeaderInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
   return (
     <View style={PDF_STYLES.header}>
       {invoiceForm?.customizationLayout === LayoutType.modern && (
         <View style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart, PDF_STYLES.mb20]}>
-          <Title invoiceForm={invoiceForm} />
-          <Logo invoiceForm={invoiceForm} />
+          <TitleInfo invoiceForm={invoiceForm} />
+          <LogoInfo invoiceForm={invoiceForm} />
         </View>
       )}
       {invoiceForm?.customizationLayout === LayoutType.compact && (
         <>
           <View style={[PDF_STYLES.alignCenter, PDF_STYLES.mb20]}>
-            <Title invoiceForm={invoiceForm} />
+            <TitleInfo invoiceForm={invoiceForm} />
           </View>
           <View style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart]}>
             <BusinessInfo invoiceForm={invoiceForm} />
@@ -52,4 +52,4 @@ const HeaderComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
     </View>
   );
 };
-export const Header = memo(HeaderComponent);
+export const HeaderInfo = memo(HeaderInfoComponent);

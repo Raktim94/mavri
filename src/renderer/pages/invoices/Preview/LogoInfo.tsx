@@ -7,7 +7,7 @@ import { DEFAULT_LOGO_SIZES, LOGO_SIZES } from './constant';
 interface Props {
   invoiceForm?: InvoiceFromData;
 }
-const LogoComponent: FC<Props> = ({ invoiceForm }) => {
+const LogoInfoComponent: FC<Props> = ({ invoiceForm }) => {
   if (!invoiceForm?.businessLogoSnapshot) return null;
 
   return (
@@ -17,4 +17,4 @@ const LogoComponent: FC<Props> = ({ invoiceForm }) => {
     />
   );
 };
-export const Logo = memo(LogoComponent);
+export const LogoInfo = memo(LogoInfoComponent);
