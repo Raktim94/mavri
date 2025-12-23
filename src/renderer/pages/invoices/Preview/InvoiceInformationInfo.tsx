@@ -7,7 +7,7 @@ import type { InvoiceFromData } from '../../../shared/types/invoice';
 import type { Settings } from '../../../shared/types/settings';
 import { formatDate } from '../../../shared/utils/formatFunctions';
 import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './constant';
-import { Title } from './TitleInfo';
+import { TitleInfo } from './TitleInfo';
 
 interface Props {
   invoiceForm?: InvoiceFromData;
@@ -18,7 +18,7 @@ const InvoiceInformationInfoComponent: FC<Props> = ({ invoiceForm, storeSettings
 
   return (
     <View style={[PDF_STYLES.alignEnd, PDF_STYLES.gap4, PDF_STYLES.w50]}>
-      {invoiceForm?.customizationLayout === LayoutType.classic && <Title invoiceForm={invoiceForm} />}
+      {invoiceForm?.customizationLayout === LayoutType.classic && <TitleInfo invoiceForm={invoiceForm} />}
 
       <View
         style={[

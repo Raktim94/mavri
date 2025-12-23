@@ -93,5 +93,6 @@ export const PDF_STYLES = StyleSheet.create({
   },
   tableCellSubtle: {
     color: '#808080'
-  }
+  },
+  attachment: { width: '100%', maxHeight: '95%' }
 });

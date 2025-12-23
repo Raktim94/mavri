@@ -6,6 +6,7 @@ import type { Settings } from '../../../shared/types/settings';
 import RobotoBold from './../../../assets/roboto/static/Roboto-Bold.ttf';
 import RobotoItalic from './../../../assets/roboto/static/Roboto-Italic.ttf';
 import RobotoRegular from './../../../assets/roboto/static/Roboto-Regular.ttf';
+import { AttachmentsInfo } from './AttachmentsInfo';
 import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './constant';
 import { FinancialInfo } from './FinancialInfo';
 import { HeaderInfo } from './HeaderInfo';
@@ -52,6 +53,7 @@ const PDFDocumentComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
           <FinancialInfo invoiceForm={invoiceForm} storeSettings={storeSettings} />
         </View>
         <NotesInfo invoiceForm={invoiceForm} />
+        <AttachmentsInfo invoiceForm={invoiceForm} />
       </Page>
     </Document>
   );
