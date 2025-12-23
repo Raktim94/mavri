@@ -65,87 +65,84 @@ const NotesSelectorComponent: FC<Props> = ({
 
   return (
     <>
-      {notesConfig.map(
-        note =>
-          (note.type !== NoteFormType.thankyou || invoiceForm?.invoiceType === 'invoice') && (
-            <ListItemButton
-              key={note.type}
-              onClick={() => {
-                setFormData({
-                  currentNote: note.value,
-                  title: note.label,
-                  type: note.type
-                });
-                handleOnOpen(setIsDropdownOpenNotes);
-              }}
-              sx={{
-                pt: 2,
-                pb: 2,
-                pl: 2,
-                pr: 2,
-                width: '100%',
-                borderRadius: 1,
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'start',
-                flexDirection: 'column'
-              }}
-            >
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  justifyContent: 'start',
-                  alignItems: 'center',
-                  width: '100%',
-                  gap: 2
-                }}
-              >
-                <ListItemText
-                  primary={
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        alignItems: 'center'
-                      }}
-                    >
-                      <Tooltip title={note.label}>
-                        <IconButton size="small" data-drag-handle onMouseDown={e => e.stopPropagation()}>
-                          {note.icon}
-                        </IconButton>
-                      </Tooltip>
-                      <Typography
-                        component="div"
-                        variant="body1"
-                        sx={{
-                          fontWeight: 600,
-                          color: 'primary.main',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis'
-                        }}
-                      >
-                        {note.label.toUpperCase()}
-                      </Typography>
-                    </Box>
-                  }
-                  secondary={
-                    <Typography
-                      component="div"
-                      variant="body2"
-                      sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}
-                    >
-                      {note.value}
-                    </Typography>
-                  }
-                  disableTypography
-                  sx={{ m: 0 }}
-                  slotProps={{ primary: { sx: { fontWeight: 500, m: 0 } } }}
-                />
-              </Box>
-            </ListItemButton>
-          )
-      )}
+      {notesConfig.map(note => (
+        <ListItemButton
+          key={note.type}
+          onClick={() => {
+            setFormData({
+              currentNote: note.value,
+              title: note.label,
+              type: note.type
+            });
+            handleOnOpen(setIsDropdownOpenNotes);
+          }}
+          sx={{
+            pt: 2,
+            pb: 2,
+            pl: 2,
+            pr: 2,
+            width: '100%',
+            borderRadius: 1,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'start',
+            flexDirection: 'column'
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'start',
+              alignItems: 'center',
+              width: '100%',
+              gap: 2
+            }}
+          >
+            <ListItemText
+              primary={
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center'
+                  }}
+                >
+                  <Tooltip title={note.label}>
+                    <IconButton size="small" data-drag-handle onMouseDown={e => e.stopPropagation()}>
+                      {note.icon}
+                    </IconButton>
+                  </Tooltip>
+                  <Typography
+                    component="div"
+                    variant="body1"
+                    sx={{
+                      fontWeight: 600,
+                      color: 'primary.main',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
+                    }}
+                  >
+                    {note.label.toUpperCase()}
+                  </Typography>
+                </Box>
+              }
+              secondary={
+                <Typography
+                  component="div"
+                  variant="body2"
+                  sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}
+                >
+                  {note.value}
+                </Typography>
+              }
+              disableTypography
+              sx={{ m: 0 }}
+              slotProps={{ primary: { sx: { fontWeight: 500, m: 0 } } }}
+            />
+          </Box>
+        </ListItemButton>
+      ))}
 
       {formData && (
         <NoteDropdown
