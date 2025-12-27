@@ -15,6 +15,7 @@ import { NotesInfo } from './NotesInfo';
 import { PageCounterInfo } from './PageCounterInfo';
 import { PaymentInfo } from './PaymentInfo';
 import { WatermarkInfo } from './WatermarkInfo';
+import { WatermarkPaidInfo } from './WatermarkPaidInfo';
 
 Font.register({
   family: 'Roboto',
@@ -48,6 +49,7 @@ const PDFDocumentComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
         ]}
       >
         <WatermarkInfo invoiceForm={invoiceForm} />
+        <WatermarkPaidInfo invoiceForm={invoiceForm} />
         <HeaderInfo invoiceForm={invoiceForm} storeSettings={storeSettings} />
         <ItemsInfo invoiceForm={invoiceForm} storeSettings={storeSettings} />
         <View style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart, PDF_STYLES.mt10]}>

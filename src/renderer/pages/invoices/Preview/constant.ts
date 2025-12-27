@@ -107,6 +107,14 @@ export const PDF_STYLES = StyleSheet.create({
     opacity: 0.2,
     objectFit: 'cover'
   },
+  watermarkPaid: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%) rotate(-30deg)',
+    width: 64,
+    height: 64
+  },
   pageCounter: {
     position: 'absolute',
     bottom: 20,
