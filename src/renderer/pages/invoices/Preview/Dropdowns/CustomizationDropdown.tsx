@@ -8,12 +8,14 @@ import {
   RadioGroup,
   SwipeableDrawer,
   Switch,
+  Typography,
   useMediaQuery,
   useTheme
 } from '@mui/material';
 import { MuiColorInput } from 'mui-color-input';
-import { memo, useEffect, useRef, type FC } from 'react';
+import { memo, useEffect, useRef, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
+import { UploadImage } from '../../../../shared/components/inputs/uploadImage/UploadImage';
 import { PageHeader } from '../../../../shared/components/layout/pageHeader/PageHeader';
 import { LayoutType } from '../../../../shared/enums/layoutType';
 import { PageFormat } from '../../../../shared/enums/pageFormat';
@@ -22,6 +24,7 @@ import { TableHeaderStyle } from '../../../../shared/enums/tableHeaderStyle';
 import { TableRowStyle } from '../../../../shared/enums/tableRowStyle';
 import { useForm } from '../../../../shared/hooks/useForm';
 import type { CustomizationForm } from '../../../../shared/types/invoice';
+import { fromUint8Array, toUint8Array } from '../../../../shared/utils/dataUrlFunctions';
 
 interface Props {
   isOpen: boolean;
@@ -37,6 +40,63 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onClose, onOp
   const { form, setForm, update } = useForm<CustomizationForm>(data ?? {});
   const lastEmittedRef = useRef<CustomizationForm | undefined>(data);
 
+  const [watermarkUrl, setWatermarkUrl] = useState<string | undefined>(
+    fromUint8Array(data?.customizationWatermarkFileData, data?.customizationWatermarkFileType) ?? undefined
+  );
+  const [watermarkPaidUrl, setWatermarkPaidUrl] = useState<string | undefined>(
+    fromUint8Array(data?.customizationPaidWatermarkFileData, data?.customizationPaidWatermarkFileType) ?? undefined
+  );
+  const watermarkUrlRef = useRef<string | undefined>(
+    fromUint8Array(data?.customizationWatermarkFileData, data?.customizationWatermarkFileType) ?? undefined
+  );
+  const watermarkPaidUrlRef = useRef<string | undefined>(
+    fromUint8Array(data?.customizationPaidWatermarkFileData, data?.customizationPaidWatermarkFileType) ?? undefined
+  );
+
+  const onUploadPaidWatermark = async (file?: Blob, filename?: string) => {
+    if (file) {
+      const fileUnitArray = await toUint8Array(t, file);
+      if (fileUnitArray)
+        setForm(prev => ({
+          ...prev,
+          customizationPaidWatermarkFileData: fileUnitArray,
+          customizationPaidWatermarkFileSize: file.size,
+          customizationPaidWatermarkFileType: file.type,
+          customizationPaidWatermarkFileName: filename
+        }));
+    } else {
+      setForm(prev => ({
+        ...prev,
+        customizationPaidWatermarkFileData: undefined,
+        customizationPaidWatermarkFileSize: undefined,
+        customizationPaidWatermarkFileType: undefined,
+        customizationPaidWatermarkFileName: undefined
+      }));
+    }
+  };
+
+  const onUploadWatermark = async (file?: Blob, filename?: string) => {
+    if (file) {
+      const fileUnitArray = await toUint8Array(t, file);
+      if (fileUnitArray)
+        setForm(prev => ({
+          ...prev,
+          customizationWatermarkFileData: fileUnitArray,
+          customizationWatermarkFileSize: file.size,
+          customizationWatermarkFileType: file.type,
+          customizationWatermarkFileName: filename
+        }));
+    } else {
+      setForm(prev => ({
+        ...prev,
+        customizationWatermarkFileData: undefined,
+        customizationWatermarkFileSize: undefined,
+        customizationWatermarkFileType: undefined,
+        customizationWatermarkFileName: undefined
+      }));
+    }
+  };
+
   useEffect(() => {
     if (isOpen && data) {
       setForm(data);
@@ -46,17 +106,72 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onClose, onOp
 
   useEffect(() => {
     if (!form) return;
+    let isChanged = false;
     try {
-      const prev = lastEmittedRef.current;
-      const prevStr = prev ? JSON.stringify(prev) : undefined;
-      const formStr = JSON.stringify(form);
-      if (formStr === prevStr) return;
-      onClick?.(form);
-      lastEmittedRef.current = form;
+      const prevForm = lastEmittedRef.current;
+      isChanged = JSON.stringify(prevForm) !== JSON.stringify(form);
     } catch {
-      onClick?.(form);
-      lastEmittedRef.current = form;
+      isChanged = true;
     }
+    if (!isChanged) return;
+
+    const prev = lastEmittedRef.current;
+    const prevStr = prev ? JSON.stringify(prev) : undefined;
+    const formStr = JSON.stringify(form);
+    if (formStr === prevStr) return;
+
+    const updateUrl = (
+      fileData: Uint8Array | undefined,
+      fileType: string | undefined,
+      currentUrl: string | undefined,
+      setUrl: React.Dispatch<React.SetStateAction<string | undefined>>
+    ) => {
+      const newUrl = fromUint8Array(fileData, fileType) ?? undefined;
+      if (currentUrl && currentUrl !== newUrl) {
+        try {
+          URL.revokeObjectURL(currentUrl);
+        } catch {
+          // ignore
+        }
+      }
+      setUrl(newUrl);
+      return newUrl;
+    };
+
+    watermarkUrlRef.current = updateUrl(
+      form.customizationWatermarkFileData,
+      form.customizationWatermarkFileType,
+      watermarkUrlRef.current,
+      setWatermarkUrl
+    );
+    watermarkPaidUrlRef.current = updateUrl(
+      form.customizationPaidWatermarkFileData,
+      form.customizationPaidWatermarkFileType,
+      watermarkPaidUrlRef.current,
+      setWatermarkPaidUrl
+    );
+
+    onClick?.(form);
+    lastEmittedRef.current = form;
+
+    return () => {
+      if (watermarkUrlRef.current) {
+        try {
+          URL.revokeObjectURL(watermarkUrlRef.current);
+        } catch {
+          // ignore
+        }
+        watermarkUrlRef.current = undefined;
+      }
+      if (watermarkPaidUrlRef.current) {
+        try {
+          URL.revokeObjectURL(watermarkPaidUrlRef.current);
+        } catch {
+          // ignore
+        }
+        watermarkPaidUrlRef.current = undefined;
+      }
+    };
   }, [form, onClick]);
 
   return (
@@ -211,6 +326,48 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onClose, onOp
               }
               label={t('common.labelsUpperCase')}
             />
+          </Grid>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Typography
+              component="legend"
+              variant="body1"
+              sx={{ fontWeight: 400, color: 'text.secondary', marginBottom: 1 }}
+            >
+              {t('common.watermark')}
+            </Typography>
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'start',
+                alignItems: 'start',
+                width: '100%',
+                gap: 1
+              }}
+            >
+              <UploadImage onUpload={onUploadWatermark} imgUrl={watermarkUrl} size={100} />
+            </Box>
+          </Grid>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Typography
+              component="legend"
+              variant="body1"
+              sx={{ fontWeight: 400, color: 'text.secondary', marginBottom: 1 }}
+            >
+              {t('common.paidWatermark')}
+            </Typography>
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'start',
+                alignItems: 'start',
+                width: '100%',
+                gap: 1
+              }}
+            >
+              <UploadImage onUpload={onUploadPaidWatermark} imgUrl={watermarkPaidUrl} size={100} />
+            </Box>
           </Grid>
         </Grid>
       </SwipeableDrawer>

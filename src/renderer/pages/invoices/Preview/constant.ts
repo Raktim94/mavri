@@ -20,7 +20,8 @@ export const FONT_SIZES = {
     regularBold: 8,
     tableCellHeader: 8,
     tableCell: 7,
-    tableCellSubtle: 6
+    tableCellSubtle: 6,
+    pageCounter: 8
   },
   medium: {
     page: 12,
@@ -31,7 +32,8 @@ export const FONT_SIZES = {
     regularBold: 10,
     tableCellHeader: 10,
     tableCell: 9,
-    tableCellSubtle: 8
+    tableCellSubtle: 8,
+    pageCounter: 10
   },
   large: {
     page: 14,
@@ -42,7 +44,8 @@ export const FONT_SIZES = {
     regularBold: 12,
     tableCellHeader: 12,
     tableCell: 11,
-    tableCellSubtle: 10
+    tableCellSubtle: 10,
+    pageCounter: 12
   }
 };
 
@@ -94,5 +97,20 @@ export const PDF_STYLES = StyleSheet.create({
   tableCellSubtle: {
     color: '#808080'
   },
-  attachment: { width: '100%', maxHeight: '95%' }
+  attachment: { width: '100%', maxHeight: '95%' },
+  watermark: {
+    position: 'absolute',
+    top: '0',
+    left: '0',
+    height: '100%',
+    width: '100%',
+    opacity: 0.2,
+    objectFit: 'cover'
+  },
+  pageCounter: {
+    position: 'absolute',
+    bottom: 20,
+    right: 40,
+    color: '#808080'
+  }
 });

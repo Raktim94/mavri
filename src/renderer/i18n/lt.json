@@ -154,9 +154,12 @@
     "noData": "Duomenų pagal paieškos kriterijus nėra",
     "noDataYet": "Duomenų dar nėra. Pradėkite juos pridėti...",
     "noUpdate": "Atnaujinimų nėra",
+    "of": "iš",
     "other": "Kita",
     "outline": "Kontūras",
+    "page": "Puslapis",
     "pageFormat": "Puslapio formatas",
+    "paidWatermark": "Apmokestintas ženklinimas",
     "paymentInfo": "Mokėjimo informacija",
     "paypal": "PayPal",
     "phone": "Telefonas",
@@ -183,7 +186,8 @@
     "to": "Iki",
     "total": "Suma",
     "unit": "Vienetas",
-    "unitCost": "Vieneto kaina"
+    "unitCost": "Vieneto kaina",
+    "watermark": "Ženklinimas"
   },
   "currencies": {
     "add": "Pridėti valiutą",

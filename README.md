@@ -165,11 +165,36 @@ npm install
 npm run dev
 ```
 
+### ⚙️ Environment Variables
+
+- .env.development
+
+```env
+VITE_ENABLE_MOCKS={true|false} # Enables or disables mock data
+```
+
+- .env.production
+
+```env
+# Leave empty
+```
+
+- .env.test
+
+```env
+# Leave empty
+```
+
 ### 📁 Project Structure
 
 ```
 /src
   /main             – Electron main process
+    /assets         - Static resources required by the main process
+    /enums          - Centralized TypeScript enums used by the main process
+    /ipc            - Your inter‑process communication layer
+    /types          - TypeScript interfaces and type definitions used exclusively by the main process
+    /utils          - Utility functions that support the main process
   /preload          – Electron preload scripts
   /renderer         – UI code
     /__tests__      – UI unit tests

@@ -154,9 +154,12 @@
     "noData": "No data based on search criteria",
     "noDataYet": "No data yet. Start adding...",
     "noUpdate": "No updates available",
+    "of": "of",
     "other": "Other",
     "outline": "Outline",
+    "page": "Page",
     "pageFormat": "Page format",
+    "paidWatermark": "Paid watermark",
     "paymentInfo": "Payment information",
     "paypal": "PayPal",
     "phone": "Phone",
@@ -183,7 +186,8 @@
     "to": "To",
     "total": "Total",
     "unit": "Unit",
-    "unitCost": "Unit cost"
+    "unitCost": "Unit cost",
+    "watermark": "Watermark"
   },
   "currencies": {
     "add": "Add currency",

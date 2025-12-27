@@ -12,7 +12,9 @@ import { FinancialInfo } from './FinancialInfo';
 import { HeaderInfo } from './HeaderInfo';
 import { ItemsInfo } from './ItemsInfo';
 import { NotesInfo } from './NotesInfo';
+import { PageCounterInfo } from './PageCounterInfo';
 import { PaymentInfo } from './PaymentInfo';
+import { WatermarkInfo } from './WatermarkInfo';
 
 Font.register({
   family: 'Roboto',
@@ -45,6 +47,7 @@ const PDFDocumentComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
           { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].page }
         ]}
       >
+        <WatermarkInfo invoiceForm={invoiceForm} />
         <HeaderInfo invoiceForm={invoiceForm} storeSettings={storeSettings} />
         <ItemsInfo invoiceForm={invoiceForm} storeSettings={storeSettings} />
         <View style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart, PDF_STYLES.mt10]}>
@@ -54,6 +57,7 @@ const PDFDocumentComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
         </View>
         <NotesInfo invoiceForm={invoiceForm} />
         <AttachmentsInfo invoiceForm={invoiceForm} />
+        <PageCounterInfo invoiceForm={invoiceForm} />
       </Page>
     </Document>
   );
