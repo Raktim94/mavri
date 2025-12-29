@@ -35,7 +35,4 @@ linux:
     - deb
   category: Office
   maintainer: 'Piratuks <evaldiz@gmail.com>'
-  desktop:
-    Name: 'Invoice Builder'
-    Comment: 'Invoice Builder application'
-    Icon: 'icon.png'
+  icon: 'icon.png'

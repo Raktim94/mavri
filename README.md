@@ -4,7 +4,7 @@
 [![Downloads](https://img.shields.io/github/downloads/piratuks/invoice-builder/total)](https://github.com/piratuks/invoice-builder/releases)
 [![Latest Release](https://img.shields.io/github/v/release/piratuks/invoice-builder)](https://github.com/piratuks/invoice-builder/releases)
 ![Windows](https://img.shields.io/badge/Windows-10%2B-blue?logo=windows)
-![Linux](https://img.shields.io/badge/Linux-AppImage-green?logo=linux)
+![Linux](https://img.shields.io/badge/Linux-DEB-blue?logo=linux)
 
 **Offline invoicing with full data ownership.**
 
@@ -91,7 +91,7 @@ If you value **privacy, portability, and control**, this app is built for you.
 ## 🖥️ Supported Platforms
 
 - **Windows:** 10 or newer, 64-bit
-- **Linux:** any modern distribution supporting AppImage (glibc 2.17+ recommended)
+- **Linux:** any modern distribution (Ubuntu, Debian, Linux Mint, etc.) supporting .deb packages
 - **Memory:** 2 GB RAM minimum (1 GB may work for very small datasets)
 - **Disk space:** ~100 MB for the app; additional space needed for database files
 
