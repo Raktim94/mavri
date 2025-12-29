@@ -93,7 +93,7 @@ If you value **privacy, portability, and control**, this app is built for you.
 - **Windows:** 10 or newer, 64-bit
 - **Linux:** any modern distribution (Ubuntu, Debian, Linux Mint, etc.) supporting .deb packages
 - **Memory:** 2 GB RAM minimum (1 GB may work for very small datasets)
-- **Disk space:** ~100 MB for the app; additional space needed for database files
+- **Disk space:** ~100 MB for the installer; ~500mb for the app; additional space needed for database files
 
 ## 📦 Installation
 
