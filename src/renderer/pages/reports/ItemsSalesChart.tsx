@@ -1,7 +1,7 @@
 import { Box, Typography, useTheme } from '@mui/material';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Cell, Legend, Pie, PieChart, ResponsiveContainer } from 'recharts';
+import { Cell, Legend, Pie, PieChart, ResponsiveContainer, type PieLabelRenderProps } from 'recharts';
 import type { ItemSales } from '../../shared/types/itemSales';
 import { CustomLegend } from './CustomLegent';
 
@@ -29,6 +29,26 @@ export const ItemsSalesChart: React.FC<Props> = ({ data }) => {
     }));
   }, [data, t]);
 
+  const renderPercentageLabel = ({
+    cx,
+    cy,
+    midAngle = 0,
+    innerRadius,
+    outerRadius,
+    percent = 0
+  }: PieLabelRenderProps) => {
+    const RADIAN = Math.PI / 180;
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+    return (
+      <text x={x} y={y} fill="#fff" textAnchor="middle" dominantBaseline="central" fontSize="12" fontWeight="600">
+        {(percent * 100).toFixed(0)}%
+      </text>
+    );
+  };
+
   return (
     <Box sx={{ mt: 1 }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
@@ -49,6 +69,7 @@ export const ItemsSalesChart: React.FC<Props> = ({ data }) => {
             outerRadius={100}
             paddingAngle={2}
             labelLine={false}
+            label={renderPercentageLabel}
           >
             {chartData.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={entry.color} />
