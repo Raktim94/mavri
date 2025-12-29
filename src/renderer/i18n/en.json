@@ -382,6 +382,7 @@
     "lastMonth": "Last month",
     "lastQuarter": "Last quarter",
     "lastYear": "Last year",
+    "noItems": "No invoices were found for the selected period. Please create at least one invoice to generate the report.",
     "outstanding": "Outstanding",
     "overdue": "{{count}} Overdue",
     "salesTrending": "Sales trending",

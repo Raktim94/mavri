@@ -380,6 +380,7 @@
     "lastMonth": "Praėjęs mėnuo",
     "lastQuarter": "Praėjęs ketvirtis",
     "lastYear": "Praėję metai",
+    "noItems": "Pasirinktam laikotarpiui sąskaitų nerasta. Sukurkite bent vieną sąskaitą, kad galėtumėte sugeneruoti ataskaitą.",
     "outstanding": "Neapmokėta",
     "overdue": "{{count}} pavėluota",
     "salesTrending": "Pardavimų tendencijos",

@@ -1,6 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import { type FC } from 'react';
 import { useTranslation } from 'react-i18next';
+import { NoItem } from '../../shared/components/lists/noItem/NoItem';
 import type { ClientRevenue } from '../../shared/types/clientRevenue';
 import type { Invoice, InvoicesByCurrency } from '../../shared/types/invoice';
 import type { ItemSales } from '../../shared/types/itemSales';
@@ -33,7 +34,7 @@ export const Overview: FC<Props> = ({ grouped, invoices }) => {
 
   return (
     <>
-      <Box sx={{ mt: 3 }}>
+      <Box sx={{ mt: 3, height: '100%' }}>
         {Object.entries(grouped).map(([code, data]) => {
           const filteredInvoices = invoices.filter(inv => inv.currencyId === data.currencyId);
           const trendChartDataRaw = filteredInvoices.map(inv => {
@@ -107,6 +108,7 @@ export const Overview: FC<Props> = ({ grouped, invoices }) => {
             </Box>
           );
         })}
+        {Object.entries(grouped).length <= 0 && <NoItem text={t('reports.noItems')} />}
       </Box>
     </>
   );
