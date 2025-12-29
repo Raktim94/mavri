@@ -374,6 +374,8 @@
     "currencyDashboard": "{{currency}} Apžvalga",
     "customRange": "Pasirinktinis laikotarpis",
     "dateRange": "Laikotarpis",
+    "invoiceCount": "{{name}} ({{count}} sąsk.)",
+    "itemsCount": "{{name}} (kiekis: {{count}})",
     "last30Days": "Paskutinės 30 dienų",
     "lastMonth": "Praėjęs mėnuo",
     "lastQuarter": "Praėjęs ketvirtis",

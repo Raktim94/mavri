@@ -1,8 +1,10 @@
 import { Box, Typography } from '@mui/material';
 import { type FC } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { ClientRevenue } from '../../shared/types/clientRevenue';
 import type { Invoice, InvoicesByCurrency } from '../../shared/types/invoice';
 import { getTotalAmountCents } from '../../shared/utils/invoiceFunctions';
+import { ClientsRevenueChart } from './ClientsRevenueChart';
 import { FinancialCards } from './FinancialCards';
 import { TrendChart } from './TrendChart';
 
@@ -41,6 +43,29 @@ export const Overview: FC<Props> = ({ grouped, invoices }) => {
             };
           });
           const trendChartData = toCumulativeTrend(trendChartDataRaw);
+          const clientRevenueData = Object.values(
+            filteredInvoices.reduce(
+              (acc, inv) => {
+                const name = inv.clientNameSnapshot;
+                const totalAmountCents = getTotalAmountCents(inv);
+                const revenue = totalAmountCents / inv.currencySubunitSnapshot;
+
+                if (!acc[name]) {
+                  acc[name] = {
+                    name,
+                    invoiceCount: 0,
+                    revenue: 0
+                  };
+                }
+
+                acc[name].invoiceCount += 1;
+                acc[name].revenue += revenue;
+
+                return acc;
+              },
+              {} as Record<string, ClientRevenue>
+            )
+          );
 
           return (
             <Box key={code} sx={{ mb: 2 }}>
@@ -49,6 +74,7 @@ export const Overview: FC<Props> = ({ grouped, invoices }) => {
               </Typography>
               <FinancialCards data={data} />
               <TrendChart data={trendChartData} />
+              <ClientsRevenueChart data={clientRevenueData} />
             </Box>
           );
         })}

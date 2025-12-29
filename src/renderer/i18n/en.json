@@ -376,6 +376,8 @@
     "currencyDashboard": "{{currency}} Overview",
     "customRange": "Custom range",
     "dateRange": "Date range",
+    "invoiceCount": "{{name}} ({{count}} inv)",
+    "itemsCount": "{{name}} (qty: {{count}})",
     "last30Days": "Last 30 days",
     "lastMonth": "Last month",
     "lastQuarter": "Last quarter",
