@@ -29,7 +29,9 @@ export const aggregateInvoicesByCurrency = (invoices: Invoice[], from: string, t
         invoiceCount: 0,
         overdueCount: 0,
         collectionRate: 0,
-        avgPerInvoice: 0
+        avgPerInvoice: 0,
+        issuedAt: invoice.issuedAt,
+        currencyId: invoice.currencyId
       };
     }
 

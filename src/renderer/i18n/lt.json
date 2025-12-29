@@ -380,11 +380,14 @@
     "lastYear": "Praėję metai",
     "outstanding": "Neapmokėta",
     "overdue": "{{count}} pavėluota",
+    "salesTrending": "Pardavimų tendencijos",
     "selectDateRange": "Pasirinkite laikotarpį",
     "thisMonth": "Šis mėnuo",
     "thisQuarter": "Šis ketvirtis",
     "thisYear": "Šie metai",
     "title": "Finansų suvestinė",
+    "topClients": "Didžiausi klientai pagal pajamas",
+    "topItems": "Populiariausios prekės pagal pardavimus",
     "totalInvoices": "{{count}} sąskaitos"
   },
   "settingsMenuItems": {

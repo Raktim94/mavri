@@ -382,11 +382,14 @@
     "lastYear": "Last year",
     "outstanding": "Outstanding",
     "overdue": "{{count}} Overdue",
+    "salesTrending": "Sales trending",
     "selectDateRange": "Select date range",
     "thisMonth": "This month",
     "thisQuarter": "This quarter",
     "thisYear": "This year",
     "title": "Financial dashboard",
+    "topClients": "Top clients by revenue",
+    "topItems": "Top items by sales",
     "totalInvoices": "{{count}} Invoices"
   },
   "settingsMenuItems": {

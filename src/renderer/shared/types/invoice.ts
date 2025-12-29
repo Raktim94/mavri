@@ -9,18 +9,21 @@ import type { TableHeaderStyle } from '../enums/tableHeaderStyle';
 import type { TableRowStyle } from '../enums/tableRowStyle';
 import type { InvoiceItemTaxType, InvoiceTaxType } from '../enums/taxType';
 
+export interface InvoicesByCurrencyMeta {
+  currencyCode: string;
+  currencySymbol: string;
+  totalAmount: number;
+  totalAmountPaid: number;
+  balanceDue: number;
+  invoiceCount: number;
+  overdueCount: number;
+  collectionRate: number;
+  avgPerInvoice: number;
+  issuedAt: string;
+  currencyId: number;
+}
 export interface InvoicesByCurrency {
-  [currencyCode: string]: {
-    currencyCode: string;
-    currencySymbol: string;
-    totalAmount: number;
-    totalAmountPaid: number;
-    balanceDue: number;
-    invoiceCount: number;
-    overdueCount: number;
-    collectionRate: number;
-    avgPerInvoice: number;
-  };
+  [currencyCode: string]: InvoicesByCurrencyMeta;
 }
 
 export interface PaymentForm {
