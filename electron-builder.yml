@@ -35,4 +35,4 @@ linux:
     - deb
   category: Office
   maintainer: 'Piratuks <evaldiz@gmail.com>'
-  icon: 'icon.png'
+  icon: 'src/main/assets/linux-icons'
