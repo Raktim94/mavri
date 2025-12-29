@@ -80,21 +80,23 @@ export const getTotalAmountPaidCents = (invoicePayments: InvoicePayment[]): numb
   return totalCents;
 };
 
+export const getItemTotalAmountCents = (invoiceItem: InvoiceItem, includeTax: boolean = true): number => {
+  const amountCents = getInvoiceItemAmountCents(invoiceItem);
+
+  if (includeTax) {
+    const taxAmountCents = getInvoiceItemTaxCents(invoiceItem);
+    if (invoiceItem.taxType !== InvoiceItemTaxType.inclusive) return amountCents + taxAmountCents;
+
+    return amountCents;
+  }
+
+  return amountCents;
+};
+
 export const getSubTotalAmountCents = (invoiceItems: InvoiceItem[], includeTax: boolean = true): number => {
   if (!invoiceItems || invoiceItems.length === 0) return 0;
 
-  return invoiceItems.reduce((sum, item) => {
-    const amountCents = getInvoiceItemAmountCents(item);
-
-    if (includeTax) {
-      const taxAmountCents = getInvoiceItemTaxCents(item);
-      if (item.taxType !== InvoiceItemTaxType.inclusive) return sum + amountCents + taxAmountCents;
-
-      return sum + amountCents;
-    }
-
-    return sum + amountCents;
-  }, 0);
+  return invoiceItems.reduce((sum, item) => sum + getItemTotalAmountCents(item, includeTax), 0);
 };
 
 export const getInvoiceItemAmountCents = (invoiceItem: InvoiceItem): number => {

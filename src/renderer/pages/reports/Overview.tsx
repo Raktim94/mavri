@@ -3,9 +3,11 @@ import { type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ClientRevenue } from '../../shared/types/clientRevenue';
 import type { Invoice, InvoicesByCurrency } from '../../shared/types/invoice';
-import { getTotalAmountCents } from '../../shared/utils/invoiceFunctions';
+import type { ItemSales } from '../../shared/types/itemSales';
+import { getItemTotalAmountCents, getTotalAmountCents } from '../../shared/utils/invoiceFunctions';
 import { ClientsRevenueChart } from './ClientsRevenueChart';
 import { FinancialCards } from './FinancialCards';
+import { ItemsSalesChart } from './ItemsSalesChart';
 import { TrendChart } from './TrendChart';
 
 interface Props {
@@ -66,6 +68,32 @@ export const Overview: FC<Props> = ({ grouped, invoices }) => {
               {} as Record<string, ClientRevenue>
             )
           );
+          const itemSalesData = Object.values(
+            filteredInvoices.reduce(
+              (acc, inv) => {
+                inv.invoiceItems.forEach(item => {
+                  const name = item.itemNameSnapshot;
+                  const quantity = item.quantity;
+                  const itemTotalAmountCents = getItemTotalAmountCents(item);
+                  const itemTotalAmount = itemTotalAmountCents / inv.currencySubunitSnapshot;
+
+                  if (!acc[name]) {
+                    acc[name] = {
+                      name,
+                      quantity: 0,
+                      amount: 0
+                    };
+                  }
+
+                  acc[name].quantity += quantity;
+                  acc[name].amount += itemTotalAmount;
+                });
+
+                return acc;
+              },
+              {} as Record<string, ItemSales>
+            )
+          );
 
           return (
             <Box key={code} sx={{ mb: 2 }}>
@@ -75,6 +103,7 @@ export const Overview: FC<Props> = ({ grouped, invoices }) => {
               <FinancialCards data={data} />
               <TrendChart data={trendChartData} />
               <ClientsRevenueChart data={clientRevenueData} />
+              <ItemsSalesChart data={itemSalesData} />
             </Box>
           );
         })}
