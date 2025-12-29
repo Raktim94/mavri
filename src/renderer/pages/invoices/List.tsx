@@ -1,5 +1,4 @@
 import { Box, Card, CardActionArea, CardContent, Chip, darken, lighten, Typography, useTheme } from '@mui/material';
-import { differenceInCalendarDays, parseISO } from 'date-fns';
 import { memo, useCallback, useMemo, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { CurrencyFormat } from '../../shared/enums/currencyFormat';
@@ -7,7 +6,7 @@ import { InvoiceStatus } from '../../shared/enums/invoiceStatus';
 import { Themes } from '../../shared/enums/themes';
 import type { Invoice } from '../../shared/types/invoice';
 import { formatDate, getFormattedCurrency } from '../../shared/utils/formatFunctions';
-import { getBalanceDueCents, getTotalAmountCents } from '../../shared/utils/invoiceFunctions';
+import { getBalanceDueCents, getDaysLeft, getTotalAmountCents } from '../../shared/utils/invoiceFunctions';
 import { useAppSelector } from '../../state/configureStore';
 import { selectSettings } from '../../state/pageSlice';
 
@@ -33,18 +32,6 @@ const InvoiceListItemComponent: FC<Props> = ({ item, isSelected, onEdit }) => {
     }, item.invoicePayments[0].paidAt);
   }, [item.invoicePayments]);
 
-  const daysLeft = useCallback(() => {
-    if (!item.dueDate) return 0;
-
-    const d = typeof item.dueDate === 'string' ? parseISO(item.dueDate) : item.dueDate;
-
-    const due = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    const today = new Date();
-    const todayDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-
-    return differenceInCalendarDays(due, todayDateOnly);
-  }, [item]);
-
   const getColor = useCallback(() => {
     if (item.status === InvoiceStatus.partiallyPaid) return theme.palette.warning.main;
     if (item.status === InvoiceStatus.paid) return theme.palette.success.main;
@@ -56,7 +43,7 @@ const InvoiceListItemComponent: FC<Props> = ({ item, isSelected, onEdit }) => {
   }, [item, theme]);
 
   const latestPaidAt = useMemo(() => getLastPaymentDate(), [getLastPaymentDate]);
-  const overdueDaysLeft = useMemo(() => daysLeft(), [daysLeft]);
+  const overdueDaysLeft = useMemo(() => getDaysLeft(item.dueDate), [item]);
   const totalAmountCents = useMemo(() => getTotalAmountCents(item), [item]);
   const remainingCents = useMemo(() => getBalanceDueCents(item), [item]);
   const remainingAmount = useMemo(() => remainingCents / item.currencySubunitSnapshot, [remainingCents, item]);

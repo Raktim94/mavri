@@ -7,7 +7,7 @@ import { CurrenciesPage } from '../pages/currencies';
 import { InvoicesPage } from '../pages/invoices';
 import { ItemsPage } from '../pages/items';
 import { QuotesPage } from '../pages/quotes';
-import { Reports } from '../pages/reports';
+import { ReportsPage } from '../pages/reports';
 import { SettingsPage } from '../pages/settings';
 import { UnitsPage } from '../pages/units';
 import { InvoiceType } from '../shared/enums/invoiceType';
@@ -25,9 +25,7 @@ export const AppRoutes: FC = () => {
       <Route path="items" element={<ItemsPage />} />
       <Route path="invoices" element={<InvoicesPage type={InvoiceType.invoice} />} />
       <Route path="quotes" element={<QuotesPage />} />
-
-      <Route path="reports" element={<Reports />} />
-
+      <Route path="reports" element={<ReportsPage />} />
       <Route path="*" element={<Navigate to="/invoices" replace />} />
     </Routes>
   );

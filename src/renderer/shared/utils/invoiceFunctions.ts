@@ -1,8 +1,73 @@
+import { differenceInCalendarDays, parseISO } from 'date-fns';
 import { DiscountType } from '../enums/discountType';
 import { InvoiceItemTaxType, InvoiceTaxType } from '../enums/taxType';
-import type { Invoice, InvoiceFromData, InvoiceItem, InvoicePayment } from '../types/invoice';
+import type { Invoice, InvoiceFromData, InvoiceItem, InvoicePayment, InvoicesByCurrency } from '../types/invoice';
 import type { Settings } from '../types/settings';
 import { createCurrencyFormatter, supportsCurrencySubunit } from './formatFunctions';
+
+export const aggregateInvoicesByCurrency = (invoices: Invoice[], from: string, to: string): InvoicesByCurrency => {
+  const result: InvoicesByCurrency = {};
+
+  const fromDate = parseISO(from);
+  const toDate = parseISO(to);
+
+  const filtered = invoices.filter(inv => {
+    const issueAt = parseISO(inv.issuedAt);
+    return issueAt >= fromDate && issueAt <= toDate;
+  });
+
+  for (const invoice of filtered) {
+    const code = invoice.currencyCodeSnapshot;
+
+    if (!result[code]) {
+      result[code] = {
+        currencyCode: invoice.currencyCodeSnapshot,
+        currencySymbol: invoice.currencySymbolSnapshot,
+        totalAmount: 0,
+        totalAmountPaid: 0,
+        balanceDue: 0,
+        invoiceCount: 0,
+        overdueCount: 0,
+        collectionRate: 0,
+        avgPerInvoice: 0
+      };
+    }
+
+    const daysLeft = getDaysLeft(invoice.dueDate);
+    const amountPaidCents = getTotalAmountPaidCents(invoice.invoicePayments);
+    const totalAmountPaid = amountPaidCents / invoice.currencySubunitSnapshot;
+
+    const totalAmountCents = getTotalAmountCents(invoice);
+    const totalAmount = totalAmountCents / invoice.currencySubunitSnapshot;
+    const remaining = totalAmount - totalAmountPaid;
+
+    result[code].totalAmount += totalAmount;
+    result[code].totalAmountPaid += totalAmountPaid;
+    result[code].balanceDue += remaining;
+    result[code].invoiceCount += 1;
+    result[code].overdueCount += daysLeft < 0 ? 1 : 0;
+  }
+
+  for (const code of Object.keys(result)) {
+    const group = result[code];
+    group.collectionRate = group.totalAmount > 0 ? (group.totalAmountPaid / group.totalAmount) * 100 : 0;
+    group.avgPerInvoice = group.invoiceCount > 0 ? group.totalAmountPaid / group.invoiceCount : 0;
+  }
+
+  return result;
+};
+
+export const getDaysLeft = (dueDate?: string) => {
+  if (!dueDate) return 0;
+
+  const d = typeof dueDate === 'string' ? parseISO(dueDate) : dueDate;
+
+  const due = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const today = new Date();
+  const todayDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+  return differenceInCalendarDays(due, todayDateOnly);
+};
 
 export const getTotalAmountPaidCents = (invoicePayments: InvoicePayment[]): number => {
   if (!invoicePayments || invoicePayments.length === 0) {

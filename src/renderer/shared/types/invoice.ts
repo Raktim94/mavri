@@ -9,6 +9,20 @@ import type { TableHeaderStyle } from '../enums/tableHeaderStyle';
 import type { TableRowStyle } from '../enums/tableRowStyle';
 import type { InvoiceItemTaxType, InvoiceTaxType } from '../enums/taxType';
 
+export interface InvoicesByCurrency {
+  [currencyCode: string]: {
+    currencyCode: string;
+    currencySymbol: string;
+    totalAmount: number;
+    totalAmountPaid: number;
+    balanceDue: number;
+    invoiceCount: number;
+    overdueCount: number;
+    collectionRate: number;
+    avgPerInvoice: number;
+  };
+}
+
 export interface PaymentForm {
   id?: number;
   paymentMethod?: PaymentType;

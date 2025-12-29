@@ -5,6 +5,19 @@ import type { DateFormat } from '../enums/dateFormat';
 import type { InvoiceFromData } from '../types/invoice';
 import type { Settings } from '../types/settings';
 
+export const toUTCISOString = (date: Date) =>
+  new Date(
+    Date.UTC(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      date.getHours(),
+      date.getMinutes(),
+      date.getSeconds(),
+      date.getMilliseconds()
+    )
+  ).toISOString();
+
 export const formatDate = (date: string | Date, pattern: DateFormat) => {
   if (!date) return '';
 

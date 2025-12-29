@@ -94,14 +94,25 @@ export const initInvoicesHandlers = (db: Database) => {
   const handleAttachments = handleEntity<InvoiceAttachment>(db, 'attachments', attachmentFields);
 
   ipcMain.handle('get-all-invoices', async (_event, type, filter) => {
-    const whereClause = getWhereClauseFromFilters({
-      filters: filter,
-      businessNameSnapshotColumn: 'i.businessNameSnapshot',
-      clientNameSnapshotColumn: 'i.clientNameSnapshot',
-      archivedColumn: 'i.isArchived',
-      issuedAtColumn: 'i.issuedAt',
-      statusColumn: 'i.status'
-    });
+    const whereClause = filter
+      ? getWhereClauseFromFilters({
+          filters: filter,
+          businessNameSnapshotColumn: 'i.businessNameSnapshot',
+          clientNameSnapshotColumn: 'i.clientNameSnapshot',
+          archivedColumn: 'i.isArchived',
+          issuedAtColumn: 'i.issuedAt',
+          statusColumn: 'i.status'
+        })
+      : '';
+
+    const conditions = [];
+    if (type) {
+      conditions.push(`i.invoiceType = '${type}'`);
+    }
+    if (whereClause) {
+      conditions.push(whereClause);
+    }
+    const whereSql = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
     const invoicesSql = `
         SELECT
@@ -109,7 +120,7 @@ export const initInvoicesHandlers = (db: Database) => {
             c.format as currencyFormat
         FROM invoices i
         INNER JOIN currencies as c on c.id = i.currencyId
-        WHERE i.invoiceType = '${type}' AND ${whereClause}
+        ${whereSql}
         ORDER BY i.createdAt DESC
       `;
     const invoices = await getAllRows(db, invoicesSql);

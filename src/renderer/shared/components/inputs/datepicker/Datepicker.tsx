@@ -28,6 +28,7 @@ export const Datepicker: React.FC<Props> = ({
   onChange = () => {}
 }) => {
   const { t } = useTranslation();
+  const [currValue, setCurrValue] = useState<string | undefined>(value);
   const [selectedValue, setSelectedValue] = useState<string | undefined>(value);
 
   useEffect(() => {
@@ -35,12 +36,16 @@ export const Datepicker: React.FC<Props> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedValue]);
 
+  useEffect(() => {
+    setCurrValue(value);
+  }, [value]);
+
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <DatePicker
         sx={{ width: '100%' }}
         label={label}
-        value={value ? dayjs.utc(value) : null}
+        value={currValue ? dayjs.utc(currValue) : null}
         format={format.toUpperCase()}
         onChange={newValue => {
           const now = dayjs();

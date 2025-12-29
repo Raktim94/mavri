@@ -367,6 +367,26 @@
       "archivedText": "Archyvuoti pasiūlymai"
     }
   },
+  "reports": {
+    "avgInvoice": "{{avg}} vid. sąskaita",
+    "collected": "Surinkta",
+    "collectionRate": "Surinkimo rodiklis",
+    "currencyDashboard": "{{currency}} Apžvalga",
+    "customRange": "Pasirinktinis laikotarpis",
+    "dateRange": "Laikotarpis",
+    "last30Days": "Paskutinės 30 dienų",
+    "lastMonth": "Praėjęs mėnuo",
+    "lastQuarter": "Praėjęs ketvirtis",
+    "lastYear": "Praėję metai",
+    "outstanding": "Neapmokėta",
+    "overdue": "{{count}} pavėluota",
+    "selectDateRange": "Pasirinkite laikotarpį",
+    "thisMonth": "Šis mėnuo",
+    "thisQuarter": "Šis ketvirtis",
+    "thisYear": "Šie metai",
+    "title": "Finansų suvestinė",
+    "totalInvoices": "{{count}} sąskaitos"
+  },
   "settingsMenuItems": {
     "descriptions": {
       "about": "Sužinokite daugiau apie šią programą, jos funkcijas.",

@@ -8,7 +8,7 @@ import type { Response } from '../../types/response';
 import { useAsyncAction } from '../useAsyncAction';
 
 interface UseInvoicesParams extends RequestHook<Response<Invoice[]>> {
-  type: InvoiceType;
+  type?: InvoiceType;
 }
 
 export const useInvoicesRetrieve = ({

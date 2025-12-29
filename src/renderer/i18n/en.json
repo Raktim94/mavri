@@ -369,6 +369,26 @@
       "archivedText": "Archived quotes"
     }
   },
+  "reports": {
+    "avgInvoice": "{{avg}} Avg. Invoice",
+    "collected": "Collected",
+    "collectionRate": "Collection rate",
+    "currencyDashboard": "{{currency}} Overview",
+    "customRange": "Custom range",
+    "dateRange": "Date range",
+    "last30Days": "Last 30 days",
+    "lastMonth": "Last month",
+    "lastQuarter": "Last quarter",
+    "lastYear": "Last year",
+    "outstanding": "Outstanding",
+    "overdue": "{{count}} Overdue",
+    "selectDateRange": "Select date range",
+    "thisMonth": "This month",
+    "thisQuarter": "This quarter",
+    "thisYear": "This year",
+    "title": "Financial dashboard",
+    "totalInvoices": "{{count}} Invoices"
+  },
   "settingsMenuItems": {
     "descriptions": {
       "about": "Learn more about this app, its features.",
