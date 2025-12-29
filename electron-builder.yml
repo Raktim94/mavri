@@ -33,3 +33,4 @@ nsis:
 linux:
   target:
     - AppImage
+  category: Office
