@@ -23,7 +23,7 @@ const createWindow = () => {
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 768,
-    show: false,
+    show: true,
     autoHideMenuBar: true,
     icon: join(__dirname, 'assets', 'icon.png'),
     webPreferences: {
@@ -40,9 +40,9 @@ const createWindow = () => {
     if (indexHtmlPath) mainWindow.loadFile(indexHtmlPath);
   }
 
-  mainWindow.once('ready-to-show', () => {
-    mainWindow.show();
-  });
+  // mainWindow.once('ready-to-show', () => {
+  //   mainWindow.show();
+  // });
 };
 
 app.whenReady().then(() => {
