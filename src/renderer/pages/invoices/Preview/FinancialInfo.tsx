@@ -105,7 +105,7 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
       {totalTax > 0 && (
         <View style={[PDF_STYLES.row, PDF_STYLES.mb5]}>
           <View style={PDF_STYLES.flexGrow} />
-          <View style={[PDF_STYLES.row, PDF_STYLES.w40]}>
+          <View style={[PDF_STYLES.row, PDF_STYLES.w60]}>
             <View
               style={[
                 PDF_STYLES.regular,

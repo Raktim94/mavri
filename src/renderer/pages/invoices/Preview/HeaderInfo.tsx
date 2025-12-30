@@ -30,9 +30,15 @@ const HeaderInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
             <TitleInfo invoiceForm={invoiceForm} />
           </View>
           <View style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart]}>
-            <BusinessInfo invoiceForm={invoiceForm} />
-            <ClientInfo invoiceForm={invoiceForm} />
-            <InvoiceInformationInfo storeSettings={storeSettings} invoiceForm={invoiceForm} />
+            <View style={[PDF_STYLES.w35]}>
+              <BusinessInfo invoiceForm={invoiceForm} />
+            </View>
+            <View style={[PDF_STYLES.w35]}>
+              <ClientInfo invoiceForm={invoiceForm} />
+            </View>
+            <View style={[PDF_STYLES.w30]}>
+              <InvoiceInformationInfo storeSettings={storeSettings} invoiceForm={invoiceForm} />
+            </View>
           </View>
         </>
       )}

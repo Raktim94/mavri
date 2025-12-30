@@ -72,6 +72,7 @@ export const PDF_STYLES = StyleSheet.create({
   w50: { width: '50%' },
   w5: { width: '5%' },
   w35: { width: '35%' },
+  w30: { width: '30%' },
   w15: { width: '15%' },
   border: { height: 1, backgroundColor: '#e0e0e0' },
   maxw50: { maxWidth: '50%' },
@@ -113,7 +114,8 @@ export const PDF_STYLES = StyleSheet.create({
     left: '50%',
     transform: 'translate(-50%, -50%) rotate(-30deg)',
     width: 64,
-    height: 64
+    height: 64,
+    zIndex: 9999
   },
   pageCounter: {
     position: 'absolute',

@@ -35,7 +35,7 @@ const NoteDropdownComponent: FC<Props> = ({ isOpen, title, currentNote, onClose,
           paper: {
             sx: {
               maxWidth: isDesktop ? '40%' : '100%',
-              height: isDesktop ? '20%' : '30%',
+              height: isDesktop ? '30%' : '40%',
               mx: 'auto',
               borderTopLeftRadius: 16,
               borderTopRightRadius: 16,
