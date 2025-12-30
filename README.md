@@ -13,6 +13,12 @@
 No accounts. No cloud. No subscriptions.  
 Your data stays on your machine in a database file you own.
 
+## 📸 Screenshots
+
+![Invoice Form](tutorial/invoice_form.jpg)
+![Invoice PDF Preview](tutorial/invoice_pdf_preview.jpg)
+![Quote PDF Preview](tutorial/quote_pdf_preview.jpg)
+
 ## ❓ Why Invoice Builder?
 
 Invoice Builder is designed for freelancers, contractors, and small businesses who want:
