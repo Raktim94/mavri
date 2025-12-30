@@ -1,6 +1,6 @@
 import { Text, View } from '@react-pdf/renderer';
 import { memo, type FC } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useUppercaseTranslation } from '../../../shared/hooks/useUppercaseTranslation';
 import type { InvoiceFromData } from '../../../shared/types/invoice';
 import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './constant';
 
@@ -8,7 +8,7 @@ interface Props {
   invoiceForm?: InvoiceFromData;
 }
 const PaymentInfoComponent: FC<Props> = ({ invoiceForm }) => {
-  const { t } = useTranslation();
+  const { tt } = useUppercaseTranslation(invoiceForm?.customizationLabelUpperCase);
 
   return (
     <View style={[PDF_STYLES.alignStart, PDF_STYLES.gap4, PDF_STYLES.maxw50]}>
@@ -18,7 +18,7 @@ const PaymentInfoComponent: FC<Props> = ({ invoiceForm }) => {
           { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
         ]}
       >
-        {t('common.paymentInfo')}:
+        {tt('common.paymentInfo')}:
       </Text>
       <Text
         style={[
