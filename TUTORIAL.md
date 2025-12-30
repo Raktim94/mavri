@@ -77,6 +77,7 @@ Click the **Add** button at the bottom to open a modal where you can:
 
 - Enter business information
 - Upload a logo (crop and adjust as needed)
+  > ⚠️ Maximum file size: 2 MB
 
 ![Businesses creation](tutorial/businesses_page_1.jpg)
 
@@ -529,6 +530,8 @@ Additionally, you can set a **notes** (customer notes, thank you note, terms & c
 
 Additionally, you can attach **images**, which will be embedded into the PDF.
 
+> ⚠️ Maximum file size: 2 MB
+
 ![Quote attachments](tutorial/quote_page_32.jpg)
 
 ### Editing / Deleting a Quote
@@ -602,6 +605,204 @@ Quotes can be exported **only to XLSX** format.
 ![Quotes PDF attachments](tutorial/quote_page_37.jpg)
 ![Quotes data](tutorial/quote_page_36.jpg)
 ![Quotes data example](tutorial/quote_page_41.jpg)
+
+## Invoices screen
+
+The **Invoices** screen allows you to **create, read, update, and delete (CRUD)** invoice records.
+
+> 💡 **Note:** Amounts and dates are formatted based on the configuration in the [Settings screen](#settings-screen) and the currency format defined in the [Currency screen](#currency-screen).
+
+You can also:
+
+- **Filter** invoices by various criteria
+- **Export** invoices to XLSX
+  > 💡 **Note:** XLSX export does **not** include attachments or business logo snapshots.
+- **Preview** invoices live in PDF format
+- **Customize** PDF appearance and layout
+- **Export** invoices as PDF documents
+- **Duplicate Invoice** to quickly create a similar invoice
+
+### Adding a Invoice
+
+Click the **Add** button at the bottom to open the right-hand pane, where you can enter invoice details.
+
+- **Required information:**
+  - Currency
+  - Business
+  - Client (“Bill To”)
+  - Invoice information
+  - At least one item
+
+![Invoice creation](tutorial/invoice_page_1.jpg)
+
+Select a currency from the dropdown. The dropdown supports **search, filter, and sort** (see [Currencies screen](#currencies-screen) for details).
+
+> 💡 **Note:** The selected currency is saved as a snapshot. The snapshot is updated only when editing the invoice and changing the currency.
+
+![Invoice currency creation](tutorial/invoice_page_2.jpg)
+
+Select a business from the dropdown. The dropdown supports **search, filter, and sort** (see [Businesses screen](#businesses-screen) for details).
+
+> 💡 **Note:** The selected business is saved as a snapshot. The snapshot is updated only when editing the invoice and changing the business.
+
+![Invoice business creation](tutorial/invoice_page_3.jpg)
+
+Select a client from the dropdown. The dropdown supports **search, filter, and sort** (see [Clients screen](#clients-screen) for details).
+
+> 💡 **Note:** The selected client is saved as a snapshot. The snapshot is updated only when editing the invoice and changing the client.
+
+![Invoice client creation](tutorial/invoice_page_4.jpg)
+
+Enter the invoice details, including:
+
+- Invoice number prefix
+- Invoice number suffix
+- Invoice number
+- Issued date
+- Due date
+
+> 💡 **Note:**
+>
+> - The prefix and suffix are saved as a snapshot if they were configured on the [Settings screen](#settings-screen).
+> - You can also change or add them here, even if they were not configured in Settings.
+> - If configured, the prefix and suffix are always incorporated into the invoice number automatically.
+
+![Invoice information](tutorial/invoice_page_5.jpg)
+
+Select a item from the dropdown and set quantity. The dropdown supports **search, filter, and sort** (see [Items screen](#items-screen) for details).
+
+> 💡 **Note:** The selected item is saved as a snapshot. The snapshot is updated only when editing the invoice and changing the item.
+
+![Invoice item creation](tutorial/invoice_page_6.jpg)
+![Invoice item quantity](tutorial/invoice_page_7.jpg)
+
+> 💡 **Note:** The items order can be changed by drag and drop.
+
+![Invoice items order](tutorial/invoice_page_27.jpg)
+
+Once all required information has been filled in, the invoice can be saved.
+
+![Invoice item quantity](tutorial/invoice_page_8.jpg)
+
+Information on other pages is also updated to reflect the current invoice count.
+
+![Invoice count](tutorial/invoice_page_10.jpg)
+
+Additionally, you can set a **discount** (fixed amount or percentage-based).
+
+![Invoice discount none](tutorial/invoice_page_14.jpg)
+![Invoice discount fixed](tutorial/invoice_page_15.jpg)
+![Invoice discount percentage](tutorial/invoice_page_16.jpg)
+![Invoice discount result](tutorial/invoice_page_17.jpg)
+
+You can also configure **taxes** for the invoice:
+
+- **Total-based taxes**: inclusive, exclusive, or deducted
+- **Per-item taxes**: inclusive or exclusive
+
+![Invoice none](tutorial/invoice_page_18.jpg)
+![Invoice on total](tutorial/invoice_page_19.jpg)
+![Invoice deducted](tutorial/invoice_page_20.jpg)
+![Invoice per item](tutorial/invoice_page_21.jpg)
+
+Results:
+
+![Invoice on total inclusive](tutorial/invoice_page_22.jpg)
+![Invoice on total dedcuted](tutorial/invoice_page_23.jpg)
+![Invoice on total exclusive](tutorial/invoice_page_24.jpg)
+![Invoice per item inclusive](tutorial/invoice_page_25.jpg)
+![Invoice per item exclusive](tutorial/invoice_page_26.jpg)
+
+Additionally, you can set a **shipping fees** (fixed amount).
+
+![Invoice shipping fees](tutorial/invoice_page_28.jpg)
+
+Additionally, **partial payments are supported**, allowing you to track paid amounts and outstanding balances per invoice.
+
+![Invoice with partial payment applied](tutorial/invoice_page_42.jpg)
+
+Additionally, you can set a **notes** (customer notes, thank you note, terms & conditions note).
+
+![Invoice thank you notes](tutorial/invoice_page_29.jpg)
+![Invoice customer notes](tutorial/invoice_page_30.jpg)
+![Invoice terms & conditions notes](tutorial/invoice_page_31.jpg)
+
+Additionally, you can attach **images**, which will be embedded into the PDF.
+
+> ⚠️ Maximum file size: 2 MB
+
+![Invoice attachments](tutorial/invoice_page_32.jpg)
+
+### Editing / Deleting a Invoice
+
+Once invoice are added, select one from the list to edit it on the right-hand pane. Each invoice also displays:
+
+- Invoice data (Issued At)
+- Invoice status (Unpaid, Paid, Partially, Closed)
+- Client name
+- Total amount
+- Due date / Overdue information / Partial paid information
+
+![Invoice list with statuses](tutorial/invoice_page_9.jpg)
+
+You can also:
+
+- **Search invoices by invoice number**
+- **Delete a invoice** by clicking the vertical dots menu → **Delete**
+
+![Invoice actions](tutorial/invoice_page_11.jpg)
+
+### Filters
+
+Invoices have filters to control what is displayed. By default:
+
+- **Active**: shows all items except archived
+
+The **archived flag** can be toggled during creation or editing. This flag only affects filtering and does not delete the invoice.
+
+Invoices have **Unpaid**, **Partially**, **Paid** and **Closed** statuses, so the status filter includes only these options.  
+Client and business filters are based on **snapshot data** stored with the invoice.
+The **date filter** applies to the **Issued At** date.
+
+![Invoices filters](tutorial/invoice_page_33.jpg)
+
+### Sorting
+
+Invoices can be sorted by:
+
+- Status
+- Issued at date
+- Invoice number
+- Last updated date
+
+![Invoices sort](tutorial/invoice_page_34.jpg)
+
+### Export
+
+Invoices can be exported **only to XLSX** format.
+
+- Export all invoice-related data to XLSX
+  > 💡 **Note:** Attachments and business logo snapshots are **not included** in the export.
+
+![Invoices import/export](tutorial/invoice_page_35.jpg)
+
+### PDF Preview
+
+- Invoices can be **previewed live** and **exported as PDF**.
+- PDF customization is based on **predefined configuration options**.
+- The **Paid watermark** is applied **only when the status is set to Paid**.
+- The watermark is applied **across all pages** of the document.
+- **Page numbers** are shown **only when the document has more than one page**.
+- **Attachments** are embedded into the PDF when present.
+- Sections with zero values (**Discount**, **Tax**, **Shipping fees**) are **hidden** in the PDF.
+
+![Invoices customized option 1](tutorial/invoice_page_40.jpg)
+![Invoices customized option 2](tutorial/invoice_page_39.jpg)
+![Invoices PDF](tutorial/invoice_page_38.jpg)
+![Invoices PDF attachments](tutorial/invoice_page_37.jpg)
+![Invoices data](tutorial/invoice_page_36.jpg)
+![Invoices data example](tutorial/invoice_page_41.jpg)
+![Invoices paid](tutorial/invoice_page_43.jpg)
 
 ## Reports screen
 
