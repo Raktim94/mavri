@@ -137,6 +137,8 @@
     "invoice": "Invoice",
     "invoiceNo": "Invoice",
     "invoiceNumber": "Invoice number",
+    "invoicePrefix": "Invoice prefix",
+    "invoiceSuffix": "Invoice suffix",
     "invoices": "Invoices",
     "issuedAt": "Issued at",
     "item": "Item",
@@ -169,6 +171,8 @@
     "quote": "Quote",
     "quoteNo": "Quote",
     "quoteNumber": "Quote number",
+    "quotePrefix": "Quote prefix",
+    "quoteSuffix": "Quote suffix",
     "quotes": "Quotes",
     "save": "Save",
     "search": "Search...",
@@ -219,8 +223,6 @@
     "includeBusinessName": "Include business name",
     "includeMonth": "Include month",
     "includeYear": "Include year",
-    "invoicePrefix": "Invoice prefix",
-    "invoiceSuffix": "Invoice suffix",
     "lettersAndNumbers": "Only letters and numbers allowed"
   },
   "databaseChooser": {

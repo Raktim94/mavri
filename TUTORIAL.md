@@ -63,7 +63,13 @@ You can optionally include:
 
 ## Businesses screen
 
-The **Businesses** screen allows you to **create, read, update, and delete (CRUD)** business data. You can also **filter**, **import**, and **export** businesses via XLSX.
+The **Businesses** screen allows you to **create, read, update, and delete (CRUD)** business data.
+
+You can also:
+
+- **Filter** businesses by various criteria
+- **Import** and **export** businesses via XLSX
+  > 💡 **Note:** XLSX import/export does **not** include business logo data.
 
 ### Adding a Business
 
@@ -354,6 +360,7 @@ The **Items** screen allows you to **create, read, update, and delete (CRUD)** i
 Click the **Add** button at the bottom to open a modal where you can:
 
 - Enter item information
+  > 💡 **Note:** The item amount is always recorded in the selected currency. The currency is attached once when the item is added to a quote or invoice. Changing the quote/invoice currency will **not** automatically convert existing item amounts.
 
 ![Items creation](tutorial/items_page_1.jpg)
 
@@ -401,3 +408,197 @@ You can:
 > 💡 **Note:** When importing items from XLSX, if a unit or category name is provided and does not already exist in the system, it will be automatically created.
 
 ![Items import/export](tutorial/items_page_5.jpg)
+
+## Quotes screen
+
+The **Quotes** screen allows you to **create, read, update, and delete (CRUD)** quote records.
+
+> 💡 **Note:** Amounts and dates are formatted based on the configuration in the [Settings screen](#settings-screen) and the currency format defined in the [Currency screen](#currency-screen).
+
+You can also:
+
+- **Filter** quotes by various criteria
+- **Export** quotes to XLSX
+  > 💡 **Note:** XLSX export does **not** include attachments or business logo snapshots.
+- **Preview** quotes live in PDF format
+- **Customize** PDF appearance and layout
+- **Export** quotes as PDF documents
+- **Create Invoice from Quote** (generate an invoice directly from a quote, quote becomes closed, but can be manually opened again)
+- **Duplicate Quote** to quickly create a similar quote
+
+### Adding a Quote
+
+Click the **Add** button at the bottom to open the right-hand pane, where you can enter quote details.
+
+- **Required information:**
+  - Currency
+  - Business
+  - Client (“Bill To”)
+  - Quote information
+  - At least one item
+
+![Quote creation](tutorial/quote_page_1.jpg)
+
+Select a currency from the dropdown. The dropdown supports **search, filter, and sort** (see [Currencies screen](#currencies-screen) for details).
+
+> 💡 **Note:** The selected currency is saved as a snapshot. The snapshot is updated only when editing the quote and changing the currency.
+
+![Quote currency creation](tutorial/quote_page_2.jpg)
+
+Select a business from the dropdown. The dropdown supports **search, filter, and sort** (see [Businesses screen](#businesses-screen) for details).
+
+> 💡 **Note:** The selected business is saved as a snapshot. The snapshot is updated only when editing the quote and changing the business.
+
+![Quote business creation](tutorial/quote_page_3.jpg)
+
+Select a client from the dropdown. The dropdown supports **search, filter, and sort** (see [Clients screen](#clients-screen) for details).
+
+> 💡 **Note:** The selected client is saved as a snapshot. The snapshot is updated only when editing the quote and changing the client.
+
+![Quote client creation](tutorial/quote_page_4.jpg)
+
+Enter the quote details, including:
+
+- Quote number prefix
+- Quote number suffix
+- Quote number
+- Issued date
+- Due date
+
+> 💡 **Note:**
+>
+> - The prefix and suffix are saved as a snapshot if they were configured on the [Settings screen](#settings-screen).
+> - You can also change or add them here, even if they were not configured in Settings.
+> - If configured, the prefix and suffix are always incorporated into the quote number automatically.
+
+![Quote information](tutorial/quote_page_5.jpg)
+
+Select a item from the dropdown and set quantity. The dropdown supports **search, filter, and sort** (see [Items screen](#items-screen) for details).
+
+> 💡 **Note:** The selected item is saved as a snapshot. The snapshot is updated only when editing the quote and changing the item.
+
+![Quote item creation](tutorial/quote_page_6.jpg)
+![Quote item quantity](tutorial/quote_page_7.jpg)
+
+> 💡 **Note:** The items order can be changed by drag and drop.
+
+![Quote items order](tutorial/quote_page_27.jpg)
+
+Once all required information has been filled in, the quote can be saved.
+
+![Quote item quantity](tutorial/quote_page_8.jpg)
+
+Information on other pages is also updated to reflect the current quote count.
+
+![Quote count](tutorial/quote_page_10.jpg)
+
+Additionally, you can set a **discount** (fixed amount or percentage-based).
+
+![Quote discount none](tutorial/quote_page_14.jpg)
+![Quote discount fixed](tutorial/quote_page_15.jpg)
+![Quote discount percentage](tutorial/quote_page_16.jpg)
+![Quote discount result](tutorial/quote_page_17.jpg)
+
+You can also configure **taxes** for the quote:
+
+- **Total-based taxes**: inclusive, exclusive, or deducted
+- **Per-item taxes**: inclusive or exclusive
+
+![Quote none](tutorial/quote_page_18.jpg)
+![Quote on total](tutorial/quote_page_19.jpg)
+![Quote deducted](tutorial/quote_page_20.jpg)
+![Quote per item](tutorial/quote_page_21.jpg)
+
+Results:
+
+![Quote on total inclusive](tutorial/quote_page_22.jpg)
+![Quote on total dedcuted](tutorial/quote_page_23.jpg)
+![Quote on total exclusive](tutorial/quote_page_26.jpg)
+![Quote per item inclusive](tutorial/quote_page_25.jpg)
+![Quote per item exclusive](tutorial/quote_page_24.jpg)
+
+Additionally, you can set a **shipping fees** (fixed amount).
+
+![Quote shipping fees](tutorial/quote_page_28.jpg)
+
+Additionally, you can set a **notes** (customer notes, thank you note, terms & conditions note).
+
+![Quote thank you notes](tutorial/quote_page_29.jpg)
+![Quote customer notes](tutorial/quote_page_30.jpg)
+![Quote terms & conditions notes](tutorial/quote_page_31.jpg)
+
+Additionally, you can attach **images**, which will be embedded into the PDF.
+
+![Quote attachments](tutorial/quote_page_32.jpg)
+
+### Editing / Deleting a Quote
+
+Once quotes are added, select one from the list to edit it on the right-hand pane. Each quote also displays:
+
+- Quote data (Issued At)
+- Quote status (Open, Closed)
+- Client name
+- Total amount
+- Due date / Overdue information
+
+![Quote list](tutorial/quote_page_9.jpg)
+![Quote status due today](tutorial/quote_page_12.jpg)
+![Quote status overdue](tutorial/quote_page_13.jpg)
+
+You can also:
+
+- **Search quotes by quote number**
+- **Delete a quote** by clicking the vertical dots menu → **Delete**
+
+![Quote actions](tutorial/quote_page_11.jpg)
+
+### Filters
+
+Quotes have filters to control what is displayed. By default:
+
+- **Active**: shows all items except archived
+
+The **archived flag** can be toggled during creation or editing. This flag only affects filtering and does not delete the quote.
+
+Quotes have only **Open** and **Closed** statuses, so the status filter includes only these options.  
+Client and business filters are based on **snapshot data** stored with the quote.
+The **date filter** applies to the **Issued At** date.
+
+![Quotes filters](tutorial/quote_page_33.jpg)
+
+### Sorting
+
+Quotes can be sorted by:
+
+- Status
+- Issued at date
+- Quote number
+- Last updated date
+
+![Quotes sort](tutorial/quote_page_34.jpg)
+
+### Export
+
+Quotes can be exported **only to XLSX** format.
+
+- Export all quote-related data to XLSX
+  > 💡 **Note:** Attachments and business logo snapshots are **not included** in the export.
+
+![Quotes import/export](tutorial/quote_page_35.jpg)
+
+### PDF Preview
+
+- Quotes can be **previewed live** and **exported as PDF**.
+- PDF customization is based on **predefined configuration options**.
+- The **Paid watermark** is applied **only when the status is set to Paid**.
+- The watermark is applied **across all pages** of the document.
+- **Page numbers** are shown **only when the document has more than one page**.
+- **Attachments** are embedded into the PDF when present.
+- Sections with zero values (**Discount**, **Tax**, **Shipping fees**) are **hidden** in the PDF.
+
+![Quotes customized option 1](tutorial/quote_page_40.jpg)
+![Quotes customized option 2](tutorial/quote_page_39.jpg)
+![Quotes PDF](tutorial/quote_page_38.jpg)
+![Quotes PDF attachments](tutorial/quote_page_37.jpg)
+![Quotes data](tutorial/quote_page_36.jpg)
+![Quotes data example](tutorial/quote_page_41.jpg)

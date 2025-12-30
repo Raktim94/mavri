@@ -137,6 +137,8 @@
     "invoice": "Sąskaita",
     "invoiceNo": "Sąskaita",
     "invoiceNumber": "Sąskaitos numeris",
+    "invoicePrefix": "Sąskaitos prefiksas",
+    "invoiceSuffix": "Sąskaitos sufiksas",
     "invoices": "Sąskaitos",
     "issuedAt": "Išrašyta",
     "item": "Prekė",
@@ -169,6 +171,8 @@
     "quote": "Pasiūlymas",
     "quoteNo": "Pasiūlymas",
     "quoteNumber": "Pasiūlymo numeris",
+    "quotePrefix": "Pasiūlymo sąskaitos numerio priešdėlis",
+    "quoteSuffix": "Pasiūlymo sąskaitos numerio priesaga",
     "quotes": "Pasiūlymai",
     "save": "Išsaugoti",
     "search": "Ieškoti...",
@@ -219,8 +223,6 @@
     "includeBusinessName": "Įtraukti įmonės pavadinimą",
     "includeMonth": "Įtraukti mėnesį",
     "includeYear": "Įtraukti metus",
-    "invoicePrefix": "Sąskaitos prefiksas",
-    "invoiceSuffix": "Sąskaitos sufiksas",
     "lettersAndNumbers": "Leidžiamos tik raidės ir skaičiai"
   },
   "databaseChooser": {

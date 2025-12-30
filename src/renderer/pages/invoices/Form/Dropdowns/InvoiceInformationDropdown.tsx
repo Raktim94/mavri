@@ -89,7 +89,9 @@ const InvoiceInformationDropdownComponent: FC<Props> = ({ isOpen, onClose, onOpe
       >
         <Box sx={{ mb: 2 }}>
           <PageHeader
-            title={t('invoices.invoiceInfo')}
+            title={
+              information.invoiceType === InvoiceType.quotation ? t('invoices.quoteInfo') : t('invoices.invoiceInfo')
+            }
             showBack={false}
             showSave={true}
             formData={form}
@@ -103,7 +105,9 @@ const InvoiceInformationDropdownComponent: FC<Props> = ({ isOpen, onClose, onOpe
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, md: 4 }}>
             <TextField
-              label={t('customizeInvoice.invoicePrefix')}
+              label={
+                information.invoiceType === InvoiceType.quotation ? t('common.quotePrefix') : t('common.invoicePrefix')
+              }
               fullWidth
               value={form.invoicePrefix}
               onChange={e => {
@@ -129,7 +133,9 @@ const InvoiceInformationDropdownComponent: FC<Props> = ({ isOpen, onClose, onOpe
           </Grid>
           <Grid size={{ xs: 12, md: 4 }}>
             <TextField
-              label={t('customizeInvoice.invoiceSuffix')}
+              label={
+                information.invoiceType === InvoiceType.quotation ? t('common.quoteSuffix') : t('common.invoiceSuffix')
+              }
               fullWidth
               value={form.invoiceSuffix}
               onChange={e => {

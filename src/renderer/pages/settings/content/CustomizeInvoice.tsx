@@ -81,7 +81,7 @@ export const CustomizeInvoice: FC<Props> = ({ showBack, onCustomizedInvoice = ()
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, md: 6 }}>
           <TextField
-            label={t('customizeInvoice.invoicePrefix')}
+            label={t('common.invoicePrefix')}
             fullWidth
             placeholder="e.g. INV"
             onChange={handleInputChange(setPrefix, 'prefix')}
@@ -91,7 +91,7 @@ export const CustomizeInvoice: FC<Props> = ({ showBack, onCustomizedInvoice = ()
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <TextField
-            label={t('customizeInvoice.invoiceSuffix')}
+            label={t('common.invoiceSuffix')}
             fullWidth
             placeholder="e.g. ALPHA"
             value={suffix}
