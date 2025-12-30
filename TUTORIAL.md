@@ -602,3 +602,20 @@ Quotes can be exported **only to XLSX** format.
 ![Quotes PDF attachments](tutorial/quote_page_37.jpg)
 ![Quotes data](tutorial/quote_page_36.jpg)
 ![Quotes data example](tutorial/quote_page_41.jpg)
+
+## Reports screen
+
+The **Reports** screen provides an overview of **aggregated financial data grouped by currency** for a selected period.
+
+![Reports currency 1](tutorial/reports_page_1.jpg)
+![Reports currency 2](tutorial/reports_page_2.jpg)
+
+### Filters
+
+You can filter reports using:
+
+- **Predefined periods** (e.g. this month, last year)
+- **Custom date ranges**
+
+![Reports predefined filters](tutorial/reports_page_3.jpg)
+![Reports custom filters](tutorial/reports_page_4.jpg)

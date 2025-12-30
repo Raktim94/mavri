@@ -9,6 +9,7 @@ import {
   type SelectChangeEvent
 } from '@mui/material';
 import {
+  endOfDay,
   endOfMonth,
   endOfQuarter,
   endOfYear,
@@ -64,61 +65,65 @@ export const Header: FC<Props> = ({ onChange = () => {} }) => {
 
   const getRangeForPreset = useCallback((preset: ReportRangeType): { from: Date; to: Date } => {
     const now = new Date();
-    const today = startOfDay(now);
+    const todayStart = startOfDay(now);
+    const todayEnd = endOfDay(now);
 
     switch (preset) {
       case ReportRangeType.last_30_days:
         return {
-          from: startOfDay(subDays(today, 29)),
-          to: today
+          from: startOfDay(subDays(todayStart, 29)),
+          to: todayEnd
         };
 
       case ReportRangeType.this_month:
         return {
-          from: startOfMonth(today),
-          to: today
+          from: startOfMonth(todayStart),
+          to: todayEnd
         };
 
       case ReportRangeType.last_month: {
-        const lastMonthStart = startOfMonth(subDays(startOfMonth(today), 1));
+        const lastMonthStart = startOfMonth(subDays(startOfMonth(todayStart), 1));
+        const lastMonthEnd = startOfMonth(subDays(startOfMonth(todayEnd), 1));
         return {
           from: lastMonthStart,
-          to: endOfMonth(lastMonthStart)
+          to: endOfMonth(lastMonthEnd)
         };
       }
 
       case ReportRangeType.this_quarter:
         return {
-          from: startOfQuarter(today),
-          to: today
+          from: startOfQuarter(todayStart),
+          to: todayEnd
         };
 
       case ReportRangeType.last_quarter: {
-        const lastQStart = startOfQuarter(subDays(startOfQuarter(today), 1));
+        const lastQStart = startOfQuarter(subDays(startOfQuarter(todayStart), 1));
+        const lastQEnd = startOfQuarter(subDays(startOfQuarter(todayEnd), 1));
         return {
           from: lastQStart,
-          to: endOfQuarter(lastQStart)
+          to: endOfQuarter(lastQEnd)
         };
       }
 
       case ReportRangeType.this_year:
         return {
-          from: startOfYear(today),
-          to: today
+          from: startOfYear(todayStart),
+          to: todayEnd
         };
 
       case ReportRangeType.last_year: {
-        const lastYearStart = startOfYear(subDays(startOfYear(today), 1));
+        const lastYearStart = startOfYear(subDays(startOfYear(todayStart), 1));
+        const lastYearEnd = startOfYear(subDays(startOfYear(todayEnd), 1));
         return {
           from: lastYearStart,
-          to: endOfYear(lastYearStart)
+          to: endOfYear(lastYearEnd)
         };
       }
 
       case ReportRangeType.custom:
-        return { from: today, to: today };
+        return { from: todayStart, to: todayEnd };
       default:
-        return { from: today, to: today };
+        return { from: todayStart, to: todayEnd };
     }
   }, []);
 
