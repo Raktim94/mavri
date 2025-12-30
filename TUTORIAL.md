@@ -283,3 +283,64 @@ You can:
 - Download a XLSX template for unit import
 
 ![Units import/export](tutorial/units_page_5.jpg)
+
+## Currencies screen
+
+The **Currencies** screen allows you to **create, read, update, and delete (CRUD)** currency data. You can also **filter**, **import**, and **export** currency via XLSX.
+
+### Adding a Currency
+
+Click the **Add** button at the bottom to open a modal where you can:
+
+- Enter currency information
+  > 💡 **Note:** Currency symbols must be unique. You cannot create two currencies with the same symbol.  
+  > 💡 **Subunit:** Defines how many subunits make up one unit of the currency.  
+  > For example:
+  >
+  > - USD and EUR: 100 subunits = 1 USD/EUR
+  > - Japanese Yen (JPY): 1 subunit = 1 JPY
+
+![Currencies creation](tutorial/currencies_page_1.jpg)
+
+### Editing/Deleting a Currency
+
+Once currencies are added, select one from the list to edit it on the right side. Each currency item also shows:
+
+- Number of invoices created
+- Number of quotes created (hidden if the layout is disabled in settings)
+
+You can also:
+
+- **Search currencies by text**
+- **Delete a currency** by clicking the red trash icon
+
+![Currencies list](tutorial/currencies_page_3.jpg)
+
+### Filters
+
+Currencies have filters to control what is displayed. By default:
+
+- **Active**: shows all units except archived
+
+The **archived flag** can be toggled during creation or editing. This flag only affects filtering and does not delete the currency.
+
+![Currencies filters](tutorial/currencies_page_2.jpg)
+
+### Sorting
+
+Currencies can be sorted by:
+
+- Text
+- Last updated date
+
+![Currencies sort](tutorial/currencies_page_4.jpg)
+
+### Import & Export
+
+You can:
+
+- Export currencies to XLSX
+- Import currencies from XLSX
+- Download a XLSX template for currency import
+
+![Currencies import/export](tutorial/currencies_page_5.jpg)
