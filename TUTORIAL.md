@@ -286,7 +286,7 @@ You can:
 
 ## Currencies screen
 
-The **Currencies** screen allows you to **create, read, update, and delete (CRUD)** currency data. You can also **filter**, **import**, and **export** currency via XLSX.
+The **Currencies** screen allows you to **create, read, update, and delete (CRUD)** currency data. You can also **filter**, **import**, and **export** currencies via XLSX.
 
 ### Adding a Currency
 
@@ -320,7 +320,7 @@ You can also:
 
 Currencies have filters to control what is displayed. By default:
 
-- **Active**: shows all units except archived
+- **Active**: shows all currencies except archived
 
 The **archived flag** can be toggled during creation or editing. This flag only affects filtering and does not delete the currency.
 
@@ -344,3 +344,60 @@ You can:
 - Download a XLSX template for currency import
 
 ![Currencies import/export](tutorial/currencies_page_5.jpg)
+
+## Items screen
+
+The **Items** screen allows you to **create, read, update, and delete (CRUD)** item data. You can also **filter**, **import**, and **export** items via XLSX.
+
+### Adding a Item
+
+Click the **Add** button at the bottom to open a modal where you can:
+
+- Enter item information
+
+![Items creation](tutorial/items_page_1.jpg)
+
+### Editing/Deleting a Item
+
+Once items are added, select one from the list to edit it on the right side. Each item also shows:
+
+- Number of invoices created
+- Number of quotes created (hidden if the layout is disabled in settings)
+
+You can also:
+
+- **Search items by name**
+- **Delete a item** by clicking the red trash icon
+
+![Items list](tutorial/items_page_2.jpg)
+
+### Filters
+
+Items have filters to control what is displayed. By default:
+
+- **Active**: shows all items except archived
+
+The **archived flag** can be toggled during creation or editing. This flag only affects filtering and does not delete the item.
+
+![Items filters](tutorial/items_page_3.jpg)
+
+### Sorting
+
+Items can be sorted by:
+
+- Name
+- Last updated date
+
+![Items sort](tutorial/items_page_4.jpg)
+
+### Import & Export
+
+You can:
+
+- Export items to XLSX
+- Import items from XLSX
+- Download a XLSX template for item import
+
+> 💡 **Note:** When importing items from XLSX, if a unit or category name is provided and does not already exist in the system, it will be automatically created.
+
+![Items import/export](tutorial/items_page_5.jpg)
