@@ -35,6 +35,7 @@ If you value **privacy, portability, and control**, this app is built for you.
 - Database-file based (create or open a database anywhere)
 - Automatic snapshotting of business, client, item, and currency data per invoice/quote
 - Multi-currency support: choose the currency for each invoice/quote individually
+- Responsive layout - usable on small and large screens, resizable windows supported
 
 ### Business Data Management
 
@@ -112,6 +113,16 @@ No account required.
 >
 > This is normal for newly published apps and does **not** indicate a security issue.  
 > Simply choose **Keep anyway / Save anyway** to proceed with the download.
+
+> 🐧 **Linux package warning**
+>
+> On some Linux distributions (Ubuntu, Linux Mint, etc.), you may see messages such as:
+>
+> - “This package is provided by a third party”
+> - “Installing software from outside the official repositories may be unsafe”
+>
+> This warning appears because the app is not distributed via the default system repositories.  
+> If you downloaded the package directly from the official GitHub Releases page, it is safe to proceed.
 
 ## 🚀 Quick Start
 
