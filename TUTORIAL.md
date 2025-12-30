@@ -181,6 +181,7 @@ The **Categories** screen allows you to **create, read, update, and delete (CRUD
 Click the **Add** button at the bottom to open a modal where you can:
 
 - Enter category information
+  > 💡 **Note:** Category names must be unique. You cannot create two categories with the same name.
 
 ![Categories creation](tutorial/categories_page_1.jpg)
 
@@ -226,3 +227,59 @@ You can:
 - Download a XLSX template for category import
 
 ![Categories import/export](tutorial/categories_page_5.jpg)
+
+## Units screen
+
+The **Units** screen allows you to **create, read, update, and delete (CRUD)** unit data. You can also **filter**, **import**, and **export** units via XLSX.
+
+### Adding a Unit
+
+Click the **Add** button at the bottom to open a modal where you can:
+
+- Enter unit information
+  > 💡 **Note:** Unit names must be unique. You cannot create two units with the same name.
+
+![Units creation](tutorial/units_page_1.jpg)
+
+### Editing/Deleting a Unit
+
+Once units are added, select one from the list to edit it on the right side. Each unit item also shows:
+
+- Number of invoices created
+- Number of quotes created (hidden if the layout is disabled in settings)
+
+You can also:
+
+- **Search units by name**
+- **Delete a unit** by clicking the red trash icon
+
+![Units list](tutorial/units_page_2.jpg)
+
+### Filters
+
+Units have filters to control what is displayed. By default:
+
+- **Active**: shows all units except archived
+
+The **archived flag** can be toggled during creation or editing. This flag only affects filtering and does not delete the unit.
+
+![Units filters](tutorial/units_page_3.jpg)
+
+### Sorting
+
+Units can be sorted by:
+
+- Name
+- Last updated date
+
+![Units sort](tutorial/units_page_4.jpg)
+
+### Import & Export
+
+You can:
+
+- Export units to XLSX
+- Import units from XLSX
+- Download a XLSX template for unit import
+
+![Units import/export](tutorial/units_page_5.jpg)
