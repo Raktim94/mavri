@@ -17,7 +17,13 @@ const InvoiceInformationInfoComponent: FC<Props> = ({ invoiceForm, storeSettings
   const { tt } = useUppercaseTranslation(invoiceForm?.customizationLabelUpperCase);
 
   return (
-    <View style={[PDF_STYLES.alignEnd, PDF_STYLES.gap4, PDF_STYLES.w50]}>
+    <View
+      style={[
+        PDF_STYLES.alignEnd,
+        PDF_STYLES.gap4,
+        invoiceForm?.customizationLayout === LayoutType.compact ? PDF_STYLES.w100 : PDF_STYLES.w50
+      ]}
+    >
       {invoiceForm?.customizationLayout === LayoutType.classic && <TitleInfo invoiceForm={invoiceForm} />}
 
       <View

@@ -13,7 +13,13 @@ const BusinessInfoComponent: FC<Props> = ({ invoiceForm }) => {
     <View style={[PDF_STYLES.row, PDF_STYLES.alignStart, PDF_STYLES.gap5]}>
       {invoiceForm?.customizationLayout === LayoutType.classic && <LogoInfo invoiceForm={invoiceForm} />}
 
-      <View style={[PDF_STYLES.gap4, PDF_STYLES.alignStart, PDF_STYLES.w50]}>
+      <View
+        style={[
+          PDF_STYLES.gap4,
+          PDF_STYLES.alignStart,
+          invoiceForm?.customizationLayout === LayoutType.compact ? PDF_STYLES.w100 : PDF_STYLES.w50
+        ]}
+      >
         <Text
           style={[
             PDF_STYLES.business,
