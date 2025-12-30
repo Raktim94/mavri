@@ -168,6 +168,61 @@ You can:
 
 - Export clients to XLSX
 - Import clients from XLSX
-- Download a XLSX template for business import
+- Download a XLSX template for client import
 
 ![Clients import/export](tutorial/clients_page_5.jpg)
+
+## Categories screen
+
+The **Categories** screen allows you to **create, read, update, and delete (CRUD)** category data. You can also **filter**, **import**, and **export** categories via XLSX.
+
+### Adding a Category
+
+Click the **Add** button at the bottom to open a modal where you can:
+
+- Enter category information
+
+![Categories creation](tutorial/categories_page_1.jpg)
+
+### Editing/Deleting a Category
+
+Once categories are added, select one from the list to edit it on the right side. Each category item also shows:
+
+- Number of invoices created
+- Number of quotes created (hidden if the layout is disabled in settings)
+
+You can also:
+
+- **Search categories by name**
+- **Delete a category** by clicking the red trash icon
+
+![Categories list](tutorial/categories_page_2.jpg)
+
+### Filters
+
+Categories have filters to control what is displayed. By default:
+
+- **Active**: shows all categories except archived
+
+The **archived flag** can be toggled during creation or editing. This flag only affects filtering and does not delete the category.
+
+![Categories filters](tutorial/categories_page_3.jpg)
+
+### Sorting
+
+Categories can be sorted by:
+
+- Name
+- Last updated date
+
+![Categories sort](tutorial/categories_page_4.jpg)
+
+### Import & Export
+
+You can:
+
+- Export categories to XLSX
+- Import categories from XLSX
+- Download a XLSX template for category import
+
+![Categories import/export](tutorial/categories_page_5.jpg)
