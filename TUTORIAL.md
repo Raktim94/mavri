@@ -74,14 +74,17 @@ Click the **Add** button at the bottom to open a modal where you can:
 
 ![Businesses creation](tutorial/businesses_page_1.jpg)
 
-### Editing a Business
+### Editing/Deleting a Business
 
 Once businesses are added, select one from the list to edit it on the right side. Each business item also shows:
 
 - Number of invoices created
 - Number of quotes created (hidden if the layout is disabled in settings)
 
-You can also **search businesses by name**.
+You can also:
+
+- **Search businesses by name**
+- **Delete a business** by clicking the red trash icon
 
 ![Businesses list](tutorial/businesses_page_2.jpg)
 
@@ -113,3 +116,58 @@ You can:
 - Download a XLSX template for business import
 
 ![Businesses import/export](tutorial/businesses_page_5.jpg)
+
+## Clients screen
+
+The **Clients** screen allows you to **create, read, update, and delete (CRUD)** client data. You can also **filter**, **import**, and **export** clients via XLSX.
+
+### Adding a Client
+
+Click the **Add** button at the bottom to open a modal where you can:
+
+- Enter client information
+
+![Clients creation](tutorial/clients_page_1.jpg)
+
+### Editing/Deleting a Client
+
+Once clients are added, select one from the list to edit it on the right side. Each client item also shows:
+
+- Number of invoices created
+- Number of quotes created (hidden if the layout is disabled in settings)
+
+You can also:
+
+- **Search clients by name**
+- **Delete a client** by clicking the red trash icon
+
+![Clients list](tutorial/clients_page_2.jpg)
+
+### Filters
+
+Clients have filters to control what is displayed. By default:
+
+- **Active**: shows all clients except archived
+
+The **archived flag** can be toggled during creation or editing. This flag only affects filtering and does not delete the client.
+
+![Clients filters](tutorial/clients_page_3.jpg)
+
+### Sorting
+
+Clients can be sorted by:
+
+- Name
+- Last updated date
+
+![Clients sort](tutorial/clients_page_4.jpg)
+
+### Import & Export
+
+You can:
+
+- Export clients to XLSX
+- Import clients from XLSX
+- Download a XLSX template for business import
+
+![Clients import/export](tutorial/clients_page_5.jpg)
