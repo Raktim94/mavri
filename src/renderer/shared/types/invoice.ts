@@ -9,6 +9,11 @@ import type { TableHeaderStyle } from '../enums/tableHeaderStyle';
 import type { TableRowStyle } from '../enums/tableRowStyle';
 import type { InvoiceItemTaxType, InvoiceTaxType } from '../enums/taxType';
 
+export interface AttachmentURL {
+  id: number;
+  url?: string;
+}
+
 export interface InvoicesByCurrencyMeta {
   currencyCode: string;
   currencySymbol: string;

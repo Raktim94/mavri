@@ -4,9 +4,27 @@ import { useCallback } from 'react';
 import { PDFDocument } from '../../pages/invoices/Preview/PDFDocument';
 import { MONTH_NAMES } from '../../state/constant';
 import { InvoiceType } from '../enums/invoiceType';
-import type { InvoiceFromData } from '../types/invoice';
+import type { AttachmentURL, InvoiceFromData } from '../types/invoice';
 import type { Settings } from '../types/settings';
 import { uint8ArrayToDataUrl } from '../utils/dataUrlFunctions';
+
+export const getAttachmentsUrl = async (invoiceForm?: InvoiceFromData): Promise<AttachmentURL[]> => {
+  const attachments = invoiceForm?.invoiceAttachments ?? [];
+
+  if (attachments.length === 0) {
+    return [];
+  }
+
+  const list = await Promise.all(
+    attachments.map(async attachment => {
+      const url = attachment.data ? await uint8ArrayToDataUrl(attachment.data, attachment.fileType) : undefined;
+
+      return { id: attachment.id as number, url };
+    })
+  );
+
+  return list;
+};
 
 export const getLogoUrl = async (invoiceForm?: InvoiceFromData) => {
   if (!invoiceForm) return;
@@ -27,9 +45,15 @@ export const useExportPdf = (data: { invoiceForm?: InvoiceFromData; storeSetting
     if (!invoiceForm) return;
 
     const logoUrl = await getLogoUrl(invoiceForm);
+    const attachmentUrls = await getAttachmentsUrl(invoiceForm);
 
     const blob = await pdf(
-      <PDFDocument invoiceForm={invoiceForm} storeSettings={storeSettings} logoUrl={logoUrl} />
+      <PDFDocument
+        invoiceForm={invoiceForm}
+        storeSettings={storeSettings}
+        logoUrl={logoUrl}
+        attachmentUrls={attachmentUrls}
+      />
     ).toBlob();
 
     const url = URL.createObjectURL(blob);

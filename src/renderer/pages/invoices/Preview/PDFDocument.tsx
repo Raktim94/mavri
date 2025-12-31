@@ -2,7 +2,7 @@ import { Document, Font, Page, View } from '@react-pdf/renderer';
 import { memo, type FC } from 'react';
 import { InvoiceStatus } from '../../../shared/enums/invoiceStatus';
 import { LayoutType } from '../../../shared/enums/layoutType';
-import type { InvoiceFromData } from '../../../shared/types/invoice';
+import type { AttachmentURL, InvoiceFromData } from '../../../shared/types/invoice';
 import type { Settings } from '../../../shared/types/settings';
 import RobotoBold from './../../../assets/roboto/static/Roboto-Bold.ttf';
 import RobotoItalic from './../../../assets/roboto/static/Roboto-Italic.ttf';
@@ -39,8 +39,9 @@ interface Props {
   invoiceForm?: InvoiceFromData;
   storeSettings?: Settings;
   logoUrl?: string;
+  attachmentUrls: AttachmentURL[];
 }
-const PDFDocumentComponent: FC<Props> = ({ invoiceForm, storeSettings, logoUrl }) => {
+const PDFDocumentComponent: FC<Props> = ({ invoiceForm, storeSettings, logoUrl, attachmentUrls }) => {
   return (
     <Document>
       <Page
@@ -60,7 +61,7 @@ const PDFDocumentComponent: FC<Props> = ({ invoiceForm, storeSettings, logoUrl }
           <FinancialInfo invoiceForm={invoiceForm} storeSettings={storeSettings} />
         </View>
         <NotesInfo invoiceForm={invoiceForm} />
-        <AttachmentsInfo invoiceForm={invoiceForm} />
+        <AttachmentsInfo attachmentUrls={attachmentUrls} />
         <PageCounterInfo invoiceForm={invoiceForm} />
       </Page>
     </Document>

@@ -1,7 +1,7 @@
 import { PDFViewer } from '@react-pdf/renderer';
 import { memo, useEffect, useState, type FC } from 'react';
-import { getLogoUrl } from '../../../shared/hooks/useExportPdf ';
-import type { InvoiceFromData } from '../../../shared/types/invoice';
+import { getAttachmentsUrl, getLogoUrl } from '../../../shared/hooks/useExportPdf ';
+import type { AttachmentURL, InvoiceFromData } from '../../../shared/types/invoice';
 import { useAppSelector } from '../../../state/configureStore';
 import { selectSettings } from '../../../state/pageSlice';
 import { PDFDocument } from './PDFDocument';
@@ -12,6 +12,7 @@ interface Props {
 const PreviewCoreComponent: FC<Props> = ({ invoiceForm }) => {
   const storeSettings = useAppSelector(selectSettings);
   const [logoUrl, setLogoUrl] = useState<string | undefined>();
+  const [attachmentUrls, setAttachmentUrls] = useState<AttachmentURL[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -23,7 +24,15 @@ const PreviewCoreComponent: FC<Props> = ({ invoiceForm }) => {
       }
     };
 
+    const loadAttacmentUrls = async () => {
+      const urls = await getAttachmentsUrl(invoiceForm);
+      if (!cancelled) {
+        setAttachmentUrls(urls);
+      }
+    };
+
     loadLogo();
+    loadAttacmentUrls();
 
     return () => {
       cancelled = true;
@@ -36,7 +45,12 @@ const PreviewCoreComponent: FC<Props> = ({ invoiceForm }) => {
       style={{ width: '100%', height: '100%', border: 'none' }}
       showToolbar={false}
     >
-      <PDFDocument invoiceForm={invoiceForm} storeSettings={storeSettings} logoUrl={logoUrl} />
+      <PDFDocument
+        invoiceForm={invoiceForm}
+        storeSettings={storeSettings}
+        logoUrl={logoUrl}
+        attachmentUrls={attachmentUrls}
+      />
     </PDFViewer>
   );
 };
