@@ -38,8 +38,9 @@ Font.register({
 interface Props {
   invoiceForm?: InvoiceFromData;
   storeSettings?: Settings;
+  logoUrl?: string;
 }
-const PDFDocumentComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
+const PDFDocumentComponent: FC<Props> = ({ invoiceForm, storeSettings, logoUrl }) => {
   return (
     <Document>
       <Page
@@ -51,7 +52,7 @@ const PDFDocumentComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
       >
         <WatermarkInfo invoiceForm={invoiceForm} />
         {invoiceForm?.status === InvoiceStatus.paid && <WatermarkPaidInfo invoiceForm={invoiceForm} />}
-        <HeaderInfo invoiceForm={invoiceForm} storeSettings={storeSettings} />
+        <HeaderInfo invoiceForm={invoiceForm} storeSettings={storeSettings} logoUrl={logoUrl} />
         <ItemsInfo invoiceForm={invoiceForm} storeSettings={storeSettings} />
         <View style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart, PDF_STYLES.mt10]}>
           {invoiceForm?.customizationLayout === LayoutType.compact && <PaymentInfo invoiceForm={invoiceForm} />}

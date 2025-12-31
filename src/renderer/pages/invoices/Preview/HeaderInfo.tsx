@@ -14,14 +14,15 @@ import { TitleInfo } from './TitleInfo';
 interface Props {
   invoiceForm?: InvoiceFromData;
   storeSettings?: Settings;
+  logoUrl?: string;
 }
-const HeaderInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
+const HeaderInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, logoUrl }) => {
   return (
     <View style={PDF_STYLES.header}>
       {invoiceForm?.customizationLayout === LayoutType.modern && (
         <View style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart, PDF_STYLES.mb20]}>
           <TitleInfo invoiceForm={invoiceForm} />
-          <LogoInfo invoiceForm={invoiceForm} />
+          <LogoInfo invoiceForm={invoiceForm} logoUrl={logoUrl} />
         </View>
       )}
       {invoiceForm?.customizationLayout === LayoutType.compact && (
@@ -31,7 +32,7 @@ const HeaderInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
           </View>
           <View style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart]}>
             <View style={[PDF_STYLES.w38]}>
-              <BusinessInfo invoiceForm={invoiceForm} />
+              <BusinessInfo invoiceForm={invoiceForm} logoUrl={logoUrl} />
             </View>
             <View style={[PDF_STYLES.w38]}>
               <ClientInfo invoiceForm={invoiceForm} />
@@ -45,7 +46,7 @@ const HeaderInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
       {invoiceForm?.customizationLayout !== LayoutType.compact && (
         <>
           <View style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart]}>
-            <BusinessInfo invoiceForm={invoiceForm} />
+            <BusinessInfo invoiceForm={invoiceForm} logoUrl={logoUrl} />
             <InvoiceInformationInfo storeSettings={storeSettings} invoiceForm={invoiceForm} />
           </View>
           <View style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart, PDF_STYLES.mt20]}>

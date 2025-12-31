@@ -7,11 +7,14 @@ import { LogoInfo } from './LogoInfo';
 
 interface Props {
   invoiceForm?: InvoiceFromData;
+  logoUrl?: string;
 }
-const BusinessInfoComponent: FC<Props> = ({ invoiceForm }) => {
+const BusinessInfoComponent: FC<Props> = ({ invoiceForm, logoUrl }) => {
   return (
     <View style={[PDF_STYLES.row, PDF_STYLES.alignStart, PDF_STYLES.gap5]}>
-      {invoiceForm?.customizationLayout === LayoutType.classic && <LogoInfo invoiceForm={invoiceForm} />}
+      {invoiceForm?.customizationLayout === LayoutType.classic && (
+        <LogoInfo invoiceForm={invoiceForm} logoUrl={logoUrl} />
+      )}
 
       <View
         style={[

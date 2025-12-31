@@ -283,6 +283,7 @@
       "archivedText": "Archyvuotos sąskaitos",
       "date": "Data"
     },
+    "fixed": "Fiksuota",
     "fixedDiscount": "Fiksuota nuolaida",
     "fixedFee": "Fiksuotas mokestis",
     "inclusive": "Įskaičiuota (įjunkite, jei kainos jau apima mokestį)",
@@ -304,6 +305,8 @@
     "paidAt": "Apmokėta",
     "partiallyPaid": "Iš dalies apmokėta: liko {{amount}}",
     "payments": "Mokėjimai",
+    "pdfINVOICE": "SĄSKAITA",
+    "pdfQUOTE": "PASIŪLYMAS",
     "perItem": "Už kiekvieną prekę",
     "percentage": "Procentinė dalis",
     "quantity": "Kiekis",

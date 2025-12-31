@@ -6,6 +6,19 @@ import { MONTH_NAMES } from '../../state/constant';
 import { InvoiceType } from '../enums/invoiceType';
 import type { InvoiceFromData } from '../types/invoice';
 import type { Settings } from '../types/settings';
+import { uint8ArrayToDataUrl } from '../utils/dataUrlFunctions';
+
+export const getLogoUrl = async (invoiceForm?: InvoiceFromData) => {
+  if (!invoiceForm) return;
+
+  let logoUrl: string | undefined;
+
+  if (invoiceForm.businessLogoSnapshot) {
+    logoUrl = await uint8ArrayToDataUrl(invoiceForm.businessLogoSnapshot, invoiceForm.businessFileTypeSnapshot);
+  }
+
+  return logoUrl;
+};
 
 export const useExportPdf = (data: { invoiceForm?: InvoiceFromData; storeSettings?: Settings }) => {
   const { invoiceForm, storeSettings } = data;
@@ -13,7 +26,11 @@ export const useExportPdf = (data: { invoiceForm?: InvoiceFromData; storeSetting
   const exportPdf = useCallback(async () => {
     if (!invoiceForm) return;
 
-    const blob = await pdf(<PDFDocument invoiceForm={invoiceForm} storeSettings={storeSettings} />).toBlob();
+    const logoUrl = await getLogoUrl(invoiceForm);
+
+    const blob = await pdf(
+      <PDFDocument invoiceForm={invoiceForm} storeSettings={storeSettings} logoUrl={logoUrl} />
+    ).toBlob();
 
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
