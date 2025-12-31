@@ -1,7 +1,7 @@
 import { View } from '@react-pdf/renderer';
 import { memo, type FC } from 'react';
 import { LayoutType } from '../../../shared/enums/layoutType';
-import type { InvoiceFromData } from '../../../shared/types/invoice';
+import type { InvoiceFromData, PdfTexts } from '../../../shared/types/invoice';
 import type { Settings } from '../../../shared/types/settings';
 import { BusinessInfo } from './BusinessInfo';
 import { ClientInfo } from './ClientInfo';
@@ -15,30 +15,48 @@ interface Props {
   invoiceForm?: InvoiceFromData;
   storeSettings?: Settings;
   logoUrl?: string;
+  pdfTexts: PdfTexts;
 }
-const HeaderInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, logoUrl }) => {
+const HeaderInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, logoUrl, pdfTexts }) => {
   return (
     <View style={PDF_STYLES.header}>
       {invoiceForm?.customizationLayout === LayoutType.modern && (
         <View style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart, PDF_STYLES.mb20]}>
-          <TitleInfo invoiceForm={invoiceForm} />
+          <TitleInfo
+            invoiceForm={invoiceForm}
+            pdfINVOICELabel={pdfTexts.pdfINVOICE}
+            pdfQUOTELabel={pdfTexts.pdfQUOTE}
+          />
           <LogoInfo invoiceForm={invoiceForm} logoUrl={logoUrl} />
         </View>
       )}
       {invoiceForm?.customizationLayout === LayoutType.compact && (
         <>
           <View style={[PDF_STYLES.alignCenter, PDF_STYLES.mb20]}>
-            <TitleInfo invoiceForm={invoiceForm} />
+            <TitleInfo
+              invoiceForm={invoiceForm}
+              pdfINVOICELabel={pdfTexts.pdfINVOICE}
+              pdfQUOTELabel={pdfTexts.pdfQUOTE}
+            />
           </View>
           <View style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart]}>
             <View style={[PDF_STYLES.w38]}>
               <BusinessInfo invoiceForm={invoiceForm} logoUrl={logoUrl} />
             </View>
             <View style={[PDF_STYLES.w38]}>
-              <ClientInfo invoiceForm={invoiceForm} />
+              <ClientInfo invoiceForm={invoiceForm} billToLabel={pdfTexts.billTo} />
             </View>
             <View style={[PDF_STYLES.w18]}>
-              <InvoiceInformationInfo storeSettings={storeSettings} invoiceForm={invoiceForm} />
+              <InvoiceInformationInfo
+                storeSettings={storeSettings}
+                invoiceForm={invoiceForm}
+                invoiceNoLabel={pdfTexts.invoiceNo}
+                quoteNoLabel={pdfTexts.quoteNo}
+                dueDateLabel={pdfTexts.dueDate}
+                dateLabel={pdfTexts.date}
+                pdfINVOICELabel={pdfTexts.pdfINVOICE}
+                pdfQUOTELabel={pdfTexts.pdfQUOTE}
+              />
             </View>
           </View>
         </>
@@ -47,12 +65,21 @@ const HeaderInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, logoUrl })
         <>
           <View style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart]}>
             <BusinessInfo invoiceForm={invoiceForm} logoUrl={logoUrl} />
-            <InvoiceInformationInfo storeSettings={storeSettings} invoiceForm={invoiceForm} />
+            <InvoiceInformationInfo
+              storeSettings={storeSettings}
+              invoiceForm={invoiceForm}
+              invoiceNoLabel={pdfTexts.invoiceNo}
+              quoteNoLabel={pdfTexts.quoteNo}
+              dueDateLabel={pdfTexts.dueDate}
+              dateLabel={pdfTexts.date}
+              pdfINVOICELabel={pdfTexts.pdfINVOICE}
+              pdfQUOTELabel={pdfTexts.pdfQUOTE}
+            />
           </View>
           <View style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart, PDF_STYLES.mt20]}>
-            <ClientInfo invoiceForm={invoiceForm} />
+            <ClientInfo invoiceForm={invoiceForm} billToLabel={pdfTexts.billTo} />
             <View style={PDF_STYLES.flexGrow} />
-            <PaymentInfo invoiceForm={invoiceForm} />
+            <PaymentInfo invoiceForm={invoiceForm} paymentInfoLabel={pdfTexts.paymentInfo} />
           </View>
         </>
       )}

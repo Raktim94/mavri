@@ -1,16 +1,14 @@
 import { Text, View } from '@react-pdf/renderer';
 import { memo, type FC } from 'react';
 import { LayoutType } from '../../../shared/enums/layoutType';
-import { useUppercaseTranslation } from '../../../shared/hooks/useUppercaseTranslation';
 import type { InvoiceFromData } from '../../../shared/types/invoice';
 import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './constant';
 
 interface Props {
   invoiceForm?: InvoiceFromData;
+  billToLabel: string;
 }
-const ClientInfoComponent: FC<Props> = ({ invoiceForm }) => {
-  const { tt } = useUppercaseTranslation(invoiceForm?.customizationLabelUpperCase);
-
+const ClientInfoComponent: FC<Props> = ({ invoiceForm, billToLabel }) => {
   return (
     <View
       style={[
@@ -25,7 +23,7 @@ const ClientInfoComponent: FC<Props> = ({ invoiceForm }) => {
           { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
         ]}
       >
-        {tt('invoices.billTo')}:
+        {billToLabel}:
       </Text>
       <Text
         style={[

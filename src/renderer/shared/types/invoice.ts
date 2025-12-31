@@ -9,6 +9,20 @@ import type { TableHeaderStyle } from '../enums/tableHeaderStyle';
 import type { TableRowStyle } from '../enums/tableRowStyle';
 import type { InvoiceItemTaxType, InvoiceTaxType } from '../enums/taxType';
 
+export interface PdfTexts {
+  billTo: string;
+  invoiceNo: string;
+  quoteNo: string;
+  date: string;
+  dueDate: string;
+  customerNote: string;
+  termsConditions: string;
+  of: string;
+  page: string;
+  paymentInfo: string;
+  pdfINVOICE: string;
+  pdfQUOTE: string;
+}
 export interface AttachmentURL {
   id: number;
   url?: string;

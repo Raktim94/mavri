@@ -1,15 +1,14 @@
 import { Text, View } from '@react-pdf/renderer';
 import { memo, type FC } from 'react';
-import { useUppercaseTranslation } from '../../../shared/hooks/useUppercaseTranslation';
 import type { InvoiceFromData } from '../../../shared/types/invoice';
 import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './constant';
 
 interface Props {
   invoiceForm?: InvoiceFromData;
+  customerNoteLabel: string;
+  termsConditionsLabel: string;
 }
-const NotesInfoComponent: FC<Props> = ({ invoiceForm }) => {
-  const { tt } = useUppercaseTranslation(invoiceForm?.customizationLabelUpperCase);
-
+const NotesInfoComponent: FC<Props> = ({ invoiceForm, customerNoteLabel, termsConditionsLabel }) => {
   return (
     <View style={[PDF_STYLES.mt20]}>
       {invoiceForm?.thanksNotes && (
@@ -31,7 +30,7 @@ const NotesInfoComponent: FC<Props> = ({ invoiceForm }) => {
               { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
             ]}
           >
-            <Text>{tt('invoices.customerNote')}</Text>
+            <Text>{customerNoteLabel}</Text>
           </View>
           <View
             style={[
@@ -51,7 +50,7 @@ const NotesInfoComponent: FC<Props> = ({ invoiceForm }) => {
               { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
             ]}
           >
-            <Text>{tt('invoices.termsConditions')}</Text>
+            <Text>{termsConditionsLabel}</Text>
           </View>
           <View
             style={[

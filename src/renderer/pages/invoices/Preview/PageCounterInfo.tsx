@@ -1,15 +1,14 @@
 import { Text } from '@react-pdf/renderer';
 import { memo, type FC } from 'react';
-import { useUppercaseTranslation } from '../../../shared/hooks/useUppercaseTranslation';
 import type { InvoiceFromData } from '../../../shared/types/invoice';
 import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './constant';
 
 interface Props {
   invoiceForm?: InvoiceFromData;
+  ofLabel: string;
+  pageLabel: string;
 }
-const PageCounterInfoComponent: FC<Props> = ({ invoiceForm }) => {
-  const { tt } = useUppercaseTranslation(invoiceForm?.customizationLabelUpperCase);
-
+const PageCounterInfoComponent: FC<Props> = ({ invoiceForm, ofLabel, pageLabel }) => {
   return (
     <Text
       fixed
@@ -18,7 +17,7 @@ const PageCounterInfoComponent: FC<Props> = ({ invoiceForm }) => {
         { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].pageCounter }
       ]}
       render={({ pageNumber, totalPages }) =>
-        totalPages > 1 ? `${tt('common.page')} ${pageNumber} ${tt('common.of')} ${totalPages}` : ''
+        totalPages > 1 ? `${pageLabel} ${pageNumber} ${ofLabel} ${totalPages}` : ''
       }
     />
   );

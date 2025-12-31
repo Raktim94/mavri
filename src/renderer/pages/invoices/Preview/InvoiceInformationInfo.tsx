@@ -2,7 +2,6 @@ import { Text, View } from '@react-pdf/renderer';
 import { memo, type FC } from 'react';
 import { InvoiceType } from '../../../shared/enums/invoiceType';
 import { LayoutType } from '../../../shared/enums/layoutType';
-import { useUppercaseTranslation } from '../../../shared/hooks/useUppercaseTranslation';
 import type { InvoiceFromData } from '../../../shared/types/invoice';
 import type { Settings } from '../../../shared/types/settings';
 import { formatDate } from '../../../shared/utils/formatFunctions';
@@ -12,10 +11,23 @@ import { TitleInfo } from './TitleInfo';
 interface Props {
   invoiceForm?: InvoiceFromData;
   storeSettings?: Settings;
+  invoiceNoLabel: string;
+  quoteNoLabel: string;
+  dueDateLabel: string;
+  dateLabel: string;
+  pdfQUOTELabel: string;
+  pdfINVOICELabel: string;
 }
-const InvoiceInformationInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
-  const { tt } = useUppercaseTranslation(invoiceForm?.customizationLabelUpperCase);
-
+const InvoiceInformationInfoComponent: FC<Props> = ({
+  invoiceForm,
+  storeSettings,
+  invoiceNoLabel,
+  quoteNoLabel,
+  dueDateLabel,
+  dateLabel,
+  pdfQUOTELabel,
+  pdfINVOICELabel
+}) => {
   return (
     <View
       style={[
@@ -24,7 +36,9 @@ const InvoiceInformationInfoComponent: FC<Props> = ({ invoiceForm, storeSettings
         invoiceForm?.customizationLayout === LayoutType.compact ? PDF_STYLES.w100 : PDF_STYLES.w50
       ]}
     >
-      {invoiceForm?.customizationLayout === LayoutType.classic && <TitleInfo invoiceForm={invoiceForm} />}
+      {invoiceForm?.customizationLayout === LayoutType.classic && (
+        <TitleInfo invoiceForm={invoiceForm} pdfINVOICELabel={pdfQUOTELabel} pdfQUOTELabel={pdfINVOICELabel} />
+      )}
 
       <View
         style={[
@@ -47,7 +61,7 @@ const InvoiceInformationInfoComponent: FC<Props> = ({ invoiceForm, storeSettings
                 { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
               ]}
             >
-              {invoiceForm?.invoiceType === InvoiceType.invoice ? tt('common.invoiceNo') : tt('common.quoteNo')}:{' '}
+              {invoiceForm?.invoiceType === InvoiceType.invoice ? invoiceNoLabel : quoteNoLabel}:{' '}
             </Text>
           )}
           <Text
@@ -69,7 +83,7 @@ const InvoiceInformationInfoComponent: FC<Props> = ({ invoiceForm, storeSettings
                 { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
               ]}
             >
-              {tt('common.date')}:{' '}
+              {dateLabel}:{' '}
             </Text>
             <Text
               style={[
@@ -89,7 +103,7 @@ const InvoiceInformationInfoComponent: FC<Props> = ({ invoiceForm, storeSettings
                 { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
               ]}
             >
-              {tt('common.dueDate')}:{' '}
+              {dueDateLabel}:{' '}
             </Text>
             <Text
               style={[
