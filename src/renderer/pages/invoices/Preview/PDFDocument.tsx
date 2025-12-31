@@ -62,8 +62,10 @@ const PDFDocumentComponent: FC<Props> = ({
           { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].page }
         ]}
       >
-        {invoiceForm?.status === InvoiceStatus.paid && <WatermarkPaidInfo watermarkPaidUrl={watermarkPaidUrl} />}
-        <WatermarkInfo watermarkUrl={watermarkUrl} />
+        {invoiceForm?.status === InvoiceStatus.paid && (
+          <WatermarkPaidInfo invoiceForm={invoiceForm} watermarkPaidUrl={watermarkPaidUrl} />
+        )}
+        <WatermarkInfo invoiceForm={invoiceForm} watermarkUrl={watermarkUrl} />
 
         <HeaderInfo invoiceForm={invoiceForm} storeSettings={storeSettings} logoUrl={logoUrl} pdfTexts={pdfTexts} />
         <ItemsInfo invoiceForm={invoiceForm} storeSettings={storeSettings} />

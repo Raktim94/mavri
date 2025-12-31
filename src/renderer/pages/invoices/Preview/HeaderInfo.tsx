@@ -39,14 +39,14 @@ const HeaderInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, logoUrl, p
               pdfQUOTELabel={pdfTexts.pdfQUOTE}
             />
           </View>
-          <View style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart]}>
-            <View style={[PDF_STYLES.w38]}>
+          <View style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart, PDF_STYLES.gap10]}>
+            <View style={[PDF_STYLES.w40]}>
               <BusinessInfo invoiceForm={invoiceForm} logoUrl={logoUrl} />
             </View>
-            <View style={[PDF_STYLES.w38]}>
+            <View style={[PDF_STYLES.w40]}>
               <ClientInfo invoiceForm={invoiceForm} billToLabel={pdfTexts.billTo} />
             </View>
-            <View style={[PDF_STYLES.w18]}>
+            <View style={[PDF_STYLES.w20]}>
               <InvoiceInformationInfo
                 storeSettings={storeSettings}
                 invoiceForm={invoiceForm}

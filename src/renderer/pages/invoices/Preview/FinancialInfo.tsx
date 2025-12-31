@@ -46,7 +46,7 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
       {(discountAmount > 0 || totalTax > 0 || shippingAmount > 0) && (
         <View style={[PDF_STYLES.row, PDF_STYLES.mb5]}>
           <View style={PDF_STYLES.flexGrow} />
-          <View style={[PDF_STYLES.row, PDF_STYLES.w60]}>
+          <View style={[PDF_STYLES.row, PDF_STYLES.w100, PDF_STYLES.textEnd]}>
             <View
               style={[
                 PDF_STYLES.regularBold,
@@ -73,7 +73,7 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
       {discountAmount > 0 && (
         <View style={[PDF_STYLES.row, PDF_STYLES.mb5]}>
           <View style={PDF_STYLES.flexGrow} />
-          <View style={[PDF_STYLES.row, PDF_STYLES.w60]}>
+          <View style={[PDF_STYLES.row, PDF_STYLES.w100, PDF_STYLES.textEnd]}>
             <View
               style={[
                 PDF_STYLES.regular,
@@ -105,7 +105,7 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
       {totalTax > 0 && (
         <View style={[PDF_STYLES.row, PDF_STYLES.mb5]}>
           <View style={PDF_STYLES.flexGrow} />
-          <View style={[PDF_STYLES.row, PDF_STYLES.w60]}>
+          <View style={[PDF_STYLES.row, PDF_STYLES.w100, PDF_STYLES.textEnd]}>
             <View
               style={[
                 PDF_STYLES.regular,
@@ -158,7 +158,7 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
       {shippingAmount > 0 && (
         <View style={[PDF_STYLES.row, PDF_STYLES.mb5]}>
           <View style={PDF_STYLES.flexGrow} />
-          <View style={[PDF_STYLES.row, PDF_STYLES.w60]}>
+          <View style={[PDF_STYLES.row, PDF_STYLES.w100, PDF_STYLES.textEnd]}>
             <View
               style={[
                 PDF_STYLES.regular,
@@ -185,7 +185,7 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
       {(discountAmount > 0 || totalTax > 0 || shippingAmount > 0) && (
         <View style={[PDF_STYLES.row, PDF_STYLES.mt5, PDF_STYLES.mb5]}>
           <View style={PDF_STYLES.flexGrow} />
-          <View style={[PDF_STYLES.border, PDF_STYLES.w60]} />
+          <View style={[PDF_STYLES.border, PDF_STYLES.w100, PDF_STYLES.textEnd]} />
         </View>
       )}
 
@@ -194,7 +194,7 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
         invoiceForm?.invoiceType === InvoiceType.quotation) && (
         <View style={[PDF_STYLES.row, PDF_STYLES.mb5]}>
           <View style={PDF_STYLES.flexGrow} />
-          <View style={[PDF_STYLES.row, PDF_STYLES.w60]}>
+          <View style={[PDF_STYLES.row, PDF_STYLES.w100, PDF_STYLES.textEnd]}>
             <View
               style={[
                 PDF_STYLES.regularBold,
@@ -223,7 +223,7 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
         invoiceForm?.status !== InvoiceStatus.paid && (
           <View style={[PDF_STYLES.row, PDF_STYLES.mb5]}>
             <View style={PDF_STYLES.flexGrow} />
-            <View style={[PDF_STYLES.row, PDF_STYLES.w60]}>
+            <View style={[PDF_STYLES.row, PDF_STYLES.w100, PDF_STYLES.textEnd]}>
               <View
                 style={[
                   PDF_STYLES.regular,
@@ -250,7 +250,7 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
       {invoiceForm?.invoiceType === InvoiceType.invoice && invoiceForm?.status !== InvoiceStatus.paid && (
         <View style={[PDF_STYLES.row, PDF_STYLES.mb5]}>
           <View style={PDF_STYLES.flexGrow} />
-          <View style={[PDF_STYLES.row, PDF_STYLES.w60]}>
+          <View style={[PDF_STYLES.row, PDF_STYLES.w100, PDF_STYLES.textEnd]}>
             <View
               style={[
                 PDF_STYLES.regularBold,
