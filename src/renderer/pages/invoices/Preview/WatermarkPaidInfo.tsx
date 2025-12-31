@@ -1,25 +1,12 @@
 import { Image } from '@react-pdf/renderer';
-import { memo, useEffect, useState, type FC } from 'react';
-import type { InvoiceFromData } from '../../../shared/types/invoice';
-import { uint8ArrayToDataUrl } from '../../../shared/utils/dataUrlFunctions';
+import { memo, type FC } from 'react';
 import { PDF_STYLES } from './constant';
 
 interface Props {
-  invoiceForm?: InvoiceFromData;
+  watermarkPaidUrl?: string;
 }
-const WatermarkPaidInfoComponent: FC<Props> = ({ invoiceForm }) => {
-  const [watermarkPaidUrl, setWatermarkPaidUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!invoiceForm?.customizationPaidWatermarkFileData) return;
-
-    uint8ArrayToDataUrl(
-      invoiceForm.customizationPaidWatermarkFileData,
-      invoiceForm.customizationPaidWatermarkFileType
-    ).then(setWatermarkPaidUrl);
-  }, [invoiceForm]);
-
+const WatermarkPaidInfoComponent: FC<Props> = ({ watermarkPaidUrl }) => {
   if (!watermarkPaidUrl) return null;
-  return <Image src={watermarkPaidUrl} fixed style={PDF_STYLES.watermarkPaid} />;
+  return <Image src={watermarkPaidUrl} style={PDF_STYLES.watermarkPaid} />;
 };
 export const WatermarkPaidInfo = memo(WatermarkPaidInfoComponent);

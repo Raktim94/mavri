@@ -1,6 +1,11 @@
 import { PDFViewer } from '@react-pdf/renderer';
 import { memo, useEffect, useState, type FC } from 'react';
-import { getAttachmentsUrl, getLogoUrl } from '../../../shared/hooks/useExportPdf ';
+import {
+  getAttachmentsUrl,
+  getLogoUrl,
+  getWatermarkPaidUrl,
+  getWatermarkUrl
+} from '../../../shared/hooks/useExportPdf ';
 import { useUppercaseTranslation } from '../../../shared/hooks/useUppercaseTranslation';
 import type { AttachmentURL, InvoiceFromData, PdfTexts } from '../../../shared/types/invoice';
 import { useAppSelector } from '../../../state/configureStore';
@@ -13,6 +18,8 @@ interface Props {
 const PreviewCoreComponent: FC<Props> = ({ invoiceForm }) => {
   const storeSettings = useAppSelector(selectSettings);
   const [logoUrl, setLogoUrl] = useState<string | undefined>();
+  const [watermarkUrl, setWatermarkUrl] = useState<string | undefined>();
+  const [watermarkPaidUrl, setWatermarkPaidUrl] = useState<string | undefined>();
   const [attachmentUrls, setAttachmentUrls] = useState<AttachmentURL[]>([]);
   const { tt } = useUppercaseTranslation(invoiceForm?.customizationLabelUpperCase);
 
@@ -34,6 +41,20 @@ const PreviewCoreComponent: FC<Props> = ({ invoiceForm }) => {
   useEffect(() => {
     let cancelled = false;
 
+    const loadWatermak = async () => {
+      const url = await getWatermarkUrl(invoiceForm);
+      if (!cancelled) {
+        setWatermarkUrl(url);
+      }
+    };
+
+    const loadWatermakPaid = async () => {
+      const url = await getWatermarkPaidUrl(invoiceForm);
+      if (!cancelled) {
+        setWatermarkPaidUrl(url);
+      }
+    };
+
     const loadLogo = async () => {
       const url = await getLogoUrl(invoiceForm);
       if (!cancelled) {
@@ -48,6 +69,8 @@ const PreviewCoreComponent: FC<Props> = ({ invoiceForm }) => {
       }
     };
 
+    loadWatermak();
+    loadWatermakPaid();
     loadLogo();
     loadAttacmentUrls();
 
@@ -68,6 +91,8 @@ const PreviewCoreComponent: FC<Props> = ({ invoiceForm }) => {
         logoUrl={logoUrl}
         attachmentUrls={attachmentUrls}
         pdfTexts={pdfTexts}
+        watermarkUrl={watermarkUrl}
+        watermarkPaidUrl={watermarkPaidUrl}
       />
     </PDFViewer>
   );

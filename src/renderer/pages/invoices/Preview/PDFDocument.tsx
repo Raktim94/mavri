@@ -41,8 +41,18 @@ interface Props {
   logoUrl?: string;
   attachmentUrls: AttachmentURL[];
   pdfTexts: PdfTexts;
+  watermarkUrl?: string;
+  watermarkPaidUrl?: string;
 }
-const PDFDocumentComponent: FC<Props> = ({ invoiceForm, storeSettings, logoUrl, attachmentUrls, pdfTexts }) => {
+const PDFDocumentComponent: FC<Props> = ({
+  invoiceForm,
+  storeSettings,
+  logoUrl,
+  attachmentUrls,
+  pdfTexts,
+  watermarkUrl,
+  watermarkPaidUrl
+}) => {
   return (
     <Document>
       <Page
@@ -52,8 +62,9 @@ const PDFDocumentComponent: FC<Props> = ({ invoiceForm, storeSettings, logoUrl, 
           { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].page }
         ]}
       >
-        <WatermarkInfo invoiceForm={invoiceForm} />
-        {invoiceForm?.status === InvoiceStatus.paid && <WatermarkPaidInfo invoiceForm={invoiceForm} />}
+        {invoiceForm?.status === InvoiceStatus.paid && <WatermarkPaidInfo watermarkPaidUrl={watermarkPaidUrl} />}
+        <WatermarkInfo watermarkUrl={watermarkUrl} />
+
         <HeaderInfo invoiceForm={invoiceForm} storeSettings={storeSettings} logoUrl={logoUrl} pdfTexts={pdfTexts} />
         <ItemsInfo invoiceForm={invoiceForm} storeSettings={storeSettings} />
         <View style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart, PDF_STYLES.mt10]}>

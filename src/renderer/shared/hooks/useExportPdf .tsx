@@ -39,30 +39,62 @@ export const getLogoUrl = async (invoiceForm?: InvoiceFromData) => {
   return logoUrl;
 };
 
+export const getWatermarkUrl = async (invoiceForm?: InvoiceFromData) => {
+  if (!invoiceForm) return;
+
+  let watermarkUrl: string | undefined;
+
+  if (invoiceForm.customizationWatermarkFileData) {
+    watermarkUrl = await uint8ArrayToDataUrl(
+      invoiceForm.customizationWatermarkFileData,
+      invoiceForm.customizationWatermarkFileType
+    );
+  }
+
+  return watermarkUrl;
+};
+
+export const getWatermarkPaidUrl = async (invoiceForm?: InvoiceFromData) => {
+  if (!invoiceForm) return;
+
+  let watermarkPaidUrl: string | undefined;
+
+  if (invoiceForm.customizationPaidWatermarkFileData) {
+    watermarkPaidUrl = await uint8ArrayToDataUrl(
+      invoiceForm.customizationPaidWatermarkFileData,
+      invoiceForm.customizationPaidWatermarkFileType
+    );
+  }
+
+  return watermarkPaidUrl;
+};
+
 export const useExportPdf = (data: { invoiceForm?: InvoiceFromData; storeSettings?: Settings }) => {
   const { invoiceForm, storeSettings } = data;
   const { tt } = useUppercaseTranslation(invoiceForm?.customizationLabelUpperCase);
 
-  const pdfTexts: PdfTexts = {
-    billTo: tt('invoices.billTo'),
-    invoiceNo: tt('common.invoiceNo'),
-    quoteNo: tt('common.quoteNo'),
-    date: tt('common.date'),
-    dueDate: tt('common.dueDate'),
-    customerNote: tt('invoices.customerNote'),
-    termsConditions: tt('invoices.termsConditions'),
-    of: tt('common.of'),
-    page: tt('common.page'),
-    paymentInfo: tt('common.paymentInfo'),
-    pdfINVOICE: tt('invoices.pdfINVOICE'),
-    pdfQUOTE: tt('invoices.pdfQUOTE')
-  };
-
   const exportPdf = useCallback(async () => {
     if (!invoiceForm) return;
 
+    const pdfTexts: PdfTexts = {
+      billTo: tt('invoices.billTo'),
+      invoiceNo: tt('common.invoiceNo'),
+      quoteNo: tt('common.quoteNo'),
+      date: tt('common.date'),
+      dueDate: tt('common.dueDate'),
+      customerNote: tt('invoices.customerNote'),
+      termsConditions: tt('invoices.termsConditions'),
+      of: tt('common.of'),
+      page: tt('common.page'),
+      paymentInfo: tt('common.paymentInfo'),
+      pdfINVOICE: tt('invoices.pdfINVOICE'),
+      pdfQUOTE: tt('invoices.pdfQUOTE')
+    };
+
     const logoUrl = await getLogoUrl(invoiceForm);
     const attachmentUrls = await getAttachmentsUrl(invoiceForm);
+    const watermarkUrl = await getWatermarkUrl(invoiceForm);
+    const watermarkPaidUrl = await getWatermarkPaidUrl(invoiceForm);
 
     const blob = await pdf(
       <PDFDocument
@@ -71,6 +103,8 @@ export const useExportPdf = (data: { invoiceForm?: InvoiceFromData; storeSetting
         logoUrl={logoUrl}
         attachmentUrls={attachmentUrls}
         pdfTexts={pdfTexts}
+        watermarkUrl={watermarkUrl}
+        watermarkPaidUrl={watermarkPaidUrl}
       />
     ).toBlob();
 
@@ -91,7 +125,7 @@ export const useExportPdf = (data: { invoiceForm?: InvoiceFromData; storeSetting
     a.click();
 
     URL.revokeObjectURL(url);
-  }, [invoiceForm, storeSettings]);
+  }, [invoiceForm, storeSettings, tt]);
 
   return { exportPdf };
 };
