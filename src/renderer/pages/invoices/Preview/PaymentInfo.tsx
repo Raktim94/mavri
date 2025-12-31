@@ -10,6 +10,8 @@ interface Props {
 const PaymentInfoComponent: FC<Props> = ({ invoiceForm }) => {
   const { tt } = useUppercaseTranslation(invoiceForm?.customizationLabelUpperCase);
 
+  if (!invoiceForm?.businessPaymentInformationSnapshot) return null;
+
   return (
     <View style={[PDF_STYLES.alignStart, PDF_STYLES.gap4, PDF_STYLES.maxw50]}>
       <Text

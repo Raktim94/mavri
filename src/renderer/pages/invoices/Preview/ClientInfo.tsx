@@ -35,46 +35,56 @@ const ClientInfoComponent: FC<Props> = ({ invoiceForm }) => {
       >
         {invoiceForm?.clientNameSnapshot}
       </Text>
-      <Text
-        style={[
-          PDF_STYLES.businessText,
-          { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].businessText }
-        ]}
-      >
-        {invoiceForm?.clientAddressSnapshot}
-      </Text>
-      <Text
-        style={[
-          PDF_STYLES.businessText,
-          { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].businessText }
-        ]}
-      >
-        {invoiceForm?.clientEmailSnapshot}
-      </Text>
-      <Text
-        style={[
-          PDF_STYLES.businessText,
-          { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].businessText }
-        ]}
-      >
-        {invoiceForm?.clientPhoneSnapshot}
-      </Text>
-      <Text
-        style={[
-          PDF_STYLES.businessText,
-          { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].businessText }
-        ]}
-      >
-        {invoiceForm?.clientCodeSnapshot}
-      </Text>
-      <Text
-        style={[
-          PDF_STYLES.businessText,
-          { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].businessText }
-        ]}
-      >
-        {invoiceForm?.clientAdditionalSnapshot}
-      </Text>
+      {invoiceForm?.clientAddressSnapshot && (
+        <Text
+          style={[
+            PDF_STYLES.businessText,
+            { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].businessText }
+          ]}
+        >
+          {invoiceForm?.clientAddressSnapshot}
+        </Text>
+      )}
+      {invoiceForm?.clientEmailSnapshot && (
+        <Text
+          style={[
+            PDF_STYLES.businessText,
+            { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].businessText }
+          ]}
+        >
+          {invoiceForm?.clientEmailSnapshot}
+        </Text>
+      )}
+      {invoiceForm?.clientPhoneSnapshot && (
+        <Text
+          style={[
+            PDF_STYLES.businessText,
+            { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].businessText }
+          ]}
+        >
+          {invoiceForm?.clientPhoneSnapshot}
+        </Text>
+      )}
+      {invoiceForm?.clientCodeSnapshot && (
+        <Text
+          style={[
+            PDF_STYLES.businessText,
+            { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].businessText }
+          ]}
+        >
+          {invoiceForm?.clientCodeSnapshot}
+        </Text>
+      )}
+      {invoiceForm?.clientAdditionalSnapshot && (
+        <Text
+          style={[
+            PDF_STYLES.businessText,
+            { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].businessText }
+          ]}
+        >
+          {invoiceForm?.clientAdditionalSnapshot}
+        </Text>
+      )}
     </View>
   );
 };
