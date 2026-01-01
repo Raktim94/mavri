@@ -1,6 +1,13 @@
 # Invoice Builder
 
-## **\_\_\_\_**, version 1.0.6
+## 2026-01-02, version 1.0.6
+
+PDF Preview Bug Fixes & Improvements
+
+- Fixed an issue where the Payment Information label did not respond correctly to the upper/lower case toggle
+- Added missing translations for the Lithuanian (LTU) language
+- Improved the look and feel of layout options for a more consistent user experience
+- Watermark, Paid Watermark, Attachments, and Business Logo are now correctly included in the generated PDF files. (Previously, these elements were visible only in the live preview)
 
 ## 2025-12-30, version 1.0.5
 
