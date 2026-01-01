@@ -184,6 +184,7 @@ export const UploadImage: React.FC<UploadSquareProps> = ({
           setCroppedImageUrl(url);
           if (onUpload) onUpload(file, originalFileName);
           setCropDialogOpen(false);
+          if (inputRef.current) inputRef.current.value = '';
         }}
       />
     </Box>

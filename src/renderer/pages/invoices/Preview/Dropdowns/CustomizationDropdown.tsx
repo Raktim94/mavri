@@ -100,7 +100,6 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onClose, onOp
   useEffect(() => {
     if (isOpen && data) {
       setForm(data);
-      lastEmittedRef.current = data;
     }
   }, [isOpen, data, setForm]);
 
@@ -114,11 +113,6 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onClose, onOp
       isChanged = true;
     }
     if (!isChanged) return;
-
-    const prev = lastEmittedRef.current;
-    const prevStr = prev ? JSON.stringify(prev) : undefined;
-    const formStr = JSON.stringify(form);
-    if (formStr === prevStr) return;
 
     const updateUrl = (
       fileData: Uint8Array | undefined,
@@ -151,8 +145,8 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onClose, onOp
       setWatermarkPaidUrl
     );
 
-    onClick?.(form);
     lastEmittedRef.current = form;
+    onClick?.(form);
 
     return () => {
       if (watermarkUrlRef.current) {

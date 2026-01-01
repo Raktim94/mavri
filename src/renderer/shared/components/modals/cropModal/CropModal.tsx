@@ -1,6 +1,6 @@
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { AppBar, Button, Dialog, DialogContent, IconButton, Toolbar, Tooltip, useTheme } from '@mui/material';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ReactCrop, { type Crop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
@@ -13,7 +13,8 @@ interface Props {
 }
 export const CropModal: React.FC<Props> = ({ onClose = () => {}, imageSrc, isOpen, onSave = () => {} }) => {
   const { t } = useTranslation();
-  const [crop, setCrop] = useState<Crop>({ unit: '%', width: 50, x: 0, y: 0, height: 50 });
+  const DEFAULT_CROP: Crop = { unit: '%', width: 50, x: 0, y: 0, height: 50 };
+  const [crop, setCrop] = useState<Crop>(DEFAULT_CROP);
   const imgRef = useRef<HTMLImageElement | null>(null);
   const theme = useTheme();
 
@@ -36,6 +37,14 @@ export const CropModal: React.FC<Props> = ({ onClose = () => {}, imageSrc, isOpe
   const handleImageLoad = (img: HTMLImageElement) => {
     imgRef.current = img;
   };
+
+  useEffect(() => {
+    if (isOpen) {
+      setCrop({ ...DEFAULT_CROP });
+      imgRef.current = null;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imageSrc, isOpen]);
 
   const makeClientCrop = async () => {
     if (!imgRef.current || !crop.width || !crop.height) return;
