@@ -262,7 +262,7 @@ Please open an issue before starting major work to ensure alignment.
 
 | Version | Status                |
 | ------- | --------------------- |
-| v1.0.6  | ✅ Actively supported |
+| v1.0.7  | ✅ Actively supported |
 | v1.0.5  | ✅ Actively supported |
 
 Details about supported versions and update policy will be documented here.

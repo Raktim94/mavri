@@ -37,7 +37,7 @@ const InvoiceInformationInfoComponent: FC<Props> = ({
       ]}
     >
       {invoiceForm?.customizationLayout === LayoutType.classic && (
-        <TitleInfo invoiceForm={invoiceForm} pdfINVOICELabel={pdfQUOTELabel} pdfQUOTELabel={pdfINVOICELabel} />
+        <TitleInfo invoiceForm={invoiceForm} pdfINVOICELabel={pdfINVOICELabel} pdfQUOTELabel={pdfQUOTELabel} />
       )}
 
       <View
