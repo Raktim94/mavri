@@ -149,22 +149,22 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onClose, onOp
     onClick?.(form);
 
     return () => {
-      if (watermarkUrlRef.current) {
-        try {
-          URL.revokeObjectURL(watermarkUrlRef.current);
-        } catch {
-          // ignore
-        }
-        watermarkUrlRef.current = undefined;
-      }
-      if (watermarkPaidUrlRef.current) {
-        try {
-          URL.revokeObjectURL(watermarkPaidUrlRef.current);
-        } catch {
-          // ignore
-        }
-        watermarkPaidUrlRef.current = undefined;
-      }
+      // if (watermarkUrlRef.current) {
+      //   try {
+      //     URL.revokeObjectURL(watermarkUrlRef.current);
+      //   } catch {
+      //     // ignore
+      //   }
+      //   watermarkUrlRef.current = undefined;
+      // }
+      // if (watermarkPaidUrlRef.current) {
+      //   try {
+      //     //URL.revokeObjectURL(watermarkPaidUrlRef.current);
+      //   } catch {
+      //     // ignore
+      //   }
+      //   watermarkPaidUrlRef.current = undefined;
+      // }
     };
   }, [form, onClick]);
 
