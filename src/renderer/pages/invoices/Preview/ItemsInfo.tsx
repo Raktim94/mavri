@@ -2,7 +2,6 @@ import { Text, View } from '@react-pdf/renderer';
 import { memo, useMemo, type FC } from 'react';
 import { TableHeaderStyle } from '../../../shared/enums/tableHeaderStyle';
 import { TableRowStyle } from '../../../shared/enums/tableRowStyle';
-import { useUppercaseTranslation } from '../../../shared/hooks/useUppercaseTranslation';
 import type { InvoiceFromData } from '../../../shared/types/invoice';
 import type { Settings } from '../../../shared/types/settings';
 import { createCurrencyFormatter } from '../../../shared/utils/formatFunctions';
@@ -12,10 +11,23 @@ import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './constant';
 interface Props {
   invoiceForm?: InvoiceFromData;
   storeSettings?: Settings;
+  itemLabel: string;
+  unitLabel: string;
+  qtyLabel: string;
+  unitCostLabel: string;
+  totalLabel: string;
+  itemTaxLabel: (data: { rate?: number; amount: string }) => string;
 }
-const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
-  const { tt } = useUppercaseTranslation(invoiceForm?.customizationLabelUpperCase);
-
+const ItemsInfoComponent: FC<Props> = ({
+  invoiceForm,
+  storeSettings,
+  itemLabel,
+  unitLabel,
+  qtyLabel,
+  unitCostLabel,
+  totalLabel,
+  itemTaxLabel
+}) => {
   const format = useMemo(
     () => (invoiceForm ? createCurrencyFormatter(storeSettings!, invoiceForm) : (n: number) => String(n)),
     [storeSettings, invoiceForm]
@@ -119,7 +131,7 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
               { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].tableCellHeader }
             ]}
           >
-            {tt('common.item')}
+            {itemLabel}
           </Text>
         </View>
         <View style={[PDF_STYLES.tableCol, PDF_STYLES.w15, PDF_STYLES.textEnd, { borderLeft: rowStyle.borderCell }]}>
@@ -129,7 +141,7 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
               { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].tableCellHeader }
             ]}
           >
-            {tt('common.unit')}
+            {unitLabel}
           </Text>
         </View>
         <View style={[PDF_STYLES.tableCol, PDF_STYLES.w15, PDF_STYLES.textEnd, { borderLeft: rowStyle.borderCell }]}>
@@ -139,7 +151,7 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
               { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].tableCellHeader }
             ]}
           >
-            {tt('common.qty')}
+            {qtyLabel}
           </Text>
         </View>
         <View style={[PDF_STYLES.tableCol, PDF_STYLES.w15, PDF_STYLES.textEnd, { borderLeft: rowStyle.borderCell }]}>
@@ -149,7 +161,7 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
               { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].tableCellHeader }
             ]}
           >
-            {tt('common.unitCost')}
+            {unitCostLabel}
           </Text>
         </View>
         <View
@@ -166,7 +178,7 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
               { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].tableCellHeader }
             ]}
           >
-            {tt('common.total')}
+            {totalLabel}
           </Text>
         </View>
       </View>
@@ -220,10 +232,7 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
                     }
                   ]}
                 >
-                  {tt('invoices.itemTax', {
-                    rate: taxRate,
-                    amount: formattedTax
-                  })}
+                  {itemTaxLabel({ rate: taxRate, amount: formattedTax })}
                 </Text>
               )}
             </View>

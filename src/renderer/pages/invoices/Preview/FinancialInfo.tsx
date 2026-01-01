@@ -4,7 +4,6 @@ import { DiscountType } from '../../../shared/enums/discountType';
 import { InvoiceStatus } from '../../../shared/enums/invoiceStatus';
 import { InvoiceType } from '../../../shared/enums/invoiceType';
 import { InvoiceItemTaxType, InvoiceTaxType } from '../../../shared/enums/taxType';
-import { useUppercaseTranslation } from '../../../shared/hooks/useUppercaseTranslation';
 import type { InvoiceFromData } from '../../../shared/types/invoice';
 import type { Settings } from '../../../shared/types/settings';
 import { getFinancialData } from '../../../shared/utils/invoiceFunctions';
@@ -13,10 +12,37 @@ import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './constant';
 interface Props {
   invoiceForm?: InvoiceFromData;
   storeSettings?: Settings;
+  subTotalLabel: string;
+  discountPrctLabel: string;
+  discountLabel: string;
+  taxExclusiveLabel: string;
+  taxInclusiveLabel: string;
+  taxRateLabel: string;
+  taxExclusivePerItemLabel: string;
+  taxInclusivePerItemLabel: string;
+  shippingFeeLabel: string;
+  totalLabel: string;
+  paidLabel: string;
+  balanceDueLabel: string;
+  taxLabel: string;
 }
-const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
-  const { tt } = useUppercaseTranslation(invoiceForm?.customizationLabelUpperCase);
-
+const FinancialInfoComponent: FC<Props> = ({
+  invoiceForm,
+  storeSettings,
+  subTotalLabel,
+  discountPrctLabel,
+  discountLabel,
+  taxExclusiveLabel,
+  taxInclusiveLabel,
+  taxRateLabel,
+  taxExclusivePerItemLabel,
+  taxInclusivePerItemLabel,
+  shippingFeeLabel,
+  totalLabel,
+  paidLabel,
+  balanceDueLabel,
+  taxLabel
+}) => {
   const {
     formattedSubTotalAmount,
     totalAmountFormatted,
@@ -54,7 +80,7 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
                 { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
               ]}
             >
-              <Text>{tt('invoices.subTotal')}</Text>
+              <Text>{subTotalLabel}</Text>
             </View>
             <View
               style={[
@@ -82,10 +108,9 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
               ]}
             >
               <Text>
-                {invoiceForm?.discountType === DiscountType.percentage &&
-                  tt('invoices.discountPrct', { prct: invoiceForm.discountPercent })}
+                {invoiceForm?.discountType === DiscountType.percentage && discountPrctLabel}
 
-                {invoiceForm?.discountType !== DiscountType.percentage && tt('invoices.discount')}
+                {invoiceForm?.discountType !== DiscountType.percentage && discountLabel}
               </Text>
             </View>
             <View
@@ -116,29 +141,12 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
               <Text>
                 {(invoiceForm?.taxType === InvoiceTaxType.deducted ||
                   invoiceForm?.taxType === InvoiceTaxType.exclusive) &&
-                  (invoiceForm.taxName
-                    ? tt('invoices.taxExclusive', {
-                        name: invoiceForm.taxName,
-                        prct: invoiceForm.taxRate
-                      })
-                    : tt('invoices.tax', {
-                        prct: invoiceForm.taxRate
-                      }))}
+                  (invoiceForm.taxName ? taxExclusiveLabel : taxLabel)}
                 {invoiceForm?.taxType === InvoiceTaxType.inclusive &&
-                  (invoiceForm.taxName
-                    ? tt('invoices.taxInclusive', {
-                        name: invoiceForm.taxName,
-                        prct: invoiceForm.taxRate
-                      })
-                    : tt('invoices.taxInclusivePlaceholder', {
-                        prct: invoiceForm.taxRate
-                      }))}
-                {hasPerItemTaxExclusive && tt('invoices.taxExclusivePerItem')}
-                {hasPerItemTaxInclusive && tt('invoices.taxInclusivePerItem')}
-                {!hasPerItemTaxExclusive &&
-                  !hasPerItemTaxInclusive &&
-                  !invoiceForm?.taxType &&
-                  tt('invoices.tax', { prct: invoiceForm?.taxRate ?? 0 })}
+                  (invoiceForm.taxName ? taxInclusiveLabel : taxRateLabel)}
+                {hasPerItemTaxExclusive && taxExclusivePerItemLabel}
+                {hasPerItemTaxInclusive && taxInclusivePerItemLabel}
+                {!hasPerItemTaxExclusive && !hasPerItemTaxInclusive && !invoiceForm?.taxType && taxLabel}
               </Text>
             </View>
             <View
@@ -166,7 +174,7 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
                 { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regular }
               ]}
             >
-              <Text>{tt('invoices.shippingFee')}</Text>
+              <Text>{shippingFeeLabel}</Text>
             </View>
             <View
               style={[
@@ -202,7 +210,7 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
                 { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
               ]}
             >
-              <Text>{tt('invoices.total')}</Text>
+              <Text>{totalLabel}</Text>
             </View>
             <View
               style={[
@@ -231,7 +239,7 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
                   { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regular }
                 ]}
               >
-                <Text>{tt('invoices.paid')}</Text>
+                <Text>{paidLabel}</Text>
               </View>
               <View
                 style={[
@@ -258,7 +266,7 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings }) => {
                 { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
               ]}
             >
-              <Text>{tt('invoices.balanceDue')}</Text>
+              <Text>{balanceDueLabel}</Text>
             </View>
             <View
               style={[

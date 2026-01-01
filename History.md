@@ -1,5 +1,7 @@
 # Invoice Builder
 
+## **\_\_\_\_**, version 1.0.6
+
 ## 2025-12-30, version 1.0.5
 
 Initial release with the following functionality

@@ -22,7 +22,27 @@ export interface PdfTexts {
   paymentInfo: string;
   pdfINVOICE: string;
   pdfQUOTE: string;
+  subTotalLabel: string;
+  discountPrctLabel: string;
+  discountLabel: string;
+  taxExclusiveLabel: string;
+  taxInclusiveLabel: string;
+  taxRateLabel: string;
+  taxExclusivePerItemLabel: string;
+  taxInclusivePerItemLabel: string;
+  shippingFeeLabel: string;
+  totalLabel1: string;
+  paidLabel: string;
+  balanceDueLabel: string;
+  taxLabel: string;
+  itemLabel: string;
+  unitLabel: string;
+  qtyLabel: string;
+  unitCostLabel: string;
+  totalLabel2: string;
+  itemTaxLabel: (data: { rate?: number; amount: string }) => string;
 }
+
 export interface AttachmentURL {
   id: number;
   url?: string;

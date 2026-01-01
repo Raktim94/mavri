@@ -68,13 +68,38 @@ const PDFDocumentComponent: FC<Props> = ({
         <WatermarkInfo invoiceForm={invoiceForm} watermarkUrl={watermarkUrl} />
 
         <HeaderInfo invoiceForm={invoiceForm} storeSettings={storeSettings} logoUrl={logoUrl} pdfTexts={pdfTexts} />
-        <ItemsInfo invoiceForm={invoiceForm} storeSettings={storeSettings} />
+        <ItemsInfo
+          invoiceForm={invoiceForm}
+          storeSettings={storeSettings}
+          itemLabel={pdfTexts.itemLabel}
+          unitLabel={pdfTexts.unitLabel}
+          qtyLabel={pdfTexts.qtyLabel}
+          unitCostLabel={pdfTexts.unitCostLabel}
+          totalLabel={pdfTexts.totalLabel2}
+          itemTaxLabel={pdfTexts.itemTaxLabel}
+        />
         <View style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart, PDF_STYLES.mt10]}>
           {invoiceForm?.customizationLayout === LayoutType.compact && (
             <PaymentInfo invoiceForm={invoiceForm} paymentInfoLabel={pdfTexts.paymentInfo} />
           )}
           {invoiceForm?.customizationLayout !== LayoutType.compact && <View style={PDF_STYLES.flexGrow} />}
-          <FinancialInfo invoiceForm={invoiceForm} storeSettings={storeSettings} />
+          <FinancialInfo
+            invoiceForm={invoiceForm}
+            storeSettings={storeSettings}
+            subTotalLabel={pdfTexts.subTotalLabel}
+            discountPrctLabel={pdfTexts.discountPrctLabel}
+            discountLabel={pdfTexts.discountLabel}
+            taxExclusiveLabel={pdfTexts.taxExclusiveLabel}
+            taxInclusiveLabel={pdfTexts.taxInclusiveLabel}
+            taxRateLabel={pdfTexts.taxRateLabel}
+            taxExclusivePerItemLabel={pdfTexts.taxExclusivePerItemLabel}
+            taxInclusivePerItemLabel={pdfTexts.taxInclusivePerItemLabel}
+            shippingFeeLabel={pdfTexts.shippingFeeLabel}
+            totalLabel={pdfTexts.totalLabel1}
+            paidLabel={pdfTexts.paidLabel}
+            balanceDueLabel={pdfTexts.balanceDueLabel}
+            taxLabel={pdfTexts.taxLabel}
+          />
         </View>
         <NotesInfo
           invoiceForm={invoiceForm}
