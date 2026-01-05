@@ -69,8 +69,8 @@ Include any additional information or context about the feature request.
 ## Branching Strategy
 
 - **main:** Main development branch.
-- **feature-branch:** Use feature branches for developing new features.
-- **bugfix-branch:** Use bugfix branches for fixing bugs.
+- **feature/{tickent number}-{branch name}:** Use feature branches for developing new features.
+- **bugfix/{tickent number}-{branch name}:** Use bugfix branches for fixing bugs.
 
 ## Pull Requests
 

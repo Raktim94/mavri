@@ -5,7 +5,8 @@ import { Language } from '../shared/enums/language';
 
 export const LANGUAGE_ITEMS = {
   [Language.lt]: { label: 'Lithuanian', value: Language.lt },
-  [Language.en]: { label: 'English', value: Language.en }
+  [Language.en]: { label: 'English', value: Language.en },
+  [Language.fr]: { label: 'French', value: Language.fr }
 } as const;
 
 export const LANGUAGE_ITEMS_ARRAY = Object.values(LANGUAGE_ITEMS);
