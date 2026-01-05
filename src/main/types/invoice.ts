@@ -106,7 +106,7 @@ export interface InvoiceItem {
   itemNameSnapshot: string;
   unitPriceCentsSnapshot: number;
   unitNameSnapshot?: string;
-  quantity: number;
+  quantity: string;
   createdAt: string;
   updatedAt: string;
   taxRate: number;

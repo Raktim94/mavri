@@ -15,7 +15,7 @@ interface Props {
   isOpen: boolean;
   onClose?: () => void;
   onOpen?: () => void;
-  onClick?: (data: Item, quantity: number) => void;
+  onClick?: (data: Item, quantity: string) => void;
 }
 
 const ItemsDropdownComponent: FC<Props> = ({ isOpen, onClose, onOpen, onClick }) => {

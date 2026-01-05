@@ -103,10 +103,10 @@ export const getInvoiceItemAmountCents = (invoiceItem: InvoiceItem): number => {
   return getTotalUnitPrice({ unitPrice: invoiceItem.unitPriceCentsSnapshot, quantity: invoiceItem.quantity });
 };
 
-export const getTotalUnitPrice = (data: { unitPrice: number; quantity: number }): number => {
+export const getTotalUnitPrice = (data: { unitPrice: number; quantity: string }): number => {
   const { unitPrice, quantity } = data;
 
-  return unitPrice * quantity;
+  return unitPrice * Number(quantity);
 };
 
 export const getDiscountAmountCents = (invoice: Invoice): number => {
@@ -196,7 +196,7 @@ export const getItemFinancialData = (data: {
   storeSettings?: Settings;
   invoiceForm: InvoiceFromData;
   unitPriceCents: number;
-  quantity: number;
+  quantity: string;
   taxType?: InvoiceItemTaxType;
   taxRate: number;
   format?: (amount: number) => string;
