@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import sqlite3 from 'sqlite3';
 import { initIpcHandler } from './ipc';
+import { runMigrations } from './migration';
 import { getFirstRow, runAsync } from './utils/dbFuntions';
 
 let db: sqlite3.Database;
@@ -394,6 +395,8 @@ const setupDB = async (opts: { fullPath: string; createIfMissing?: boolean; main
     await init();
     await initInitialData();
   }
+
+  await runMigrations(db);
 
   initIpcHandler(db, dbPath, mainWindow);
 };

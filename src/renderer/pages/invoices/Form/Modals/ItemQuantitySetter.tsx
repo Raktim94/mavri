@@ -7,14 +7,14 @@ import { validators } from '../../../../shared/utils/validatorFunctions';
 
 interface Props {
   isOpen: boolean;
-  currQuantity?: number;
+  currQuantity?: string;
   onCancel?: () => void;
-  onSave?: (quantity: number) => void;
+  onSave?: (quantity: string) => void;
 }
 const ItemQuantitySetterComponent: FC<Props> = ({ isOpen, currQuantity, onCancel = () => {}, onSave = () => {} }) => {
   const { t } = useTranslation();
   const [isFormValid, setIsFormValid] = useState(true);
-  const [quantity, setQuantity] = useState<number | undefined>(currQuantity ?? 0);
+  const [quantity, setQuantity] = useState<number | undefined>(Number(currQuantity ?? 0));
   const [quantityError, setQuantityErrors] = useState(false);
 
   useEffect(() => {
@@ -24,7 +24,7 @@ const ItemQuantitySetterComponent: FC<Props> = ({ isOpen, currQuantity, onCancel
   }, [quantity]);
 
   useEffect(() => {
-    setQuantity(currQuantity ?? 0);
+    setQuantity(Number(currQuantity ?? 0));
   }, [currQuantity]);
 
   return (
@@ -36,7 +36,7 @@ const ItemQuantitySetterComponent: FC<Props> = ({ isOpen, currQuantity, onCancel
         formData={quantity}
         onClose={onCancel}
         onSave={data => {
-          onSave(data as number);
+          onSave(data as string);
         }}
       />
       <DialogContent sx={{ minWidth: '300px' }}>
@@ -46,6 +46,7 @@ const ItemQuantitySetterComponent: FC<Props> = ({ isOpen, currQuantity, onCancel
           value={quantity}
           error={quantityError}
           helperText={quantityError ? t('common.fieldRequired') : ''}
+          decimalScale={3}
           onChange={e => {
             setQuantity(e);
             if (!validators.required((e ?? '').toString())) {

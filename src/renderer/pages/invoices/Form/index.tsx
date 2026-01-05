@@ -211,7 +211,7 @@ const InvoiceFormComponent: FC<Props> = ({
   );
 
   const handleClickItems = useCallback(
-    (data: Item, quantity: number) => {
+    (data: Item, quantity: string) => {
       handleOnClose(setIsDropdownOpenItems);
 
       if (!invoiceForm) return;
@@ -272,7 +272,7 @@ const InvoiceFormComponent: FC<Props> = ({
   );
 
   const handleEditQuantity = useCallback(
-    (quantity: number) => {
+    (quantity: string) => {
       if (!selectedInvoiceItem || !invoiceForm) return;
       startTransition(() => {
         setInvoiceForm(prev => {

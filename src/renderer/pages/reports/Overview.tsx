@@ -86,7 +86,7 @@ export const Overview: FC<Props> = ({ grouped, invoices }) => {
                     };
                   }
 
-                  acc[name].quantity += quantity;
+                  acc[name].quantity += Number(quantity);
                   acc[name].amount += itemTotalAmount;
                 });
 
