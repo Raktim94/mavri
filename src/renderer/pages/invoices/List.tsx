@@ -165,7 +165,7 @@ const InvoiceListItemComponent: FC<Props> = ({ item, isSelected, onEdit }) => {
                 )}
               </Box>
 
-              {item.dueDate && settings && (
+              {item.dueDate && settings && InvoiceStatus.paid !== item.status && (
                 <>
                   {overdueDaysLeft > 0 && (
                     <Typography

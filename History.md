@@ -1,5 +1,13 @@
 # Invoice Builder
 
+## 2026-01-07, version 1.1.2
+
+Bug Fixes
+
+- Export pdf which is empty contained undefined parts in the file name
+- Overdue showed always even on paid
+- Duplicating was setting issuedAt as current date instead of copying it
+
 ## 2026-01-06, version 1.1.1
 
 PDF Preview Bug Fixes

@@ -349,7 +349,7 @@ export const initInvoicesHandlers = (db: Database) => {
         )
         SELECT
           ?, ?, businessId, clientId, currencyId,
-          datetime('now'), dueDate, ?, isArchived, ?, customerNotes,
+          issuedAt, dueDate, ?, isArchived, ?, customerNotes,
           thanksNotes, termsConditionNotes, discountName, businessNameSnapshot,
           businessShortNameSnapshot, businessAddressSnapshot,
           businessRoleSnapshot, businessEmailSnapshot, businessPhoneSnapshot,
