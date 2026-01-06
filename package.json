@@ -54,7 +54,7 @@
     "package": "npm run build && electron-builder --win --x64",
     "release:win": "npm run build && electron-builder --win --x64 --publish always",
     "release:linux": "npm run build && electron-builder --linux --publish always",
-    "release:mac": "npm run build && electron-builder --mac --publish always",
+    "release:mac": "npm run build && electron-builder --mac universal --publish always",
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
