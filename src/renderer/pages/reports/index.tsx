@@ -44,7 +44,7 @@ export const ReportsPage: FC = () => {
   return (
     <>
       <Header onChange={handleOnChange} />
-      <Overview grouped={grouped} invoices={invoices} />
+      <Overview grouped={grouped} invoices={invoices} dates={dates} />
     </>
   );
 };

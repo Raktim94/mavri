@@ -1,4 +1,5 @@
 import { Box, Typography } from '@mui/material';
+import { parseISO } from 'date-fns';
 import { type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NoItem } from '../../shared/components/lists/noItem/NoItem';
@@ -14,8 +15,9 @@ import { TrendChart } from './TrendChart';
 interface Props {
   grouped: InvoicesByCurrency;
   invoices: Invoice[];
+  dates: { from: string; to: string };
 }
-export const Overview: FC<Props> = ({ grouped, invoices }) => {
+export const Overview: FC<Props> = ({ grouped, invoices, dates }) => {
   const { t } = useTranslation();
 
   const toCumulativeTrend = (data: { date: string; total: number }[]) => {
@@ -32,11 +34,18 @@ export const Overview: FC<Props> = ({ grouped, invoices }) => {
       });
   };
 
+  console.log(grouped);
   return (
     <>
       <Box sx={{ mt: 3, height: '100%' }}>
         {Object.entries(grouped).map(([code, data]) => {
-          const filteredInvoices = invoices.filter(inv => inv.currencyId === data.currencyId);
+          const fromDate = parseISO(dates.from);
+          const toDate = parseISO(dates.to);
+          const filteredInvoices = invoices.filter(inv => {
+            if (inv.currencyId !== data.currencyId) return false;
+            const issued = parseISO(inv.issuedAt);
+            return issued >= fromDate && issued <= toDate;
+          });
           const trendChartDataRaw = filteredInvoices.map(inv => {
             const totalAmountCents = getTotalAmountCents(inv);
             const totalAmount = totalAmountCents / inv.currencySubunitSnapshot;
