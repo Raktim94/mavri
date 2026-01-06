@@ -1,5 +1,11 @@
 # Invoice Builder
 
+## 2026-01-06, version 1.1.1
+
+PDF Preview Bug Fixes
+
+- Fixed an issue which caused a UI break when trying to add new invoice while in preview mode with logo available
+
 ## 2026-01-06, version 1.1.0
 
 New features & improvements

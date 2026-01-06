@@ -264,6 +264,7 @@ Please open an issue before starting major work to ensure alignment.
 
 | Version | Status                |
 | ------- | --------------------- |
+| v1.1.1  | ✅ Actively supported |
 | v1.1.0  | ✅ Actively supported |
 | v1.0.7  | ✅ Actively supported |
 | v1.0.5  | ✅ Actively supported |
