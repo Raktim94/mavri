@@ -19,7 +19,7 @@ export const CustomLegend: FC<CustomProps> = ({ payload, chartData }) => {
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
       {payload?.map((entry, index) => {
         const item = chartData[index];
-        const revenue = storeSettings ? formatAmount(item.value, storeSettings.amountFormat) : item.value;
+        const revenue = storeSettings ? (item ? formatAmount(item.value, storeSettings.amountFormat) : 0) : item.value;
 
         return (
           <Box
@@ -40,7 +40,7 @@ export const CustomLegend: FC<CustomProps> = ({ payload, chartData }) => {
             />
             <Box sx={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
               <Typography variant="body2" fontWeight={600}>
-                {item.name}
+                {item?.name}
               </Typography>
               <Typography variant="caption" color="text.secondary">
                 {revenue}
