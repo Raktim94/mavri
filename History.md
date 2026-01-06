@@ -1,5 +1,14 @@
 # Invoice Builder
 
+## 2026-01-06, version 1.1.0
+
+New features & improvements
+
+- Added French language support (translations provided by the community)
+- Quantity now supports decimal values (up to 3 decimal places)
+- macOS support
+- Partial payment status fix - invoices and quotes no longer remain marked as “partial” after all payments are removed.
+
 ## 2026-01-02, version 1.0.7
 
 PDF Preview Bug Fixes & Improvements

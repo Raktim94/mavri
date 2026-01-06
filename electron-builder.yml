@@ -36,3 +36,9 @@ linux:
   category: Office
   maintainer: 'Piratuks <evaldiz@gmail.com>'
   icon: 'src/main/assets/linux-icons'
+
+mac:
+  target:
+    - dmg
+  category: public.app-category.productivity
+  icon: 'src/main/assets/icon.icns'

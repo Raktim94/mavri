@@ -5,6 +5,7 @@
 [![Latest Release](https://img.shields.io/github/v/release/piratuks/invoice-builder)](https://github.com/piratuks/invoice-builder/releases)
 ![Windows](https://img.shields.io/badge/Windows-10%2B-blue?logo=windows)
 ![Linux](https://img.shields.io/badge/Linux-DEB-blue?logo=linux)
+![macOS](https://img.shields.io/badge/macOS-DMG-lightgrey?logo=apple&logoColor=white)
 
 **Offline invoicing with full data ownership.**
 
@@ -26,7 +27,7 @@ Invoice Builder is designed for freelancers, contractors, and small businesses w
 - **Full ownership of their data** — no cloud lock‑in
 - **Offline access** — works anywhere, anytime
 - **A predictable, transparent tool** — no subscriptions, no hidden sync
-- **Cross-platform support** — Windows & Linux
+- **Cross-platform support** — macOS, Windows & Linux
 - **Import/export freedom** — JSON, XLSX, full database backups
 - **Highly customizable PDFs** — branding, layout, colors, typography
 
@@ -87,7 +88,7 @@ If you value **privacy, portability, and control**, this app is built for you.
 
 ### Settings & Customization
 
-- Language selection: currently English and Lithuanian
+- Language selection: currently French, English and Lithuanian
 - Number & date formatting (e.g. `1,234.10` vs `1.234,10`)
 - Invoice/quote number prefix & suffix
 - File name customization for exported PDFs
@@ -99,6 +100,7 @@ If you value **privacy, portability, and control**, this app is built for you.
 
 - **Windows:** 10 or newer, 64-bit
 - **Linux:** any modern distribution (Ubuntu, Debian, Linux Mint, etc.) supporting .deb packages
+- **macOS:** 10.15 (Catalina) or newer, 64-bit, .dmg installer available
 - **Memory:** 2 GB RAM minimum (1 GB may work for very small datasets)
 - **Disk space:** ~100 MB for the installer; ~500mb for the app; additional space needed for database files
 
@@ -262,6 +264,7 @@ Please open an issue before starting major work to ensure alignment.
 
 | Version | Status                |
 | ------- | --------------------- |
+| v1.1.0  | ✅ Actively supported |
 | v1.0.7  | ✅ Actively supported |
 | v1.0.5  | ✅ Actively supported |
 
