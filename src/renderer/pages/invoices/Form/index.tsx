@@ -349,7 +349,7 @@ const InvoiceFormComponent: FC<Props> = ({
     (newInvoiceForm: InvoiceFromData) => {
       const { totalAmount, totalAmountPaid } = getFinancialData({ storeSettings, invoiceForm: newInvoiceForm });
 
-      if (totalAmountPaid < totalAmount) {
+      if (totalAmountPaid < totalAmount && totalAmountPaid > 0) {
         return InvoiceStatus.partiallyPaid;
       } else if (totalAmountPaid >= totalAmount) {
         return InvoiceStatus.paid;
