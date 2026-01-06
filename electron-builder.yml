@@ -41,5 +41,4 @@ mac:
   target:
     - dmg
   category: public.app-category.productivity
-  # TODO
-  icon: 'src/main/assets/mac-icon.icns'
+  icon: 'src/main/assets/icon.icns'
