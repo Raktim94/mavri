@@ -40,5 +40,6 @@ linux:
 mac:
   target:
     - dmg
+  arch: ['arm64']
   category: public.app-category.productivity
   icon: 'src/main/assets/icon.icns'
