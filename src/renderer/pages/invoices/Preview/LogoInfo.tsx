@@ -9,6 +9,7 @@ interface Props {
 }
 const LogoInfoComponent: FC<Props> = ({ invoiceForm, logoUrl }) => {
   if (!logoUrl) return null;
+  if (!invoiceForm?.businessLogoSnapshot) return null;
 
   return <Image style={[{ ...LOGO_SIZES[invoiceForm?.customizationLogoSize ?? DEFAULT_LOGO_SIZES] }]} src={logoUrl} />;
 };
