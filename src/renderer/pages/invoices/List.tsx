@@ -165,50 +165,53 @@ const InvoiceListItemComponent: FC<Props> = ({ item, isSelected, onEdit }) => {
                 )}
               </Box>
 
-              {item.dueDate && settings && InvoiceStatus.paid !== item.status && (
-                <>
-                  {overdueDaysLeft > 0 && (
-                    <Typography
-                      color={theme.palette.warning.main}
-                      component="div"
-                      variant="body2"
-                      fontSize={'small'}
-                      sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                    >
-                      {t('invoices.dueDate', {
-                        days: overdueDaysLeft,
-                        date: formatDate(item.dueDate, settings.dateFormat)
-                      })}
-                    </Typography>
-                  )}
-                  {overdueDaysLeft < 0 && (
-                    <Typography
-                      color={theme.palette.error.main}
-                      component="div"
-                      variant="body2"
-                      fontSize={'small'}
-                      sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                    >
-                      {t('invoices.overdue', {
-                        days: Math.abs(overdueDaysLeft)
-                      })}
-                    </Typography>
-                  )}
-                  {overdueDaysLeft === 0 && (
-                    <Typography
-                      color={theme.palette.warning.main}
-                      component="div"
-                      variant="body2"
-                      fontSize={'small'}
-                      sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                    >
-                      {t('invoices.dueToday', {
-                        date: formatDate(item.dueDate, settings.dateFormat)
-                      })}
-                    </Typography>
-                  )}
-                </>
-              )}
+              {item.dueDate &&
+                settings &&
+                InvoiceStatus.paid !== item.status &&
+                InvoiceStatus.closed !== item.status && (
+                  <>
+                    {overdueDaysLeft > 0 && (
+                      <Typography
+                        color={theme.palette.warning.main}
+                        component="div"
+                        variant="body2"
+                        fontSize={'small'}
+                        sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                      >
+                        {t('invoices.dueDate', {
+                          days: overdueDaysLeft,
+                          date: formatDate(item.dueDate, settings.dateFormat)
+                        })}
+                      </Typography>
+                    )}
+                    {overdueDaysLeft < 0 && (
+                      <Typography
+                        color={theme.palette.error.main}
+                        component="div"
+                        variant="body2"
+                        fontSize={'small'}
+                        sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                      >
+                        {t('invoices.overdue', {
+                          days: Math.abs(overdueDaysLeft)
+                        })}
+                      </Typography>
+                    )}
+                    {overdueDaysLeft === 0 && (
+                      <Typography
+                        color={theme.palette.warning.main}
+                        component="div"
+                        variant="body2"
+                        fontSize={'small'}
+                        sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                      >
+                        {t('invoices.dueToday', {
+                          date: formatDate(item.dueDate, settings.dateFormat)
+                        })}
+                      </Typography>
+                    )}
+                  </>
+                )}
               {item.status === InvoiceStatus.paid && latestPaidAt && settings && (
                 <>
                   <Typography

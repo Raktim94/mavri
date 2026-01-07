@@ -83,6 +83,8 @@ const ShippingFeesDropdownComponent: FC<Props> = ({ isOpen, currShippingFee, onC
                 setShippingFee(e);
                 if (!validators.required((e ?? '').toString())) {
                   setShippingFeeErrors(true);
+                } else {
+                  setShippingFeeErrors(false);
                 }
               }}
             />

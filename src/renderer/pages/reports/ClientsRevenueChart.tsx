@@ -1,7 +1,7 @@
 import { Box, Typography, useTheme } from '@mui/material';
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Cell, Legend, Pie, PieChart, ResponsiveContainer, type PieLabelRenderProps } from 'recharts';
+import { Cell, Pie, PieChart, ResponsiveContainer, type PieLabelRenderProps } from 'recharts';
 import type { ClientRevenue } from '../../shared/types/clientRevenue';
 import { CustomLegend } from './CustomLegent';
 
@@ -9,7 +9,7 @@ interface Props {
   data: ClientRevenue[];
 }
 
-export const ClientsRevenueChart: React.FC<Props> = ({ data }) => {
+const ClientsRevenueChartComponent: React.FC<Props> = ({ data }) => {
   const theme = useTheme();
   const { t } = useTranslation();
 
@@ -57,32 +57,35 @@ export const ClientsRevenueChart: React.FC<Props> = ({ data }) => {
         </Typography>
       </Box>
 
-      <ResponsiveContainer width="100%" height={300}>
-        <PieChart>
-          <Pie
-            data={chartData}
-            dataKey="value"
-            nameKey="name"
-            cx="50%"
-            cy="50%"
-            innerRadius={40}
-            outerRadius={100}
-            paddingAngle={2}
-            labelLine={false}
-            label={renderPercentageLabel}
-          >
-            {chartData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color} />
-            ))}
-          </Pie>
-          <Legend
-            layout="vertical"
-            align="right"
-            verticalAlign="middle"
-            content={props => <CustomLegend {...props} chartData={chartData} />}
-          />
-        </PieChart>
-      </ResponsiveContainer>
+      <Box display="flex" alignItems="center" justifyContent="center">
+        <Box flex="0 0 300px" height={300}>
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={chartData}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                innerRadius={40}
+                outerRadius={100}
+                paddingAngle={2}
+                labelLine={false}
+                label={renderPercentageLabel}
+              >
+                {chartData.map((entry, index) => (
+                  <Cell key={index} fill={entry.color} />
+                ))}
+              </Pie>
+            </PieChart>
+          </ResponsiveContainer>
+        </Box>
+
+        <Box ml={3}>
+          <CustomLegend chartData={chartData} />
+        </Box>
+      </Box>
     </Box>
   );
 };
+export const ClientsRevenueChart = memo(ClientsRevenueChartComponent);

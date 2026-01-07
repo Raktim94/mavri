@@ -1,4 +1,5 @@
 import { Box, Typography, useTheme } from '@mui/material';
+import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { formatDate } from '../../shared/utils/formatFunctions';
@@ -9,7 +10,7 @@ import { CustomTooltip } from './CustomTooltip';
 interface Props {
   data: { date: string; total: number }[];
 }
-export const TrendChart: React.FC<Props> = ({ data }) => {
+const TrendChartComponent: React.FC<Props> = ({ data }) => {
   const theme = useTheme();
   const { t } = useTranslation();
   const storeSettings = useAppSelector(selectSettings);
@@ -37,3 +38,4 @@ export const TrendChart: React.FC<Props> = ({ data }) => {
     </Box>
   );
 };
+export const TrendChart = memo(TrendChartComponent);

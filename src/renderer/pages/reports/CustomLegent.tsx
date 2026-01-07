@@ -1,25 +1,27 @@
 import { Box, Typography } from '@mui/material';
-import type { FC } from 'react';
-import type { Props } from 'recharts/types/component/DefaultLegendContent';
+import { memo, type FC } from 'react';
 import { formatAmount } from '../../shared/utils/formatFunctions';
 import { useAppSelector } from '../../state/configureStore';
 import { selectSettings } from '../../state/pageSlice';
 
-interface CustomProps extends Props {
+interface CustomProps {
   chartData: {
     name: string;
     value: number;
     color: string;
   }[];
 }
-export const CustomLegend: FC<CustomProps> = ({ payload, chartData }) => {
+const CustomLegendComponent: FC<CustomProps> = ({ chartData }) => {
   const storeSettings = useAppSelector(selectSettings);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-      {payload?.map((entry, index) => {
-        const item = chartData[index];
-        const revenue = storeSettings ? (item ? formatAmount(item.value, storeSettings.amountFormat) : 0) : item.value;
+      {chartData?.map((entry, index) => {
+        const revenue = storeSettings
+          ? entry
+            ? formatAmount(entry.value, storeSettings.amountFormat)
+            : 0
+          : entry.value;
 
         return (
           <Box
@@ -40,7 +42,7 @@ export const CustomLegend: FC<CustomProps> = ({ payload, chartData }) => {
             />
             <Box sx={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
               <Typography variant="body2" fontWeight={600}>
-                {item?.name}
+                {entry?.name}
               </Typography>
               <Typography variant="caption" color="text.secondary">
                 {revenue}
@@ -52,3 +54,4 @@ export const CustomLegend: FC<CustomProps> = ({ payload, chartData }) => {
     </Box>
   );
 };
+export const CustomLegend = memo(CustomLegendComponent);

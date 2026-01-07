@@ -53,7 +53,7 @@ export const InvoicesPage: FC<Props> = ({ type }) => {
     },
     {
       type: FilterType.status,
-      label: t('currencies.status'),
+      label: t('common.status'),
       value: FilterType.status,
       options:
         type === InvoiceType.quotation

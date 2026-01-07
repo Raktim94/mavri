@@ -1,4 +1,5 @@
 import { Paper, Typography, useTheme } from '@mui/material';
+import { memo } from 'react';
 import { type TooltipContentProps } from 'recharts';
 import type { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
 import { formatAmount, formatDate } from '../../shared/utils/formatFunctions';
@@ -7,7 +8,7 @@ import { selectSettings } from '../../state/pageSlice';
 
 type TrendTooltipProps = TooltipContentProps<ValueType, NameType>;
 
-export const CustomTooltip: React.FC<TrendTooltipProps> = ({ active, payload, label }) => {
+const CustomTooltipComponent: React.FC<TrendTooltipProps> = ({ active, payload, label }) => {
   const theme = useTheme();
   const storeSettings = useAppSelector(selectSettings);
 
@@ -34,3 +35,4 @@ export const CustomTooltip: React.FC<TrendTooltipProps> = ({ active, payload, la
     </Paper>
   );
 };
+export const CustomTooltip = memo(CustomTooltipComponent);

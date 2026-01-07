@@ -19,7 +19,7 @@ import {
   startOfYear,
   subDays
 } from 'date-fns';
-import { useCallback, useEffect, useState, type FC } from 'react';
+import { memo, useCallback, useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ReportRangeType } from '../../shared/enums/reportRangeType';
 import { toUTCISOString } from '../../shared/utils/formatFunctions';
@@ -31,7 +31,7 @@ interface Props {
   onChange?: (value: { from: string; to: string }) => void;
 }
 
-export const Header: FC<Props> = ({ onChange = () => {} }) => {
+const HeaderComponent: FC<Props> = ({ onChange = () => {} }) => {
   const theme = useTheme();
   const { t } = useTranslation();
   const storeSettings = useAppSelector(selectSettings);
@@ -184,3 +184,4 @@ export const Header: FC<Props> = ({ onChange = () => {} }) => {
     </>
   );
 };
+export const Header = memo(HeaderComponent);

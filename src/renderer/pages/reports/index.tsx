@@ -36,15 +36,15 @@ export const ReportsPage: FC = () => {
     });
   }, []);
 
-  const grouped = useMemo(() => {
-    if (!invoices) return {};
-    return aggregateInvoicesByCurrency(invoices, dates.from, dates.to);
+  const groupedMeta = useMemo(() => {
+    if (!invoices) return { groups: {}, invoices: [] };
+    return { groups: aggregateInvoicesByCurrency(invoices, dates.from, dates.to), invoices: invoices };
   }, [invoices, dates]);
 
   return (
     <>
       <Header onChange={handleOnChange} />
-      <Overview grouped={grouped} invoices={invoices} dates={dates} />
+      <Overview groupedMeta={groupedMeta} dates={dates} />
     </>
   );
 };

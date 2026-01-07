@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import { parseISO } from 'date-fns';
-import { type FC } from 'react';
+import { memo, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NoItem } from '../../shared/components/lists/noItem/NoItem';
 import type { ClientRevenue } from '../../shared/types/clientRevenue';
@@ -13,12 +13,12 @@ import { ItemsSalesChart } from './ItemsSalesChart';
 import { TrendChart } from './TrendChart';
 
 interface Props {
-  grouped: InvoicesByCurrency;
-  invoices: Invoice[];
+  groupedMeta: { groups: InvoicesByCurrency; invoices: Invoice[] };
   dates: { from: string; to: string };
 }
-export const Overview: FC<Props> = ({ grouped, invoices, dates }) => {
+const OverviewComponent: FC<Props> = ({ groupedMeta, dates }) => {
   const { t } = useTranslation();
+  const { groups, invoices } = groupedMeta;
 
   const toCumulativeTrend = (data: { date: string; total: number }[]) => {
     let running = 0;
@@ -34,11 +34,10 @@ export const Overview: FC<Props> = ({ grouped, invoices, dates }) => {
       });
   };
 
-  console.log(grouped);
   return (
     <>
       <Box sx={{ mt: 3, height: '100%' }}>
-        {Object.entries(grouped).map(([code, data]) => {
+        {Object.entries(groups).map(([code, data]) => {
           const fromDate = parseISO(dates.from);
           const toDate = parseISO(dates.to);
           const filteredInvoices = invoices.filter(inv => {
@@ -117,8 +116,10 @@ export const Overview: FC<Props> = ({ grouped, invoices, dates }) => {
             </Box>
           );
         })}
-        {Object.entries(grouped).length <= 0 && <NoItem text={t('reports.noItems')} />}
+        {Object.entries(groups).length <= 0 && <NoItem text={t('reports.noItems')} />}
       </Box>
     </>
   );
 };
+
+export const Overview = memo(OverviewComponent);

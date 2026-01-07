@@ -97,6 +97,7 @@ const AttachmentsListComponent: FC<Props> = ({ invoiceForm, onAttach, onClear })
           flexDirection: 'row',
           justifyContent: 'start',
           alignItems: 'start',
+          flexWrap: 'wrap',
           width: '100%',
           gap: 1
         }}

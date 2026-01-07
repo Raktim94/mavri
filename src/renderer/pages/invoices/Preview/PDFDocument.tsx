@@ -120,6 +120,7 @@ const PDFDocumentComponent: FC<Props> = ({
             { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].page }
           ]}
         >
+          <WatermarkInfo invoiceForm={invoiceForm} watermarkUrl={watermarkUrl} />
           <Image style={PDF_STYLES.attachment} src={item.url} />
           <PageCounterInfo invoiceForm={invoiceForm} ofLabel={pdfTexts.of} pageLabel={pdfTexts.page} />
         </Page>

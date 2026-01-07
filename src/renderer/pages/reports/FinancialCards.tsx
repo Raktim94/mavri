@@ -1,5 +1,5 @@
 import { Grid, useTheme } from '@mui/material';
-import { type FC } from 'react';
+import { memo, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SummaryCard } from '../../shared/components/layout/summaryCard/SummaryCard';
 import { Themes } from '../../shared/enums/themes';
@@ -11,7 +11,7 @@ import { selectSettings } from '../../state/pageSlice';
 interface Props {
   data: InvoicesByCurrencyMeta;
 }
-export const FinancialCards: FC<Props> = ({ data }) => {
+const FinancialCardsComponent: FC<Props> = ({ data }) => {
   const theme = useTheme();
   const { t } = useTranslation();
   const storeSettings = useAppSelector(selectSettings);
@@ -60,3 +60,4 @@ export const FinancialCards: FC<Props> = ({ data }) => {
     </Grid>
   );
 };
+export const FinancialCards = memo(FinancialCardsComponent);

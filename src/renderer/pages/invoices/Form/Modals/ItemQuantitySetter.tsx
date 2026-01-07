@@ -51,6 +51,8 @@ const ItemQuantitySetterComponent: FC<Props> = ({ isOpen, currQuantity, onCancel
             setQuantity(e);
             if (!validators.required((e ?? '').toString())) {
               setQuantityErrors(true);
+            } else {
+              setQuantityErrors(false);
             }
           }}
         />
