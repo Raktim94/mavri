@@ -1,5 +1,12 @@
 # Invoice Builder
 
+## 2026-01-07, version 1.1.4
+
+Bug Fixes
+
+- Fixed the More Actions dropdown so it hides after an action is selected
+- Fixed the Delete action to deselect the previously selected (deleted) item
+
 ## 2026-01-07, version 1.1.3
 
 Bug Fixes

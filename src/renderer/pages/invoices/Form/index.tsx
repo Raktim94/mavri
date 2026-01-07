@@ -611,18 +611,25 @@ const InvoiceFormComponent: FC<Props> = ({
         onClose={() => handleOnClose(setMoreActionDropdown)}
         onOpen={() => handleOnOpen(setMoreActionDropdown)}
         onDelete={() => {
+          handleOnClose(setMoreActionDropdown);
+          setInvoiceForm(undefined);
           if (invoiceForm?.id !== undefined) handleDelete(invoiceForm.id);
         }}
         onDuplicate={() => {
+          handleOnClose(setMoreActionDropdown);
           if (invoiceForm?.id !== undefined) handleDuplicate(invoiceForm.id, type);
         }}
         onMakeInvoice={() => {
+          handleOnClose(setMoreActionDropdown);
           if (invoiceForm?.id !== undefined) handleDuplicate(invoiceForm.id, InvoiceType.invoice);
+        }}
+        onExport={() => {
+          handleOnClose(setMoreActionDropdown);
+          exportPdf();
         }}
         showDelete={invoiceForm?.id !== undefined}
         showDuplicate={invoiceForm?.id !== undefined}
         showMakeInvoice={invoiceForm?.id !== undefined && invoiceForm.invoiceType === InvoiceType.quotation}
-        onExport={exportPdf}
       />
 
       <ItemQuantitySetter
