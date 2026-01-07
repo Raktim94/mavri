@@ -112,7 +112,7 @@ export const CropModal: React.FC<Props> = ({ onClose = () => {}, imageSrc, isOpe
       </AppBar>
 
       <DialogContent sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <ReactCrop crop={crop} aspect={1} onChange={newCrop => setCrop(newCrop)} circularCrop={false} keepSelection>
+        <ReactCrop crop={crop} onChange={newCrop => setCrop(newCrop)} circularCrop={false} keepSelection>
           <img
             src={sanitizeImageSrc(imageSrc)}
             alt={t('common.crop')}

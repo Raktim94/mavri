@@ -21,7 +21,7 @@ const HeaderInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, logoUrl, p
   return (
     <View style={PDF_STYLES.header}>
       {invoiceForm?.customizationLayout === LayoutType.modern && (
-        <View style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart, PDF_STYLES.mb20]}>
+        <View style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart, PDF_STYLES.pb20]}>
           <TitleInfo
             invoiceForm={invoiceForm}
             pdfINVOICELabel={pdfTexts.pdfINVOICE}
@@ -32,7 +32,7 @@ const HeaderInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, logoUrl, p
       )}
       {invoiceForm?.customizationLayout === LayoutType.compact && (
         <>
-          <View style={[PDF_STYLES.alignCenter, PDF_STYLES.mb20]}>
+          <View style={[PDF_STYLES.alignCenter, PDF_STYLES.pb20]}>
             <TitleInfo
               invoiceForm={invoiceForm}
               pdfINVOICELabel={pdfTexts.pdfINVOICE}
@@ -76,7 +76,7 @@ const HeaderInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, logoUrl, p
               pdfQUOTELabel={pdfTexts.pdfQUOTE}
             />
           </View>
-          <View style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart, PDF_STYLES.mt20]}>
+          <View style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart, PDF_STYLES.pt20]}>
             <ClientInfo invoiceForm={invoiceForm} billToLabel={pdfTexts.billTo} />
             <View style={PDF_STYLES.flexGrow} />
             <PaymentInfo invoiceForm={invoiceForm} paymentInfoLabel={pdfTexts.paymentInfo} />

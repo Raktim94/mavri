@@ -10,7 +10,7 @@ interface Props {
 }
 const NotesInfoComponent: FC<Props> = ({ invoiceForm, customerNoteLabel, termsConditionsLabel }) => {
   return (
-    <View style={[PDF_STYLES.mt20]}>
+    <View style={[PDF_STYLES.pt20]}>
       {invoiceForm?.thanksNotes && (
         <View
           style={[
@@ -23,7 +23,7 @@ const NotesInfoComponent: FC<Props> = ({ invoiceForm, customerNoteLabel, termsCo
         </View>
       )}
       {invoiceForm?.customerNotes && (
-        <View style={[PDF_STYLES.mt10]}>
+        <View style={[PDF_STYLES.pt10]}>
           <View
             style={[
               PDF_STYLES.regularBold,
@@ -43,7 +43,7 @@ const NotesInfoComponent: FC<Props> = ({ invoiceForm, customerNoteLabel, termsCo
         </View>
       )}
       {invoiceForm?.termsConditionNotes && (
-        <View style={[PDF_STYLES.mt10]}>
+        <View style={[PDF_STYLES.pt10]}>
           <View
             style={[
               PDF_STYLES.regularBold,

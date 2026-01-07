@@ -1,5 +1,14 @@
 # Invoice Builder
 
+## 2026-01-07, version 1.1.3
+
+Bug Fixes
+
+- Fixed attachment URL issue.
+- Fixed image remove icon visibility over the crop modal (z-index issue).
+- Fixed crop modal to allow changing the aspect ratio.
+- Stabilized pdf preview to ensure consistent attachment display in PDFs.
+
 ## 2026-01-07, version 1.1.2
 
 Bug Fixes

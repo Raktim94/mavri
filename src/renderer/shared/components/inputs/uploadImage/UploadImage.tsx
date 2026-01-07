@@ -153,7 +153,7 @@ export const UploadImage: React.FC<UploadSquareProps> = ({
                 sx={{
                   position: 'absolute',
                   top: 0,
-                  zIndex: 9999,
+                  zIndex: 100,
                   right: 0,
                   height: 24,
                   width: 24,

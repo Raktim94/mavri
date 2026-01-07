@@ -1,4 +1,4 @@
-import { Document, Font, Page, View } from '@react-pdf/renderer';
+import { Document, Font, Image, Page, View } from '@react-pdf/renderer';
 import { memo, type FC } from 'react';
 import { InvoiceStatus } from '../../../shared/enums/invoiceStatus';
 import { LayoutType } from '../../../shared/enums/layoutType';
@@ -7,7 +7,6 @@ import type { Settings } from '../../../shared/types/settings';
 import RobotoBold from './../../../assets/roboto/static/Roboto-Bold.ttf';
 import RobotoItalic from './../../../assets/roboto/static/Roboto-Italic.ttf';
 import RobotoRegular from './../../../assets/roboto/static/Roboto-Regular.ttf';
-import { AttachmentsInfo } from './AttachmentsInfo';
 import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './constant';
 import { FinancialInfo } from './FinancialInfo';
 import { HeaderInfo } from './HeaderInfo';
@@ -78,7 +77,11 @@ const PDFDocumentComponent: FC<Props> = ({
           totalLabel={pdfTexts.totalLabel2}
           itemTaxLabel={pdfTexts.itemTaxLabel}
         />
-        <View style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart, PDF_STYLES.mt10]}>
+        <View
+          wrap={false}
+          style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart, PDF_STYLES.pt10]}
+          minPresenceAhead={20}
+        >
           {invoiceForm?.customizationLayout === LayoutType.compact && (
             <PaymentInfo invoiceForm={invoiceForm} paymentInfoLabel={pdfTexts.paymentInfo} />
           )}
@@ -106,9 +109,21 @@ const PDFDocumentComponent: FC<Props> = ({
           customerNoteLabel={pdfTexts.customerNote}
           termsConditionsLabel={pdfTexts.termsConditions}
         />
-        <AttachmentsInfo attachmentUrls={attachmentUrls} />
         <PageCounterInfo invoiceForm={invoiceForm} ofLabel={pdfTexts.of} pageLabel={pdfTexts.page} />
       </Page>
+      {attachmentUrls.map(item => (
+        <Page
+          key={item.id}
+          size={invoiceForm?.customizationPageFormat}
+          style={[
+            PDF_STYLES.page,
+            { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].page }
+          ]}
+        >
+          <Image style={PDF_STYLES.attachment} src={item.url} />
+          <PageCounterInfo invoiceForm={invoiceForm} ofLabel={pdfTexts.of} pageLabel={pdfTexts.page} />
+        </Page>
+      ))}
     </Document>
   );
 };

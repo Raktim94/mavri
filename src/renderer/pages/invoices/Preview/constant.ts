@@ -54,7 +54,7 @@ export const PDF_STYLES = StyleSheet.create({
     padding: 32,
     fontFamily: 'Roboto'
   },
-  header: { marginBottom: 16 },
+  header: { paddingBottom: 16 },
   row: { flexDirection: 'row' },
   spaceBetween: { justifyContent: 'space-between' },
   flexGrow: { flexGrow: 1 },
@@ -62,11 +62,11 @@ export const PDF_STYLES = StyleSheet.create({
   gap4: { gap: 4 },
   gap5: { gap: 5 },
   gap10: { gap: 10 },
-  mb20: { marginBottom: 20 },
-  mt20: { marginTop: 20 },
-  mt10: { marginTop: 10 },
-  mt5: { marginTop: 5 },
-  mb5: { marginBottom: 5 },
+  pt20: { paddingTop: 20 },
+  pb20: { paddingBottom: 20 },
+  pt10: { paddingTop: 10 },
+  pb5: { paddingBottom: 5 },
+  pt5: { paddingTop: 5 },
   w100: { width: '100%' },
   w40: { width: '40%' },
   textEnd: { textAlign: 'right' },
@@ -89,7 +89,7 @@ export const PDF_STYLES = StyleSheet.create({
   italic: { fontStyle: 'italic' },
   table: {
     width: '100%',
-    marginTop: 10
+    paddingTop: 10
   },
   tableCol: {
     padding: 6
@@ -100,7 +100,7 @@ export const PDF_STYLES = StyleSheet.create({
   tableCellSubtle: {
     color: '#808080'
   },
-  attachment: { width: '100%', maxHeight: '95%' },
+  attachment: { width: '100%', height: '90%', objectFit: 'contain' },
   watermark: {
     position: 'absolute',
     top: '0',
@@ -117,7 +117,7 @@ export const PDF_STYLES = StyleSheet.create({
     transform: 'translate(-50%, -50%) rotate(-30deg)',
     width: 64,
     height: 64,
-    zIndex: 9999
+    opacity: 1
   },
   pageCounter: {
     position: 'absolute',

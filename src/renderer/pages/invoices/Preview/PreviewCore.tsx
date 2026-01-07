@@ -21,48 +21,42 @@ const PreviewCoreComponent: FC<Props> = ({ invoiceForm }) => {
   const [watermarkUrl, setWatermarkUrl] = useState<string | undefined>();
   const [watermarkPaidUrl, setWatermarkPaidUrl] = useState<string | undefined>();
   const [attachmentUrls, setAttachmentUrls] = useState<AttachmentURL[]>([]);
+  const [loading, setLoading] = useState(true);
   const pdfTexts = usePdfTexts(invoiceForm);
 
   useEffect(() => {
     let cancelled = false;
+    setAttachmentUrls([]);
+    setLogoUrl(undefined);
+    setWatermarkUrl(undefined);
+    setWatermarkPaidUrl(undefined);
+    setLoading(true);
 
-    const loadWatermak = async () => {
-      const url = await getWatermarkUrl(invoiceForm);
+    const loadData = async () => {
+      const [logo, watermark, watermarkPaid, attachments] = await Promise.all([
+        getLogoUrl(invoiceForm),
+        getWatermarkUrl(invoiceForm),
+        getWatermarkPaidUrl(invoiceForm),
+        getAttachmentsUrl(invoiceForm)
+      ]);
+
       if (!cancelled) {
-        setWatermarkUrl(url);
+        setLogoUrl(logo);
+        setWatermarkUrl(watermark);
+        setWatermarkPaidUrl(watermarkPaid);
+        setAttachmentUrls(attachments);
+        setLoading(false);
       }
     };
 
-    const loadWatermakPaid = async () => {
-      const url = await getWatermarkPaidUrl(invoiceForm);
-      if (!cancelled) {
-        setWatermarkPaidUrl(url);
-      }
-    };
-
-    const loadLogo = async () => {
-      const url = await getLogoUrl(invoiceForm);
-      if (!cancelled) {
-        setLogoUrl(url);
-      }
-    };
-
-    const loadAttacmentUrls = async () => {
-      const urls = await getAttachmentsUrl(invoiceForm);
-      if (!cancelled) {
-        setAttachmentUrls(urls);
-      }
-    };
-
-    loadWatermak();
-    loadWatermakPaid();
-    loadLogo();
-    loadAttacmentUrls();
+    loadData();
 
     return () => {
       cancelled = true;
     };
   }, [invoiceForm]);
+
+  if (loading) return null;
 
   return (
     <PDFViewer
