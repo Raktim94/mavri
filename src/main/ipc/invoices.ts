@@ -42,8 +42,8 @@ export const initInvoicesHandlers = (db: Database) => {
     'clientAdditionalSnapshot',
     'currencyCodeSnapshot',
     'currencySymbolSnapshot',
-    'invoicePrefixSnapshot',
-    'invoiceSuffixSnapshot',
+    'invoicePrefix',
+    'invoiceSuffix',
     'currencySubunitSnapshot',
     'discountType',
     'discountAmountCents',
@@ -345,7 +345,7 @@ export const initInvoicesHandlers = (db: Database) => {
           clientPhoneSnapshot, clientCodeSnapshot, clientAdditionalSnapshot,
           currencyCodeSnapshot, currencySymbolSnapshot, currencySubunitSnapshot,
           discountType, discountAmountCents, discountPercent, shippingFeeCents,
-          invoicePrefixSnapshot, invoiceSuffixSnapshot, taxName, taxRate, taxType
+          invoicePrefix, invoiceSuffix, taxName, taxRate, taxType
         )
         SELECT
           ?, ?, businessId, clientId, currencyId,
@@ -366,7 +366,7 @@ export const initInvoicesHandlers = (db: Database) => {
           clientPhoneSnapshot, clientCodeSnapshot, clientAdditionalSnapshot,
           currencyCodeSnapshot, currencySymbolSnapshot, currencySubunitSnapshot,
           discountType, discountAmountCents, discountPercent, shippingFeeCents,
-          invoicePrefixSnapshot, invoiceSuffixSnapshot, taxName, taxRate, taxType
+          invoicePrefix, invoiceSuffix, taxName, taxRate, taxType
         FROM invoices WHERE id = ?;
       `;
 

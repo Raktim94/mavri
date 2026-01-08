@@ -167,8 +167,8 @@ export interface Invoice {
   businessNameSnapshot: string;
   businessAddressSnapshot?: string;
   businessRoleSnapshot?: string;
-  invoicePrefixSnapshot?: string;
-  invoiceSuffixSnapshot?: string;
+  invoicePrefix?: string;
+  invoiceSuffix?: string;
   businessShortNameSnapshot: string;
   businessEmailSnapshot?: string;
   businessPhoneSnapshot?: string;
@@ -229,8 +229,8 @@ export interface InvoiceAdd {
   status?: InvoiceStatus;
   customerNotes?: string;
   thanksNotes?: string;
-  invoicePrefixSnapshot?: string;
-  invoiceSuffixSnapshot?: string;
+  invoicePrefix?: string;
+  invoiceSuffix?: string;
   termsConditionNotes?: string;
   discountName?: string;
   businessNameSnapshot?: string;
@@ -301,8 +301,8 @@ export interface InvoiceFromData {
   status?: InvoiceStatus;
   customerNotes?: string;
   thanksNotes?: string;
-  invoicePrefixSnapshot?: string;
-  invoiceSuffixSnapshot?: string;
+  invoicePrefix?: string;
+  invoiceSuffix?: string;
   termsConditionNotes?: string;
   discountName?: string;
   businessNameSnapshot?: string;

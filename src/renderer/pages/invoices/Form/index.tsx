@@ -75,8 +75,8 @@ const InvoiceFormComponent: FC<Props> = ({
       issuedAt: invoiceForm?.issuedAt,
       invoiceNumber: invoiceForm?.invoiceNumber,
       dueDate: invoiceForm?.dueDate,
-      invoicePrefix: invoiceForm?.invoicePrefixSnapshot,
-      invoiceSuffix: invoiceForm?.invoiceSuffixSnapshot
+      invoicePrefix: invoiceForm?.invoicePrefix,
+      invoiceSuffix: invoiceForm?.invoiceSuffix
     }),
     [
       invoiceForm?.id,
@@ -84,8 +84,8 @@ const InvoiceFormComponent: FC<Props> = ({
       invoiceForm?.issuedAt,
       invoiceForm?.invoiceNumber,
       invoiceForm?.dueDate,
-      invoiceForm?.invoicePrefixSnapshot,
-      invoiceForm?.invoiceSuffixSnapshot
+      invoiceForm?.invoicePrefix,
+      invoiceForm?.invoiceSuffix
     ]
   );
 
@@ -302,8 +302,8 @@ const InvoiceFormComponent: FC<Props> = ({
           issuedAt: data.issuedAt ?? '',
           invoiceNumber: data.invoiceNumber ?? '',
           dueDate: data.dueDate,
-          invoicePrefixSnapshot: data.invoicePrefix,
-          invoiceSuffixSnapshot: data.invoiceSuffix
+          invoicePrefix: data.invoicePrefix,
+          invoiceSuffix: data.invoiceSuffix
         });
       });
     },

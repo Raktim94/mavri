@@ -15,7 +15,7 @@ export const runMigrations = async (db: sqlite3.Database) => {
   try {
     const files = fs
       .readdirSync(migrationsPath)
-      .filter(f => f.endsWith('.cjs'))
+      .filter(f => /^\d{8}-\d{2}-.*\.cjs$/.test(f))
       .sort();
 
     await runAsync(
@@ -37,8 +37,10 @@ export const runMigrations = async (db: sqlite3.Database) => {
         const migrationFilePath = join(migrationsPath, file);
         const migrationUrl = pathToFileURL(migrationFilePath).href;
         const migration = await import(migrationUrl);
-        await migration.up(db);
-        await runAsync(db, `INSERT INTO migrations(name) VALUES('${name}')`);
+        if (migration.up) {
+          await migration.up(db);
+          await runAsync(db, `INSERT INTO migrations(name) VALUES('${name}')`);
+        }
       }
     }
   } catch (error) {

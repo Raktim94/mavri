@@ -96,10 +96,9 @@ export const useExportPdf = (data: { invoiceForm?: InvoiceFromData; storeSetting
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
 
-    const hasInvoicePart =
-      invoiceForm.invoicePrefixSnapshot || invoiceForm.invoiceNumber || invoiceForm.invoiceSuffixSnapshot;
+    const hasInvoicePart = invoiceForm.invoicePrefix || invoiceForm.invoiceNumber || invoiceForm.invoiceSuffix;
     const subTypeName = invoiceForm.invoiceType === InvoiceType.invoice ? 'Invoice' : 'Quote';
-    const invoiceNumber = `${hasInvoicePart ? '_' : ''}${invoiceForm.invoicePrefixSnapshot ?? ''}${invoiceForm.invoiceNumber ?? ''}${invoiceForm.invoiceSuffixSnapshot ?? ''}`;
+    const invoiceNumber = `${hasInvoicePart ? '_' : ''}${invoiceForm.invoicePrefix ?? ''}${invoiceForm.invoiceNumber ?? ''}${invoiceForm.invoiceSuffix ?? ''}`;
     const issuedAtDate = invoiceForm?.issuedAt ? parseISO(invoiceForm.issuedAt) : undefined;
     const year = issuedAtDate && storeSettings?.shouldIncludeYear ? `_${issuedAtDate.getFullYear()}` : '';
     const month = issuedAtDate && storeSettings?.shouldIncludeMonth ? `_${MONTH_NAMES[issuedAtDate.getMonth()]}` : '';

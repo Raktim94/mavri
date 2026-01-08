@@ -53,9 +53,9 @@ const InvoiceInformationSelectorComponent: FC<Props> = ({ type, invoiceForm, onE
                 variant="body2"
                 sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}
               >
-                {invoiceForm?.invoicePrefixSnapshot}
+                {invoiceForm?.invoicePrefix}
                 {invoiceForm?.invoiceNumber}
-                {invoiceForm?.invoiceSuffixSnapshot}
+                {invoiceForm?.invoiceSuffix}
               </Typography>
               {storeSettings && invoiceForm?.issuedAt && (
                 <Typography

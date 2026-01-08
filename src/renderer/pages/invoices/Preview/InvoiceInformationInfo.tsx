@@ -70,9 +70,9 @@ const InvoiceInformationInfoComponent: FC<Props> = ({
               { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regular }
             ]}
           >
-            {invoiceForm?.invoicePrefixSnapshot}
+            {invoiceForm?.invoicePrefix}
             {invoiceForm?.invoiceNumber}
-            {invoiceForm?.invoiceSuffixSnapshot}
+            {invoiceForm?.invoiceSuffix}
           </Text>
         </View>
         {storeSettings && invoiceForm?.issuedAt && (
