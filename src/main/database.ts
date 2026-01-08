@@ -361,6 +361,7 @@ const initDatabase = async () => {
       resolve();
     });
   });
+  await runAsync(db, 'PRAGMA foreign_keys = ON;');
 };
 
 const setupDB = async (opts: { fullPath: string; createIfMissing?: boolean; mainWindow: BrowserWindow }) => {

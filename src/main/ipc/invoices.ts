@@ -1,10 +1,17 @@
 import { ipcMain } from 'electron';
 import type { Database } from 'sqlite3';
 import type { Invoice, InvoiceAttachment, InvoiceItem, InvoicePayment } from '../types/invoice';
+import type { FilterData } from '../types/invoiceFilter';
 import { getAllRows, getFirstRow, runDb } from '../utils/dbFuntions';
 import { handleEntity } from '../utils/entitiesFunctions';
 import { mapSqliteError } from '../utils/errorFunctions';
 import { getWhereClauseFromFilters } from '../utils/filterFunctions';
+
+type GetInvoicesOptions = {
+  id?: number;
+  type?: 'invoice' | 'quotation';
+  filter?: FilterData[];
+};
 
 export const initInvoicesHandlers = (db: Database) => {
   const invoiceFields: (keyof Invoice)[] = [
@@ -87,13 +94,9 @@ export const initInvoicesHandlers = (db: Database) => {
     'taxRate',
     'taxType'
   ];
+  const getInvoices = async (options: GetInvoicesOptions) => {
+    const { id, type, filter } = options;
 
-  const handleInvoice = handleEntity<Invoice>(db, 'invoices', invoiceFields);
-  const handleInvoicePayments = handleEntity<InvoicePayment>(db, 'invoice_payments', paymentsFields);
-  const handleInvoiceItems = handleEntity<InvoiceItem>(db, 'invoice_items', itemsFields);
-  const handleAttachments = handleEntity<InvoiceAttachment>(db, 'attachments', attachmentFields);
-
-  ipcMain.handle('get-all-invoices', async (_event, type, filter) => {
     const whereClause = filter
       ? getWhereClauseFromFilters({
           filters: filter,
@@ -106,6 +109,9 @@ export const initInvoicesHandlers = (db: Database) => {
       : '';
 
     const conditions = [];
+    if (id) {
+      conditions.push(`i.id = ${id}`);
+    }
     if (type) {
       conditions.push(`i.invoiceType = '${type}'`);
     }
@@ -113,7 +119,6 @@ export const initInvoicesHandlers = (db: Database) => {
       conditions.push(whereClause);
     }
     const whereSql = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-
     const invoicesSql = `
         SELECT
             i.*,
@@ -155,6 +160,16 @@ export const initInvoicesHandlers = (db: Database) => {
       invoiceAttachments: invoiceAttachments.filter(p => p.parentInvoiceId === invoice.id)
     }));
 
+    return finalInvoices;
+  };
+
+  const handleInvoice = handleEntity<Invoice>(db, 'invoices', invoiceFields);
+  const handleInvoicePayments = handleEntity<InvoicePayment>(db, 'invoice_payments', paymentsFields);
+  const handleInvoiceItems = handleEntity<InvoiceItem>(db, 'invoice_items', itemsFields);
+  const handleAttachments = handleEntity<InvoiceAttachment>(db, 'attachments', attachmentFields);
+
+  ipcMain.handle('get-all-invoices', async (_event, type, filter) => {
+    const finalInvoices = await getInvoices({ type, filter });
     return {
       success: true,
       data: finalInvoices
@@ -378,11 +393,7 @@ export const initInvoicesHandlers = (db: Database) => {
         invoiceId
       ]);
 
-      const duplicatedRow = await getFirstRow(db, 'SELECT * FROM invoices where id = ?;', [duplicatedRowID]);
-
-      if (!duplicatedRow) return { success: false };
-
-      const newInvoiceId = duplicatedRow.id as number;
+      const newInvoiceId = duplicatedRowID;
 
       await runDb(
         db,
@@ -411,7 +422,9 @@ export const initInvoicesHandlers = (db: Database) => {
         [newInvoiceId, invoiceId]
       );
 
-      return { success: true, data: duplicatedRow };
+      const duplicatedRow = await getInvoices({ id: duplicatedRowID });
+
+      return { success: true, data: duplicatedRow[0] };
     } catch (error) {
       return { success: false, ...mapSqliteError(error) };
     }

@@ -250,8 +250,8 @@ export const up = async (db: sqlite3.Database) => {
     await runAsync(db, 'COMMIT;');
     await runAsync(db, 'PRAGMA foreign_keys = ON;');
   } catch (error) {
-    console.log(error);
     await runAsync(db, 'ROLLBACK;');
+    await runAsync(db, 'PRAGMA foreign_keys = ON;');
     return { success: false, ...mapSqliteError(error) };
   }
 };
