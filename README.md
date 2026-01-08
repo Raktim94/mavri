@@ -43,6 +43,7 @@ If you value **privacy, portability, and control**, this app is built for you.
 - Automatic snapshotting of business, client, item, and currency data per invoice/quote
 - Multi-currency support: choose the currency for each invoice/quote individually
 - Responsive layout - usable on small and large screens, resizable windows supported
+- Invoice/Quote translations – select a language per document, independent of app settings
 
 ### Business Data Management
 
