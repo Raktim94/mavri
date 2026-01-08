@@ -61,6 +61,7 @@ export const initItemsHandlers = (db: Database) => {
      LEFT JOIN invoices inv ON ii.parentInvoiceId = inv.id
      GROUP BY it.id
      ${havingClause ? havingClause : ''}
+     ORDER BY it.createdAt DESC
      `;
 
     return {

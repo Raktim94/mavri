@@ -23,6 +23,7 @@ export const getAllEntities =
       LEFT JOIN invoices i ON i.${keyFieldName} = t.id
       GROUP BY t.id
       ${havingClause ? havingClause : ''}
+      ORDER BY t.createdAt DESC
     `;
 
     const data = await getAllRows<T & { invoiceCount: number; quotesCount: number }>(db, sql);

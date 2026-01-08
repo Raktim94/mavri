@@ -52,6 +52,7 @@ const RangeSetterComponent: FC<Props> = ({ isOpen, fromDate, to, onCancel = () =
           <Grid size={{ xs: 12, md: 12 }}>
             {storeSettings && (
               <Datepicker
+                required={true}
                 label={`${t('common.from')}`}
                 value={form.from}
                 format={storeSettings.dateFormat}
@@ -64,6 +65,7 @@ const RangeSetterComponent: FC<Props> = ({ isOpen, fromDate, to, onCancel = () =
           <Grid size={{ xs: 12, md: 12 }}>
             {storeSettings && (
               <Datepicker
+                required={true}
                 label={`${t('common.to')}`}
                 value={form.to}
                 format={storeSettings.dateFormat}

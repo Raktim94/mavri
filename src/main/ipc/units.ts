@@ -56,6 +56,7 @@ export const initUnitsHandlers = (db: Database) => {
        LEFT JOIN invoices inv ON ii.parentInvoiceId = inv.id
        GROUP BY u.id
        ${havingClause ? havingClause : ''}
+       ORDER BY u.createdAt DESC
      `;
     return {
       success: true,
