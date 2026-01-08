@@ -75,11 +75,16 @@ export const up = async (db: sqlite3.Database) => {
           taxName TEXT,
           taxRate REAL NOT NULL DEFAULT 0,
           taxType TEXT CHECK(taxType IN ('exclusive','inclusive','deducted') OR taxType IS NULL),
+          invoiceFullNumber TEXT GENERATED ALWAYS AS (
+                                                      COALESCE(invoicePrefix, '') ||
+                                                      invoiceNumber ||
+                                                      COALESCE(invoiceSuffix, '')
+                                                    ) STORED,
           FOREIGN KEY (businessId) REFERENCES businesses(id),
           FOREIGN KEY (clientId) REFERENCES clients(id),
           FOREIGN KEY (currencyId) REFERENCES currencies(id),
           FOREIGN KEY (convertedFromQuotationId) REFERENCES invoices(id),
-          UNIQUE (businessId, invoiceNumber, invoicePrefix, invoiceSuffix),
+          UNIQUE (businessId, invoiceFullNumber),
           CHECK (
             (discountType = 'fixed' AND discountAmountCents >= 0 AND discountPercent = 0) OR
             (discountType = 'percentage' AND discountPercent <= 100 AND discountPercent >= 0 AND discountAmountCents = 0) OR
