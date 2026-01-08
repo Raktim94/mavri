@@ -71,6 +71,7 @@ export const getAllRows = <T extends Record<string, unknown>>(
 
 export const toSqliteValue = (value: unknown): SqliteValue => {
   if (value === undefined || value === null) return null;
+  if (Buffer.isBuffer(value)) return value;
   if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') return value;
   return JSON.stringify(value);
 };
