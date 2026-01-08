@@ -112,6 +112,7 @@
     "color": "Spalva",
     "compact": "Kompaktiškas",
     "confirm": "Patvirtinti",
+    "confirmDelete": "Ar tikrai norite ištrinti šį elementą? Šio veiksmo nebus galima atšaukti.",
     "confirmation": "Patvirtinimas",
     "creditCard": "Kredito kortelė",
     "dark": "Tamsus",

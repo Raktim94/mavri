@@ -30,6 +30,7 @@ import { ImportExportButton } from '../../controls/importExportButton/ImportExpo
 import { SearchInput } from '../../inputs/searchInput/SearchInput';
 import { NoItem } from '../../lists/noItem/NoItem';
 import { BottomFilterSheet } from '../../modals/bottomFilterSheet/BottomFilterSheet';
+import { Confirmation } from '../../modals/confirmation';
 import { Content } from '../content/Content';
 import { PageAppBar } from '../pageAppBar/PageAppBar';
 
@@ -149,6 +150,7 @@ export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
   const [newItem, setNewItem] = useState<TAdd | undefined>(undefined);
   const [newItemsBatch, setNewItemsBatch] = useState<TAdd[] | undefined>(undefined);
   const [changedItem, setChangedItem] = useState<TUpdate | undefined>(undefined);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const { items, execute: reload } = useRetrieve({
     filter: selectedFilter,
@@ -306,7 +308,17 @@ export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
 
   const onDelete = useCallback((id: number) => {
     setDeleteID(id);
+    setShowDeleteConfirm(true);
   }, []);
+
+  const handleCancelDelete = useCallback(() => {
+    setShowDeleteConfirm(false);
+  }, []);
+
+  const handleConfirmDelete = useCallback(() => {
+    handleCancelDelete();
+    if (deleteID !== -1) deleteItem();
+  }, [deleteID, handleCancelDelete, deleteItem]);
 
   const onDuplicate = useCallback((id: number) => {
     setDuplicateID(id);
@@ -401,10 +413,6 @@ export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
   useEffect(() => {
     if (duplicateID !== -1) duplicateItem();
   }, [duplicateID, duplicateItem]);
-
-  useEffect(() => {
-    if (deleteID !== -1) deleteItem();
-  }, [deleteID, deleteItem]);
 
   useEffect(() => {
     if (newItemsBatch !== undefined) addItemsBatch();
@@ -616,6 +624,12 @@ export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
   return (
     <>
       {(!inlineOnAdd && isModalOpen && crBusiness) || (inlineOnAdd && !isDesktop && isModalOpen && crBusiness)}
+      <Confirmation
+        onCancel={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        isOpen={showDeleteConfirm}
+        text={t('common.confirmDelete')}
+      />
 
       <Grid container component="div" spacing={2} justifyContent="center" alignItems="stretch" sx={{ height: '100%' }}>
         {!showRightSide && leftColumn}

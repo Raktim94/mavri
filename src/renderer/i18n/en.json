@@ -112,6 +112,7 @@
     "color": "Color",
     "compact": "Compact",
     "confirm": "Confirm",
+    "confirmDelete": "Are you sure you want to delete this item? This action cannot be undone.",
     "confirmation": "Confirmation",
     "creditCard": "Credit card",
     "dark": "Dark",
