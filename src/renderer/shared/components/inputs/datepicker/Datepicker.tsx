@@ -1,3 +1,5 @@
+import ClearIcon from '@mui/icons-material/Clear';
+import IconButton from '@mui/material/IconButton';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -44,10 +46,17 @@ export const Datepicker: React.FC<Props> = ({
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <DatePicker
         sx={{ width: '100%' }}
+        views={['year', 'month', 'day']}
+        openTo="day"
         label={label}
         value={currValue ? dayjs.utc(currValue) : null}
         format={format.toUpperCase()}
         onChange={newValue => {
+          if (!newValue) {
+            setSelectedValue(undefined);
+            return;
+          }
+
           const now = dayjs();
           const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
           const combined = dayjs.tz(newValue?.format('YYYY-MM-DD') + ' ' + now.format('HH:mm:ss'), tz);
@@ -64,7 +73,20 @@ export const Datepicker: React.FC<Props> = ({
               e.preventDefault();
             },
             InputProps: {
-              readOnly: true
+              readOnly: true,
+              startAdornment:
+                !required && currValue ? (
+                  <IconButton
+                    size="small"
+                    onClick={e => {
+                      e.stopPropagation();
+                      setCurrValue(undefined);
+                      setSelectedValue(undefined);
+                    }}
+                  >
+                    <ClearIcon fontSize="small" />
+                  </IconButton>
+                ) : undefined
             }
           }
         }}

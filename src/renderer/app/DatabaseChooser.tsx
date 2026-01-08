@@ -138,7 +138,7 @@ export const DatabaseChooser: FC<Props> = ({ onDatabaseRead }) => {
         alignItems: 'center',
         justifyContent: 'start',
         gap: 3,
-        mt: 5
+        pt: 5
       }}
     >
       <Typography variant="h5" noWrap component="div" sx={{ color: theme.palette.secondary.main }}>

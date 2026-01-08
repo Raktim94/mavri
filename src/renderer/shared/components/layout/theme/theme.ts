@@ -66,6 +66,16 @@ export const lightTheme = createTheme({
             border: '2px solid #e5e5e5'
           },
           scrollbarColor: '#1976d2 #e5e5e5'
+        },
+        '*': {
+          '&::-webkit-scrollbar-track': {
+            background: '#e5e5e5'
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: '#1976d2',
+            border: '2px solid #e5e5e5'
+          },
+          scrollbarColor: '#1976d2 #e5e5e5'
         }
       }
     }
@@ -92,6 +102,16 @@ export const darkTheme = createTheme({
     MuiCssBaseline: {
       styleOverrides: {
         body: {
+          '&::-webkit-scrollbar-track': {
+            background: '#2c2c2c'
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: '#1976d2',
+            border: '2px solid #2c2c2c'
+          },
+          scrollbarColor: '#1976d2 #2c2c2c'
+        },
+        '*': {
           '&::-webkit-scrollbar-track': {
             background: '#2c2c2c'
           },
