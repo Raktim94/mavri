@@ -1,5 +1,43 @@
 # Invoice Builder
 
+## 2026-01-08, version 1.2.0
+
+Bug Fixes
+
+- Fixed incorrect translations under the Invoice Status filter.
+- Fixed Quantity field error not showing the correct value.
+- Fixed Shipping Fees field error not showing the correct value.
+- Fixed Closed state incorrectly showing overdue status.
+- Fixed Normal watermark not appearing on attachments.
+- Fixed Legend in reporting: vertical layout now fits when there are many items.
+- Fixed Attachments layout to wrap correctly.
+- Fixed Date fields: allow removing value if not required; delete keyboard button no longer triggers errors.
+- Fixed Import/Export JSON functionality.
+- Fixed Report aggregation to respect date filter.
+- Fixed layout issue for invoices on smaller screens.
+
+UX / Interaction Improvements
+
+- Delete now deselects the previous item and shows the correct selection.
+- Add New immediately selects the new item after saving.
+- Duplicate invoices/quotes now select the newly created item automatically.
+- Reports: custom dates are now required.
+- Add new items appear at the top instead of the bottom of the list.
+- Delete shows a confirmation prompt.
+- First screen scroll style is now consistent across all pages.
+- Date fields now allow selecting month, similar to year selection.
+
+Functional Updates
+
+- Invoice uniqueness now enforced on: (business ID, and invoice number combined with suffix and prefix).
+- Renamed Invoice Number Suffix and Prefix Snapshot columns to clarify they are not snapshots.
+- Ghost data cleanup.
+- Invoice/Quote translations now allow selecting a language, instead of always using settings language.
+
+Performance / Reporting
+
+- Reports performance improved.
+
 ## 2026-01-07, version 1.1.4
 
 Bug Fixes
