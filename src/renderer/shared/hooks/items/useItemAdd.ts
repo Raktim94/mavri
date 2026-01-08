@@ -1,10 +1,10 @@
 import { useCallback } from 'react';
-import type { ItemAdd } from '../../types/item';
+import type { Item, ItemAdd } from '../../types/item';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
 import { useAsyncAction } from '../useAsyncAction';
 
-interface UseItemAddParams extends RequestHook<Response<ItemAdd>> {
+interface UseItemAddParams extends RequestHook<Response<Item>> {
   item?: ItemAdd;
 }
 
@@ -14,11 +14,11 @@ export const useItemAdd = ({ item, immediate = true, showLoader = true, onDone }
     return window.electronAPI.addItem(item);
   }, [item]);
 
-  const { data, loading, execute } = useAsyncAction<Response<ItemAdd>>(asyncFn, {
+  const { data, loading, execute } = useAsyncAction<Response<Item>>(asyncFn, {
     immediate,
     showLoader,
     onDone
   });
 
-  return { data, loading, execute };
+  return { data: data?.data, loading, execute };
 };

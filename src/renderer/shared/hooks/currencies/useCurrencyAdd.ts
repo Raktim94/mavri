@@ -1,10 +1,10 @@
 import { useCallback } from 'react';
-import type { CurrencyAdd } from '../../types/currency';
+import type { Currency, CurrencyAdd } from '../../types/currency';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
 import { useAsyncAction } from '../useAsyncAction';
 
-interface UseCurrencyAddParams extends RequestHook<Response<CurrencyAdd>> {
+interface UseCurrencyAddParams extends RequestHook<Response<Currency>> {
   currency?: CurrencyAdd;
 }
 
@@ -14,11 +14,11 @@ export const useCurrencyAdd = ({ currency, immediate = true, showLoader = true, 
     return window.electronAPI.addCurrency(currency);
   }, [currency]);
 
-  const { data, loading, execute } = useAsyncAction<Response<CurrencyAdd>>(asyncFn, {
+  const { data, loading, execute } = useAsyncAction<Response<Currency>>(asyncFn, {
     immediate,
     showLoader,
     onDone
   });
 
-  return { data, loading, execute };
+  return { data: data?.data, loading, execute };
 };

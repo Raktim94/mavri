@@ -27,7 +27,7 @@ export const PageAppBar: FC<Props> = ({
   const [isFormValid, setIsFormValid] = useState(false);
   const [description, setDescription] = useState<string | undefined>(undefined);
   const [formData, setFormData] = useState<unknown | undefined>(undefined);
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const handleChange = useCallback(
     (properties: { changedData: unknown; isFormValid: boolean; description?: string }) => {

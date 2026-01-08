@@ -1,10 +1,10 @@
 import { useCallback } from 'react';
-import type { CategoryAdd } from '../../types/category';
+import type { Category, CategoryAdd } from '../../types/category';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
 import { useAsyncAction } from '../useAsyncAction';
 
-interface UseCategoryAddParams extends RequestHook<Response<CategoryAdd>> {
+interface UseCategoryAddParams extends RequestHook<Response<Category>> {
   category?: CategoryAdd;
 }
 
@@ -14,11 +14,11 @@ export const useCategoryAdd = ({ category, immediate = true, showLoader = true, 
     return window.electronAPI.addCategory(category);
   }, [category]);
 
-  const { data, loading, execute } = useAsyncAction<Response<CategoryAdd>>(asyncFn, {
+  const { data, loading, execute } = useAsyncAction<Response<Category>>(asyncFn, {
     immediate,
     showLoader,
     onDone
   });
 
-  return { data, loading, execute };
+  return { data: data?.data, loading, execute };
 };

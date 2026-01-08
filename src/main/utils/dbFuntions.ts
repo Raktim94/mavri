@@ -8,13 +8,13 @@ export const runAsync = (db: sqlite3.Database, sql: string) =>
     db.run(sql, err => (err ? reject(err) : resolve()));
   });
 
-export const runDb = (db: sqlite3.Database, sql: string, params: SqliteValue[] = []): Promise<void> => {
+export const runDb = (db: sqlite3.Database, sql: string, params: SqliteValue[] = []): Promise<number> => {
   const convertedParams = params.map(p => (p === true ? 1 : p === false ? 0 : p));
 
   return new Promise((resolve, reject) => {
     db.run(sql, convertedParams, function (err) {
       if (err) reject(err);
-      else resolve();
+      else resolve(this.lastID);
     });
   });
 };

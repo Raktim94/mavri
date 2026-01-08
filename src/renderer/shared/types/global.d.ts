@@ -39,44 +39,44 @@ declare global {
       getAllBusinesses: (filter?: FilterData[]) => Promise<Response<Business[]>>;
       updateBusiness: (data: BusinessUpdate) => Promise<Response<BusinessUpdate>>;
       deleteBusiness: (id: number) => Promise<Response<unknown>>;
-      addBusiness: (data: BusinessAdd) => Promise<Response<BusinessAdd>>;
+      addBusiness: (data: BusinessAdd) => Promise<Response<Business>>;
       addBatchBusiness: (data: BusinessAdd[]) => Promise<Response<BusinessAdd[]>>;
 
       getAllClients: (filter?: FilterData[]) => Promise<Response<Client[]>>;
       updateClient: (data: ClientUpdate) => Promise<Response<ClientUpdate>>;
       deleteClient: (id: number) => Promise<Response<unknown>>;
-      addClient: (data: ClientAdd) => Promise<Response<ClientAdd>>;
+      addClient: (data: ClientAdd) => Promise<Response<Client>>;
       addBatchClient: (data: ClientAdd[]) => Promise<Response<ClientAdd[]>>;
 
       getAllItems: (filter?: FilterData[]) => Promise<Response<Item[]>>;
       updateItem: (data: ItemUpdate) => Promise<Response<ItemUpdate>>;
       deleteItem: (id: number) => Promise<Response<unknown>>;
-      addItem: (data: ItemAdd) => Promise<Response<ItemAdd>>;
+      addItem: (data: ItemAdd) => Promise<Response<Item>>;
       addBatchItem: (data: ItemAdd[]) => Promise<Response<ItemAdd[]>>;
 
       getAllUnits: (filter?: FilterData[]) => Promise<Response<Unit[]>>;
       updateUnit: (data: UnitUpdate) => Promise<Response<UnitUpdate>>;
       deleteUnit: (id: number) => Promise<Response<unknown>>;
-      addUnit: (data: UnitAdd) => Promise<Response<UnitAdd>>;
+      addUnit: (data: UnitAdd) => Promise<Response<Unit>>;
       addBatchUnit: (data: UnitAdd[]) => Promise<Response<UnitAdd[]>>;
 
       getAllCategories: (filter?: FilterData[]) => Promise<Response<Category[]>>;
       updateCategory: (data: CategoryUpdate) => Promise<Response<CategoryUpdate>>;
       deleteCategory: (id: number) => Promise<Response<unknown>>;
-      addCategory: (data: CategoryAdd) => Promise<Response<CategoryAdd>>;
+      addCategory: (data: CategoryAdd) => Promise<Response<Category>>;
       addBatchCategory: (data: CategoryAdd[]) => Promise<Response<CategoryAdd[]>>;
 
       getAllCurrencies: (filter?: FilterData[]) => Promise<Response<Currency[]>>;
       updateCurrency: (data: CurrencyUpdate) => Promise<Response<CurrencyUpdate>>;
       deleteCurrency: (id: number) => Promise<Response<unknown>>;
-      addCurrency: (data: CurrencyAdd) => Promise<Response<CurrencyAdd>>;
+      addCurrency: (data: CurrencyAdd) => Promise<Response<Currency>>;
       addBatchCurrency: (data: CurrencyAdd[]) => Promise<Response<CurrencyAdd[]>>;
 
       getAllInvoices: (type?: InvoiceType, filter?: FilterData[]) => Promise<Response<Invoice[]>>;
       deleteInvoice: (id: number) => Promise<Response<unknown>>;
-      addInvoice: (data: InvoiceAdd) => Promise<Response<InvoiceAdd>>;
+      addInvoice: (data: InvoiceAdd) => Promise<Response<Invoice>>;
       updateInvoice: (data: InvoiceUpdate) => Promise<Response<InvoiceUpdate>>;
-      duplicateInvoice: (id: number, invoiceType: InvoiceType) => Promise<Response<unknown>>;
+      duplicateInvoice: (id: number, invoiceType: InvoiceType) => Promise<Response<Invoice>>;
 
       exportAllData: () => Promise<Response<ExportMeta>>;
       importAllData: () => Promise<Response<unknown>>;

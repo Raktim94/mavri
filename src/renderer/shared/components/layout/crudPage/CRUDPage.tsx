@@ -41,6 +41,7 @@ interface Props<T, TAdd, TUpdate> {
     execute: () => void;
   };
   useAdd?: (args: { item?: TAdd; immediate?: boolean; onDone?: (data: Response<TAdd>) => void }) => {
+    data?: T;
     execute: () => void;
   };
   useAddBatch?: (args: { item?: TAdd[]; immediate?: boolean; onDone?: (data: Response<TAdd[]>) => void }) => {
@@ -50,6 +51,7 @@ interface Props<T, TAdd, TUpdate> {
     execute: () => void;
   };
   useDuplicate?: (args: { id: number; immediate?: boolean; onDone?: (data: Response<unknown>) => void }) => {
+    data?: T;
     execute: () => void;
   };
   useDelete?: (args: { id: number; immediate?: boolean; onDone?: (data: Response<unknown>) => void }) => {
@@ -103,6 +105,7 @@ export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
       execute: () => {}
     }),
     useAdd = () => ({
+      data: undefined,
       execute: () => {}
     }),
     useAddBatch = () => ({
@@ -115,6 +118,7 @@ export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
       execute: () => {}
     }),
     useDuplicate = () => ({
+      data: undefined,
       execute: () => {}
     }),
     renderListItem = () => null,
@@ -156,7 +160,7 @@ export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
     }
   });
 
-  const { execute: addItem } = useAdd({
+  const { execute: addItem, data: newRow } = useAdd({
     item: newItem,
     immediate: false,
     onDone: (data: Response<TAdd>) => {
@@ -207,6 +211,7 @@ export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
     onDone: (data: Response<unknown>) => {
       setDeleteID(-1);
       setSelectedItem(undefined);
+      setIsModalOpen(false);
       reload();
 
       if (!data.success) {
@@ -216,12 +221,13 @@ export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
     }
   });
 
-  const { execute: duplicateItem } = useDuplicate({
+  const { execute: duplicateItem, data: duplicatedRow } = useDuplicate({
     id: duplicateID,
     immediate: false,
     onDone: (data: Response<unknown>) => {
       setDuplicateID(-1);
       setSelectedItem(undefined);
+      setIsModalOpen(false);
       reload();
 
       if (!data.success) {
@@ -411,6 +417,14 @@ export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
   useEffect(() => {
     if (changedItem !== undefined) updateItem();
   }, [changedItem, updateItem]);
+
+  useEffect(() => {
+    if (newRow) setSelectedItem(newRow);
+  }, [newRow]);
+
+  useEffect(() => {
+    if (duplicatedRow) setSelectedItem(duplicatedRow);
+  }, [duplicatedRow]);
 
   useEffect(() => {
     setCurrentPage(1);

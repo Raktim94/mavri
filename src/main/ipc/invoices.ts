@@ -179,7 +179,7 @@ export const initInvoicesHandlers = (db: Database) => {
         return { success: false, key: result.key };
       }
 
-      const lastRow = await getFirstRow(db, 'SELECT MAX(id) AS id FROM invoices;');
+      const lastRow = result.data;
 
       if (!lastRow) {
         await runDb(db, 'ROLLBACK');
@@ -213,7 +213,7 @@ export const initInvoicesHandlers = (db: Database) => {
       }
 
       await runDb(db, 'COMMIT');
-      return { success: true };
+      return { success: true, data: lastRow };
     } catch (error) {
       await runDb(db, 'ROLLBACK');
       return { success: false, ...mapSqliteError(error) };
@@ -370,13 +370,19 @@ export const initInvoicesHandlers = (db: Database) => {
         FROM invoices WHERE id = ?;
       `;
 
-      await runDb(db, insertInvoiceSQL, [invoiceType, convertedFromQuotationId, newInvoiceNumber, status, invoiceId]);
+      const duplicatedRowID = await runDb(db, insertInvoiceSQL, [
+        invoiceType,
+        convertedFromQuotationId,
+        newInvoiceNumber,
+        status,
+        invoiceId
+      ]);
 
-      const lastInsertedRow = await getFirstRow(db, 'SELECT MAX(id) AS id FROM invoices;');
+      const duplicatedRow = await getFirstRow(db, 'SELECT * FROM invoices where id = ?;', [duplicatedRowID]);
 
-      if (!lastInsertedRow) return { success: false };
+      if (!duplicatedRow) return { success: false };
 
-      const newInvoiceId = lastInsertedRow.id as number;
+      const newInvoiceId = duplicatedRow.id as number;
 
       await runDb(
         db,
@@ -405,7 +411,7 @@ export const initInvoicesHandlers = (db: Database) => {
         [newInvoiceId, invoiceId]
       );
 
-      return { success: true };
+      return { success: true, data: duplicatedRow };
     } catch (error) {
       return { success: false, ...mapSqliteError(error) };
     }

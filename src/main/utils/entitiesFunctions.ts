@@ -1,7 +1,7 @@
 import type { Database } from 'sqlite3';
 import type { EntityWithId } from '../types/entityWithId';
 import type { FilterData } from '../types/invoiceFilter';
-import { getAllRows, runDb } from './dbFuntions';
+import { getAllRows, getFirstRow, runDb } from './dbFuntions';
 import { mapSqliteError } from './errorFunctions';
 import { getHavingClauseFromFilters } from './filterFunctions';
 
@@ -37,22 +37,24 @@ export const handleEntity =
   <T extends EntityWithId>(db: Database, table: string, fields: readonly (keyof T)[]) =>
   async (data: T, isUpdate = false) => {
     const params = fields.map(key => (data[key] ?? null) as string | number | null);
-
+    let lastID = -1;
     try {
       if (isUpdate) {
         const setClause = fields.map(f => `${String(f)} = ?`).join(', ') + `, updatedAt = datetime('now')`;
 
-        await runDb(db, `UPDATE ${table} SET ${setClause} WHERE id = ?`, [...params, data.id ?? -1]);
+        lastID = await runDb(db, `UPDATE ${table} SET ${setClause} WHERE id = ?`, [...params, data.id ?? -1]);
       } else {
-        await runDb(
+        lastID = await runDb(
           db,
           `INSERT INTO ${table} (${fields.map(f => String(f)).join(',')}) VALUES (${fields.map(() => '?').join(',')})`,
           params
         );
       }
 
-      return { success: true };
+      const row = await getFirstRow(db, `SELECT * FROM ${table} WHERE id = ?;`, [lastID]);
+
+      return { success: true, data: row, message: undefined, key: undefined };
     } catch (error) {
-      return { success: false, ...mapSqliteError(error) };
+      return { success: false, ...mapSqliteError(error), data: undefined };
     }
   };

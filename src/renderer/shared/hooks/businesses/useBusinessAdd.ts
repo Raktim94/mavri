@@ -1,9 +1,9 @@
 import { useCallback } from 'react';
-import type { BusinessAdd } from '../../types/business';
+import type { Business, BusinessAdd } from '../../types/business';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
 import { useAsyncAction } from '../useAsyncAction';
-interface UseBusinessAddParams extends RequestHook<Response<BusinessAdd>> {
+interface UseBusinessAddParams extends RequestHook<Response<Business>> {
   business?: BusinessAdd;
 }
 
@@ -13,11 +13,11 @@ export const useBusinessAdd = ({ business, immediate = true, showLoader = true, 
     return window.electronAPI.addBusiness(business);
   }, [business]);
 
-  const { data, loading, execute } = useAsyncAction<Response<BusinessAdd>>(asyncFn, {
+  const { data, loading, execute } = useAsyncAction<Response<Business>>(asyncFn, {
     immediate,
     showLoader,
     onDone
   });
 
-  return { data, loading, execute };
+  return { data: data?.data, loading, execute };
 };
