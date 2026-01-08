@@ -195,6 +195,7 @@ export const isInvoiceFromData = (data: unknown): data is InvoiceFromData => {
   if (d.clientId !== undefined && d.clientId !== null && typeof d.clientId !== 'number') return false;
   if (d.currencyId !== undefined && d.currencyId !== null && typeof d.currencyId !== 'number') return false;
   if (d.issuedAt !== undefined && d.issuedAt !== null && typeof d.issuedAt !== 'string') return false;
+  if (d.language !== undefined && d.language !== null && typeof d.language !== 'string') return false;
   if (d.invoiceNumber !== undefined && d.invoiceNumber !== null && typeof d.invoiceNumber !== 'string') return false;
   if (d.status !== undefined && d.status !== null && typeof d.status !== 'string') return false;
   if (d.customizationColor !== undefined && d.customizationColor !== null && typeof d.customizationColor !== 'string')

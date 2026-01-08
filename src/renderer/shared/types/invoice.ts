@@ -1,6 +1,7 @@
 import type { DiscountType } from '../enums/discountType';
 import type { InvoiceStatus } from '../enums/invoiceStatus';
 import type { InvoiceType } from '../enums/invoiceType';
+import type { Language } from '../enums/language';
 import type { LayoutType } from '../enums/layoutType';
 import type { PageFormat } from '../enums/pageFormat';
 import type { PaymentType } from '../enums/paymentType';
@@ -214,6 +215,7 @@ export interface Invoice {
   customizationPaidWatermarkFileType?: string;
   customizationPaidWatermarkFileSize?: number;
   customizationPaidWatermarkFileData?: Uint8Array;
+  language: Language;
 }
 
 export interface InvoiceAdd {
@@ -281,6 +283,7 @@ export interface InvoiceAdd {
   customizationPaidWatermarkFileType?: string;
   customizationPaidWatermarkFileSize?: number;
   customizationPaidWatermarkFileData?: Uint8Array;
+  language?: Language;
 }
 
 export interface InvoiceUpdate extends InvoiceAdd {
@@ -353,4 +356,5 @@ export interface InvoiceFromData {
   customizationPaidWatermarkFileType?: string;
   customizationPaidWatermarkFileSize?: number;
   customizationPaidWatermarkFileData?: Uint8Array;
+  language?: Language;
 }

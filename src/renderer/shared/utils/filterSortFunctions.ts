@@ -7,7 +7,7 @@ export const filterAndSortArray = <T>(params: {
   searchValue: string;
   searchField: keyof T;
   sortField?: keyof T;
-  sortType: SortType;
+  sortType?: SortType;
 }): T[] => {
   const { data, searchValue, searchField, sortField, sortType = SortType.DEFAULT } = params;
 

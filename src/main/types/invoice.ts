@@ -1,3 +1,4 @@
+import type { Language } from '../../renderer/shared/enums/language';
 import type { DiscountType } from '../enums/discountType';
 import type { InvoiceStatus } from '../enums/invoiceStatus';
 import type { InvoiceType } from '../enums/invoiceType';
@@ -75,6 +76,7 @@ export interface Invoice {
   customizationPaidWatermarkFileType?: string;
   customizationPaidWatermarkFileSize?: number;
   customizationPaidWatermarkFileData?: Uint8Array;
+  language: Language;
 }
 
 export interface InvoiceAttachment {

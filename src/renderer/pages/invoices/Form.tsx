@@ -2,6 +2,7 @@ import { memo, useCallback, useDeferredValue, useEffect, useRef, useState, useTr
 import { InvoiceFormMode } from '../../shared/enums/invoiceFormMode';
 import { InvoiceStatus } from '../../shared/enums/invoiceStatus';
 import { InvoiceType } from '../../shared/enums/invoiceType';
+import { Language } from '../../shared/enums/language';
 import { LayoutType } from '../../shared/enums/layoutType';
 import { PageFormat } from '../../shared/enums/pageFormat';
 import { SizeType } from '../../shared/enums/sizeType';
@@ -39,6 +40,7 @@ const InvoiceFormComponent: FC<Props> = ({
       invoiceForm?.currencyId !== undefined &&
       invoiceForm?.issuedAt !== undefined &&
       invoiceForm?.invoiceNumber !== undefined &&
+      invoiceForm?.language !== undefined &&
       invoiceForm?.invoiceItems &&
       invoiceForm?.invoiceItems.length > 0
     ) {
@@ -67,6 +69,7 @@ const InvoiceFormComponent: FC<Props> = ({
           invoiceItems: [],
           invoicePayments: [],
           invoiceAttachments: [],
+          language: Language.en,
           customizationColor: '#006400',
           customizationLogoSize: SizeType.medium,
           customizationFontSizeSize: SizeType.medium,

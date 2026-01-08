@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import type { InvoiceInfo } from '../../../../main/types/invoice';
 import { InvoiceStatus } from '../../../shared/enums/invoiceStatus';
 import { InvoiceType } from '../../../shared/enums/invoiceType';
+import type { Language } from '../../../shared/enums/language';
 import { useExportPdf } from '../../../shared/hooks/useExportPdf ';
 import type { Business } from '../../../shared/types/business';
 import type { Client } from '../../../shared/types/client';
@@ -26,12 +27,13 @@ import { StatusSelector } from './../Form/StatusSelector';
 import { AttachmentsList } from './AttachmentsList';
 import { BusinessSelector } from './BusinessSelector';
 import { ClientInvoiceRow } from './ClientInvoiceRow';
-import { CurrencySelector } from './CurrencySelector';
+import { CurrencyLanguageRow } from './CurrencyLanguageRow';
 import { BusinessesDropdown } from './Dropdowns/BusinessesDropdown';
 import { ClientsDropdown } from './Dropdowns/ClientsDropdown';
 import { CurrenciesDropdown } from './Dropdowns/CurrenciesDropdown';
 import { InvoiceInformationDropdown } from './Dropdowns/InvoiceInformationDropdown';
 import { ItemsDropdown } from './Dropdowns/ItemsDropdown';
+import { LanguageDropdown } from './Dropdowns/LanguageDropdown';
 import { MoreActionDropdown } from './Dropdowns/MoreActionDropdown';
 import { FinancialInfo } from './FinancialInfo';
 import { ItemSelector } from './ItemSelector';
@@ -57,6 +59,7 @@ const InvoiceFormComponent: FC<Props> = ({
 
   const { exportPdf } = useExportPdf({ invoiceForm, storeSettings });
 
+  const [isDropdownOpenLanguages, setIsDropdownOpenLanguages] = useState<boolean>(false);
   const [isDropdownOpenBusinesses, setIsDropdownOpenBusinesses] = useState<boolean>(false);
   const [isDropdownOpenCurrencies, setIsDropdownOpenCurrencies] = useState<boolean>(false);
   const [isDropdownOpenClients, setIsDropdownOpenClients] = useState<boolean>(false);
@@ -489,6 +492,22 @@ const InvoiceFormComponent: FC<Props> = ({
     [setInvoiceForm, invoiceForm]
   );
 
+  const handleOnClickLanguage = useCallback(
+    (data: Language) => {
+      handleOnClose(setIsDropdownOpenLanguages);
+
+      if (!invoiceForm) return;
+
+      startTransition(() => {
+        setInvoiceForm({
+          ...invoiceForm,
+          language: data
+        });
+      });
+    },
+    [setInvoiceForm, invoiceForm, handleOnClose]
+  );
+
   return (
     <Box
       sx={{
@@ -499,7 +518,11 @@ const InvoiceFormComponent: FC<Props> = ({
       }}
     >
       <Divider flexItem />
-      <CurrencySelector onEdit={() => onEdit(setIsDropdownOpenCurrencies)} invoiceForm={invoiceForm} />
+      <CurrencyLanguageRow
+        onEditCurrency={() => onEdit(setIsDropdownOpenCurrencies)}
+        onEditLanguage={() => onEdit(setIsDropdownOpenLanguages)}
+        invoiceForm={invoiceForm}
+      />
       <Divider flexItem />
       <BusinessSelector onEdit={() => onEdit(setIsDropdownOpenBusinesses)} invoiceForm={invoiceForm} />
       <Divider flexItem />
@@ -573,6 +596,12 @@ const InvoiceFormComponent: FC<Props> = ({
         </>
       )}
 
+      <LanguageDropdown
+        isOpen={isDropdownOpenLanguages}
+        onClose={() => handleOnClose(setIsDropdownOpenLanguages)}
+        onOpen={() => handleOnOpen(setIsDropdownOpenLanguages)}
+        onClick={handleOnClickLanguage}
+      />
       <BusinessesDropdown
         isOpen={isDropdownOpenBusinesses}
         onClose={() => handleOnClose(setIsDropdownOpenBusinesses)}
