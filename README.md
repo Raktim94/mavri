@@ -213,6 +213,7 @@ VITE_ENABLE_MOCKS={true|false} # Enables or disables mock data
     /assets         - Static resources required by the main process
     /enums          - Centralized TypeScript enums used by the main process
     /ipc            - Your inter‑process communication layer
+    /migrations     - Folder is used to manage and version database schema changes.
     /types          - TypeScript interfaces and type definitions used exclusively by the main process
     /utils          - Utility functions that support the main process
   /preload          – Electron preload scripts
