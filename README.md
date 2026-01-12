@@ -133,6 +133,24 @@ No account required.
 > This warning appears because the app is not distributed via the default system repositories.  
 > If you downloaded the package directly from the official GitHub Releases page, it is safe to proceed.
 
+> 🍎 **macOS Gatekeeper warning**
+>
+> Because this app is **unsigned**, macOS may display a message like:
+>
+> - “App is damaged and can’t be opened. Move to Trash”
+> - “App is from an unidentified developer”
+>
+> This happens because macOS Gatekeeper treats all unsigned apps downloaded from the internet as potentially unsafe.  
+> It adds a special **quarantine flag** to the app bundle, which prevents it from launching.
+>
+> To fix this, after downloading:
+>
+> 1. Open **Terminal**.
+> 2. Run the following command:
+>    ```bash
+>     sudo xattr -rd com.apple.quarantine "/Applications/Invoice Builder.app"
+>    ```
+
 ## 🚀 Quick Start
 
 1. Launch the application
