@@ -20,6 +20,8 @@ extraMetadata:
 
 forceCodeSigning: false
 
+afterPack: scripts/afterPack.cjs
+
 win:
   target:
     - nsis

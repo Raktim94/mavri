@@ -1,5 +1,11 @@
 # Invoice Builder
 
+## 2026-01-12, version 1.2.1
+
+Bug Fixes
+
+- Fixed macOS build.
+
 ## 2026-01-08, version 1.2.0
 
 Bug Fixes
