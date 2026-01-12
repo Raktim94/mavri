@@ -143,7 +143,7 @@ No account required.
 > This happens because macOS Gatekeeper treats all unsigned apps downloaded from the internet as potentially unsafe.  
 > It adds a special **quarantine flag** to the app bundle, which prevents it from launching.
 >
-> To fix this, after downloading:
+> To fix this, after downloading and installing it:
 >
 > 1. Open **Terminal**.
 > 2. Run the following command:
