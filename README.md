@@ -74,6 +74,7 @@ If you value **privacy, portability, and control**, this app is built for you.
 - Uppercase label toggle
 - Quote & invoice watermarks (including paid watermark)
 - Attachments: include images in PDFs
+- Handwritten signature support (draw and apply signatures to PDFs)
 
 ### Reports
 
