@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import { parseISO } from 'date-fns';
-import { memo, type FC } from 'react';
+import { memo, useMemo, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NoItem } from '../../shared/components/lists/noItem/NoItem';
 import type { ClientRevenue } from '../../shared/types/clientRevenue';
@@ -13,10 +13,11 @@ import { ItemsSalesChart } from './ItemsSalesChart';
 import { TrendChart } from './TrendChart';
 
 interface Props {
+  currencyCode: string;
   groupedMeta: { groups: InvoicesByCurrency; invoices: Invoice[] };
   dates: { from: string; to: string };
 }
-const OverviewComponent: FC<Props> = ({ groupedMeta, dates }) => {
+const OverviewComponent: FC<Props> = ({ groupedMeta, dates, currencyCode }) => {
   const { t } = useTranslation();
   const { groups, invoices } = groupedMeta;
 
@@ -34,89 +35,97 @@ const OverviewComponent: FC<Props> = ({ groupedMeta, dates }) => {
       });
   };
 
+  const reportData = useMemo(() => {
+    const data = groups[currencyCode];
+    if (!data) {
+      return null;
+    }
+
+    const fromDate = parseISO(dates.from);
+    const toDate = parseISO(dates.to);
+    const filteredInvoices = invoices.filter(inv => {
+      if (inv.currencyId !== data.currencyId) return false;
+      const issued = parseISO(inv.issuedAt);
+      return issued >= fromDate && issued <= toDate;
+    });
+    const trendChartDataRaw = filteredInvoices.map(inv => {
+      const totalAmountCents = getTotalAmountCents(inv);
+      const totalAmount = totalAmountCents / inv.currencySubunitSnapshot;
+      return {
+        date: inv.issuedAt,
+        total: totalAmount
+      };
+    });
+    const trendChartData = toCumulativeTrend(trendChartDataRaw);
+    const clientRevenueData = Object.values(
+      filteredInvoices.reduce(
+        (acc, inv) => {
+          const name = inv.clientNameSnapshot;
+          const totalAmountCents = getTotalAmountCents(inv);
+          const revenue = totalAmountCents / inv.currencySubunitSnapshot;
+
+          if (!acc[name]) {
+            acc[name] = {
+              name,
+              invoiceCount: 0,
+              revenue: 0
+            };
+          }
+
+          acc[name].invoiceCount += 1;
+          acc[name].revenue += revenue;
+
+          return acc;
+        },
+        {} as Record<string, ClientRevenue>
+      )
+    );
+    const itemSalesData = Object.values(
+      filteredInvoices.reduce(
+        (acc, inv) => {
+          inv.invoiceItems.forEach(item => {
+            const name = item.itemNameSnapshot;
+            const quantity = item.quantity;
+            const itemTotalAmountCents = getItemTotalAmountCents(item);
+            const itemTotalAmount = itemTotalAmountCents / inv.currencySubunitSnapshot;
+
+            if (!acc[name]) {
+              acc[name] = {
+                name,
+                quantity: 0,
+                amount: 0
+              };
+            }
+
+            acc[name].quantity += Number(quantity);
+            acc[name].amount += itemTotalAmount;
+          });
+
+          return acc;
+        },
+        {} as Record<string, ItemSales>
+      )
+    );
+
+    return { trendChartData, clientRevenueData, itemSalesData };
+  }, [groups, currencyCode, dates, invoices]);
+
   return (
     <>
       <Box sx={{ mt: 3, height: '100%' }}>
-        {Object.entries(groups).map(([code, data]) => {
-          const fromDate = parseISO(dates.from);
-          const toDate = parseISO(dates.to);
-          const filteredInvoices = invoices.filter(inv => {
-            if (inv.currencyId !== data.currencyId) return false;
-            const issued = parseISO(inv.issuedAt);
-            return issued >= fromDate && issued <= toDate;
-          });
-          const trendChartDataRaw = filteredInvoices.map(inv => {
-            const totalAmountCents = getTotalAmountCents(inv);
-            const totalAmount = totalAmountCents / inv.currencySubunitSnapshot;
-            return {
-              date: inv.issuedAt,
-              total: totalAmount
-            };
-          });
-          const trendChartData = toCumulativeTrend(trendChartDataRaw);
-          const clientRevenueData = Object.values(
-            filteredInvoices.reduce(
-              (acc, inv) => {
-                const name = inv.clientNameSnapshot;
-                const totalAmountCents = getTotalAmountCents(inv);
-                const revenue = totalAmountCents / inv.currencySubunitSnapshot;
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+            {t('reports.currencyDashboard', { currency: currencyCode })}
+          </Typography>
+          <>
+            {groups[currencyCode] && <FinancialCards data={groups[currencyCode]} />}
+            {groups[currencyCode] && reportData && <TrendChart data={reportData.trendChartData} />}
+            {groups[currencyCode] && reportData && <ClientsRevenueChart data={reportData.clientRevenueData} />}
+            {groups[currencyCode] && reportData && <ItemsSalesChart data={reportData.itemSalesData} />}
+          </>
+        </Box>
 
-                if (!acc[name]) {
-                  acc[name] = {
-                    name,
-                    invoiceCount: 0,
-                    revenue: 0
-                  };
-                }
-
-                acc[name].invoiceCount += 1;
-                acc[name].revenue += revenue;
-
-                return acc;
-              },
-              {} as Record<string, ClientRevenue>
-            )
-          );
-          const itemSalesData = Object.values(
-            filteredInvoices.reduce(
-              (acc, inv) => {
-                inv.invoiceItems.forEach(item => {
-                  const name = item.itemNameSnapshot;
-                  const quantity = item.quantity;
-                  const itemTotalAmountCents = getItemTotalAmountCents(item);
-                  const itemTotalAmount = itemTotalAmountCents / inv.currencySubunitSnapshot;
-
-                  if (!acc[name]) {
-                    acc[name] = {
-                      name,
-                      quantity: 0,
-                      amount: 0
-                    };
-                  }
-
-                  acc[name].quantity += Number(quantity);
-                  acc[name].amount += itemTotalAmount;
-                });
-
-                return acc;
-              },
-              {} as Record<string, ItemSales>
-            )
-          );
-
-          return (
-            <Box key={code} sx={{ mb: 2 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                {t('reports.currencyDashboard', { currency: code })}
-              </Typography>
-              <FinancialCards data={data} />
-              <TrendChart data={trendChartData} />
-              <ClientsRevenueChart data={clientRevenueData} />
-              <ItemsSalesChart data={itemSalesData} />
-            </Box>
-          );
-        })}
-        {Object.entries(groups).length <= 0 && <NoItem text={t('reports.noItems')} />}
+        {!groups[currencyCode] && <NoItem text={t('reports.noItems')} />}
       </Box>
     </>
   );

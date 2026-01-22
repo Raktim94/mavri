@@ -14,6 +14,7 @@ import { ItemsInfo } from './ItemsInfo';
 import { NotesInfo } from './NotesInfo';
 import { PageCounterInfo } from './PageCounterInfo';
 import { PaymentInfo } from './PaymentInfo';
+import { SignatureInfo } from './SignatureInfo';
 import { WatermarkInfo } from './WatermarkInfo';
 import { WatermarkPaidInfo } from './WatermarkPaidInfo';
 
@@ -38,6 +39,7 @@ interface Props {
   invoiceForm?: InvoiceFromData;
   storeSettings?: Settings;
   logoUrl?: string;
+  signatureUrl?: string;
   attachmentUrls: AttachmentURL[];
   pdfTexts: PdfTexts;
   watermarkUrl?: string;
@@ -47,6 +49,7 @@ const PDFDocumentComponent: FC<Props> = ({
   invoiceForm,
   storeSettings,
   logoUrl,
+  signatureUrl,
   attachmentUrls,
   pdfTexts,
   watermarkUrl,
@@ -110,6 +113,7 @@ const PDFDocumentComponent: FC<Props> = ({
           termsConditionsLabel={pdfTexts.termsConditions}
         />
         <PageCounterInfo invoiceForm={invoiceForm} ofLabel={pdfTexts.of} pageLabel={pdfTexts.page} />
+        <SignatureInfo invoiceForm={invoiceForm} signatureUrl={signatureUrl} />
       </Page>
       {attachmentUrls.map(item => (
         <Page
@@ -123,6 +127,7 @@ const PDFDocumentComponent: FC<Props> = ({
           <WatermarkInfo invoiceForm={invoiceForm} watermarkUrl={watermarkUrl} />
           <Image style={PDF_STYLES.attachment} src={item.url} />
           <PageCounterInfo invoiceForm={invoiceForm} ofLabel={pdfTexts.of} pageLabel={pdfTexts.page} />
+          <SignatureInfo invoiceForm={invoiceForm} signatureUrl={signatureUrl} />
         </Page>
       ))}
     </Document>

@@ -101,6 +101,13 @@ export const PDF_STYLES = StyleSheet.create({
     color: '#808080'
   },
   attachment: { width: '100%', height: '90%', objectFit: 'contain' },
+  signature: {
+    position: 'absolute',
+    bottom: '10',
+    left: '10',
+    width: '100px',
+    objectFit: 'cover'
+  },
   watermark: {
     position: 'absolute',
     top: '0',

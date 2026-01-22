@@ -27,6 +27,18 @@ export const getAttachmentsUrl = async (invoiceForm?: InvoiceFromData): Promise<
   return list;
 };
 
+export const getSignatureUrls = async (invoiceForm?: InvoiceFromData) => {
+  if (!invoiceForm) return;
+
+  let signatureUrl: string | undefined;
+
+  if (invoiceForm.signatureData) {
+    signatureUrl = await uint8ArrayToDataUrl(invoiceForm.signatureData, invoiceForm.signatureType);
+  }
+
+  return signatureUrl;
+};
+
 export const getLogoUrl = async (invoiceForm?: InvoiceFromData) => {
   if (!invoiceForm) return;
 
@@ -80,6 +92,7 @@ export const useExportPdf = (data: { invoiceForm?: InvoiceFromData; storeSetting
     const attachmentUrls = await getAttachmentsUrl(invoiceForm);
     const watermarkUrl = await getWatermarkUrl(invoiceForm);
     const watermarkPaidUrl = await getWatermarkPaidUrl(invoiceForm);
+    const signatureUrl = await getSignatureUrls(invoiceForm);
 
     const blob = await pdf(
       <PDFDocument
@@ -90,6 +103,7 @@ export const useExportPdf = (data: { invoiceForm?: InvoiceFromData; storeSetting
         pdfTexts={pdfTexts}
         watermarkUrl={watermarkUrl}
         watermarkPaidUrl={watermarkPaidUrl}
+        signatureUrl={signatureUrl}
       />
     ).toBlob();
 

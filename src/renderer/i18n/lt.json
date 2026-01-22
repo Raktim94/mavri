@@ -115,6 +115,7 @@
     "confirmDelete": "Ar tikrai norite ištrinti šį elementą? Šio veiksmo nebus galima atšaukti.",
     "confirmation": "Patvirtinimas",
     "creditCard": "Kredito kortelė",
+    "currency": "Valiuta",
     "dark": "Tamsus",
     "date": "Data",
     "description": "Aprašymas",
@@ -181,6 +182,7 @@
     "selectImage": "Pasirinkite vaizdo failą",
     "shortName": "Trumpinys",
     "shortNameHelper": "Maksimaliai 2 simboliai",
+    "signature": "Parašas",
     "small": "Mažas",
     "sortBy": "Rūšiuoti pagal",
     "status": "Statusas",
@@ -217,8 +219,7 @@
     "format": "Formatas",
     "noItem": "Pasirinkite valiutą, kad pamatytumėte jos informaciją.",
     "subunit": "Subvienetas",
-    "symbol": "Simbolis",
-    "title": "Valiuta"
+    "symbol": "Simbolis"
   },
   "customizeInvoice": {
     "includeBusinessName": "Įtraukti įmonės pavadinimą",
@@ -263,6 +264,7 @@
     "addNote": "Pridėti pastabą",
     "addPayment": "Pridėti mokėjimą",
     "addQuote": "Pridėti pasiūlymą",
+    "addSignature": "Pridėti parašą",
     "addTaxes": "Pridėti mokesčius",
     "attachments": "Priedai",
     "balanceDue": "Likusi mokėtina suma",

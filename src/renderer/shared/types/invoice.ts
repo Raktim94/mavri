@@ -66,6 +66,13 @@ export interface InvoicesByCurrency {
   [currencyCode: string]: InvoicesByCurrencyMeta;
 }
 
+export interface SignatureForm {
+  data?: Uint8Array;
+  size?: number;
+  type?: string;
+  name?: string;
+}
+
 export interface PaymentForm {
   id?: number;
   paymentMethod?: PaymentType;
@@ -216,6 +223,10 @@ export interface Invoice {
   customizationPaidWatermarkFileSize?: number;
   customizationPaidWatermarkFileData?: Uint8Array;
   language: Language;
+  signatureData?: Uint8Array;
+  signatureSize?: number;
+  signatureType?: string;
+  signatureName?: string;
 }
 
 export interface InvoiceAdd {
@@ -284,6 +295,10 @@ export interface InvoiceAdd {
   customizationPaidWatermarkFileSize?: number;
   customizationPaidWatermarkFileData?: Uint8Array;
   language?: Language;
+  signatureData?: Uint8Array;
+  signatureSize?: number;
+  signatureType?: string;
+  signatureName?: string;
 }
 
 export interface InvoiceUpdate extends InvoiceAdd {
@@ -357,4 +372,8 @@ export interface InvoiceFromData {
   customizationPaidWatermarkFileSize?: number;
   customizationPaidWatermarkFileData?: Uint8Array;
   language?: Language;
+  signatureData?: Uint8Array;
+  signatureSize?: number;
+  signatureType?: string;
+  signatureName?: string;
 }

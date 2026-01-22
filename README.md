@@ -89,7 +89,7 @@ If you value **privacy, portability, and control**, this app is built for you.
 
 ### Settings & Customization
 
-- Language selection: currently French, English and Lithuanian
+- Language selection: currently French, German, English and Lithuanian
 - Number & date formatting (e.g. `1,234.10` vs `1.234,10`)
 - Invoice/quote number prefix & suffix
 - File name customization for exported PDFs
@@ -284,6 +284,7 @@ Please open an issue before starting major work to ensure alignment.
 
 | Version | Status                |
 | ------- | --------------------- |
+| v1.3.0  | ✅ Actively supported |
 | v1.2.1  | ✅ Actively supported |
 | v1.2.0  | ✅ Actively supported |
 | v1.1.4  | ✅ Actively supported |

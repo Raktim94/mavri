@@ -1,5 +1,6 @@
 import { differenceInCalendarDays, parseISO } from 'date-fns';
 import { DiscountType } from '../enums/discountType';
+import { InvoiceStatus } from '../enums/invoiceStatus';
 import { InvoiceItemTaxType, InvoiceTaxType } from '../enums/taxType';
 import type { Invoice, InvoiceFromData, InvoiceItem, InvoicePayment, InvoicesByCurrency } from '../types/invoice';
 import type { Settings } from '../types/settings';
@@ -15,6 +16,17 @@ export const aggregateInvoicesByCurrency = (invoices: Invoice[], from: string, t
     const issueAt = parseISO(inv.issuedAt);
     return issueAt >= fromDate && issueAt <= toDate;
   });
+
+  const getInvoicePaidAmount = (invoice: Invoice) => {
+    const amountPaidCents = getTotalAmountPaidCents(invoice.invoicePayments);
+    const totalAmountCents = getTotalAmountCents(invoice);
+
+    if (invoice.status === InvoiceStatus.paid && amountPaidCents <= totalAmountCents) {
+      return totalAmountCents / invoice.currencySubunitSnapshot;
+    }
+
+    return amountPaidCents / invoice.currencySubunitSnapshot;
+  };
 
   for (const invoice of filtered) {
     const code = invoice.currencyCodeSnapshot;
@@ -36,8 +48,7 @@ export const aggregateInvoicesByCurrency = (invoices: Invoice[], from: string, t
     }
 
     const daysLeft = getDaysLeft(invoice.dueDate);
-    const amountPaidCents = getTotalAmountPaidCents(invoice.invoicePayments);
-    const totalAmountPaid = amountPaidCents / invoice.currencySubunitSnapshot;
+    const totalAmountPaid = getInvoicePaidAmount(invoice);
 
     const totalAmountCents = getTotalAmountCents(invoice);
     const totalAmount = totalAmountCents / invoice.currencySubunitSnapshot;

@@ -115,6 +115,7 @@
     "confirmDelete": "Are you sure you want to delete this item? This action cannot be undone.",
     "confirmation": "Confirmation",
     "creditCard": "Credit card",
+    "currency": "Currency",
     "dark": "Dark",
     "date": "Date",
     "description": "Description",
@@ -181,6 +182,7 @@
     "selectImage": "Select an image file",
     "shortName": "Short name",
     "shortNameHelper": "Maximum 2 characters",
+    "signature": "Signature",
     "small": "Small",
     "sortBy": "Sort by",
     "status": "Status",
@@ -217,8 +219,7 @@
     "format": "Format",
     "noItem": "Selected a currency to view details.",
     "subunit": "Sub unit",
-    "symbol": "Symbol",
-    "title": "Currency"
+    "symbol": "Symbol"
   },
   "customizeInvoice": {
     "includeBusinessName": "Include business name",
@@ -263,6 +264,7 @@
     "addNote": "Add note",
     "addPayment": "Add payment",
     "addQuote": "Add quote",
+    "addSignature": "Add signature",
     "addTaxes": "Add taxes",
     "attachments": "Attachments",
     "balanceDue": "Balance due",

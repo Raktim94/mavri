@@ -41,9 +41,11 @@ export const initImportExportHandlers = (db: Database) => {
         const bufLogo = i.businessLogoSnapshot as unknown as Buffer | null;
         const bufWatermarPaid = i.customizationPaidWatermarkFileData as unknown as Buffer | null;
         const bufWatermark = i.customizationWatermarkFileData as unknown as Buffer | null;
+        const bufSignature = i.signatureData as unknown as Buffer | null;
 
         return {
           ...i,
+          signatureData: bufSignature ? bufSignature.toString('base64') : null,
           businessLogoSnapshot: bufLogo ? bufLogo.toString('base64') : null,
           customizationPaidWatermarkFileData: bufWatermarPaid ? bufWatermarPaid.toString('base64') : null,
           customizationWatermarkFileData: bufWatermark ? bufWatermark.toString('base64') : null
@@ -194,6 +196,7 @@ export const initImportExportHandlers = (db: Database) => {
         if (Array.isArray(parsed.invoices)) {
           parsed.invoices = parsed.invoices.map((i: Record<string, unknown>) => ({
             ...i,
+            signatureData: fromBase64(i.signatureData),
             businessLogoSnapshot: fromBase64(i.businessLogoSnapshot),
             customizationPaidWatermarkFileData: fromBase64(i.customizationPaidWatermarkFileData),
             customizationWatermarkFileData: fromBase64(i.customizationWatermarkFileData)

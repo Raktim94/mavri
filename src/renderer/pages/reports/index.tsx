@@ -18,6 +18,7 @@ export const ReportsPage: FC = () => {
     from: new Date().toISOString(),
     to: new Date().toISOString()
   });
+  const [selectedCurrencyCode, setSelectedCurrencyCode] = useState<string>('');
 
   const { invoices } = useInvoicesRetrieve({
     type: InvoiceType.invoice,
@@ -29,7 +30,11 @@ export const ReportsPage: FC = () => {
     }
   });
 
-  const handleOnChange = useCallback((data: { from: string; to: string }) => {
+  const handleCurrencyChange = useCallback((data: string) => {
+    setSelectedCurrencyCode(data);
+  }, []);
+
+  const handleOnDateChange = useCallback((data: { from: string; to: string }) => {
     setDates({
       from: data.from,
       to: data.to
@@ -43,8 +48,12 @@ export const ReportsPage: FC = () => {
 
   return (
     <>
-      <Header onChange={handleOnChange} />
-      <Overview groupedMeta={groupedMeta} dates={dates} />
+      <Header
+        onCurrencyChange={handleCurrencyChange}
+        onDateChange={handleOnDateChange}
+        currencies={groupedMeta.groups}
+      />
+      <Overview groupedMeta={groupedMeta} dates={dates} currencyCode={selectedCurrencyCode} />
     </>
   );
 };

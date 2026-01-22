@@ -320,7 +320,9 @@ export const isInvoiceFromData = (data: unknown): data is InvoiceFromData => {
     'customizationWatermarkFileName',
     'customizationWatermarkFileType',
     'customizationPaidWatermarkFileName',
-    'customizationPaidWatermarkFileType'
+    'customizationPaidWatermarkFileType',
+    'signatureType',
+    'signatureName'
   ];
 
   for (const key of stringFields) {
@@ -332,6 +334,7 @@ export const isInvoiceFromData = (data: unknown): data is InvoiceFromData => {
     'customizationPaidWatermarkFileSize',
     'customizationWatermarkFileSize',
     'businessFileSizeSnapshot',
+    'signatureSize',
     'discountAmountCents',
     'discountPercent',
     'shippingFeeCents'
@@ -342,6 +345,8 @@ export const isInvoiceFromData = (data: unknown): data is InvoiceFromData => {
     if (val !== undefined && val !== null && typeof val !== 'number') return false;
   }
 
+  if (d.signatureData !== undefined && d.signatureData !== null && !(d.signatureData instanceof Uint8Array))
+    return false;
   if (
     d.businessLogoSnapshot !== undefined &&
     d.businessLogoSnapshot !== null &&
