@@ -77,6 +77,10 @@ export interface Invoice {
   customizationPaidWatermarkFileSize?: number;
   customizationPaidWatermarkFileData?: Uint8Array;
   language: Language;
+  signatureData?: Uint8Array;
+  signatureSize?: number;
+  signatureType?: string;
+  signatureName?: string;
 }
 
 export interface InvoiceAttachment {

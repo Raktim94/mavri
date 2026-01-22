@@ -116,12 +116,26 @@ export const InvoicesPage: FC<Props> = ({ type }) => {
       const toRow = (obj: unknown): Row => Object.fromEntries(Object.entries(obj as Record<string, unknown>)) as Row;
 
       const cleanInvoice = (invoice: Invoice) => {
-        const { invoicePayments, invoiceItems, currencyFormat, businessLogoSnapshot, ...rest } = invoice;
+        const {
+          invoicePayments,
+          invoiceItems,
+          currencyFormat,
+          invoiceAttachments,
+          customizationWatermarkFileData,
+          customizationPaidWatermarkFileData,
+          signatureData,
+          businessLogoSnapshot,
+          ...rest
+        } = invoice;
 
         void invoicePayments;
         void invoiceItems;
         void currencyFormat;
         void businessLogoSnapshot;
+        void customizationWatermarkFileData;
+        void customizationPaidWatermarkFileData;
+        void signatureData;
+        void invoiceAttachments;
 
         return rest;
       };

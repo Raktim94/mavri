@@ -1,5 +1,17 @@
 # Invoice Builder
 
+## 2026-01-22, version 1.3.0
+
+New features & improvements
+
+- Added German language support
+- Improved Reporting UI (currency selection dropdown instead of listing all currencies)
+- Added the ability to apply a handwritten signature to PDF invoices
+
+Bug Fixes
+
+- Fixed an issue with Invoice Excel export
+
 ## 2026-01-12, version 1.2.1
 
 Bug Fixes

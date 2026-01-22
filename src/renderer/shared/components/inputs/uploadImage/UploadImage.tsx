@@ -15,6 +15,7 @@ interface UploadSquareProps {
   imgUrl?: string;
   alwaysShowAddIcon?: boolean;
   disableEdit?: boolean;
+  disableClear?: boolean;
 }
 export const UploadImage: React.FC<UploadSquareProps> = ({
   onUpload,
@@ -22,7 +23,8 @@ export const UploadImage: React.FC<UploadSquareProps> = ({
   maxSizeMB = 2,
   imgUrl,
   alwaysShowAddIcon,
-  disableEdit
+  disableEdit,
+  disableClear
 }) => {
   const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -131,38 +133,40 @@ export const UploadImage: React.FC<UploadSquareProps> = ({
               alt={t('ariaLabel.cropped')}
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
-            <Tooltip title={t('ariaLabel.clear')}>
-              <Fab
-                color="primary"
-                size="small"
-                aria-label={t('ariaLabel.clear')}
-                onClick={e => {
-                  e.stopPropagation();
-                  if (objectUrlRef.current) {
-                    try {
-                      URL.revokeObjectURL(objectUrlRef.current);
-                    } catch {
-                      // swallow if invalid
+            {!disableClear && (
+              <Tooltip title={t('ariaLabel.clear')}>
+                <Fab
+                  color="primary"
+                  size="small"
+                  aria-label={t('ariaLabel.clear')}
+                  onClick={e => {
+                    e.stopPropagation();
+                    if (objectUrlRef.current) {
+                      try {
+                        URL.revokeObjectURL(objectUrlRef.current);
+                      } catch {
+                        // swallow if invalid
+                      }
+                      objectUrlRef.current = undefined;
                     }
-                    objectUrlRef.current = undefined;
-                  }
-                  setCroppedImageUrl(undefined);
-                  if (inputRef.current) inputRef.current.value = '';
-                  if (onUpload) onUpload(undefined);
-                }}
-                sx={{
-                  position: 'absolute',
-                  top: 0,
-                  zIndex: 100,
-                  right: 0,
-                  height: 24,
-                  width: 24,
-                  minHeight: 'unset'
-                }}
-              >
-                <CloseIcon fontSize="small" />
-              </Fab>
-            </Tooltip>
+                    setCroppedImageUrl(undefined);
+                    if (inputRef.current) inputRef.current.value = '';
+                    if (onUpload) onUpload(undefined);
+                  }}
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    zIndex: 100,
+                    right: 0,
+                    height: 24,
+                    width: 24,
+                    minHeight: 'unset'
+                  }}
+                >
+                  <CloseIcon fontSize="small" />
+                </Fab>
+              </Tooltip>
+            )}
           </>
         ) : (
           <Tooltip title={t('ariaLabel.uploadImage')}>

@@ -75,7 +75,11 @@ export const initInvoicesHandlers = (db: Database) => {
     'customizationPaidWatermarkFileName',
     'customizationPaidWatermarkFileType',
     'customizationPaidWatermarkFileSize',
-    'customizationPaidWatermarkFileData'
+    'customizationPaidWatermarkFileData',
+    'signatureData',
+    'signatureSize',
+    'signatureType',
+    'signatureName'
   ];
   const attachmentFields: (keyof InvoiceAttachment)[] = ['parentInvoiceId', 'fileSize', 'fileType', 'fileName', 'data'];
   const paymentsFields: (keyof InvoicePayment)[] = [
@@ -361,7 +365,8 @@ export const initInvoicesHandlers = (db: Database) => {
           clientPhoneSnapshot, clientCodeSnapshot, clientAdditionalSnapshot,
           currencyCodeSnapshot, currencySymbolSnapshot, currencySubunitSnapshot,
           discountType, discountAmountCents, discountPercent, shippingFeeCents,
-          invoicePrefix, invoiceSuffix, taxName, taxRate, taxType
+          invoicePrefix, invoiceSuffix, taxName, taxRate, taxType, signatureData,
+          signatureSize, signatureType, signatureName
         )
         SELECT
           ?, ?, businessId, clientId, currencyId,
@@ -382,7 +387,8 @@ export const initInvoicesHandlers = (db: Database) => {
           clientPhoneSnapshot, clientCodeSnapshot, clientAdditionalSnapshot,
           currencyCodeSnapshot, currencySymbolSnapshot, currencySubunitSnapshot,
           discountType, discountAmountCents, discountPercent, shippingFeeCents,
-          invoicePrefix, invoiceSuffix, taxName, taxRate, taxType
+          invoicePrefix, invoiceSuffix, taxName, taxRate, taxType, signatureData,
+          signatureSize, signatureType, signatureName
         FROM invoices WHERE id = ?;
       `;
 

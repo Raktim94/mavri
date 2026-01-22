@@ -3,6 +3,7 @@ import { memo, useEffect, useState, type FC } from 'react';
 import {
   getAttachmentsUrl,
   getLogoUrl,
+  getSignatureUrls,
   getWatermarkPaidUrl,
   getWatermarkUrl
 } from '../../../shared/hooks/useExportPdf ';
@@ -21,6 +22,7 @@ const PreviewCoreComponent: FC<Props> = ({ invoiceForm }) => {
   const [watermarkUrl, setWatermarkUrl] = useState<string | undefined>();
   const [watermarkPaidUrl, setWatermarkPaidUrl] = useState<string | undefined>();
   const [attachmentUrls, setAttachmentUrls] = useState<AttachmentURL[]>([]);
+  const [signatureUrl, setSignatureUrl] = useState<string | undefined>();
   const [loading, setLoading] = useState(true);
   const pdfTexts = usePdfTexts(invoiceForm);
 
@@ -33,11 +35,12 @@ const PreviewCoreComponent: FC<Props> = ({ invoiceForm }) => {
     setLoading(true);
 
     const loadData = async () => {
-      const [logo, watermark, watermarkPaid, attachments] = await Promise.all([
+      const [logo, watermark, watermarkPaid, attachments, signature] = await Promise.all([
         getLogoUrl(invoiceForm),
         getWatermarkUrl(invoiceForm),
         getWatermarkPaidUrl(invoiceForm),
-        getAttachmentsUrl(invoiceForm)
+        getAttachmentsUrl(invoiceForm),
+        getSignatureUrls(invoiceForm)
       ]);
 
       if (!cancelled) {
@@ -45,6 +48,7 @@ const PreviewCoreComponent: FC<Props> = ({ invoiceForm }) => {
         setWatermarkUrl(watermark);
         setWatermarkPaidUrl(watermarkPaid);
         setAttachmentUrls(attachments);
+        setSignatureUrl(signature);
         setLoading(false);
       }
     };
@@ -72,6 +76,7 @@ const PreviewCoreComponent: FC<Props> = ({ invoiceForm }) => {
         pdfTexts={pdfTexts}
         watermarkUrl={watermarkUrl}
         watermarkPaidUrl={watermarkPaidUrl}
+        signatureUrl={signatureUrl}
       />
     </PDFViewer>
   );

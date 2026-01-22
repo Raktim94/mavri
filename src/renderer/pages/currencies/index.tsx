@@ -85,7 +85,7 @@ export const CurrenciesPage: FC = () => {
 
   return (
     <CRUDPage<Currency, CurrencyAdd, CurrencyUpdate>
-      title={t('currencies.title')}
+      title={t('common.currency')}
       filters={filters}
       excelData={{ excelColumns, excelFileName, excelFormat: 'xlsx', excelTemplateData }}
       useRetrieve={useCurrenciesCRUDRetrieve}

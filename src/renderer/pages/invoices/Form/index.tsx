@@ -16,6 +16,7 @@ import type {
   InvoiceFromData,
   InvoiceItem,
   PaymentForm,
+  SignatureForm,
   TaxForm
 } from '../../../shared/types/invoice';
 import type { Item } from '../../../shared/types/item';
@@ -39,6 +40,7 @@ import { FinancialInfo } from './FinancialInfo';
 import { ItemSelector } from './ItemSelector';
 import { ItemsList } from './ItemsList';
 import { ItemQuantitySetter } from './Modals/ItemQuantitySetter';
+import { SignatureSelector } from './SignatureSelector';
 
 interface Props {
   invoiceForm?: InvoiceFromData;
@@ -452,6 +454,23 @@ const InvoiceFormComponent: FC<Props> = ({
     [setInvoiceForm, invoiceForm]
   );
 
+  const handleSignature = useCallback(
+    (data: SignatureForm) => {
+      if (!invoiceForm) return;
+
+      startTransition(() => {
+        setInvoiceForm({
+          ...invoiceForm,
+          signatureData: data.data,
+          signatureName: data.name,
+          signatureType: data.type,
+          signatureSize: data.size
+        });
+      });
+    },
+    [setInvoiceForm, invoiceForm]
+  );
+
   const handleAttachments = useCallback(
     (data: AttachmentForm) => {
       if (!invoiceForm) return;
@@ -589,6 +608,7 @@ const InvoiceFormComponent: FC<Props> = ({
               });
             }}
           />
+          <SignatureSelector invoiceForm={invoiceForm} onEdit={handleSignature} />
 
           <Divider flexItem />
 

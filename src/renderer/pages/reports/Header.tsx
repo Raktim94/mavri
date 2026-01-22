@@ -22,20 +22,24 @@ import {
 import { memo, useCallback, useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ReportRangeType } from '../../shared/enums/reportRangeType';
+import type { InvoicesByCurrency } from '../../shared/types/invoice';
 import { toUTCISOString } from '../../shared/utils/formatFunctions';
 import { useAppSelector } from '../../state/configureStore';
 import { selectSettings } from '../../state/pageSlice';
 import { RangeSetter } from './Modals/RangeSetter';
 
 interface Props {
-  onChange?: (value: { from: string; to: string }) => void;
+  currencies: InvoicesByCurrency;
+  onDateChange?: (value: { from: string; to: string }) => void;
+  onCurrencyChange?: (value: string) => void;
 }
 
-const HeaderComponent: FC<Props> = ({ onChange = () => {} }) => {
+const HeaderComponent: FC<Props> = ({ onCurrencyChange = () => {}, onDateChange = () => {}, currencies }) => {
   const theme = useTheme();
   const { t } = useTranslation();
   const storeSettings = useAppSelector(selectSettings);
 
+  const [selectedCurrencyCode, setSelectedCurrencyCode] = useState<string>('');
   const [dates, setDates] = useState<{ from: string; to: string }>({
     from: new Date().toISOString(),
     to: new Date().toISOString()
@@ -62,6 +66,11 @@ const HeaderComponent: FC<Props> = ({ onChange = () => {} }) => {
     },
     [handleClose]
   );
+
+  const handleCurrencyChange = useCallback((event: SelectChangeEvent) => {
+    const value = event.target.value;
+    setSelectedCurrencyCode(value);
+  }, []);
 
   const getRangeForPreset = useCallback((preset: ReportRangeType): { from: Date; to: Date } => {
     const now = new Date();
@@ -128,6 +137,19 @@ const HeaderComponent: FC<Props> = ({ onChange = () => {} }) => {
   }, []);
 
   useEffect(() => {
+    onCurrencyChange(selectedCurrencyCode);
+  }, [onCurrencyChange, selectedCurrencyCode]);
+
+  useEffect(() => {
+    const entries = Object.keys(currencies);
+    if (entries.length > 0) {
+      setSelectedCurrencyCode(entries[0]);
+    } else {
+      setSelectedCurrencyCode('');
+    }
+  }, [currencies]);
+
+  useEffect(() => {
     const range = getRangeForPreset(internalValue);
     const fromUTC = toUTCISOString(range.from);
     const toUTC = toUTCISOString(range.to);
@@ -139,7 +161,7 @@ const HeaderComponent: FC<Props> = ({ onChange = () => {} }) => {
   }, [internalValue, getRangeForPreset]);
 
   useEffect(() => {
-    onChange(dates);
+    onDateChange(dates);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dates]);
 
@@ -150,6 +172,21 @@ const HeaderComponent: FC<Props> = ({ onChange = () => {} }) => {
           {t('reports.title')}
         </Typography>
         <Box sx={{ flexGrow: 1 }} />
+        <FormControl size="small" sx={{ minWidth: 200 }}>
+          <InputLabel id="currency-label">{t('common.currency')}</InputLabel>
+          <Select
+            labelId="currency-label"
+            label={t('common.currency')}
+            value={selectedCurrencyCode}
+            onChange={handleCurrencyChange}
+          >
+            {Object.entries(currencies).map(([code]) => (
+              <MenuItem key={code} value={code}>
+                {currencies[code].currencyCode}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
         <FormControl size="small" sx={{ minWidth: 200 }}>
           <InputLabel id="date-range-label">{t('reports.dateRange')}</InputLabel>
           <Select
