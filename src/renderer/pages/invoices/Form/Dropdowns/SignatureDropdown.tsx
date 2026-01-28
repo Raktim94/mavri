@@ -2,6 +2,7 @@ import { Box, Button, Grid, SwipeableDrawer, useMediaQuery, useTheme } from '@mu
 import { memo, useCallback, useEffect, useRef, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import SignatureCanvas from 'react-signature-canvas';
+import { UploadButton } from '../../../../shared/components/controls/uploadButton/UploadButton';
 import { PageHeader } from '../../../../shared/components/layout/pageHeader/PageHeader';
 import type { SignatureForm } from '../../../../shared/types/invoice';
 import { toDataUrl, toUint8Array } from '../../../../shared/utils/dataUrlFunctions';
@@ -35,9 +36,9 @@ const SignatureDropdownComponent: FC<Props> = ({ isOpen, form, onClose, onOpen, 
     }
   }, [isOpen, form]);
 
-  const clearSignature = () => {
+  const clearSignature = useCallback(() => {
     sigRef.current?.clear();
-  };
+  }, []);
 
   const loadSignature = useCallback(async () => {
     if (sigRef.current !== null && formData.data) {
@@ -53,7 +54,7 @@ const SignatureDropdownComponent: FC<Props> = ({ isOpen, form, onClose, onOpen, 
     }
   }, [formData, canvasWidth]);
 
-  const saveSignature = () => {
+  const saveSignature = useCallback(() => {
     if (!sigRef.current || sigRef.current.isEmpty()) return;
 
     sigRef.current.getCanvas().toBlob(async blob => {
@@ -64,14 +65,30 @@ const SignatureDropdownComponent: FC<Props> = ({ isOpen, form, onClose, onOpen, 
         type: blob ? blob.type : '',
         name: 'signature.png'
       };
-
       setFormData(formData);
 
       onClick?.(formData);
 
       clearSignature();
     });
-  };
+  }, [clearSignature, onClick, t]);
+
+  const onUploadSignature = useCallback(
+    async (file?: Blob, filename?: string) => {
+      if (file) {
+        const fileUnitArray = await toUint8Array(t, file);
+        const formData = {
+          data: fileUnitArray ?? undefined,
+          size: file ? file.size : 0,
+          type: file ? file.type : '',
+          name: filename
+        };
+
+        setFormData(formData);
+      }
+    },
+    [t]
+  );
 
   useEffect(() => {
     const handleResize = () => {
@@ -138,9 +155,12 @@ const SignatureDropdownComponent: FC<Props> = ({ isOpen, form, onClose, onOpen, 
             }}
             renderCustomButtons={() => {
               return (
-                <Button variant="outlined" onClick={clearSignature}>
-                  {t('ariaLabel.clear')}
-                </Button>
+                <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
+                  <UploadButton onUpload={onUploadSignature} />
+                  <Button variant="outlined" onClick={clearSignature}>
+                    {t('ariaLabel.clear')}
+                  </Button>
+                </Box>
               );
             }}
           />
