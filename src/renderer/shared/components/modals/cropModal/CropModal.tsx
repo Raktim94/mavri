@@ -1,5 +1,5 @@
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { AppBar, Button, Dialog, DialogContent, IconButton, Toolbar, Tooltip, useTheme } from '@mui/material';
+import { AppBar, Box, Button, Dialog, DialogContent, IconButton, Toolbar, Tooltip, useTheme } from '@mui/material';
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ReactCrop, { type Crop } from 'react-image-crop';
@@ -96,14 +96,16 @@ export const CropModal: React.FC<Props> = ({ onClose = () => {}, imageSrc, isOpe
         </Toolbar>
       </AppBar>
 
-      <DialogContent sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <ReactCrop crop={crop} onChange={newCrop => setCrop(newCrop)} circularCrop={false} keepSelection>
-          <img
-            src={imageSrc}
-            alt={t('common.crop')}
-            ref={handleImageLoad as unknown as React.RefObject<HTMLImageElement>}
-          />
-        </ReactCrop>
+      <DialogContent sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'auto' }}>
+        <Box style={{ maxWidth: '100%', maxHeight: '100%', overflow: 'auto' }}>
+          <ReactCrop crop={crop} onChange={newCrop => setCrop(newCrop)} circularCrop={false} keepSelection>
+            <img
+              src={imageSrc}
+              alt={t('common.crop')}
+              ref={handleImageLoad as unknown as React.RefObject<HTMLImageElement>}
+            />
+          </ReactCrop>
+        </Box>
       </DialogContent>
     </Dialog>
   );

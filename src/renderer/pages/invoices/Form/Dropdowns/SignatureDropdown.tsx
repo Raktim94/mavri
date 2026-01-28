@@ -40,14 +40,16 @@ const SignatureDropdownComponent: FC<Props> = ({ isOpen, form, onClose, onOpen, 
   };
 
   const loadSignature = useCallback(async () => {
-    if (sigRef.current && formData.data) {
+    if (sigRef.current !== null && formData.data) {
       const url = formData.data ? await toDataUrl(formData.data, formData.type) : undefined;
 
-      const canvas = sigRef.current.getCanvas();
-      canvas.width = canvasWidth;
-      canvas.height = 200;
+      const canvas = sigRef.current?.getCanvas();
+      if (canvas) {
+        canvas.width = canvasWidth;
+        canvas.height = 200;
 
-      if (url) sigRef.current.fromDataURL(url, { width: canvas.width, height: canvas.height });
+        if (url) sigRef.current?.fromDataURL(url, { width: canvas.width, height: canvas.height });
+      }
     }
   }, [formData, canvasWidth]);
 
