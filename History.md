@@ -2,19 +2,16 @@
 
 ## 2026-01-28, version 1.4.0
 
+New features & improvements
+
+- Signature can be either uploaded or drawn. Previously it was only possible to draw.
+- Simplified DataURL generation by replacing fromUint8Array with the unified uint8ArrayToDataUrl API.
+
 Bug Fixes
 
 - Fixed issues with report filters where some presets (e.g. This Year, This Quarter) were limited to the current date instead of the full period.
 - Fixed a potential error when resizing the invoice builder inside the signature modal.
 - Fixed an issue where very large image attachments were being cut off during upload, even when scrolling was enabled.
-
-Improvements
-
-- Simplified DataURL generation by replacing fromUint8Array with the unified uint8ArrayToDataUrl API.
-
-New features
-
-- Signature can be either uploaded or drawn. Previously it was only possible to draw.
 
 ## 2026-01-22, version 1.3.0
 
