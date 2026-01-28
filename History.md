@@ -1,6 +1,6 @@
 # Invoice Builder
 
-## 2026-01-22, version 1.4.0
+## 2026-01-28, version 1.4.0
 
 Bug Fixes
 
@@ -11,6 +11,10 @@ Bug Fixes
 Improvements
 
 - Simplified DataURL generation by replacing fromUint8Array with the unified uint8ArrayToDataUrl API.
+
+New features
+
+- Signature can be either uploaded or drawn. Previously it was only possible to draw.
 
 ## 2026-01-22, version 1.3.0
 
