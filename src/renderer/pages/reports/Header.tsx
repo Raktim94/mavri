@@ -17,7 +17,10 @@ import {
   startOfMonth,
   startOfQuarter,
   startOfYear,
-  subDays
+  subDays,
+  subMonths,
+  subQuarters,
+  subYears
 } from 'date-fns';
 import { memo, useCallback, useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -87,45 +90,42 @@ const HeaderComponent: FC<Props> = ({ onCurrencyChange = () => {}, onDateChange 
       case ReportRangeType.this_month:
         return {
           from: startOfMonth(todayStart),
-          to: todayEnd
+          to: endOfMonth(todayStart)
         };
 
       case ReportRangeType.last_month: {
-        const lastMonthStart = startOfMonth(subDays(startOfMonth(todayStart), 1));
-        const lastMonthEnd = startOfMonth(subDays(startOfMonth(todayEnd), 1));
+        const lastMonthDate = subMonths(todayStart, 1);
         return {
-          from: lastMonthStart,
-          to: endOfMonth(lastMonthEnd)
+          from: startOfMonth(lastMonthDate),
+          to: endOfMonth(lastMonthDate)
         };
       }
 
       case ReportRangeType.this_quarter:
         return {
           from: startOfQuarter(todayStart),
-          to: todayEnd
+          to: endOfQuarter(todayStart)
         };
 
       case ReportRangeType.last_quarter: {
-        const lastQStart = startOfQuarter(subDays(startOfQuarter(todayStart), 1));
-        const lastQEnd = startOfQuarter(subDays(startOfQuarter(todayEnd), 1));
+        const lastQuarterDate = subQuarters(todayStart, 1);
         return {
-          from: lastQStart,
-          to: endOfQuarter(lastQEnd)
+          from: startOfQuarter(lastQuarterDate),
+          to: endOfQuarter(lastQuarterDate)
         };
       }
 
       case ReportRangeType.this_year:
         return {
           from: startOfYear(todayStart),
-          to: todayEnd
+          to: endOfYear(todayStart)
         };
 
       case ReportRangeType.last_year: {
-        const lastYearStart = startOfYear(subDays(startOfYear(todayStart), 1));
-        const lastYearEnd = startOfYear(subDays(startOfYear(todayEnd), 1));
+        const lastYearDate = subYears(todayStart, 1);
         return {
-          from: lastYearStart,
-          to: endOfYear(lastYearEnd)
+          from: startOfYear(lastYearDate),
+          to: endOfYear(lastYearDate)
         };
       }
 

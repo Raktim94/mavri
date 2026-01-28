@@ -1,10 +1,10 @@
 import { FormControlLabel, Grid, Switch, TextField } from '@mui/material';
-import { useEffect, useRef, useState, type FC } from 'react';
+import { useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { UploadImage } from '../../shared/components/inputs/uploadImage/UploadImage';
 import { useForm } from '../../shared/hooks/useForm';
 import type { Business, BusinessFromData } from '../../shared/types/business';
-import { fromUint8Array, toUint8Array } from '../../shared/utils/dataUrlFunctions';
+import { toDataUrl, toUint8Array } from '../../shared/utils/dataUrlFunctions';
 import { validators } from '../../shared/utils/validatorFunctions';
 
 interface Props {
@@ -37,10 +37,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, business }) => {
     name: false,
     shortName: false
   });
-  const [logoUrl, setLogoUrl] = useState<string | undefined>(
-    fromUint8Array(business?.logo, business?.fileType) ?? undefined
-  );
-  const logoUrlRef = useRef<string | undefined>(fromUint8Array(business?.logo, business?.fileType) ?? undefined);
+  const [logoUrl, setLogoUrl] = useState<string | undefined>(undefined);
 
   const onUpload = async (file?: Blob, filename?: string) => {
     if (file) {
@@ -87,30 +84,10 @@ export const Form: FC<Props> = ({ handleChange = () => {}, business }) => {
       isArchived: business?.isArchived ?? false
     });
 
-    const newUrl = fromUint8Array(business?.logo, business?.fileType) ?? undefined;
-
-    if (logoUrlRef.current && logoUrlRef.current !== newUrl) {
-      try {
-        URL.revokeObjectURL(logoUrlRef.current);
-      } catch {
-        // ignore
-      }
-      logoUrlRef.current = undefined;
-    }
-
-    setLogoUrl(newUrl);
-    if (newUrl) logoUrlRef.current = newUrl;
-
-    return () => {
-      if (logoUrlRef.current) {
-        try {
-          URL.revokeObjectURL(logoUrlRef.current);
-        } catch {
-          // ignore
-        }
-        logoUrlRef.current = undefined;
-      }
-    };
+    (async () => {
+      const url = business && business.logo ? await toDataUrl(business.logo, business.fileType) : undefined;
+      setLogoUrl(url);
+    })();
   }, [business, setForm]);
 
   useEffect(() => {

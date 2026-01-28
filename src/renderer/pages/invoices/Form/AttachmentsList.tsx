@@ -4,7 +4,7 @@ import { memo, useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { UploadImage } from '../../../shared/components/inputs/uploadImage/UploadImage';
 import type { AttachmentForm, InvoiceFromData } from '../../../shared/types/invoice';
-import { toUint8Array, uint8ArrayToDataUrl } from '../../../shared/utils/dataUrlFunctions';
+import { toDataUrl, toUint8Array } from '../../../shared/utils/dataUrlFunctions';
 
 interface Props {
   invoiceForm?: InvoiceFromData;
@@ -42,7 +42,7 @@ const AttachmentsListComponent: FC<Props> = ({ invoiceForm, onAttach, onClear })
     (async () => {
       const list = await Promise.all(
         attachments.map(async attachment => {
-          const url = attachment.data ? await uint8ArrayToDataUrl(attachment.data, attachment.fileType) : undefined;
+          const url = attachment.data ? await toDataUrl(attachment.data, attachment.fileType) : undefined;
 
           return { id: attachment.id as number, url };
         })
