@@ -6,7 +6,7 @@ import { MONTH_NAMES } from '../../state/constant';
 import { InvoiceType } from '../enums/invoiceType';
 import type { AttachmentURL, InvoiceFromData } from '../types/invoice';
 import type { Settings } from '../types/settings';
-import { uint8ArrayToDataUrl } from '../utils/dataUrlFunctions';
+import { toDataUrl } from '../utils/dataUrlFunctions';
 import { usePdfTexts } from './usePdfTexts';
 
 export const getAttachmentsUrl = async (invoiceForm?: InvoiceFromData): Promise<AttachmentURL[]> => {
@@ -18,7 +18,7 @@ export const getAttachmentsUrl = async (invoiceForm?: InvoiceFromData): Promise<
 
   const list = await Promise.all(
     attachments.map(async attachment => {
-      const url = attachment.data ? await uint8ArrayToDataUrl(attachment.data, attachment.fileType) : undefined;
+      const url = attachment.data ? await toDataUrl(attachment.data, attachment.fileType) : undefined;
 
       return { id: attachment.id as number, url };
     })
@@ -33,7 +33,7 @@ export const getSignatureUrls = async (invoiceForm?: InvoiceFromData) => {
   let signatureUrl: string | undefined;
 
   if (invoiceForm.signatureData) {
-    signatureUrl = await uint8ArrayToDataUrl(invoiceForm.signatureData, invoiceForm.signatureType);
+    signatureUrl = await toDataUrl(invoiceForm.signatureData, invoiceForm.signatureType);
   }
 
   return signatureUrl;
@@ -45,7 +45,7 @@ export const getLogoUrl = async (invoiceForm?: InvoiceFromData) => {
   let logoUrl: string | undefined;
 
   if (invoiceForm.businessLogoSnapshot) {
-    logoUrl = await uint8ArrayToDataUrl(invoiceForm.businessLogoSnapshot, invoiceForm.businessFileTypeSnapshot);
+    logoUrl = await toDataUrl(invoiceForm.businessLogoSnapshot, invoiceForm.businessFileTypeSnapshot);
   }
 
   return logoUrl;
@@ -57,7 +57,7 @@ export const getWatermarkUrl = async (invoiceForm?: InvoiceFromData) => {
   let watermarkUrl: string | undefined;
 
   if (invoiceForm.customizationWatermarkFileData) {
-    watermarkUrl = await uint8ArrayToDataUrl(
+    watermarkUrl = await toDataUrl(
       invoiceForm.customizationWatermarkFileData,
       invoiceForm.customizationWatermarkFileType
     );
@@ -72,7 +72,7 @@ export const getWatermarkPaidUrl = async (invoiceForm?: InvoiceFromData) => {
   let watermarkPaidUrl: string | undefined;
 
   if (invoiceForm.customizationPaidWatermarkFileData) {
-    watermarkPaidUrl = await uint8ArrayToDataUrl(
+    watermarkPaidUrl = await toDataUrl(
       invoiceForm.customizationPaidWatermarkFileData,
       invoiceForm.customizationPaidWatermarkFileType
     );

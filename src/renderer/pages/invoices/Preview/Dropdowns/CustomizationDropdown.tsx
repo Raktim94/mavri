@@ -13,7 +13,7 @@ import {
   useTheme
 } from '@mui/material';
 import { MuiColorInput } from 'mui-color-input';
-import { memo, useEffect, useRef, useState, type FC } from 'react';
+import { memo, useCallback, useEffect, useRef, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { UploadImage } from '../../../../shared/components/inputs/uploadImage/UploadImage';
 import { PageHeader } from '../../../../shared/components/layout/pageHeader/PageHeader';
@@ -24,7 +24,7 @@ import { TableHeaderStyle } from '../../../../shared/enums/tableHeaderStyle';
 import { TableRowStyle } from '../../../../shared/enums/tableRowStyle';
 import { useForm } from '../../../../shared/hooks/useForm';
 import type { CustomizationForm } from '../../../../shared/types/invoice';
-import { fromUint8Array, toUint8Array } from '../../../../shared/utils/dataUrlFunctions';
+import { toDataUrl, toUint8Array } from '../../../../shared/utils/dataUrlFunctions';
 
 interface Props {
   isOpen: boolean;
@@ -40,18 +40,8 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onClose, onOp
   const { form, setForm, update } = useForm<CustomizationForm>(data ?? {});
   const lastEmittedRef = useRef<CustomizationForm | undefined>(data);
 
-  const [watermarkUrl, setWatermarkUrl] = useState<string | undefined>(
-    fromUint8Array(data?.customizationWatermarkFileData, data?.customizationWatermarkFileType) ?? undefined
-  );
-  const [watermarkPaidUrl, setWatermarkPaidUrl] = useState<string | undefined>(
-    fromUint8Array(data?.customizationPaidWatermarkFileData, data?.customizationPaidWatermarkFileType) ?? undefined
-  );
-  const watermarkUrlRef = useRef<string | undefined>(
-    fromUint8Array(data?.customizationWatermarkFileData, data?.customizationWatermarkFileType) ?? undefined
-  );
-  const watermarkPaidUrlRef = useRef<string | undefined>(
-    fromUint8Array(data?.customizationPaidWatermarkFileData, data?.customizationPaidWatermarkFileType) ?? undefined
-  );
+  const [watermarkUrl, setWatermarkUrl] = useState<string | undefined>(undefined);
+  const [watermarkPaidUrl, setWatermarkPaidUrl] = useState<string | undefined>(undefined);
 
   const onUploadPaidWatermark = async (file?: Blob, filename?: string) => {
     if (file) {
@@ -97,11 +87,27 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onClose, onOp
     }
   };
 
+  const updateUrl = useCallback(
+    async (
+      fileData: Uint8Array | undefined,
+      fileType: string | undefined,
+      setUrl: React.Dispatch<React.SetStateAction<string | undefined>>
+    ) => {
+      const newUrl = fileData ? await toDataUrl(fileData, fileType) : undefined;
+
+      setUrl(newUrl);
+    },
+    []
+  );
+
   useEffect(() => {
     if (isOpen && data) {
       setForm(data);
+
+      updateUrl(data.customizationWatermarkFileData, data.customizationWatermarkFileType, setWatermarkUrl);
+      updateUrl(data.customizationPaidWatermarkFileData, data.customizationPaidWatermarkFileType, setWatermarkPaidUrl);
     }
-  }, [isOpen, data, setForm]);
+  }, [isOpen, data, setForm, updateUrl]);
 
   useEffect(() => {
     if (!form) return;
@@ -114,59 +120,12 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onClose, onOp
     }
     if (!isChanged) return;
 
-    const updateUrl = (
-      fileData: Uint8Array | undefined,
-      fileType: string | undefined,
-      currentUrl: string | undefined,
-      setUrl: React.Dispatch<React.SetStateAction<string | undefined>>
-    ) => {
-      const newUrl = fromUint8Array(fileData, fileType) ?? undefined;
-      if (currentUrl && currentUrl !== newUrl) {
-        try {
-          URL.revokeObjectURL(currentUrl);
-        } catch {
-          // ignore
-        }
-      }
-      setUrl(newUrl);
-      return newUrl;
-    };
-
-    watermarkUrlRef.current = updateUrl(
-      form.customizationWatermarkFileData,
-      form.customizationWatermarkFileType,
-      watermarkUrlRef.current,
-      setWatermarkUrl
-    );
-    watermarkPaidUrlRef.current = updateUrl(
-      form.customizationPaidWatermarkFileData,
-      form.customizationPaidWatermarkFileType,
-      watermarkPaidUrlRef.current,
-      setWatermarkPaidUrl
-    );
+    updateUrl(form.customizationWatermarkFileData, form.customizationWatermarkFileType, setWatermarkUrl);
+    updateUrl(form.customizationPaidWatermarkFileData, form.customizationPaidWatermarkFileType, setWatermarkPaidUrl);
 
     lastEmittedRef.current = form;
     onClick?.(form);
-
-    return () => {
-      // if (watermarkUrlRef.current) {
-      //   try {
-      //     URL.revokeObjectURL(watermarkUrlRef.current);
-      //   } catch {
-      //     // ignore
-      //   }
-      //   watermarkUrlRef.current = undefined;
-      // }
-      // if (watermarkPaidUrlRef.current) {
-      //   try {
-      //     //URL.revokeObjectURL(watermarkPaidUrlRef.current);
-      //   } catch {
-      //     // ignore
-      //   }
-      //   watermarkPaidUrlRef.current = undefined;
-      // }
-    };
-  }, [form, onClick]);
+  }, [form, onClick, updateUrl]);
 
   return (
     <>

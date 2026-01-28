@@ -4,7 +4,7 @@ import { memo, useCallback, useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { UploadImage } from '../../../shared/components/inputs/uploadImage/UploadImage';
 import type { InvoiceFromData, SignatureForm } from '../../../shared/types/invoice';
-import { uint8ArrayToDataUrl } from '../../../shared/utils/dataUrlFunctions';
+import { toDataUrl } from '../../../shared/utils/dataUrlFunctions';
 import { SignatureDropdown } from './Dropdowns/SignatureDropdown';
 
 interface Props {
@@ -45,7 +45,7 @@ const SignatureSelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
     } else {
       (async () => {
         const url = invoiceForm.signatureData
-          ? await uint8ArrayToDataUrl(invoiceForm.signatureData, invoiceForm?.signatureType)
+          ? await toDataUrl(invoiceForm.signatureData, invoiceForm?.signatureType)
           : undefined;
         setSignatureUrl(url);
       })();

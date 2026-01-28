@@ -2,7 +2,7 @@ import { Box, ListItemButton, ListItemText, Typography } from '@mui/material';
 import { memo, useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { InvoiceFromData } from '../../../shared/types/invoice';
-import { fromUint8Array } from '../../../shared/utils/dataUrlFunctions';
+import { toDataUrl } from '../../../shared/utils/dataUrlFunctions';
 
 interface Props {
   invoiceForm?: InvoiceFromData;
@@ -15,31 +15,14 @@ const BusinessSelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!invoiceForm?.businessLogoSnapshot) {
-      if (logoUrl) {
-        try {
-          URL.revokeObjectURL(logoUrl);
-        } catch {
-          // swallow if invalid
-        }
-      }
-      setLogoUrl(null);
-      return;
-    }
-
-    const url = fromUint8Array(invoiceForm.businessLogoSnapshot, invoiceForm.businessFileTypeSnapshot) ?? null;
-    setLogoUrl(url);
-
-    return () => {
-      if (url)
-        try {
-          URL.revokeObjectURL(url);
-        } catch {
-          // swallow if invalid
-        }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [invoiceForm?.businessLogoSnapshot, invoiceForm?.businessFileTypeSnapshot]);
+    (async () => {
+      const url =
+        invoiceForm && invoiceForm.businessLogoSnapshot
+          ? await toDataUrl(invoiceForm.businessLogoSnapshot, invoiceForm.businessFileTypeSnapshot)
+          : null;
+      setLogoUrl(url);
+    })();
+  }, [invoiceForm]);
 
   return (
     <ListItemButton

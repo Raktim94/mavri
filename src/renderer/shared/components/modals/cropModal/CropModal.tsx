@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ReactCrop, { type Crop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
+import { toDataUrl } from '../../../utils/dataUrlFunctions';
 
 interface Props {
   isOpen: boolean;
@@ -17,22 +18,6 @@ export const CropModal: React.FC<Props> = ({ onClose = () => {}, imageSrc, isOpe
   const [crop, setCrop] = useState<Crop>(DEFAULT_CROP);
   const imgRef = useRef<HTMLImageElement | null>(null);
   const theme = useTheme();
-
-  const sanitizeImageSrc = (url?: string) => {
-    if (!url) return '';
-
-    try {
-      const parsed = new URL(url);
-
-      if (['http:', 'https:', 'blob:', 'file:'].includes(parsed.protocol)) {
-        return url;
-      }
-    } catch (e) {
-      console.log(e);
-    }
-
-    return '';
-  };
 
   const handleImageLoad = (img: HTMLImageElement) => {
     imgRef.current = img;
@@ -83,7 +68,7 @@ export const CropModal: React.FC<Props> = ({ onClose = () => {}, imageSrc, isOpe
   const handleCropSave = async () => {
     const croppedBlob = await makeClientCrop();
     if (croppedBlob) {
-      const croppedUrl = URL.createObjectURL(croppedBlob);
+      const croppedUrl = await toDataUrl(croppedBlob);
 
       if (onSave) onSave(croppedUrl, croppedBlob);
     }
@@ -114,7 +99,7 @@ export const CropModal: React.FC<Props> = ({ onClose = () => {}, imageSrc, isOpe
       <DialogContent sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <ReactCrop crop={crop} onChange={newCrop => setCrop(newCrop)} circularCrop={false} keepSelection>
           <img
-            src={sanitizeImageSrc(imageSrc)}
+            src={imageSrc}
             alt={t('common.crop')}
             ref={handleImageLoad as unknown as React.RefObject<HTMLImageElement>}
           />

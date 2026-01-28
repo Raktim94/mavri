@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import 'react-image-crop/dist/ReactCrop.css';
 import { useAppDispatch } from '../../../../state/configureStore';
 import { addToast } from '../../../../state/pageSlice';
+import { toDataUrl } from '../../../utils/dataUrlFunctions';
 import { CropModal } from '../../modals/cropModal/CropModal';
 
 interface UploadSquareProps {
@@ -34,7 +35,6 @@ export const UploadImage: React.FC<UploadSquareProps> = ({
   const [imageSrc, setImageSrc] = useState<string | undefined>(undefined);
   const [cropDialogOpen, setCropDialogOpen] = useState(false);
   const [croppedImageUrl, setCroppedImageUrl] = useState<string | undefined>(imgUrl);
-  const objectUrlRef = useRef<string | undefined>(undefined);
 
   const handleClick = () => {
     if (croppedImageUrl && disableEdit) return;
@@ -42,7 +42,7 @@ export const UploadImage: React.FC<UploadSquareProps> = ({
     inputRef.current?.click();
   };
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -53,48 +53,14 @@ export const UploadImage: React.FC<UploadSquareProps> = ({
       event.target.value = '';
       dispatch(addToast({ message: t('error.fileTooLarge', { maxSizeMB: maxSizeMB }), severity: 'error' }));
     } else {
-      const url = URL.createObjectURL(file);
+      const url = await toDataUrl(file);
       setImageSrc(url);
       setCropDialogOpen(true);
     }
   };
-
   useEffect(() => {
-    if (objectUrlRef.current && objectUrlRef.current !== imgUrl) {
-      try {
-        URL.revokeObjectURL(objectUrlRef.current);
-      } catch {
-        // swallow if invalid
-      }
-      objectUrlRef.current = undefined;
-    }
     setCroppedImageUrl(imgUrl);
   }, [imgUrl]);
-
-  useEffect(() => {
-    return () => {
-      if (imageSrc) {
-        try {
-          URL.revokeObjectURL(imageSrc);
-        } catch {
-          // swallow if invalid
-        }
-      }
-    };
-  }, [imageSrc]);
-
-  useEffect(() => {
-    return () => {
-      if (objectUrlRef.current) {
-        try {
-          URL.revokeObjectURL(objectUrlRef.current);
-        } catch {
-          // swallow if invalid
-        }
-        objectUrlRef.current = undefined;
-      }
-    };
-  }, []);
 
   return (
     <Box sx={{ position: 'relative' }}>
@@ -141,14 +107,6 @@ export const UploadImage: React.FC<UploadSquareProps> = ({
                   aria-label={t('ariaLabel.clear')}
                   onClick={e => {
                     e.stopPropagation();
-                    if (objectUrlRef.current) {
-                      try {
-                        URL.revokeObjectURL(objectUrlRef.current);
-                      } catch {
-                        // swallow if invalid
-                      }
-                      objectUrlRef.current = undefined;
-                    }
                     setCroppedImageUrl(undefined);
                     if (inputRef.current) inputRef.current.value = '';
                     if (onUpload) onUpload(undefined);

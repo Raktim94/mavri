@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import SignatureCanvas from 'react-signature-canvas';
 import { PageHeader } from '../../../../shared/components/layout/pageHeader/PageHeader';
 import type { SignatureForm } from '../../../../shared/types/invoice';
-import { toUint8Array, uint8ArrayToDataUrl } from '../../../../shared/utils/dataUrlFunctions';
+import { toDataUrl, toUint8Array } from '../../../../shared/utils/dataUrlFunctions';
 
 interface Props {
   isOpen: boolean;
@@ -41,7 +41,7 @@ const SignatureDropdownComponent: FC<Props> = ({ isOpen, form, onClose, onOpen, 
 
   const loadSignature = useCallback(async () => {
     if (sigRef.current && formData.data) {
-      const url = formData.data ? await uint8ArrayToDataUrl(formData.data, formData.type) : undefined;
+      const url = formData.data ? await toDataUrl(formData.data, formData.type) : undefined;
 
       const canvas = sigRef.current.getCanvas();
       canvas.width = canvasWidth;
