@@ -3,6 +3,9 @@ name: Manual Release (Win + Linux + MacOS)
 on:
   workflow_dispatch:   
 
+permissions:
+  contents: write
+
 jobs:
   win:
     environment: release
