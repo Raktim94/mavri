@@ -106,7 +106,7 @@ export const PDF_STYLES = StyleSheet.create({
     bottom: '10',
     left: '10',
     width: '100px',
-    objectFit: 'cover'
+    objectFit: 'contain'
   },
   watermark: {
     position: 'absolute',
@@ -115,7 +115,7 @@ export const PDF_STYLES = StyleSheet.create({
     height: '100%',
     width: '100%',
     opacity: 0.2,
-    objectFit: 'cover'
+    objectFit: 'contain'
   },
   watermarkPaid: {
     position: 'absolute',

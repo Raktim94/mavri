@@ -3,12 +3,17 @@ import { memo, type FC } from 'react';
 import type { InvoiceFromData } from '../../../shared/types/invoice';
 import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './constant';
 
-interface Props {
-  invoiceForm?: InvoiceFromData;
+interface PropsLabels {
   ofLabel: string;
   pageLabel: string;
 }
-const PageCounterInfoComponent: FC<Props> = ({ invoiceForm, ofLabel, pageLabel }) => {
+interface Props {
+  invoiceForm?: InvoiceFromData;
+  labels: PropsLabels;
+}
+const PageCounterInfoComponent: FC<Props> = ({ invoiceForm, labels }) => {
+  const { ofLabel, pageLabel } = labels;
+
   return (
     <Text
       fixed

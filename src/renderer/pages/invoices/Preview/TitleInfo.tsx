@@ -4,12 +4,17 @@ import { InvoiceType } from '../../../shared/enums/invoiceType';
 import type { InvoiceFromData } from '../../../shared/types/invoice';
 import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './constant';
 
-interface Props {
-  invoiceForm?: InvoiceFromData;
+interface PropsLabels {
   pdfQUOTELabel: string;
   pdfINVOICELabel: string;
 }
-const TitleInfoComponent: FC<Props> = ({ invoiceForm, pdfINVOICELabel, pdfQUOTELabel }) => {
+interface Props {
+  invoiceForm?: InvoiceFromData;
+  labels: PropsLabels;
+}
+const TitleInfoComponent: FC<Props> = ({ invoiceForm, labels }) => {
+  const { pdfINVOICELabel, pdfQUOTELabel } = labels;
+
   return (
     <Text
       style={[
