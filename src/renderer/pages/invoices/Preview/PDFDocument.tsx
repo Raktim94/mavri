@@ -73,12 +73,14 @@ const PDFDocumentComponent: FC<Props> = ({
         <ItemsInfo
           invoiceForm={invoiceForm}
           storeSettings={storeSettings}
-          itemLabel={pdfTexts.itemLabel}
-          unitLabel={pdfTexts.unitLabel}
-          qtyLabel={pdfTexts.qtyLabel}
-          unitCostLabel={pdfTexts.unitCostLabel}
-          totalLabel={pdfTexts.totalLabel2}
-          itemTaxLabel={pdfTexts.itemTaxLabel}
+          labels={{
+            itemLabel: pdfTexts.itemLabel,
+            unitLabel: pdfTexts.unitLabel,
+            qtyLabel: pdfTexts.qtyLabel,
+            unitCostLabel: pdfTexts.unitCostLabel,
+            totalLabel: pdfTexts.totalLabel2,
+            itemTaxLabel: pdfTexts.itemTaxLabel
+          }}
         />
         <View
           wrap={false}
@@ -92,27 +94,37 @@ const PDFDocumentComponent: FC<Props> = ({
           <FinancialInfo
             invoiceForm={invoiceForm}
             storeSettings={storeSettings}
-            subTotalLabel={pdfTexts.subTotalLabel}
-            discountPrctLabel={pdfTexts.discountPrctLabel}
-            discountLabel={pdfTexts.discountLabel}
-            taxExclusiveLabel={pdfTexts.taxExclusiveLabel}
-            taxInclusiveLabel={pdfTexts.taxInclusiveLabel}
-            taxRateLabel={pdfTexts.taxRateLabel}
-            taxExclusivePerItemLabel={pdfTexts.taxExclusivePerItemLabel}
-            taxInclusivePerItemLabel={pdfTexts.taxInclusivePerItemLabel}
-            shippingFeeLabel={pdfTexts.shippingFeeLabel}
-            totalLabel={pdfTexts.totalLabel1}
-            paidLabel={pdfTexts.paidLabel}
-            balanceDueLabel={pdfTexts.balanceDueLabel}
-            taxLabel={pdfTexts.taxLabel}
+            labels={{
+              subTotalLabel: pdfTexts.subTotalLabel,
+              discountPrctLabel: pdfTexts.discountPrctLabel,
+              discountLabel: pdfTexts.discountLabel,
+              taxExclusiveLabel: pdfTexts.taxExclusiveLabel,
+              taxInclusiveLabel: pdfTexts.taxInclusiveLabel,
+              taxRateLabel: pdfTexts.taxRateLabel,
+              taxExclusivePerItemLabel: pdfTexts.taxExclusivePerItemLabel,
+              taxInclusivePerItemLabel: pdfTexts.taxInclusivePerItemLabel,
+              shippingFeeLabel: pdfTexts.shippingFeeLabel,
+              totalLabel: pdfTexts.totalLabel1,
+              paidLabel: pdfTexts.paidLabel,
+              balanceDueLabel: pdfTexts.balanceDueLabel,
+              taxLabel: pdfTexts.taxLabel
+            }}
           />
         </View>
         <NotesInfo
           invoiceForm={invoiceForm}
-          customerNoteLabel={pdfTexts.customerNote}
-          termsConditionsLabel={pdfTexts.termsConditions}
+          labels={{
+            customerNoteLabel: pdfTexts.customerNote,
+            termsConditionsLabel: pdfTexts.termsConditions
+          }}
         />
-        <PageCounterInfo invoiceForm={invoiceForm} ofLabel={pdfTexts.of} pageLabel={pdfTexts.page} />
+        <PageCounterInfo
+          invoiceForm={invoiceForm}
+          labels={{
+            ofLabel: pdfTexts.of,
+            pageLabel: pdfTexts.page
+          }}
+        />
         <SignatureInfo invoiceForm={invoiceForm} signatureUrl={signatureUrl} />
       </Page>
       {attachmentUrls.map(item => (
@@ -126,7 +138,13 @@ const PDFDocumentComponent: FC<Props> = ({
         >
           <WatermarkInfo invoiceForm={invoiceForm} watermarkUrl={watermarkUrl} />
           <Image style={PDF_STYLES.attachment} src={item.url} />
-          <PageCounterInfo invoiceForm={invoiceForm} ofLabel={pdfTexts.of} pageLabel={pdfTexts.page} />
+          <PageCounterInfo
+            invoiceForm={invoiceForm}
+            labels={{
+              ofLabel: pdfTexts.of,
+              pageLabel: pdfTexts.page
+            }}
+          />
           <SignatureInfo invoiceForm={invoiceForm} signatureUrl={signatureUrl} />
         </Page>
       ))}

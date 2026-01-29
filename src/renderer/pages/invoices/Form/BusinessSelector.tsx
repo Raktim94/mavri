@@ -77,7 +77,7 @@ const BusinessSelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
           <img
             src={logoUrl}
             alt={t('invoices.businessLogo')}
-            style={{ width: '60px', height: '60px', objectFit: 'cover' }}
+            style={{ width: '60px', height: '60px', objectFit: 'contain' }}
           />
         ) : (
           <Box

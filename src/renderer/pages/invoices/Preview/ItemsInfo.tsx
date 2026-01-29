@@ -8,9 +8,7 @@ import { createCurrencyFormatter } from '../../../shared/utils/formatFunctions';
 import { getItemFinancialData } from '../../../shared/utils/invoiceFunctions';
 import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './constant';
 
-interface Props {
-  invoiceForm?: InvoiceFromData;
-  storeSettings?: Settings;
+interface PropsLabels {
   itemLabel: string;
   unitLabel: string;
   qtyLabel: string;
@@ -18,16 +16,14 @@ interface Props {
   totalLabel: string;
   itemTaxLabel: (data: { rate?: number; amount: string }) => string;
 }
-const ItemsInfoComponent: FC<Props> = ({
-  invoiceForm,
-  storeSettings,
-  itemLabel,
-  unitLabel,
-  qtyLabel,
-  unitCostLabel,
-  totalLabel,
-  itemTaxLabel
-}) => {
+interface Props {
+  invoiceForm?: InvoiceFromData;
+  storeSettings?: Settings;
+  labels: PropsLabels;
+}
+const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) => {
+  const { itemLabel, unitLabel, qtyLabel, unitCostLabel, totalLabel, itemTaxLabel } = labels;
+
   const format = useMemo(
     () => (invoiceForm ? createCurrencyFormatter(storeSettings!, invoiceForm) : (n: number) => String(n)),
     [storeSettings, invoiceForm]

@@ -8,9 +8,7 @@ import { formatDate } from '../../../shared/utils/formatFunctions';
 import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './constant';
 import { TitleInfo } from './TitleInfo';
 
-interface Props {
-  invoiceForm?: InvoiceFromData;
-  storeSettings?: Settings;
+interface PropsLabels {
   invoiceNoLabel: string;
   quoteNoLabel: string;
   dueDateLabel: string;
@@ -18,16 +16,14 @@ interface Props {
   pdfQUOTELabel: string;
   pdfINVOICELabel: string;
 }
-const InvoiceInformationInfoComponent: FC<Props> = ({
-  invoiceForm,
-  storeSettings,
-  invoiceNoLabel,
-  quoteNoLabel,
-  dueDateLabel,
-  dateLabel,
-  pdfQUOTELabel,
-  pdfINVOICELabel
-}) => {
+interface Props {
+  invoiceForm?: InvoiceFromData;
+  storeSettings?: Settings;
+  labels: PropsLabels;
+}
+const InvoiceInformationInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) => {
+  const { invoiceNoLabel, quoteNoLabel, dueDateLabel, dateLabel, pdfQUOTELabel, pdfINVOICELabel } = labels;
+
   return (
     <View
       style={[
@@ -37,7 +33,13 @@ const InvoiceInformationInfoComponent: FC<Props> = ({
       ]}
     >
       {invoiceForm?.customizationLayout === LayoutType.classic && (
-        <TitleInfo invoiceForm={invoiceForm} pdfINVOICELabel={pdfINVOICELabel} pdfQUOTELabel={pdfQUOTELabel} />
+        <TitleInfo
+          invoiceForm={invoiceForm}
+          labels={{
+            pdfINVOICELabel: pdfINVOICELabel,
+            pdfQUOTELabel: pdfQUOTELabel
+          }}
+        />
       )}
 
       <View

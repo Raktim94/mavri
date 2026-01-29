@@ -24,8 +24,10 @@ const HeaderInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, logoUrl, p
         <View style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart, PDF_STYLES.pb20]}>
           <TitleInfo
             invoiceForm={invoiceForm}
-            pdfINVOICELabel={pdfTexts.pdfINVOICE}
-            pdfQUOTELabel={pdfTexts.pdfQUOTE}
+            labels={{
+              pdfINVOICELabel: pdfTexts.pdfINVOICE,
+              pdfQUOTELabel: pdfTexts.pdfQUOTE
+            }}
           />
           <LogoInfo invoiceForm={invoiceForm} logoUrl={logoUrl} />
         </View>
@@ -35,8 +37,10 @@ const HeaderInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, logoUrl, p
           <View style={[PDF_STYLES.alignCenter, PDF_STYLES.pb20]}>
             <TitleInfo
               invoiceForm={invoiceForm}
-              pdfINVOICELabel={pdfTexts.pdfINVOICE}
-              pdfQUOTELabel={pdfTexts.pdfQUOTE}
+              labels={{
+                pdfINVOICELabel: pdfTexts.pdfINVOICE,
+                pdfQUOTELabel: pdfTexts.pdfQUOTE
+              }}
             />
           </View>
           <View style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart, PDF_STYLES.gap10]}>
@@ -50,12 +54,14 @@ const HeaderInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, logoUrl, p
               <InvoiceInformationInfo
                 storeSettings={storeSettings}
                 invoiceForm={invoiceForm}
-                invoiceNoLabel={pdfTexts.invoiceNo}
-                quoteNoLabel={pdfTexts.quoteNo}
-                dueDateLabel={pdfTexts.dueDate}
-                dateLabel={pdfTexts.date}
-                pdfINVOICELabel={pdfTexts.pdfINVOICE}
-                pdfQUOTELabel={pdfTexts.pdfQUOTE}
+                labels={{
+                  invoiceNoLabel: pdfTexts.invoiceNo,
+                  quoteNoLabel: pdfTexts.quoteNo,
+                  dueDateLabel: pdfTexts.dueDate,
+                  dateLabel: pdfTexts.date,
+                  pdfINVOICELabel: pdfTexts.pdfINVOICE,
+                  pdfQUOTELabel: pdfTexts.pdfQUOTE
+                }}
               />
             </View>
           </View>
@@ -68,12 +74,14 @@ const HeaderInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, logoUrl, p
             <InvoiceInformationInfo
               storeSettings={storeSettings}
               invoiceForm={invoiceForm}
-              invoiceNoLabel={pdfTexts.invoiceNo}
-              quoteNoLabel={pdfTexts.quoteNo}
-              dueDateLabel={pdfTexts.dueDate}
-              dateLabel={pdfTexts.date}
-              pdfINVOICELabel={pdfTexts.pdfINVOICE}
-              pdfQUOTELabel={pdfTexts.pdfQUOTE}
+              labels={{
+                invoiceNoLabel: pdfTexts.invoiceNo,
+                quoteNoLabel: pdfTexts.quoteNo,
+                dueDateLabel: pdfTexts.dueDate,
+                dateLabel: pdfTexts.date,
+                pdfINVOICELabel: pdfTexts.pdfINVOICE,
+                pdfQUOTELabel: pdfTexts.pdfQUOTE
+              }}
             />
           </View>
           <View style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart, PDF_STYLES.pt20]}>

@@ -3,12 +3,17 @@ import { memo, type FC } from 'react';
 import type { InvoiceFromData } from '../../../shared/types/invoice';
 import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './constant';
 
-interface Props {
-  invoiceForm?: InvoiceFromData;
+interface PropsLabels {
   customerNoteLabel: string;
   termsConditionsLabel: string;
 }
-const NotesInfoComponent: FC<Props> = ({ invoiceForm, customerNoteLabel, termsConditionsLabel }) => {
+interface Props {
+  invoiceForm?: InvoiceFromData;
+  labels: PropsLabels;
+}
+const NotesInfoComponent: FC<Props> = ({ invoiceForm, labels }) => {
+  const { customerNoteLabel, termsConditionsLabel } = labels;
+
   return (
     <View style={[PDF_STYLES.pt20]}>
       {invoiceForm?.thanksNotes && (

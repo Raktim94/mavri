@@ -9,9 +9,7 @@ import type { Settings } from '../../../shared/types/settings';
 import { getFinancialData } from '../../../shared/utils/invoiceFunctions';
 import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './constant';
 
-interface Props {
-  invoiceForm?: InvoiceFromData;
-  storeSettings?: Settings;
+interface PropsLabels {
   subTotalLabel: string;
   discountPrctLabel: string;
   discountLabel: string;
@@ -26,23 +24,12 @@ interface Props {
   balanceDueLabel: string;
   taxLabel: string;
 }
-const FinancialInfoComponent: FC<Props> = ({
-  invoiceForm,
-  storeSettings,
-  subTotalLabel,
-  discountPrctLabel,
-  discountLabel,
-  taxExclusiveLabel,
-  taxInclusiveLabel,
-  taxRateLabel,
-  taxExclusivePerItemLabel,
-  taxInclusivePerItemLabel,
-  shippingFeeLabel,
-  totalLabel,
-  paidLabel,
-  balanceDueLabel,
-  taxLabel
-}) => {
+interface Props {
+  invoiceForm?: InvoiceFromData;
+  storeSettings?: Settings;
+  labels: PropsLabels;
+}
+const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) => {
   const {
     formattedSubTotalAmount,
     totalAmountFormatted,
@@ -56,6 +43,21 @@ const FinancialInfoComponent: FC<Props> = ({
     totalTax,
     totalAmountPaid
   } = useMemo(() => getFinancialData({ storeSettings, invoiceForm: invoiceForm }), [storeSettings, invoiceForm]);
+  const {
+    subTotalLabel,
+    discountPrctLabel,
+    discountLabel,
+    taxExclusiveLabel,
+    taxInclusiveLabel,
+    taxRateLabel,
+    taxExclusivePerItemLabel,
+    taxInclusivePerItemLabel,
+    shippingFeeLabel,
+    totalLabel,
+    paidLabel,
+    balanceDueLabel,
+    taxLabel
+  } = labels;
 
   const hasPerItemTaxExclusive = useMemo(
     () => invoiceForm?.invoiceItems?.some(item => item.taxType === InvoiceItemTaxType.exclusive),

@@ -97,7 +97,7 @@ export const UploadImage: React.FC<UploadSquareProps> = ({
             <img
               src={croppedImageUrl}
               alt={t('ariaLabel.cropped')}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
             />
             {!disableClear && (
               <Tooltip title={t('ariaLabel.clear')}>
