@@ -147,22 +147,31 @@ const InvoiceFormComponent: FC<Props> = ({
           ...invoiceForm,
           styleProfilesId: data.id,
           styleProfileNameSnapshot: data.name,
-          customizationColor: data.customizationColor,
-          customizationLogoSize: data.customizationLogoSize,
-          customizationFontSizeSize: data.customizationFontSizeSize,
-          customizationLayout: data.customizationLayout,
-          customizationTableHeaderStyle: data.customizationTableHeaderStyle,
-          customizationTableRowStyle: data.customizationTableRowStyle,
-          customizationPageFormat: data.customizationPageFormat,
+          customizationColor: data.customizationColor ?? invoiceForm.customizationColor,
+          customizationLogoSize: data.customizationLogoSize ?? invoiceForm.customizationLogoSize,
+          customizationFontSizeSize: data.customizationFontSizeSize ?? invoiceForm.customizationFontSizeSize,
+          customizationLayout: data.customizationLayout ?? invoiceForm.customizationLayout,
+          customizationTableHeaderStyle:
+            data.customizationTableHeaderStyle ?? invoiceForm.customizationTableHeaderStyle,
+          customizationTableRowStyle: data.customizationTableRowStyle ?? invoiceForm.customizationTableRowStyle,
+          customizationPageFormat: data.customizationPageFormat ?? invoiceForm.customizationPageFormat,
           customizationLabelUpperCase: data.customizationLabelUpperCase,
-          customizationWatermarkFileName: data.customizationWatermarkFileName,
-          customizationWatermarkFileType: data.customizationWatermarkFileType,
-          customizationWatermarkFileSize: data.customizationWatermarkFileSize,
-          customizationWatermarkFileData: data.customizationWatermarkFileData,
-          customizationPaidWatermarkFileName: data.customizationPaidWatermarkFileName,
-          customizationPaidWatermarkFileType: data.customizationPaidWatermarkFileType,
-          customizationPaidWatermarkFileSize: data.customizationPaidWatermarkFileSize,
-          customizationPaidWatermarkFileData: data.customizationPaidWatermarkFileData
+          customizationWatermarkFileName:
+            data.customizationWatermarkFileName ?? invoiceForm.customizationWatermarkFileName,
+          customizationWatermarkFileType:
+            data.customizationWatermarkFileType ?? invoiceForm.customizationWatermarkFileType,
+          customizationWatermarkFileSize:
+            data.customizationWatermarkFileSize ?? invoiceForm.customizationWatermarkFileSize,
+          customizationWatermarkFileData:
+            data.customizationWatermarkFileData ?? invoiceForm.customizationWatermarkFileData,
+          customizationPaidWatermarkFileName:
+            data.customizationPaidWatermarkFileName ?? invoiceForm.customizationPaidWatermarkFileName,
+          customizationPaidWatermarkFileType:
+            data.customizationPaidWatermarkFileType ?? invoiceForm.customizationPaidWatermarkFileType,
+          customizationPaidWatermarkFileSize:
+            data.customizationPaidWatermarkFileSize ?? invoiceForm.customizationPaidWatermarkFileSize,
+          customizationPaidWatermarkFileData:
+            data.customizationPaidWatermarkFileData ?? invoiceForm.customizationPaidWatermarkFileData
         });
       });
     },
