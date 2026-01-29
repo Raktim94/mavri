@@ -1,5 +1,5 @@
 import type { Database } from 'sqlite3';
-import type { Item } from '../types/item';
+import type { Item } from '../../shared/types/item';
 import { getFirstRow, runDb } from './dbFuntions';
 
 export const getOrCreateByName = async (

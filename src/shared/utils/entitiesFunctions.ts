@@ -1,6 +1,6 @@
 import type { Database } from 'sqlite3';
-import type { EntityWithId } from '../types/entityWithId';
-import type { FilterData } from '../types/invoiceFilter';
+import type { EntityWithId } from '../../shared/types/entityWithId';
+import type { FilterData } from '../../shared/types/invoiceFilter';
 import { getAllRows, getFirstRow, runDb } from './dbFuntions';
 import { mapSqliteError } from './errorFunctions';
 import { getHavingClauseFromFilters } from './filterFunctions';

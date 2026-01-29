@@ -1,0 +1,70 @@
+import type { Database } from 'sqlite3';
+import type { StyleProfile } from '../../renderer/shared/types/styleProfiles';
+import type { FilterData } from '../types/invoiceFilter';
+import { runDb } from '../utils/dbFuntions';
+import { getAllEntities, handleEntity } from '../utils/entitiesFunctions';
+import { mapSqliteError } from '../utils/errorFunctions';
+
+const styleProfileFields: (keyof StyleProfile)[] = [
+  'name',
+  'customizationColor',
+  'customizationLogoSize',
+  'customizationFontSizeSize',
+  'customizationLayout',
+  'customizationTableHeaderStyle',
+  'customizationTableRowStyle',
+  'customizationPageFormat',
+  'customizationLabelUpperCase',
+  'customizationWatermarkFileName',
+  'customizationWatermarkFileType',
+  'customizationWatermarkFileSize',
+  'customizationWatermarkFileData',
+  'customizationPaidWatermarkFileName',
+  'customizationPaidWatermarkFileType',
+  'customizationPaidWatermarkFileSize',
+  'customizationPaidWatermarkFileData',
+  'isArchived'
+];
+
+export const getAllStyleProfiles = async (db: Database, filter?: FilterData[]) => {
+  const getAll = getAllEntities(db, 'style_profiles', 'styleProfilesId');
+  return getAll(filter ?? []);
+};
+
+export const addStyleProfile = async (db: Database, data: StyleProfile) => {
+  const handle = handleEntity<StyleProfile>(db, 'style_profiles', styleProfileFields);
+  return handle(data);
+};
+
+export const updateStyleProfile = async (db: Database, data: StyleProfile) => {
+  const handle = handleEntity<StyleProfile>(db, 'style_profiles', styleProfileFields);
+  return handle(data, true);
+};
+
+export const deleteStyleProfile = async (db: Database, id: number) => {
+  try {
+    await runDb(db, 'DELETE FROM style_profiles WHERE id = ?;', [id]);
+    return { success: true };
+  } catch (error) {
+    return { success: false, ...mapSqliteError(error) };
+  }
+};
+
+export const batchAddStyleProfile = async (db: Database, data: StyleProfile[]) => {
+  const handle = handleEntity<StyleProfile>(db, 'style_profiles', styleProfileFields);
+  try {
+    await runDb(db, 'BEGIN TRANSACTION');
+    for (const row of data) {
+      const result = await handle(row);
+      if (!result.success) {
+        await runDb(db, 'ROLLBACK');
+        return result;
+      }
+    }
+    await runDb(db, 'COMMIT');
+    return { success: true };
+  } catch (error) {
+    await runDb(db, 'ROLLBACK');
+    return { success: false, ...mapSqliteError(error) };
+  }
+};

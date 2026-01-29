@@ -1,8 +1,8 @@
 import { BrowserWindow, dialog, ipcMain } from 'electron';
 import { join } from 'path';
+import { DBInitType } from '../../shared/enums/dbInitType';
+import { mapSqliteError } from '../../shared/utils/errorFunctions';
 import { setupDB } from '../database';
-import { DBInitType } from '../enums/dbInitType';
-import { mapSqliteError } from '../utils/errorFunctions';
 
 const resetIPCHandlers = () => {
   const handlers = [

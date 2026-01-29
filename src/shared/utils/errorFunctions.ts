@@ -1,4 +1,4 @@
-import type { SqliteError } from '../types/sqliteError';
+import type { SqliteError } from '../../shared/types/sqliteError';
 
 export const sqliteErrorMap: Record<string, string> = {
   'UNIQUE constraint failed': 'error.invalidConstraintUnique',

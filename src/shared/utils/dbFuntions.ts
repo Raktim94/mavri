@@ -1,7 +1,7 @@
 import sqlite3 from 'sqlite3';
+import type { SqliteValue } from '../../shared/types/sqliteValue';
+import type { UpdateData } from '../../shared/types/updateData';
 import { BOOLEAN_FIELDS } from '../constant';
-import type { SqliteValue } from '../types/sqliteValue';
-import type { UpdateData } from '../types/updateData';
 
 export const runAsync = (db: sqlite3.Database, sql: string) =>
   new Promise<void>((resolve, reject) => {

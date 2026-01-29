@@ -1,51 +1,12 @@
 import { ipcMain } from 'electron';
 import type { Database } from 'sqlite3';
-import { runDb } from '../utils/dbFuntions';
-import { getAllEntities, handleEntity } from '../utils/entitiesFunctions';
-import { mapSqliteError } from '../utils/errorFunctions';
-import type { Client } from './../types/client';
+import * as clientsService from '../../shared/services/clients';
+import type { Client } from '../../shared/types/client';
 
 export const initClientsHandlers = (db: Database) => {
-  const clientFields: (keyof Client)[] = [
-    'name',
-    'shortName',
-    'address',
-    'email',
-    'phone',
-    'code',
-    'additional',
-    'description',
-    'isArchived'
-  ];
-  const handleClient = handleEntity<Client>(db, 'clients', clientFields);
-  const getAllClients = getAllEntities(db, 'clients', 'clientId');
-
-  ipcMain.handle('add-client', async (_e, data: Client) => handleClient(data));
-  ipcMain.handle('update-client', async (_e, data: Client) => handleClient(data, true));
-  ipcMain.handle('delete-client', async (_e, id: number) => {
-    try {
-      await runDb(db, 'DELETE FROM clients WHERE id = ?;', [id]);
-      return { success: true };
-    } catch (error) {
-      return { success: false, ...mapSqliteError(error) };
-    }
-  });
-  ipcMain.handle('batch-add-client', async (_e, data: Client[]) => {
-    try {
-      await runDb(db, 'BEGIN TRANSACTION');
-      for (const row of data) {
-        const result = await handleClient(row);
-        if (!result.success) {
-          await runDb(db, 'ROLLBACK');
-          return result;
-        }
-      }
-      await runDb(db, 'COMMIT');
-      return { success: true };
-    } catch (error) {
-      await runDb(db, 'ROLLBACK');
-      return { success: false, ...mapSqliteError(error) };
-    }
-  });
-  ipcMain.handle('get-all-clients', async (_e, filter) => getAllClients(filter));
+  ipcMain.handle('add-client', async (_e, data: Client) => clientsService.addClient(db, data));
+  ipcMain.handle('update-client', async (_e, data: Client) => clientsService.updateClient(db, data));
+  ipcMain.handle('delete-client', async (_e, id: number) => clientsService.deleteClient(db, id));
+  ipcMain.handle('batch-add-client', async (_e, data: Client[]) => clientsService.batchAddClient(db, data));
+  ipcMain.handle('get-all-clients', async (_e, filter) => clientsService.getAllClients(db, filter));
 };

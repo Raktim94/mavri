@@ -1,5 +1,5 @@
-import { FilterType } from '../enums/filterType';
-import type { FilterData } from '../types/invoiceFilter';
+import { FilterType } from '../../shared/enums/filterType';
+import type { FilterData } from '../../shared/types/invoiceFilter';
 
 export const getWhereClauseFromFilters = (data: {
   filters: FilterData[];
