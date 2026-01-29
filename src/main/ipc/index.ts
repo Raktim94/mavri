@@ -9,6 +9,7 @@ import { initImportExportHandlers } from './importExport';
 import { initInvoicesHandlers } from './invoices';
 import { initItemsHandlers } from './items';
 import { initSettingsHandlers } from './settings';
+import { initStyleProfilesHandlers } from './styleProfiles';
 import { initUnitsHandlers } from './units';
 
 export const initIpcHandler = (db: Database, path: string, mainWindow: BrowserWindow) => {
@@ -21,6 +22,7 @@ export const initIpcHandler = (db: Database, path: string, mainWindow: BrowserWi
 
   initAutoUpdaterHandlers(mainWindow);
   initBusinessesHandlers(db);
+  initStyleProfilesHandlers(db);
   initCategoriesHandlers(db);
   initClientsHandlers(db);
   initCurrenciesHandlers(db);

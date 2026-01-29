@@ -14,6 +14,7 @@ export interface Settings {
   shouldIncludeMonth: boolean;
   shouldIncludeBusinessName: boolean;
   quotesON: boolean;
+  styleProfilesON: boolean;
   reportsON: boolean;
   createdAt: string;
   updatedAt: string;
@@ -30,5 +31,6 @@ export interface SettingsUpdate {
   shouldIncludeMonth?: boolean;
   shouldIncludeBusinessName?: boolean;
   quotesON?: boolean;
+  styleProfilesON?: boolean;
   reportsON?: boolean;
 }

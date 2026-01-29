@@ -5,6 +5,7 @@ import { memo, useCallback, useMemo, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useExportPdf } from '../../../shared/hooks/useExportPdf ';
 import type { CustomizationForm, InvoiceFromData } from '../../../shared/types/invoice';
+import type { StyleProfileFromData } from '../../../shared/types/styleProfiles';
 import { useAppSelector } from '../../../state/configureStore';
 import { selectSettings } from '../../../state/pageSlice';
 import { CustomizationDropdown } from './Dropdowns/CustomizationDropdown';
@@ -12,9 +13,10 @@ import { PreviewCore } from './PreviewCore';
 
 interface Props {
   invoiceForm?: InvoiceFromData;
+  onSaveProfile?: (data: StyleProfileFromData) => void;
   setInvoiceForm?: React.Dispatch<React.SetStateAction<InvoiceFromData | undefined>>;
 }
-const InvoicesPreviewComponent: FC<Props> = ({ setInvoiceForm = () => {}, invoiceForm }) => {
+const InvoicesPreviewComponent: FC<Props> = ({ onSaveProfile = () => {}, setInvoiceForm = () => {}, invoiceForm }) => {
   const { t } = useTranslation();
   const storeSettings = useAppSelector(selectSettings);
 
@@ -70,6 +72,7 @@ const InvoicesPreviewComponent: FC<Props> = ({ setInvoiceForm = () => {}, invoic
         onClose={() => handleOnClose(setIsDropdownOpenCustomization)}
         onOpen={() => handleOnOpen(setIsDropdownOpenCustomization)}
         onClick={handleOnClickCustomization}
+        onSaveProfile={onSaveProfile}
       />
       <Tooltip title={t('ariaLabel.export')}>
         <Fab

@@ -2,6 +2,7 @@ import { Business, ChevronLeft, ChevronRight, Description, Inventory, People, Se
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import CategoryIcon from '@mui/icons-material/Category';
+import ColorLensIcon from '@mui/icons-material/ColorLens';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import ScaleIcon from '@mui/icons-material/Scale';
 import { Box, Divider, Drawer, IconButton, Tooltip, Typography } from '@mui/material';
@@ -63,6 +64,19 @@ export const Sidebar: FC = () => {
             text: t('menuItems.quotes'),
             icon: <ReceiptIcon />,
             path: '/quotes',
+            isToggle: false,
+            minHeight: 50,
+            isSelected: isSelected,
+            onClick: onClickNavigate
+          }
+        ]
+      : []),
+    ...(storeSettings?.styleProfilesON
+      ? [
+          {
+            text: t('menuItems.styleProfiles'),
+            icon: <ColorLensIcon />,
+            path: '/styleProfiles',
             isToggle: false,
             minHeight: 50,
             isSelected: isSelected,

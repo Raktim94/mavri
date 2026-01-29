@@ -177,6 +177,7 @@
     "quoteSuffix": "Suffixe de devis",
     "quotes": "Devis",
     "save": "Enregistrer",
+    "saveAsProfile": "Enregistrer comme profil",
     "search": "Rechercher...",
     "selectFilterType": "Sélectionnez un type de filtre",
     "selectImage": "Sélectionnez un fichier image",
@@ -364,6 +365,7 @@
     "quotes": "Devis",
     "reports": "Rapports",
     "settings": "Paramètres",
+    "styleProfiles": "Profils de style",
     "units": "Unités"
   },
   "quotes": {
@@ -414,6 +416,7 @@
       "support": "Signalez des bugs ou proposez des améliorations via GitHub.",
       "turnQuotes": "Activer ou désactiver la création de devis",
       "turnReports": "Activer ou désactiver les rapports",
+      "turnStyleProfiles": "Activer ou désactiver la fonction des profils de style",
       "tutorial": "Consultez le guide d’utilisation"
     },
     "importConfirmText": "Êtes‑vous sûr de vouloir importer ce fichier JSON ? Cette action effacera votre base actuelle et la remplacera par les données de la sauvegarde. Cette action est irréversible.",
@@ -430,9 +433,32 @@
       "support": "Support",
       "turnQuotes": "Devis",
       "turnReports": "Rapports",
+      "turnStyleProfiles": "Profils de style",
       "tutorial": "Tutoriel"
     },
     "updateConfirmText": "Une nouvelle version ({{newVersion}}) est prête. Redémarrer maintenant pour mettre à jour depuis {{currentVersion}} ? Vous pouvez annuler et la mise à jour s’appliquera au prochain lancement."
+  },
+  "styleProfiles": {
+    "add": "Ajouter un profil de style",
+    "filter": {
+      "activeDesc": "Profils de style non archivés",
+      "activeText": "Profils de style actifs",
+      "allText": "Tous les profils de style",
+      "archivedDesc": "Profils de style archivés",
+      "archivedText": "Profils de style archivés",
+      "atleastOneInvoiceDesc": "Profils de style ayant au moins une facture",
+      "atleastOneInvoiceText": "Profils de style avec des factures",
+      "noInvoices30Desc": "Aucune facture au cours des 30 derniers jours",
+      "noInvoices30Text": "Profils de style inactifs (30 jours)",
+      "noInvoices60Desc": "Aucune facture au cours des 60 derniers jours",
+      "noInvoices60Text": "Profils de style inactifs (60 jours)",
+      "noInvoices90Desc": "Aucune facture au cours des 90 derniers jours",
+      "noInvoices90Text": "Profils de style inactifs (90 jours)",
+      "noInvoicesDesc": "Profils de style sans facture",
+      "noInvoicesText": "Profils de style sans factures"
+    },
+    "noItem": "Sélectionnez un profil de style pour afficher les détails.",
+    "title": "Profil de style"
   },
   "units": {
     "add": "Ajouter une unité",

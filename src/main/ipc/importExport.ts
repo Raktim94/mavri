@@ -9,6 +9,7 @@ import { mapSqliteError } from '../utils/errorFunctions';
 export const initImportExportHandlers = (db: Database) => {
   ipcMain.handle('export-all-data', async () => {
     try {
+      const styleProfiles = await getAllRows(db, 'SELECT * FROM style_profiles');
       const settingsRow = await getFirstRow(db, 'SELECT * FROM settings LIMIT 1');
       const businesses = await getAllRows(db, 'SELECT * FROM businesses');
       const clients = await getAllRows(db, 'SELECT * FROM clients');
@@ -37,6 +38,16 @@ export const initImportExportHandlers = (db: Database) => {
           logo: buf ? buf.toString('base64') : null
         };
       });
+      const styleProfilesModified = styleProfiles.map(sp => {
+        const bufWatermarPaid = sp.customizationPaidWatermarkFileData as unknown as Buffer | null;
+        const bufWatermark = sp.customizationWatermarkFileData as unknown as Buffer | null;
+
+        return {
+          ...sp,
+          customizationPaidWatermarkFileData: bufWatermarPaid ? bufWatermarPaid.toString('base64') : null,
+          customizationWatermarkFileData: bufWatermark ? bufWatermark.toString('base64') : null
+        };
+      });
       const invoicesModified = invoices.map(i => {
         const bufLogo = i.businessLogoSnapshot as unknown as Buffer | null;
         const bufWatermarPaid = i.customizationPaidWatermarkFileData as unknown as Buffer | null;
@@ -61,6 +72,7 @@ export const initImportExportHandlers = (db: Database) => {
         categories,
         currencies,
         invoices: invoicesModified,
+        styleProfiles: styleProfilesModified,
         invoiceItems,
         invoicePayments,
         attachments: attachmentsModified
@@ -161,7 +173,8 @@ export const initImportExportHandlers = (db: Database) => {
           'clients',
           'units',
           'categories',
-          'currencies'
+          'currencies',
+          'style_profiles'
         ];
 
         for (const table of deleteOrder) {
@@ -173,6 +186,7 @@ export const initImportExportHandlers = (db: Database) => {
           units: 'units',
           categories: 'categories',
           businesses: 'businesses',
+          style_profiles: 'styleProfiles',
           clients: 'clients',
           items: 'items',
           invoices: 'invoices',
@@ -185,6 +199,13 @@ export const initImportExportHandlers = (db: Database) => {
           parsed.attachments = parsed.attachments.map((a: Record<string, unknown>) => ({
             ...a,
             data: fromBase64(a.data)
+          }));
+        }
+        if (Array.isArray(parsed.styleProfiles)) {
+          parsed.styleProfiles = parsed.styleProfiles.map((sp: Record<string, unknown>) => ({
+            ...sp,
+            customizationPaidWatermarkFileData: fromBase64(sp.customizationPaidWatermarkFileData),
+            customizationWatermarkFileData: fromBase64(sp.customizationWatermarkFileData)
           }));
         }
         if (Array.isArray(parsed.businesses)) {

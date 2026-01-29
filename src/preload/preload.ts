@@ -9,6 +9,7 @@ import type { FilterData } from '../renderer/shared/types/filter';
 import type { InvoiceAdd, InvoiceUpdate } from '../renderer/shared/types/invoice';
 import type { ItemAdd, ItemUpdate } from '../renderer/shared/types/item';
 import type { SettingsUpdate } from '../renderer/shared/types/settings';
+import type { StyleProfile, StyleProfileAdd, StyleProfileUpdate } from '../renderer/shared/types/styleProfiles';
 import type { UnitAdd, UnitUpdate } from '../renderer/shared/types/unit';
 import type { ProgressInfo } from '../renderer/shared/types/updater';
 
@@ -54,6 +55,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   deleteBusiness: (id: number) => ipcRenderer.invoke('delete-business', id),
   addBusiness: (data: BusinessAdd) => ipcRenderer.invoke('add-business', data),
   addBatchBusiness: (data: BusinessAdd[]) => ipcRenderer.invoke('batch-add-business', data),
+
+  getAllStyleProfiles: (filter?: FilterData[]) => ipcRenderer.invoke('get-all-styleProfiles', filter),
+  updateStyleProfile: (data: StyleProfileUpdate) => ipcRenderer.invoke('update-styleProfile', data),
+  deleteStyleProfile: (id: number) => ipcRenderer.invoke('delete-styleProfile', id),
+  addStyleProfile: (data: StyleProfileAdd) => ipcRenderer.invoke('add-styleProfile', data),
+  addBatchStyleProfile: (data: StyleProfile[]) => ipcRenderer.invoke('batch-add-styleProfile', data),
 
   getAllClients: (filter?: FilterData[]) => ipcRenderer.invoke('get-all-clients', filter),
   updateClient: (data: ClientUpdate) => ipcRenderer.invoke('update-client', data),

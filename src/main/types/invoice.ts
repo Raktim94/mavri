@@ -81,6 +81,8 @@ export interface Invoice {
   signatureSize?: number;
   signatureType?: string;
   signatureName?: string;
+  styleProfilesId?: number;
+  styleProfileNameSnapshot?: string;
 }
 
 export interface InvoiceAttachment {
