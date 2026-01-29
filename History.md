@@ -1,5 +1,12 @@
 # Invoice Builder
 
+## 2026-01-29, version 1.5.0
+
+New features & improvements
+
+- Technical depth has been removed to simplify the customization workflow
+- Style profiles are now available for invoices and quotes, enabling quick, consistent theming.
+
 ## 2026-01-28, version 1.4.0
 
 New features & improvements
