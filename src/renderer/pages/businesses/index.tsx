@@ -28,7 +28,10 @@ export const BusinessesPage = () => {
     'description',
     'additional',
     'paymentInformation',
-    'isArchived'
+    'isArchived',
+    'fileSize',
+    'fileType',
+    'fileName'
   ];
   const excelFileName = 'businesses';
   const excelTemplateData: Rows = [

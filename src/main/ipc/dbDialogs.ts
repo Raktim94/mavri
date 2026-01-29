@@ -48,7 +48,12 @@ const resetIPCHandlers = () => {
     'import-all-data',
     'restart-app',
     'get-app-version',
-    'check-for-updates'
+    'check-for-updates',
+    'add-styleProfile',
+    'update-styleProfile',
+    'delete-styleProfile',
+    'batch-add-styleProfile',
+    'get-all-styleProfiles'
   ];
 
   handlers.forEach(handler => ipcMain.removeHandler(handler));

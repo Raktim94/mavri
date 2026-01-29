@@ -438,6 +438,28 @@
     },
     "updateConfirmText": "Nauja versija ({{newVersion}}) paruošta. Perkrauti dabar, kad atnaujintumėte iš {{currentVersion}}? Atšaukę, atnaujinimas bus kitą kartą paleidus programą."
   },
+  "styleProfiles": {
+    "add": "Pridėti stiliaus profilį",
+    "filter": {
+      "activeDesc": "Nestarchivuoti stiliaus profiliai",
+      "activeText": "Aktyvūs stiliaus profiliai",
+      "allText": "Visi stiliaus profiliai",
+      "archivedDesc": "Archyvuoti stiliaus profiliai",
+      "archivedText": "Archyvuoti stiliaus profiliai",
+      "atleastOneInvoiceDesc": "Stiliaus profiliai, turintys bent vieną sąskaitą",
+      "atleastOneInvoiceText": "Stiliaus profiliai su sąskaitomis",
+      "noInvoices30Desc": "Nėra sąskaitų per paskutines 30 dienų",
+      "noInvoices30Text": "Neaktyvūs stiliaus profiliai (30 dienų)",
+      "noInvoices60Desc": "Nėra sąskaitų per paskutines 60 dienų",
+      "noInvoices60Text": "Neaktyvūs stiliaus profiliai (60 dienų)",
+      "noInvoices90Desc": "Nėra sąskaitų per paskutines 90 dienų",
+      "noInvoices90Text": "Neaktyvūs stiliaus profiliai (90 dienų)",
+      "noInvoicesDesc": "Stiliaus profiliai be sąskaitų",
+      "noInvoicesText": "Stiliaus profiliai, neturintys sąskaitų"
+    },
+    "noItem": "Pasirinkite stiliaus profilį, kad matytumėte detales.",
+    "title": "Stiliaus profilis"
+  },
   "units": {
     "add": "Pridėti vienetą",
     "filter": {

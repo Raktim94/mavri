@@ -227,6 +227,8 @@ export interface Invoice {
   signatureSize?: number;
   signatureType?: string;
   signatureName?: string;
+  styleProfilesId?: number;
+  styleProfileNameSnapshot?: string;
 }
 
 export interface InvoiceAdd {
@@ -299,6 +301,8 @@ export interface InvoiceAdd {
   signatureSize?: number;
   signatureType?: string;
   signatureName?: string;
+  styleProfilesId?: number;
+  styleProfileNameSnapshot?: string;
 }
 
 export interface InvoiceUpdate extends InvoiceAdd {
@@ -376,4 +380,6 @@ export interface InvoiceFromData {
   signatureSize?: number;
   signatureType?: string;
   signatureName?: string;
+  styleProfilesId?: number;
+  styleProfileNameSnapshot?: string;
 }

@@ -437,6 +437,28 @@
     },
     "updateConfirmText": "Eine neue Version ({{newVersion}}) ist verfügbar. Jetzt neu starten, um von {{currentVersion}} zu aktualisieren? Sie können abbrechen und das Update wird beim nächsten Start angewendet."
   },
+  "styleProfiles": {
+    "add": "Stilprofil hinzufügen",
+    "filter": {
+      "activeDesc": "Stilprofile, die nicht archiviert sind",
+      "activeText": "Aktive Stilprofile",
+      "allText": "Alle Stilprofile",
+      "archivedDesc": "Archivierte Stilprofile",
+      "archivedText": "Archivierte Stilprofile",
+      "atleastOneInvoiceDesc": "Stilprofile mit mindestens einer Rechnung",
+      "atleastOneInvoiceText": "Stilprofile mit Rechnungen",
+      "noInvoices30Desc": "Keine Rechnungen in den letzten 30 Tagen",
+      "noInvoices30Text": "Inaktive Stilprofile (30 Tage)",
+      "noInvoices60Desc": "Keine Rechnungen in den letzten 60 Tagen",
+      "noInvoices60Text": "Inaktive Stilprofile (60 Tage)",
+      "noInvoices90Desc": "Keine Rechnungen in den letzten 90 Tagen",
+      "noInvoices90Text": "Inaktive Stilprofile (90 Tage)",
+      "noInvoicesDesc": "Stilprofile ohne Rechnungen",
+      "noInvoicesText": "Stilprofile ohne Rechnungen"
+    },
+    "noItem": "Wählen Sie ein Stilprofil aus, um Details anzuzeigen.",
+    "title": "Stilprofil"
+  },
   "units": {
     "add": "Einheit hinzufügen",
     "filter": {

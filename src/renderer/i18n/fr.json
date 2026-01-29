@@ -437,6 +437,28 @@
     },
     "updateConfirmText": "Une nouvelle version ({{newVersion}}) est prête. Redémarrer maintenant pour mettre à jour depuis {{currentVersion}} ? Vous pouvez annuler et la mise à jour s’appliquera au prochain lancement."
   },
+  "styleProfiles": {
+    "add": "Ajouter un profil de style",
+    "filter": {
+      "activeDesc": "Profils de style non archivés",
+      "activeText": "Profils de style actifs",
+      "allText": "Tous les profils de style",
+      "archivedDesc": "Profils de style archivés",
+      "archivedText": "Profils de style archivés",
+      "atleastOneInvoiceDesc": "Profils de style ayant au moins une facture",
+      "atleastOneInvoiceText": "Profils de style avec des factures",
+      "noInvoices30Desc": "Aucune facture au cours des 30 derniers jours",
+      "noInvoices30Text": "Profils de style inactifs (30 jours)",
+      "noInvoices60Desc": "Aucune facture au cours des 60 derniers jours",
+      "noInvoices60Text": "Profils de style inactifs (60 jours)",
+      "noInvoices90Desc": "Aucune facture au cours des 90 derniers jours",
+      "noInvoices90Text": "Profils de style inactifs (90 jours)",
+      "noInvoicesDesc": "Profils de style sans facture",
+      "noInvoicesText": "Profils de style sans factures"
+    },
+    "noItem": "Sélectionnez un profil de style pour afficher les détails.",
+    "title": "Profil de style"
+  },
   "units": {
     "add": "Ajouter une unité",
     "filter": {

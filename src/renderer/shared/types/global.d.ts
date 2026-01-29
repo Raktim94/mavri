@@ -11,6 +11,7 @@ import type { FilterData } from './filter';
 import type { Invoice, InvoiceAdd, InvoiceUpdate } from './invoice';
 import type { Item, ItemAdd, ItemUpdate } from './item';
 import type { Response } from './response';
+import type { StyleProfile, StyleProfileAdd, StyleProfileUpdate } from './styleProfiles';
 import type { Unit, UnitAdd, UnitUpdate } from './unit';
 import type { ProgressInfo } from './updater';
 
@@ -41,6 +42,12 @@ declare global {
       deleteBusiness: (id: number) => Promise<Response<unknown>>;
       addBusiness: (data: BusinessAdd) => Promise<Response<Business>>;
       addBatchBusiness: (data: BusinessAdd[]) => Promise<Response<BusinessAdd[]>>;
+
+      getAllStyleProfiles: (filter?: FilterData[]) => Promise<Response<StyleProfile[]>>;
+      updateStyleProfile: (data: StyleProfileUpdate) => Promise<Response<StyleProfileUpdate>>;
+      deleteStyleProfile: (id: number) => Promise<Response<unknown>>;
+      addStyleProfile: (data: StyleProfileAdd) => Promise<Response<StyleProfile>>;
+      addBatchStyleProfile: (data: StyleProfileAdd[]) => Promise<Response<StyleProfileAdd[]>>;
 
       getAllClients: (filter?: FilterData[]) => Promise<Response<Client[]>>;
       updateClient: (data: ClientUpdate) => Promise<Response<ClientUpdate>>;

@@ -437,6 +437,28 @@
     },
     "updateConfirmText": "A new version ({{newVersion}}) is ready. Restart now to update from {{currentVersion}}? You can cancel and update will apply on next launch."
   },
+  "styleProfiles": {
+    "add": "Add style profile",
+    "filter": {
+      "activeDesc": "Style profiles that are not archived",
+      "activeText": "Active style profiles",
+      "allText": "All style profiles",
+      "archivedDesc": "Style profiles that have been archived",
+      "archivedText": "Archived style profiles",
+      "atleastOneInvoiceDesc": "Style profiles which has at least one invoice",
+      "atleastOneInvoiceText": "Style profiles who have invoices",
+      "noInvoices30Desc": "No invoices in the last 30 days",
+      "noInvoices30Text": "Inactive style profiles (30 days)",
+      "noInvoices60Desc": "No invoices in the last 60 days",
+      "noInvoices60Text": "Inactive style profiles (60 days)",
+      "noInvoices90Desc": "No invoices in the last 90 days",
+      "noInvoices90Text": "Inactive style profiles (90 days)",
+      "noInvoicesDesc": "Style profiles with no invoices",
+      "noInvoicesText": "Style profiles who do not have invoices"
+    },
+    "noItem": "Selected a style profile to view details.",
+    "title": "Style profile"
+  },
   "units": {
     "add": "Add unit",
     "filter": {

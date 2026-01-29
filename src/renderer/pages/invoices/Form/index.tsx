@@ -20,6 +20,7 @@ import type {
   TaxForm
 } from '../../../shared/types/invoice';
 import type { Item } from '../../../shared/types/item';
+import type { StyleProfile } from '../../../shared/types/styleProfiles';
 import { getFinancialData } from '../../../shared/utils/invoiceFunctions';
 import { useAppSelector } from '../../../state/configureStore';
 import { selectSettings } from '../../../state/pageSlice';
@@ -28,7 +29,7 @@ import { StatusSelector } from './../Form/StatusSelector';
 import { AttachmentsList } from './AttachmentsList';
 import { BusinessSelector } from './BusinessSelector';
 import { ClientInvoiceRow } from './ClientInvoiceRow';
-import { CurrencyLanguageRow } from './CurrencyLanguageRow';
+import { CurrencyLanguageProfileRow } from './CurrencyLanguageProfileRow';
 import { BusinessesDropdown } from './Dropdowns/BusinessesDropdown';
 import { ClientsDropdown } from './Dropdowns/ClientsDropdown';
 import { CurrenciesDropdown } from './Dropdowns/CurrenciesDropdown';
@@ -36,6 +37,7 @@ import { InvoiceInformationDropdown } from './Dropdowns/InvoiceInformationDropdo
 import { ItemsDropdown } from './Dropdowns/ItemsDropdown';
 import { LanguageDropdown } from './Dropdowns/LanguageDropdown';
 import { MoreActionDropdown } from './Dropdowns/MoreActionDropdown';
+import { StyleProfilesDropdown } from './Dropdowns/StyleProfilesDropdown';
 import { FinancialInfo } from './FinancialInfo';
 import { ItemSelector } from './ItemSelector';
 import { ItemsList } from './ItemsList';
@@ -64,6 +66,7 @@ const InvoiceFormComponent: FC<Props> = ({
   const [isDropdownOpenLanguages, setIsDropdownOpenLanguages] = useState<boolean>(false);
   const [isDropdownOpenBusinesses, setIsDropdownOpenBusinesses] = useState<boolean>(false);
   const [isDropdownOpenCurrencies, setIsDropdownOpenCurrencies] = useState<boolean>(false);
+  const [isDropdownOpenStyleProfile, setIsDropdownOpenStyleProfile] = useState<boolean>(false);
   const [isDropdownOpenClients, setIsDropdownOpenClients] = useState<boolean>(false);
   const [isDropdownOpenInvoiceInfo, setIsDropdownOpenInvoiceInfo] = useState<boolean>(false);
   const [isDropdownOpenMoreAction, setMoreActionDropdown] = useState<boolean>(false);
@@ -129,6 +132,39 @@ const InvoiceFormComponent: FC<Props> = ({
           });
         });
       }
+    },
+    [handleOnClose, setInvoiceForm, invoiceForm]
+  );
+
+  const handleOnClickStyleProfile = useCallback(
+    (data: StyleProfile) => {
+      handleOnClose(setIsDropdownOpenStyleProfile);
+
+      if (!invoiceForm) return;
+
+      startTransition(() => {
+        setInvoiceForm({
+          ...invoiceForm,
+          styleProfilesId: data.id,
+          styleProfileNameSnapshot: data.name,
+          customizationColor: data.customizationColor,
+          customizationLogoSize: data.customizationLogoSize,
+          customizationFontSizeSize: data.customizationFontSizeSize,
+          customizationLayout: data.customizationLayout,
+          customizationTableHeaderStyle: data.customizationTableHeaderStyle,
+          customizationTableRowStyle: data.customizationTableRowStyle,
+          customizationPageFormat: data.customizationPageFormat,
+          customizationLabelUpperCase: data.customizationLabelUpperCase,
+          customizationWatermarkFileName: data.customizationWatermarkFileName,
+          customizationWatermarkFileType: data.customizationWatermarkFileType,
+          customizationWatermarkFileSize: data.customizationWatermarkFileSize,
+          customizationWatermarkFileData: data.customizationWatermarkFileData,
+          customizationPaidWatermarkFileName: data.customizationPaidWatermarkFileName,
+          customizationPaidWatermarkFileType: data.customizationPaidWatermarkFileType,
+          customizationPaidWatermarkFileSize: data.customizationPaidWatermarkFileSize,
+          customizationPaidWatermarkFileData: data.customizationPaidWatermarkFileData
+        });
+      });
     },
     [handleOnClose, setInvoiceForm, invoiceForm]
   );
@@ -537,9 +573,10 @@ const InvoiceFormComponent: FC<Props> = ({
       }}
     >
       <Divider flexItem />
-      <CurrencyLanguageRow
+      <CurrencyLanguageProfileRow
         onEditCurrency={() => onEdit(setIsDropdownOpenCurrencies)}
         onEditLanguage={() => onEdit(setIsDropdownOpenLanguages)}
+        onEditStyleProfile={() => onEdit(setIsDropdownOpenStyleProfile)}
         invoiceForm={invoiceForm}
       />
       <Divider flexItem />
@@ -627,6 +664,12 @@ const InvoiceFormComponent: FC<Props> = ({
         onClose={() => handleOnClose(setIsDropdownOpenBusinesses)}
         onOpen={() => handleOnOpen(setIsDropdownOpenBusinesses)}
         onClick={handleOnClickBusiness}
+      />
+      <StyleProfilesDropdown
+        isOpen={isDropdownOpenStyleProfile}
+        onClose={() => handleOnClose(setIsDropdownOpenStyleProfile)}
+        onOpen={() => handleOnOpen(setIsDropdownOpenStyleProfile)}
+        onClick={handleOnClickStyleProfile}
       />
       <CurrenciesDropdown
         isOpen={isDropdownOpenCurrencies}
