@@ -5,6 +5,7 @@ on:
 
 jobs:
   win:
+    environment: release
     name: Build Windows Release
     runs-on: ubuntu-latest
     steps:
@@ -23,6 +24,7 @@ jobs:
         run: npm run release:win
 
   linux:
+    environment: release
     name: Build Linux Release
     runs-on: ubuntu-latest
     steps:
@@ -41,6 +43,7 @@ jobs:
         run: npm run release:linux
 
   mac:
+    environment: release
     name: Build macOS Release
     runs-on: macos-latest
     steps:
