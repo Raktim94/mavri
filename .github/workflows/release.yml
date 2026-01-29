@@ -1,0 +1,60 @@
+name: Manual Release (Win + Linux + MacOS)
+
+on:
+  workflow_dispatch:   
+
+jobs:
+  win:
+    name: Build Windows Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Windows release
+        run: npm run release:win
+
+  linux:
+    name: Build Linux Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Linux release
+        run: npm run release:linux
+
+  mac:
+    name: Build macOS Release
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build MacOS release
+        run: npm run release:mac
+
