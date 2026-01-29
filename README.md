@@ -105,7 +105,7 @@ If you value **privacy, portability, and control**, this app is built for you.
 - **Linux:** any modern distribution (Ubuntu, Debian, Linux Mint, etc.) supporting .deb packages
 - **macOS:** 11.0 (Big Sur) or newer, Apple Silicon (M1/M2/M3/M4), 64-bit, .dmg installer available
 - **Memory:** 2 GB RAM minimum (1 GB may work for very small datasets)
-- **Disk space:** ~100 MB for the installer; ~500mb for the app; additional space needed for database files
+- **Disk space:** ~150 MB for the installer; ~500mb for the app; additional space needed for database files
 
 ## 📦 Installation
 
