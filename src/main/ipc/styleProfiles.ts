@@ -33,7 +33,7 @@ export const initStyleProfilesHandlers = (db: Database) => {
   ipcMain.handle('update-styleProfile', async (_event, data: StyleProfile) => handleStyleProfile(data, true));
   ipcMain.handle('delete-styleProfile', async (_event, id: number) => {
     try {
-      await runDb(db, 'DELETE FROM styleProfile WHERE id = ?;', [id]);
+      await runDb(db, 'DELETE FROM style_profiles WHERE id = ?;', [id]);
       return { success: true };
     } catch (error) {
       return { success: false, ...mapSqliteError(error) };
