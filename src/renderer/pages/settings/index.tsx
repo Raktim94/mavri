@@ -24,7 +24,8 @@ import {
   setLanguageDate,
   setMode,
   setQuotes,
-  setReports
+  setReports,
+  setStyleProfiles
 } from '../../state/pageSlice';
 import { CustomizeInvoice } from './content/CustomizeInvoice';
 import { LanguageFormat } from './content/LanguageFormat';
@@ -103,6 +104,13 @@ export const SettingsPage = () => {
   const toggleQuotes = useCallback(
     (value: boolean) => {
       dispatch(setQuotes(value));
+    },
+    [dispatch]
+  );
+
+  const toggleStyleProfiles = useCallback(
+    (value: boolean) => {
+      dispatch(setStyleProfiles(value));
     },
     [dispatch]
   );
@@ -211,6 +219,7 @@ export const SettingsPage = () => {
       onModeChange={onModeChange}
       toggleQuotes={toggleQuotes}
       toggleReports={toggleReports}
+      toggleStyleProfiles={toggleStyleProfiles}
       onExportJSON={exportJSON}
       onImportJSON={importJSONCallback}
     />

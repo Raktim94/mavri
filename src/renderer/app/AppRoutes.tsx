@@ -9,6 +9,7 @@ import { ItemsPage } from '../pages/items';
 import { QuotesPage } from '../pages/quotes';
 import { ReportsPage } from '../pages/reports';
 import { SettingsPage } from '../pages/settings';
+import { StyleProfilesPage } from '../pages/styleProfiles';
 import { UnitsPage } from '../pages/units';
 import { InvoiceType } from '../shared/enums/invoiceType';
 
@@ -23,6 +24,7 @@ export const AppRoutes: FC = () => {
       <Route path="units" element={<UnitsPage />} />
       <Route path="categories" element={<CategoriesPage />} />
       <Route path="items" element={<ItemsPage />} />
+      <Route path="styleProfiles" element={<StyleProfilesPage />} />
       <Route path="invoices" element={<InvoicesPage type={InvoiceType.invoice} />} />
       <Route path="quotes" element={<QuotesPage />} />
       <Route path="reports" element={<ReportsPage />} />

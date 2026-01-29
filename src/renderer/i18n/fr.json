@@ -364,6 +364,7 @@
     "quotes": "Devis",
     "reports": "Rapports",
     "settings": "Paramètres",
+    "styleProfiles": "Profils de style",
     "units": "Unités"
   },
   "quotes": {
@@ -414,6 +415,7 @@
       "support": "Signalez des bugs ou proposez des améliorations via GitHub.",
       "turnQuotes": "Activer ou désactiver la création de devis",
       "turnReports": "Activer ou désactiver les rapports",
+      "turnStyleProfiles": "Activer ou désactiver la fonction des profils de style",
       "tutorial": "Consultez le guide d’utilisation"
     },
     "importConfirmText": "Êtes‑vous sûr de vouloir importer ce fichier JSON ? Cette action effacera votre base actuelle et la remplacera par les données de la sauvegarde. Cette action est irréversible.",
@@ -430,6 +432,7 @@
       "support": "Support",
       "turnQuotes": "Devis",
       "turnReports": "Rapports",
+      "turnStyleProfiles": "Profils de style",
       "tutorial": "Tutoriel"
     },
     "updateConfirmText": "Une nouvelle version ({{newVersion}}) est prête. Redémarrer maintenant pour mettre à jour depuis {{currentVersion}} ? Vous pouvez annuler et la mise à jour s’appliquera au prochain lancement."

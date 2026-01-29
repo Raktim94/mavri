@@ -365,6 +365,7 @@
     "quotes": "Pasiūlymai",
     "reports": "Ataskaitos",
     "settings": "Nustatymai",
+    "styleProfiles": "Stiliaus profiliai",
     "units": "Vienetai"
   },
   "quotes": {
@@ -415,6 +416,7 @@
       "support": "Praneškite apie klaidas arba siūlykite patobulinimus per GitHub.",
       "turnQuotes": "Įjunkti arba išjungti pasiūlymų kūrimo funkciją",
       "turnReports": "Įjunkti arba išjungti ataskaitų teikimo funkciją",
+      "turnStyleProfiles": "Įjungti arba išjungti stiliaus profilių funkciją",
       "tutorial": "Peržiūrėkite gidą, kaip naudotis programa"
     },
     "importConfirmText": "Ar tikrai norite importuoti šį JSON failą? Šis veiksmas ištrins dabartinę duomenų bazę ir ją pakeis duomenimis iš atsarginės kopijos. Šio veiksmo atšaukti nebus galima.",
@@ -431,6 +433,7 @@
       "support": "Pagalba",
       "turnQuotes": "Pasiūlymai",
       "turnReports": "Ataskaitos",
+      "turnStyleProfiles": "Stiliaus profiliai",
       "tutorial": "Pamoka"
     },
     "updateConfirmText": "Nauja versija ({{newVersion}}) paruošta. Perkrauti dabar, kad atnaujintumėte iš {{currentVersion}}? Atšaukę, atnaujinimas bus kitą kartą paleidus programą."

@@ -28,6 +28,7 @@ export const initSettingsHandlers = (db: Database) => {
         shouldIncludeMonth?: boolean;
         shouldIncludeBusinessName?: boolean;
         quotesON?: boolean;
+        styleProfilesON?: boolean;
         reportsON?: boolean;
       }
     ) => {

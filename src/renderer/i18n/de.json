@@ -364,6 +364,7 @@
     "quotes": "Angebote",
     "reports": "Berichte",
     "settings": "Einstellungen",
+    "styleProfiles": "Stilprofile",
     "units": "Einheiten"
   },
   "quotes": {
@@ -414,6 +415,7 @@
       "support": "Fehler melden oder Verbesserungen über GitHub vorschlagen.",
       "turnQuotes": "Angebotserstellung aktivieren oder deaktivieren",
       "turnReports": "Berichtsfunktion aktivieren oder deaktivieren",
+      "turnStyleProfiles": "Style‑Profil‑Funktion aktivieren oder deaktivieren",
       "tutorial": "Anleitung zur Verwendung der Anwendung ansehen"
     },
     "importConfirmText": "Sind Sie sicher, dass Sie diese JSON-Datei importieren möchten? Diese Aktion löscht Ihre aktuelle Datenbank und ersetzt sie durch die Daten aus dem Backup. Dies kann nicht rückgängig gemacht werden.",
@@ -430,6 +432,7 @@
       "support": "Support",
       "turnQuotes": "Angebote",
       "turnReports": "Berichte",
+      "turnStyleProfiles": "Stilprofile",
       "tutorial": "Anleitung"
     },
     "updateConfirmText": "Eine neue Version ({{newVersion}}) ist verfügbar. Jetzt neu starten, um von {{currentVersion}} zu aktualisieren? Sie können abbrechen und das Update wird beim nächsten Start angewendet."
