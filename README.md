@@ -75,7 +75,7 @@ If you value **privacy, portability, and control**, this app is built for you.
 - Quote & invoice watermarks (including paid watermark)
 - Attachments: include images in PDFs
 - Signature support: upload or hand-draw signatures and apply them to PDFs
-- Style profiles are now available for invoices and quotes, enabling quick, consistent theming.
+- Style profiles are now available for invoices and quotes, enabling quick, consistent theming
 
 ### Reports
 
