@@ -79,7 +79,9 @@ export const initInvoicesHandlers = (db: Database) => {
     'signatureData',
     'signatureSize',
     'signatureType',
-    'signatureName'
+    'signatureName',
+    'styleProfilesId',
+    'styleProfileNameSnapshot'
   ];
   const attachmentFields: (keyof InvoiceAttachment)[] = ['parentInvoiceId', 'fileSize', 'fileType', 'fileName', 'data'];
   const paymentsFields: (keyof InvoicePayment)[] = [
@@ -366,7 +368,7 @@ export const initInvoicesHandlers = (db: Database) => {
           currencyCodeSnapshot, currencySymbolSnapshot, currencySubunitSnapshot,
           discountType, discountAmountCents, discountPercent, shippingFeeCents,
           invoicePrefix, invoiceSuffix, taxName, taxRate, taxType, signatureData,
-          signatureSize, signatureType, signatureName
+          signatureSize, signatureType, signatureName, styleProfilesId, styleProfileNameSnapshot
         )
         SELECT
           ?, ?, businessId, clientId, currencyId,
@@ -388,7 +390,7 @@ export const initInvoicesHandlers = (db: Database) => {
           currencyCodeSnapshot, currencySymbolSnapshot, currencySubunitSnapshot,
           discountType, discountAmountCents, discountPercent, shippingFeeCents,
           invoicePrefix, invoiceSuffix, taxName, taxRate, taxType, signatureData,
-          signatureSize, signatureType, signatureName
+          signatureSize, signatureType, signatureName, styleProfilesId, styleProfileNameSnapshot
         FROM invoices WHERE id = ?;
       `;
 
