@@ -10,13 +10,13 @@ publish:
   repo: invoice-builder
 
 files:
-  - dist/**
-  - dist-electron/**
+  - dist-fe/**
+  - dist-be/**
   - node_modules/**
   - package.json
 
 extraMetadata:
-  main: dist-electron/main/main.cjs
+  main: dist-be/main/main.cjs
 
 forceCodeSigning: false
 

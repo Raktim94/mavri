@@ -1,6 +1,6 @@
 import type { Database } from 'sqlite3';
-import type { StyleProfile } from '../../renderer/shared/types/styleProfiles';
 import type { FilterData } from '../types/invoiceFilter';
+import type { StyleProfile } from '../types/styleProfiles';
 import { runDb } from '../utils/dbFuntions';
 import { getAllEntities, handleEntity } from '../utils/entitiesFunctions';
 import { mapSqliteError } from '../utils/errorFunctions';

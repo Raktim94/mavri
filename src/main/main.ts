@@ -13,9 +13,9 @@ const dbName = APP_CONFIG.DB_NAME;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const preloadPath = isDev
-  ? join(resolve(), 'dist-electron/preload/preload.cjs')
-  : join(app.getAppPath(), 'dist-electron/preload/preload.cjs');
-const indexHtmlPath = isDev ? devServer : join(app.getAppPath(), 'dist/index.html');
+  ? join(resolve(), 'dist-be/preload/preload.cjs')
+  : join(app.getAppPath(), 'dist-be/preload/preload.cjs');
+const indexHtmlPath = isDev ? devServer : join(app.getAppPath(), 'dist-fe/index.html');
 
 let mainWindow: BrowserWindow;
 

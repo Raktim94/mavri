@@ -3,7 +3,7 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
   build: {
-    outDir: 'dist-electron/preload',
+    outDir: 'dist-be/preload',
     target: 'node20',
     lib: {
       entry: 'src/preload/preload.ts',

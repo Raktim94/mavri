@@ -4,7 +4,7 @@ import path from 'path';
 import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
-const MIGRATIONS_SRC = path.resolve(__dirname, 'src', 'main', 'migrations');
+const MIGRATIONS_SRC = path.resolve(__dirname, 'src', 'shared', 'migrations');
 
 export default defineConfig(() => {
   const files = fs.readdirSync(MIGRATIONS_SRC).filter(f => f.endsWith('.ts'));
@@ -16,7 +16,7 @@ export default defineConfig(() => {
 
   return {
     build: {
-      outDir: path.resolve(__dirname, 'dist-electron', 'migrations'),
+      outDir: path.resolve(__dirname, 'dist-be', 'migrations'),
       target: 'node20',
       lib: {
         entry: input,

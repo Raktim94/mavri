@@ -1,7 +1,7 @@
-import type { Language } from '../../renderer/shared/enums/language';
 import type { DiscountType } from '../enums/discountType';
 import type { InvoiceStatus } from '../enums/invoiceStatus';
 import type { InvoiceType } from '../enums/invoiceType';
+import type { Language } from '../enums/language';
 import type { LayoutType } from '../enums/layoutType';
 import type { PageFormat } from '../enums/pageFormat';
 import type { SizeType } from '../enums/sizeType';

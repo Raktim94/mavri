@@ -26,7 +26,7 @@ Developer workflows (exact commands)
 - Dev (watch builds + open Electron):
   - `npm run dev` (runs `dev:react`, `dev:preload`, `dev:electron`, then `dev:electron:start`).
 - Build bundles:
-  - `npm run build` (renderer + preload + main) — outputs: `dist/`, `dist-electron/preload/preload.cjs`, `dist-electron/main/main.cjs`.
+  - `npm run build` (renderer + preload + main) — outputs: `dist-fe/`, `dist-be/preload/preload.cjs`, `dist-be/main/main.cjs`.
 - Tests & checks:
   - `npm test` (Vitest)
   - `npm run test:coverage`
