@@ -227,6 +227,7 @@ export const updateInvoice = async (db: Database, data: Invoice) => {
     const result = await handleInvoice(data, true);
     if (!result.success || !data.id) {
       await runDb(db, 'ROLLBACK');
+      console.log(result);
       return { success: false, key: result.key };
     }
 
@@ -292,6 +293,7 @@ export const updateInvoice = async (db: Database, data: Invoice) => {
     await runDb(db, 'COMMIT');
     return { success: true };
   } catch (error) {
+    console.log(error);
     await runDb(db, 'ROLLBACK');
     return { success: false, ...mapSqliteError(error) };
   }
