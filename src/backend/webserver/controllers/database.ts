@@ -7,6 +7,7 @@ import { initInitialData, initSchema, openDb } from '../../shared/db/setup';
 import { DBInitType } from '../../shared/enums/dbInitType';
 import { APP_CONFIG } from '../config';
 import { runMigrations } from '../migration';
+import { listDbLimiter } from '../utils/functions';
 
 export let dbInstance: Database | null = null;
 export const dbDir = path.resolve(process.cwd(), process.env.dbDirectory || APP_CONFIG.dbDirectory);
@@ -40,7 +41,7 @@ const openDatabase = async (fullPath: string, createIfMissing: boolean): Promise
 };
 
 export const initDatabaseController = (app: Express) => {
-  app.get('/api/databases', async (_req: Request, res: Response) => {
+  app.get('/api/databases', listDbLimiter, async (_req: Request, res: Response) => {
     try {
       const files = await fsPromise.readdir(dbDir);
       const dbFiles = files.filter(f => f.endsWith('.db') || f.endsWith('.sqlite') || f.endsWith('.sqlite3'));

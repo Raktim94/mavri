@@ -1,5 +1,6 @@
 import type { NextFunction } from 'express';
 import { type Request, type Response } from 'express';
+import rateLimit from 'express-rate-limit';
 import type { FilterData } from '../../shared/types/invoiceFilter';
 import { dbInstance } from '../controllers/database';
 
@@ -22,3 +23,14 @@ export const requireDB = (_req: Request, res: Response, next: NextFunction) => {
   }
   next();
 };
+
+export const listDbLimiter = rateLimit({
+  windowMs: 10 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: 'Too many requests. Please slow down.'
+  }
+});
