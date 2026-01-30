@@ -3,6 +3,7 @@ import type { Database } from 'sqlite3';
 import type { SqliteValue } from '../types/sqliteValue';
 import { getAllRows, getFirstRow, runDb, toSqliteValue } from '../utils/dbFuntions';
 import { mapSqliteError } from '../utils/errorFunctions';
+import { fromBase64 } from '../utils/generalFunctions';
 
 export const exportAllData = async (db: Database) => {
   try {
@@ -72,15 +73,6 @@ export const exportAllData = async (db: Database) => {
 };
 
 export const importAllData = async (db: Database, parsed: Record<string, unknown>) => {
-  const fromBase64 = (value: unknown): Buffer | null => {
-    if (!value || typeof value !== 'string') return null;
-    try {
-      return Buffer.from(value, 'base64');
-    } catch {
-      return null;
-    }
-  };
-
   const runInTransaction = async (fn: () => Promise<void>) => {
     try {
       await runDb(db, 'PRAGMA foreign_keys = OFF');

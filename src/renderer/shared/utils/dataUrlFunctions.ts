@@ -18,6 +18,16 @@ export const isDataUrl = (value: unknown): value is string => {
   return typeof value === 'string' && /^data:[\w/+.-]+;base64,[A-Za-z0-9+/=]+$/.test(value);
 };
 
+export const base64ToBytes = (base64: string): Uint8Array => {
+  const binary = atob(base64);
+  const len = binary.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+};
+
 export const toUint8Array = async (
   t: TFunction<'translation', undefined>,
   input: Blob | File | ArrayBuffer | Uint8Array | null

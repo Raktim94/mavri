@@ -1,4 +1,4 @@
-export interface Business {
+export interface BusinessMeta {
   id: number;
   name: string;
   shortName: string;
@@ -9,7 +9,6 @@ export interface Business {
   website?: string;
   additional?: string;
   paymentInformation?: string;
-  logo?: Uint8Array | null;
   invoiceCount: number;
   quotesCount: number;
   createdAt: string;
@@ -21,7 +20,15 @@ export interface Business {
   isArchived: boolean;
 }
 
-export interface BusinessAdd {
+export interface Business extends BusinessMeta {
+  logo?: Uint8Array | null;
+}
+
+export interface BusinessWeb extends BusinessMeta {
+  logo?: string | null;
+}
+
+export interface BusinessAddMeta {
   name: string;
   shortName: string;
   address?: string;
@@ -31,7 +38,6 @@ export interface BusinessAdd {
   website?: string;
   additional?: string;
   paymentInformation?: string;
-  logo?: Uint8Array | null;
   fileSize?: number;
   fileType?: string;
   fileName?: string;
@@ -39,7 +45,19 @@ export interface BusinessAdd {
   isArchived: boolean;
 }
 
+export interface BusinessAdd extends BusinessMeta {
+  logo?: Uint8Array | null;
+}
+
 export interface BusinessUpdate extends BusinessAdd {
+  id: number;
+}
+
+export interface BusinessAddWeb extends BusinessMeta {
+  logo?: string | null;
+}
+
+export interface BusinessUpdateWeb extends BusinessAddWeb {
   id: number;
 }
 

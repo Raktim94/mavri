@@ -1,6 +1,6 @@
 import type { DBInitType } from '../enums/dbInitType';
 import type { InvoiceType } from '../enums/invoiceType';
-import type { Business, BusinessAdd, BusinessUpdate } from '../types/business';
+import type { BusinessAdd, BusinessUpdate, BusinessUpdateWeb, BusinessWeb } from '../types/business';
 import type { Category, CategoryAdd, CategoryUpdate } from '../types/category';
 import type { Client, ClientAdd, ClientUpdate } from '../types/client';
 import type { Currency, CurrencyAdd, CurrencyUpdate } from '../types/currency';
@@ -11,9 +11,15 @@ import type { Invoice, InvoiceAdd, InvoiceUpdate } from '../types/invoice';
 import type { Item, ItemAdd, ItemUpdate } from '../types/item';
 import type { Response } from '../types/response';
 import type { Settings, SettingsUpdate } from '../types/settings';
-import type { StyleProfile, StyleProfileAdd, StyleProfileUpdate } from '../types/styleProfiles';
+import type {
+  StyleProfileAdd,
+  StyleProfileUpdate,
+  StyleProfileUpdateWeb,
+  StyleProfileWeb
+} from '../types/styleProfiles';
 import type { Unit, UnitAdd, UnitUpdate } from '../types/unit';
 import type { ProgressInfo } from '../types/updater';
+import { base64ToBytes, toDataUrl } from '../utils/dataUrlFunctions';
 
 const baseUrl = (): string => {
   if (typeof window === 'undefined') return '';
@@ -95,20 +101,139 @@ export const webApi = () => {
     getAllSettings: () => apiGet<Response<Settings>>('/api/settings'),
     updateSettings: (data: SettingsUpdate) => apiPut<Response<SettingsUpdate>>('/api/settings', data),
 
-    getAllBusinesses: (filter?: FilterData[]) =>
-      apiGet<Response<Business[]>>('/api/businesses', filter?.length ? { filter: JSON.stringify(filter) } : undefined),
-    addBusiness: (data: BusinessAdd) => apiPost<Response<Business>>('/api/businesses', data),
-    updateBusiness: (data: BusinessUpdate) => apiPut<Response<BusinessUpdate>>('/api/businesses', data),
+    getAllBusinesses: async (filter?: FilterData[]) => {
+      const response = await apiGet<Response<BusinessWeb[]>>(
+        '/api/businesses',
+        filter?.length ? { filter: JSON.stringify(filter) } : undefined
+      );
+      return {
+        ...response,
+        data: response?.data?.map(b => ({
+          ...b,
+          logo: b.logo ? base64ToBytes(b.logo) : null
+        }))
+      };
+    },
+    updateBusiness: async (data: BusinessUpdate) => {
+      const dataUrl = data.logo ? await toDataUrl(data.logo) : null;
+      const base64 = dataUrl ? dataUrl.split(',')[1] : null;
+
+      const dataModified = {
+        ...data,
+        logo: base64 ? base64 : null
+      };
+
+      const response = await apiPut<Response<BusinessUpdateWeb>>('/api/businesses', dataModified);
+
+      return {
+        ...response,
+        data: {
+          ...response?.data,
+          logo: response?.data?.logo ? base64ToBytes(response.data.logo) : null
+        }
+      };
+    },
+    addBusiness: async (data: BusinessAdd) => {
+      const dataUrl = data.logo ? await toDataUrl(data.logo) : null;
+      const base64 = dataUrl ? dataUrl.split(',')[1] : null;
+
+      const dataModified = {
+        ...data,
+        logo: base64 ? base64 : null
+      };
+      const response = await apiPost<Response<BusinessWeb>>('/api/businesses', dataModified);
+
+      return {
+        ...response,
+        data: {
+          ...response?.data,
+          logo: response?.data?.logo ? base64ToBytes(response.data.logo) : null
+        }
+      };
+    },
     deleteBusiness: (id: number) => apiDelete<Response<unknown>>(`/api/businesses/${id}`),
     addBatchBusiness: (data: BusinessAdd[]) => apiPost<Response<BusinessAdd[]>>('/api/businesses/batch', data),
 
-    getAllStyleProfiles: (filter?: FilterData[]) =>
-      apiGet<Response<StyleProfile[]>>(
+    getAllStyleProfiles: async (filter?: FilterData[]) => {
+      const response = await apiGet<Response<StyleProfileWeb[]>>(
         '/api/styleProfiles',
         filter?.length ? { filter: JSON.stringify(filter) } : undefined
-      ),
-    addStyleProfile: (data: StyleProfileAdd) => apiPost<Response<StyleProfile>>('/api/styleProfiles', data),
-    updateStyleProfile: (data: StyleProfileUpdate) => apiPut<Response<StyleProfileUpdate>>('/api/styleProfiles', data),
+      );
+      return {
+        ...response,
+        data: response?.data?.map(sp => ({
+          ...sp,
+          customizationPaidWatermarkFileData: sp.customizationPaidWatermarkFileData
+            ? base64ToBytes(sp.customizationPaidWatermarkFileData)
+            : null,
+          customizationWatermarkFileData: sp.customizationWatermarkFileData
+            ? base64ToBytes(sp.customizationWatermarkFileData)
+            : null
+        }))
+      };
+    },
+    updateStyleProfile: async (data: StyleProfileUpdate) => {
+      const dataUrlPaidWatermark = data.customizationPaidWatermarkFileData
+        ? await toDataUrl(data.customizationPaidWatermarkFileData)
+        : null;
+      const dataUrlWatermark = data.customizationWatermarkFileData
+        ? await toDataUrl(data.customizationWatermarkFileData)
+        : null;
+      const base64PaidWatermark = dataUrlPaidWatermark ? dataUrlPaidWatermark.split(',')[1] : null;
+      const base64Watermark = dataUrlWatermark ? dataUrlWatermark.split(',')[1] : null;
+
+      const dataModified = {
+        ...data,
+        customizationPaidWatermarkFileData: base64PaidWatermark ? base64PaidWatermark : null,
+        customizationWatermarkFileData: base64Watermark ? base64Watermark : null
+      };
+
+      const response = await apiPut<Response<StyleProfileUpdateWeb>>('/api/styleProfiles', dataModified);
+
+      return {
+        ...response,
+        data: {
+          ...response?.data,
+          customizationPaidWatermarkFileData: response?.data?.customizationPaidWatermarkFileData
+            ? base64ToBytes(response.data.customizationPaidWatermarkFileData)
+            : null,
+          customizationWatermarkFileData: response?.data?.customizationWatermarkFileData
+            ? base64ToBytes(response.data.customizationWatermarkFileData)
+            : null
+        }
+      };
+    },
+    addStyleProfile: async (data: StyleProfileAdd) => {
+      const dataUrlPaidWatermark = data.customizationPaidWatermarkFileData
+        ? await toDataUrl(data.customizationPaidWatermarkFileData)
+        : null;
+      const dataUrlWatermark = data.customizationWatermarkFileData
+        ? await toDataUrl(data.customizationWatermarkFileData)
+        : null;
+      const base64PaidWatermark = dataUrlPaidWatermark ? dataUrlPaidWatermark.split(',')[1] : null;
+      const base64Watermark = dataUrlWatermark ? dataUrlWatermark.split(',')[1] : null;
+
+      const dataModified = {
+        ...data,
+        customizationPaidWatermarkFileData: base64PaidWatermark ? base64PaidWatermark : null,
+        customizationWatermarkFileData: base64Watermark ? base64Watermark : null
+      };
+
+      const response = await apiPost<Response<StyleProfileWeb>>('/api/styleProfiles', dataModified);
+
+      return {
+        ...response,
+        data: {
+          ...response?.data,
+          customizationPaidWatermarkFileData: response?.data?.customizationPaidWatermarkFileData
+            ? base64ToBytes(response.data.customizationPaidWatermarkFileData)
+            : null,
+          customizationWatermarkFileData: response?.data?.customizationWatermarkFileData
+            ? base64ToBytes(response.data.customizationWatermarkFileData)
+            : null
+        }
+      };
+    },
     deleteStyleProfile: (id: number) => apiDelete<Response<unknown>>(`/api/styleProfiles/${id}`),
     addBatchStyleProfile: (data: StyleProfileAdd[]) =>
       apiPost<Response<StyleProfileAdd[]>>('/api/styleProfiles/batch', data),
@@ -160,7 +285,6 @@ export const webApi = () => {
     duplicateInvoice: (id: number, invoiceType: InvoiceType) =>
       apiPost<Response<Invoice>>('/api/invoices/duplicate', { invoiceId: id, invoiceType }),
 
-    //TODO
     exportAllData: async (): Promise<Response<ExportMeta>> => {
       const result = await apiGet<{ success: boolean; data?: unknown }>('/api/export');
       if (!result.success || !result.data) return result as Response<ExportMeta>;
@@ -189,7 +313,7 @@ export const webApi = () => {
           try {
             parsed = JSON.parse(text);
           } catch {
-            resolve({ success: false, key: 'invalidFile' });
+            resolve({ success: false, key: 'error.invalidFile' });
             return;
           }
           const result = await apiPost<Response<unknown>>('/api/import', parsed);
