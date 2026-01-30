@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { getApi } from '../../api';
 import type { Currency } from '../../types/currency';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
@@ -10,7 +11,7 @@ export const useCurrenciesRetrieve = ({
   filter,
   onDone
 }: RequestHook<Response<Currency[]>>) => {
-  const asyncFn = useCallback(() => window.electronAPI.getAllCurrencies(filter), [filter]);
+  const asyncFn = useCallback(() => getApi().getAllCurrencies(filter), [filter]);
   const { data: currencies, execute } = useAsyncAction<Response<Currency[]>>(asyncFn, {
     showLoader,
     immediate,

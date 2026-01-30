@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { getApi } from '../../api';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
 import { useAsyncAction } from '../useAsyncAction';
@@ -8,7 +9,7 @@ interface UseItemDeleteParams extends RequestHook<Response<unknown>> {
 }
 
 export const useItemDelete = ({ id, immediate = true, showLoader = true, onDone }: UseItemDeleteParams) => {
-  const asyncFn = useCallback(() => window.electronAPI.deleteItem(id), [id]);
+  const asyncFn = useCallback(() => getApi().deleteItem(id), [id]);
   const { data, loading, execute } = useAsyncAction<Response<unknown>>(asyncFn, {
     immediate,
     showLoader,

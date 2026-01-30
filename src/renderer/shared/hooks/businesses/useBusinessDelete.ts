@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { getApi } from '../../api';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
 import { useAsyncAction } from '../useAsyncAction';
@@ -8,7 +9,7 @@ interface UseBusinessDeleteParams extends RequestHook<Response<unknown>> {
 }
 
 export const useBusinessDelete = ({ id, immediate = true, showLoader = true, onDone }: UseBusinessDeleteParams) => {
-  const asyncFn = useCallback(() => window.electronAPI.deleteBusiness(id), [id]);
+  const asyncFn = useCallback(() => getApi().deleteBusiness(id), [id]);
   const { data, loading, execute } = useAsyncAction<Response<unknown>>(asyncFn, {
     immediate,
     showLoader,

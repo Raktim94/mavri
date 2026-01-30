@@ -35,6 +35,7 @@ Developer workflows (exact commands)
 Environment specifics
 
 - `VITE_ENABLE_MOCKS` — toggles MSW mocks in renderer.
+- `VITE_API_URL` —  Defines the backend webserver URL when the application is running without Electron (i.e., in Web/Docker mode).
 
 Application configuration
 

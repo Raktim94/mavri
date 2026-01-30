@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { getApi } from '../../api';
 import type { CategoryUpdate } from '../../types/category';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
@@ -16,7 +17,7 @@ export const useCategoryUpdate = ({
 }: UseCategoryUpdateParams) => {
   const asyncFn = useCallback(async (): Promise<Response<CategoryUpdate>> => {
     if (!category) return Promise.resolve({ success: false });
-    return window.electronAPI.updateCategory(category);
+    return getApi().updateCategory(category);
   }, [category]);
 
   const { data, loading, execute } = useAsyncAction<Response<CategoryUpdate>>(asyncFn, {

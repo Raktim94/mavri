@@ -211,18 +211,20 @@ npm run dev
 
 ```env
 VITE_ENABLE_MOCKS={true|false} # Enables or disables mock data
+VITE_API_URL={url} Defines the backend webserver URL when the application is running without Electron (i.e., in Web/Docker mode)
+
 ```
 
 - .env.production
 
 ```env
-# Leave empty
+VITE_API_URL={url} Defines the backend webserver URL when the application is running without Electron (i.e., in Web/Docker mode)
 ```
 
 - .env.test
 
 ```env
-# Leave empty
+VITE_API_URL={url} Defines the backend webserver URL when the application is running without Electron (i.e., in Web/Docker mode)
 ```
 
 ### 📁 Project Structure

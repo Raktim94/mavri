@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { getApi } from '../../api';
 import type { BusinessUpdate } from '../../types/business';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
@@ -16,7 +17,7 @@ export const useBusinessUpdate = ({
 }: UseBusinessUpdateParams) => {
   const asyncFn = useCallback(async (): Promise<Response<BusinessUpdate>> => {
     if (!business) return Promise.resolve({ success: false });
-    return window.electronAPI.updateBusiness(business);
+    return getApi().updateBusiness(business);
   }, [business]);
 
   const { data, loading, execute } = useAsyncAction<Response<BusinessUpdate>>(asyncFn, {

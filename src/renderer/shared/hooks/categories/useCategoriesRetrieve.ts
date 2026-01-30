@@ -1,4 +1,5 @@
 import { useCallback, useEffect } from 'react';
+import { getApi } from '../../api';
 import { useAppDispatch } from '../../../state/configureStore';
 import { setCategoryOptions } from '../../../state/pageSlice';
 import type { Category } from '../../types/category';
@@ -13,7 +14,7 @@ export const useCategoriesRetrieve = ({
   onDone
 }: RequestHook<Response<Category[]>>) => {
   const dispatch = useAppDispatch();
-  const asyncFn = useCallback(() => window.electronAPI.getAllCategories(filter), [filter]);
+  const asyncFn = useCallback(() => getApi().getAllCategories(filter), [filter]);
   const { data: categories, execute } = useAsyncAction<Response<Category[]>>(asyncFn, {
     showLoader,
     immediate,

@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { getApi } from '../../api';
 import type { CategoryAdd } from '../../types/category';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
@@ -16,7 +17,7 @@ export const useCategoryAddBatch = ({
 }: UseCategoryAddParams) => {
   const asyncFn = useCallback(() => {
     if (!categories) return Promise.resolve({ success: false });
-    return window.electronAPI.addBatchCategory(categories);
+    return getApi().addBatchCategory(categories);
   }, [categories]);
 
   const { data, loading, execute } = useAsyncAction<Response<CategoryAdd[]>>(asyncFn, {

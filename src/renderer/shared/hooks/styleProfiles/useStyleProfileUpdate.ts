@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { getApi } from '../../api';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
 import type { StyleProfileUpdate } from '../../types/styleProfiles';
@@ -16,7 +17,7 @@ export const useStyleProfileUpdate = ({
 }: UseStyleProfileUpdateParams) => {
   const asyncFn = useCallback(async (): Promise<Response<StyleProfileUpdate>> => {
     if (!styleProfile) return Promise.resolve({ success: false });
-    return window.electronAPI.updateStyleProfile(styleProfile);
+    return getApi().updateStyleProfile(styleProfile);
   }, [styleProfile]);
 
   const { data, loading, execute } = useAsyncAction<Response<StyleProfileUpdate>>(asyncFn, {

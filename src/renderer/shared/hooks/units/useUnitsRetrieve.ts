@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from 'react';
 import { useAppDispatch } from '../../../state/configureStore';
 import { setUnitOptions } from '../../../state/pageSlice';
+import { getApi } from '../../api';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
 import type { Unit } from '../../types/unit';
@@ -8,7 +9,7 @@ import { useAsyncAction } from '../useAsyncAction';
 
 export const useUnitsRetrieve = ({ showLoader = true, filter, onDone }: RequestHook<Response<Unit[]>>) => {
   const dispatch = useAppDispatch();
-  const asyncFn = useCallback(() => window.electronAPI.getAllUnits(filter), [filter]);
+  const asyncFn = useCallback(() => getApi().getAllUnits(filter), [filter]);
   const { data: units, execute } = useAsyncAction<Response<Unit[]>>(asyncFn, { showLoader, onDone });
 
   useEffect(() => {

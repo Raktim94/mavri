@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { getApi } from '../../api';
 import type { InvoiceType } from '../../enums/invoiceType';
 import type { Invoice } from '../../types/invoice';
 import type { RequestHook } from '../../types/requestHook';
@@ -17,7 +18,7 @@ export const useInvoiceDuplicate = ({
   showLoader = true,
   onDone
 }: UseInvoiceDuplicateParams) => {
-  const asyncFn = useCallback(() => window.electronAPI.duplicateInvoice(id, invoiceType), [id, invoiceType]);
+  const asyncFn = useCallback(() => getApi().duplicateInvoice(id, invoiceType), [id, invoiceType]);
   const { data, loading, execute } = useAsyncAction<Response<Invoice>>(asyncFn, {
     immediate,
     showLoader,

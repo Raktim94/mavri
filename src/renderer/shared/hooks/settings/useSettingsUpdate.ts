@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { getApi } from '../../api';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
 import type { SettingsUpdate } from '../../types/settings';
@@ -15,7 +16,7 @@ export const useSettingsUpdate = ({
   onDone
 }: UseSettingsUpdateParams) => {
   const asyncFn = useCallback(async (): Promise<Response<SettingsUpdate>> => {
-    return window.electronAPI.updateSettings(newSettings);
+    return getApi().updateSettings(newSettings);
   }, [newSettings]);
 
   const { data, loading, execute } = useAsyncAction<Response<SettingsUpdate>>(asyncFn, {

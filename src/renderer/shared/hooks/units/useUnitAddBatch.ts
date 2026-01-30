@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { getApi } from '../../api';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
 import type { UnitAdd } from '../../types/unit';
@@ -11,7 +12,7 @@ interface UseUnitAddParams extends RequestHook<Response<UnitAdd[]>> {
 export const useUnitAddBatch = ({ units, immediate = true, showLoader = true, onDone }: UseUnitAddParams) => {
   const asyncFn = useCallback(() => {
     if (!units) return Promise.resolve({ success: false });
-    return window.electronAPI.addBatchUnit(units);
+    return getApi().addBatchUnit(units);
   }, [units]);
 
   const { data, loading, execute } = useAsyncAction<Response<UnitAdd[]>>(asyncFn, {

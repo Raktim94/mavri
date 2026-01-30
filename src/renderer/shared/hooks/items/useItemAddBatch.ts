@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { getApi } from '../../api';
 import { useAppDispatch } from '../../../state/configureStore';
 import { addToast } from '../../../state/pageSlice';
 import type { Category } from '../../types/category';
@@ -41,7 +42,7 @@ export const useItemAddBatch = ({ items, immediate = true, showLoader = true, on
 
   const asyncFn = useCallback(() => {
     if (!items) return Promise.resolve({ success: false });
-    return window.electronAPI.addBatchItem(items);
+    return getApi().addBatchItem(items);
   }, [items]);
 
   const { data, loading, execute } = useAsyncAction<Response<ItemAdd[]>>(asyncFn, {

@@ -2,7 +2,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { Box, Divider, Fab, Tooltip } from '@mui/material';
 import { memo, useCallback, useMemo, useState, useTransition, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { InvoiceInfo } from '../../../../main/types/invoice';
+import type { InvoiceInfo } from '../../../../shared/types/invoice';
 import { InvoiceStatus } from '../../../shared/enums/invoiceStatus';
 import { InvoiceType } from '../../../shared/enums/invoiceType';
 import type { Language } from '../../../shared/enums/language';

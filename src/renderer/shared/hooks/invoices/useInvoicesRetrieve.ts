@@ -1,4 +1,5 @@
 import { useCallback, useEffect } from 'react';
+import { getApi } from '../../api';
 import { useAppDispatch } from '../../../state/configureStore';
 import { setBusinessSnapshotOptions, setClientSnapshotOptions } from '../../../state/pageSlice';
 import type { InvoiceType } from '../../enums/invoiceType';
@@ -19,7 +20,7 @@ export const useInvoicesRetrieve = ({
   onDone
 }: UseInvoicesParams) => {
   const dispatch = useAppDispatch();
-  const asyncFn = useCallback(() => window.electronAPI.getAllInvoices(type, filter), [filter, type]);
+  const asyncFn = useCallback(() => getApi().getAllInvoices(type, filter), [filter, type]);
   const { data: invoices, execute } = useAsyncAction<Response<Invoice[]>>(asyncFn, {
     showLoader,
     immediate,

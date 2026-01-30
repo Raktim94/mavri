@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
+import { getApi } from '../shared/api';
 import { Confirmation } from '../shared/components/modals/confirmation';
 import { useAppDispatch, useAppSelector } from '../state/configureStore';
 import { selectNewVersion, selectVersion, setNewVersion, setUpdateMessage } from '../state/pageSlice';
@@ -19,20 +20,21 @@ export const Updater: FC = () => {
 
   const handleConfirmUpdate = useCallback(() => {
     handleCancelUpdate();
-    window.electronAPI.restartApp();
+    getApi().restartApp();
   }, [handleCancelUpdate]);
 
   useEffect(() => {
-    const unsub1 = window.electronAPI.onUpdateAvailable(() => {
+    const api = getApi();
+    const unsub1 = api.onUpdateAvailable(() => {
       dispatch(setUpdateMessage(t('common.downloading')));
     });
-    const unsub2 = window.electronAPI.onUpdateNotAvailable(() => {
+    const unsub2 = api.onUpdateNotAvailable(() => {
       dispatch(setUpdateMessage(t('common.noUpdate')));
     });
-    const unsub3 = window.electronAPI.onUpdateProgress(p => {
+    const unsub3 = api.onUpdateProgress(p => {
       dispatch(setUpdateMessage(t('common.progress', { prct: Math.trunc(p.percent) })));
     });
-    const unsub4 = window.electronAPI.onUpdateDownloaded(updateVersion => {
+    const unsub4 = api.onUpdateDownloaded(updateVersion => {
       dispatch(setNewVersion(updateVersion));
 
       setShowImportConfirm(true);

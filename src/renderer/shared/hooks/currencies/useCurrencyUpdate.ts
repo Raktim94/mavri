@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { getApi } from '../../api';
 import type { CurrencyUpdate } from '../../types/currency';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
@@ -16,7 +17,7 @@ export const useCurrencyUpdate = ({
 }: UseCurrencyUpdateParams) => {
   const asyncFn = useCallback((): Promise<Response<CurrencyUpdate>> => {
     if (!currency) return Promise.resolve({ success: false });
-    return window.electronAPI.updateCurrency(currency);
+    return getApi().updateCurrency(currency);
   }, [currency]);
 
   const { data, loading, execute } = useAsyncAction<Response<CurrencyUpdate>>(asyncFn, {

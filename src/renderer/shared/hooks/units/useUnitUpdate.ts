@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { getApi } from '../../api';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
 import type { UnitUpdate } from '../../types/unit';
@@ -11,7 +12,7 @@ interface UseUnitUpdateParams extends RequestHook<Response<UnitUpdate>> {
 export const useUnitUpdate = ({ unit, immediate = true, showLoader = true, onDone }: UseUnitUpdateParams) => {
   const asyncFn = useCallback(async (): Promise<Response<UnitUpdate>> => {
     if (!unit) return Promise.resolve({ success: false });
-    return window.electronAPI.updateUnit(unit);
+    return getApi().updateUnit(unit);
   }, [unit]);
 
   const { data, loading, execute } = useAsyncAction<Response<UnitUpdate>>(asyncFn, {

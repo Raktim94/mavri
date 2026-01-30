@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { getApi } from '../../api';
 import type { Client, ClientAdd } from '../../types/client';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
@@ -11,7 +12,7 @@ interface UseClientAddParams extends RequestHook<Response<Client>> {
 export const useClientAdd = ({ client, immediate = true, showLoader = true, onDone }: UseClientAddParams) => {
   const asyncFn = useCallback(() => {
     if (!client) return Promise.resolve({ success: false });
-    return window.electronAPI.addClient(client);
+    return getApi().addClient(client);
   }, [client]);
 
   const { data, loading, execute } = useAsyncAction<Response<Client>>(asyncFn, {
