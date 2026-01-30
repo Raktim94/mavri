@@ -95,6 +95,7 @@
     "noItem": "Selected a client to view details."
   },
   "common": {
+    "addDB": "Add Database",
     "additional": "Additional",
     "address": "Address",
     "amount": "Amount",

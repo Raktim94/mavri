@@ -1,18 +1,27 @@
+import cors from 'cors';
 import express, { type Request, type Response } from 'express';
 import fs from 'fs';
 import path from 'path';
 import { APP_CONFIG } from './config';
+import { initControllers } from './controllers';
 import { initDatabaseController } from './controllers/database';
 
 const port = Number(process.env.PORT) || Number(APP_CONFIG.PORT);
 const server = process.env.DEV_SERVER_URL || APP_CONFIG.DEV_SERVER_URL;
+const feServer = process.env.FE_SERVER_URL || APP_CONFIG.FE_SERVER_URL;
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
+app.use(
+  cors({
+    origin: feServer,
+    credentials: true
+  })
+);
 
 const getVersion = () => {
   try {
-    const pkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, '..', 'package.json'), 'utf8'));
+    const pkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../../', 'package.json'), 'utf8'));
     return pkg.version ?? '0.0.0';
   } catch {
     return '0.0.0';
@@ -21,6 +30,8 @@ const getVersion = () => {
 
 const main = async () => {
   initDatabaseController(app);
+  initControllers(app);
+
   app.listen(port, server, () => {
     console.log(`Server listening on http://${server}:${port}`);
   });

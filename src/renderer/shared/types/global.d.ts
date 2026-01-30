@@ -33,6 +33,7 @@ declare global {
       selectDatabase: () => Promise<Response<DBSelector>>;
       openDatabase: () => Promise<Response<DBSelector>>;
       initializeDatabase: (data: { fullPath: string; mode?: DBInitType }) => Promise<Response<unknown>>;
+      getDatabaseList: () => Promise<Response<string[]>>;
 
       getAllSettings: () => Promise<Response<Settings>>;
       updateSettings: (data: SettingsUpdate) => Promise<Response<SettingsUpdate>>;

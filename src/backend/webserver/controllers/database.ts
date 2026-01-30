@@ -1,55 +1,72 @@
 import { type Express, type Request, type Response } from 'express';
 import fs from 'fs';
+import fsPromise from 'fs/promises';
 import path from 'path';
 import type { Database } from 'sqlite3';
-import { initControllers } from '.';
 import { initInitialData, initSchema, openDb } from '../../shared/db/setup';
+import { DBInitType } from '../../shared/enums/dbInitType';
+import { APP_CONFIG } from '../config';
 import { runMigrations } from '../migration';
 
-export let db: Database | null = null;
+export let dbInstance: Database | null = null;
+export const dbDir = path.resolve(process.cwd(), process.env.dbDirectory || APP_CONFIG.dbDirectory);
 
-const openDatabase = async (app: Express, fullPath: string, createIfMissing: boolean): Promise<void> => {
-  if (db) {
-    (db as Database).close();
-    db = null;
+const openDatabase = async (fullPath: string, createIfMissing: boolean): Promise<void> => {
+  if (dbInstance) {
+    await new Promise<void>((resolve, reject) => {
+      (dbInstance as Database).close(err => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
+    dbInstance = null;
   }
+
   fs.mkdirSync(path.dirname(fullPath), { recursive: true });
   const { db: database } = await openDb(fullPath, createIfMissing);
-  db = database;
+  dbInstance = database;
 
-  if (!db) throw new Error('No database selected');
+  if (!dbInstance) throw new Error('No database selected');
 
   if (createIfMissing) {
-    await initSchema(db);
-    await initInitialData(db);
+    await initSchema(dbInstance);
+    await initInitialData(dbInstance);
   }
 
-  const migrationResult = await runMigrations(db);
+  const migrationResult = await runMigrations(dbInstance);
   if (migrationResult && !migrationResult.success) {
     throw new Error(migrationResult.message ?? 'Migrations failed');
   }
-
-  initControllers(app, db);
 };
 
 export const initDatabaseController = (app: Express) => {
-  app.post('/api/databases/create', async (req: Request, res: Response) => {
+  app.get('/api/databases', async (_req: Request, res: Response) => {
     try {
-      const fullPath = String(req.body?.path ?? '')
-        .trim()
-        .replace(/[^a-zA-Z0-9_-]/g, '_');
-      await openDatabase(app, fullPath, true);
-      res.json({ success: true });
+      const files = await fsPromise.readdir(dbDir);
+      const dbFiles = files.filter(f => f.endsWith('.db') || f.endsWith('.sqlite') || f.endsWith('.sqlite3'));
+
+      res.json({
+        success: true,
+        data: dbFiles
+      });
     } catch (err) {
-      res.status(500).json({ success: false, message: (err as Error).message });
+      res.status(500).json({
+        success: false,
+        message: (err as Error).message
+      });
     }
   });
-  app.post('/api/databases/connect', async (req: Request, res: Response) => {
+  app.post('/api/databases', async (req: Request, res: Response) => {
     try {
-      const fullPath = String(req.body?.path ?? '').trim();
-      await openDatabase(app, fullPath, false);
+      const name = String(req.body?.fullPath ?? '');
+      const mode = String(req.body?.mode ?? '');
+      const fullPath = path.resolve(dbDir, name);
+      const createIfMissing = mode === DBInitType.create || typeof mode === 'undefined';
+
+      await openDatabase(fullPath, createIfMissing);
       res.json({ success: true });
     } catch (err) {
+      console.log(err);
       res.status(500).json({ success: false, message: (err as Error).message });
     }
   });

@@ -1,28 +1,28 @@
 import { type Express, type Request, type Response } from 'express';
-import type { Database } from 'sqlite3';
 import * as currenciesService from '../../shared/services/currencies';
-import { parseFilter } from '../utils/functions';
+import { parseFilter, requireDB } from '../utils/functions';
+import { dbInstance } from './database';
 
-export const initCurrenciesController = (app: Express, db: Database) => {
-  app.get('/api/currencies', async (req: Request, res: Response) => {
+export const initCurrenciesController = (app: Express) => {
+  app.get('/api/currencies', requireDB, async (req: Request, res: Response) => {
     const filter = parseFilter(req.query.filter as string);
-    const result = await currenciesService.getAllCurrencies(db, filter);
+    const result = await currenciesService.getAllCurrencies(dbInstance!, filter);
     res.json(result);
   });
-  app.post('/api/currencies', async (req: Request, res: Response) => {
-    const result = await currenciesService.addCurrency(db, req.body);
+  app.post('/api/currencies', requireDB, async (req: Request, res: Response) => {
+    const result = await currenciesService.addCurrency(dbInstance!, req.body);
     res.json(result);
   });
-  app.put('/api/currencies', async (req: Request, res: Response) => {
-    const result = await currenciesService.updateCurrency(db, req.body);
+  app.put('/api/currencies', requireDB, async (req: Request, res: Response) => {
+    const result = await currenciesService.updateCurrency(dbInstance!, req.body);
     res.json(result);
   });
-  app.delete('/api/currencies/:id', async (req: Request, res: Response) => {
-    const result = await currenciesService.deleteCurrency(db, Number(req.params.id));
+  app.delete('/api/currencies/:id', requireDB, async (req: Request, res: Response) => {
+    const result = await currenciesService.deleteCurrency(dbInstance!, Number(req.params.id));
     res.json(result);
   });
-  app.post('/api/currencies/batch', async (req: Request, res: Response) => {
-    const result = await currenciesService.batchAddCurrency(db, req.body);
+  app.post('/api/currencies/batch', requireDB, async (req: Request, res: Response) => {
+    const result = await currenciesService.batchAddCurrency(dbInstance!, req.body);
     res.json(result);
   });
 };

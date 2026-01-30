@@ -1,28 +1,28 @@
 import { type Express, type Request, type Response } from 'express';
-import type { Database } from 'sqlite3';
 import * as itemsService from '../../shared/services/items';
-import { parseFilter } from '../utils/functions';
+import { parseFilter, requireDB } from '../utils/functions';
+import { dbInstance } from './database';
 
-export const initItemsController = (app: Express, db: Database) => {
-  app.get('/api/items', async (req: Request, res: Response) => {
+export const initItemsController = (app: Express) => {
+  app.get('/api/items', requireDB, async (req: Request, res: Response) => {
     const filter = parseFilter(req.query.filter as string);
-    const result = await itemsService.getAllItems(db, filter);
+    const result = await itemsService.getAllItems(dbInstance!, filter);
     res.json(result);
   });
-  app.post('/api/items', async (req: Request, res: Response) => {
-    const result = await itemsService.addItem(db, req.body);
+  app.post('/api/items', requireDB, async (req: Request, res: Response) => {
+    const result = await itemsService.addItem(dbInstance!, req.body);
     res.json(result);
   });
-  app.put('/api/items', async (req: Request, res: Response) => {
-    const result = await itemsService.updateItem(db, req.body);
+  app.put('/api/items', requireDB, async (req: Request, res: Response) => {
+    const result = await itemsService.updateItem(dbInstance!, req.body);
     res.json(result);
   });
-  app.delete('/api/items/:id', async (req: Request, res: Response) => {
-    const result = await itemsService.deleteItem(db, Number(req.params.id));
+  app.delete('/api/items/:id', requireDB, async (req: Request, res: Response) => {
+    const result = await itemsService.deleteItem(dbInstance!, Number(req.params.id));
     res.json(result);
   });
-  app.post('/api/items/batch', async (req: Request, res: Response) => {
-    const result = await itemsService.batchAddItem(db, req.body);
+  app.post('/api/items/batch', requireDB, async (req: Request, res: Response) => {
+    const result = await itemsService.batchAddItem(dbInstance!, req.body);
     res.json(result);
   });
 };

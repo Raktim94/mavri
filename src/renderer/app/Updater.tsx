@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getApi } from '../shared/api';
+import { getApi } from '../shared/api/restApi';
 import { Confirmation } from '../shared/components/modals/confirmation';
 import { useAppDispatch, useAppSelector } from '../state/configureStore';
 import { selectNewVersion, selectVersion, setNewVersion, setUpdateMessage } from '../state/pageSlice';

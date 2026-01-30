@@ -8,7 +8,7 @@ import { initDBDialogsHandlers } from './ipc/dbDialogs';
 config();
 
 const isDev = !app.isPackaged;
-const devServer = APP_CONFIG.DEV_SERVER_URL;
+const devServer = APP_CONFIG.FE_SERVER_URL;
 const dbName = APP_CONFIG.DB_NAME;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

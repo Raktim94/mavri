@@ -10,8 +10,8 @@ import SupportAgentIcon from '@mui/icons-material/SupportAgent';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import { Box, Card, CardContent, Grid, Typography, useTheme } from '@mui/material';
 import { useContext, type FC } from 'react';
-import { getApi } from '../../../shared/api';
 import { useTranslation } from 'react-i18next';
+import { getApi, isWebMode } from '../../../shared/api/restApi';
 import { ThemeContext } from '../../../shared/components/layout/theme/ThemeProviderWrapper';
 import { MenuList } from '../../../shared/components/lists/menuList/MenuList';
 import { MenuItemSettings } from '../../../shared/enums/menuItemSettings';
@@ -180,17 +180,21 @@ export const Menu: FC<Props> = ({
         getApi().openUrl('https://github.com/piratuks/invoice-builder/blob/main/TERMS-OF-USE.md');
       }
     },
-    {
-      text: t('settingsMenuItems.titles.checkForUpdate'),
-      description: updateMessage,
-      icon: <AutorenewIcon />,
-      isToggle: false,
-      isSelected: false,
-      onClick: () => {
-        dispatch(setUpdateMessage(t('common.checking')));
-        getApi().checkForUpdates();
-      }
-    }
+    ...(!isWebMode()
+      ? [
+          {
+            text: t('settingsMenuItems.titles.checkForUpdate'),
+            description: updateMessage,
+            icon: <AutorenewIcon />,
+            isToggle: false,
+            isSelected: false,
+            onClick: () => {
+              dispatch(setUpdateMessage(t('common.checking')));
+              getApi().checkForUpdates();
+            }
+          }
+        ]
+      : [])
   ];
 
   return (

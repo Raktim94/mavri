@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from 'react';
-import { getApi } from '../../api';
 import { useAppDispatch } from '../../../state/configureStore';
 import { setBusinessSnapshotOptions, setClientSnapshotOptions } from '../../../state/pageSlice';
+import { getApi } from '../../api/restApi';
 import type { InvoiceType } from '../../enums/invoiceType';
 import type { Invoice } from '../../types/invoice';
 import type { RequestHook } from '../../types/requestHook';

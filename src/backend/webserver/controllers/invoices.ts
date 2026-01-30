@@ -1,30 +1,30 @@
 import { type Express, type Request, type Response } from 'express';
-import type { Database } from 'sqlite3';
 import * as invoicesService from '../../shared/services/invoices';
-import { parseFilter } from '../utils/functions';
+import { parseFilter, requireDB } from '../utils/functions';
+import { dbInstance } from './database';
 
-export const initInvoicesController = (app: Express, db: Database) => {
-  app.get('/api/invoices', async (req: Request, res: Response) => {
+export const initInvoicesController = (app: Express) => {
+  app.get('/api/invoices', requireDB, async (req: Request, res: Response) => {
     const type = req.query.type as 'invoice' | 'quotation' | undefined;
     const filter = parseFilter(req.query.filter as string);
-    const result = await invoicesService.getAllInvoices(db, type, filter);
+    const result = await invoicesService.getAllInvoices(dbInstance!, type, filter);
     res.json(result);
   });
-  app.post('/api/invoices', async (req: Request, res: Response) => {
-    const result = await invoicesService.addInvoice(db, req.body);
+  app.post('/api/invoices', requireDB, async (req: Request, res: Response) => {
+    const result = await invoicesService.addInvoice(dbInstance!, req.body);
     res.json(result);
   });
-  app.put('/api/invoices', async (req: Request, res: Response) => {
-    const result = await invoicesService.updateInvoice(db, req.body);
+  app.put('/api/invoices', requireDB, async (req: Request, res: Response) => {
+    const result = await invoicesService.updateInvoice(dbInstance!, req.body);
     res.json(result);
   });
-  app.delete('/api/invoices/:id', async (req: Request, res: Response) => {
-    const result = await invoicesService.deleteInvoice(db, Number(req.params.id));
+  app.delete('/api/invoices/:id', requireDB, async (req: Request, res: Response) => {
+    const result = await invoicesService.deleteInvoice(dbInstance!, Number(req.params.id));
     res.json(result);
   });
-  app.post('/api/invoices/duplicate', async (req: Request, res: Response) => {
+  app.post('/api/invoices/duplicate', requireDB, async (req: Request, res: Response) => {
     const { invoiceId, invoiceType } = req.body;
-    const result = await invoicesService.duplicateInvoice(db, invoiceId, invoiceType);
+    const result = await invoicesService.duplicateInvoice(dbInstance!, invoiceId, invoiceType);
     res.json(result);
   });
 };

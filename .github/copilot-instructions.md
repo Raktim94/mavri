@@ -40,7 +40,7 @@ Environment specifics
 Application configuration
 
 - `DB_NAME` — 'invoice_builder.db' specifies the default database filename for the app. Used in the Electron main process to initialize or open the database.
-- `DEV_SERVER_URL` — 'http://localhost:5173' Provides the URL of the Vite dev server for development. Used in the Electron main process to load the renderer window during development.
+- `FE_SERVER_URL` — 'http://localhost:5173' Provides the URL of the Vite dev server for development. Used in the Electron main process to load the renderer window during development.
 
 IPC / change pattern (exact steps)
 

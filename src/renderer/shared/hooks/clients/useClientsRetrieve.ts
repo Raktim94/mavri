@@ -1,8 +1,8 @@
 import { useCallback } from 'react';
+import { getApi } from '../../api/restApi';
 import type { Client } from '../../types/client';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
-import { getApi } from '../../api';
 import { useAsyncAction } from '../useAsyncAction';
 
 export const useClientsRetrieve = ({

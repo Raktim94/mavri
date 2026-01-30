@@ -15,53 +15,47 @@ import type { StyleProfile, StyleProfileAdd, StyleProfileUpdate } from '../types
 import type { Unit, UnitAdd, UnitUpdate } from '../types/unit';
 import type { ProgressInfo } from '../types/updater';
 
-const isElectron = typeof window !== 'undefined' && 'electronAPI' in window;
-
-function baseUrl(): string {
+const baseUrl = (): string => {
   if (typeof window === 'undefined') return '';
   return (import.meta.env.VITE_API_URL as string) || '';
-}
+};
 
-async function apiGet<T>(path: string, params?: Record<string, string>): Promise<T> {
+const apiGet = async <T>(path: string, params?: Record<string, string>): Promise<T> => {
   const url = new URL(path, baseUrl() || window.location.origin);
   if (params) {
     Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
   }
   const res = await fetch(url.toString());
-  if (!res.ok) throw new Error(res.statusText);
   return res.json() as Promise<T>;
-}
+};
 
-async function apiPost<T>(path: string, body?: unknown): Promise<T> {
+const apiPost = async <T>(path: string, body?: unknown): Promise<T> => {
   const url = (baseUrl() || window.location.origin) + path;
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: body !== undefined ? JSON.stringify(body) : undefined
   });
-  if (!res.ok) throw new Error(res.statusText);
   return res.json() as Promise<T>;
-}
+};
 
-async function apiPut<T>(path: string, body?: unknown): Promise<T> {
+const apiPut = async <T>(path: string, body?: unknown): Promise<T> => {
   const url = (baseUrl() || window.location.origin) + path;
   const res = await fetch(url, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: body !== undefined ? JSON.stringify(body) : undefined
   });
-  if (!res.ok) throw new Error(res.statusText);
   return res.json() as Promise<T>;
-}
+};
 
-async function apiDelete<T>(path: string): Promise<T> {
+const apiDelete = async <T>(path: string): Promise<T> => {
   const url = (baseUrl() || window.location.origin) + path;
   const res = await fetch(url, { method: 'DELETE' });
-  if (!res.ok) throw new Error(res.statusText);
   return res.json() as Promise<T>;
-}
+};
 
-function webApi() {
+export const webApi = () => {
   return {
     ping: () => console.log('pong'),
 
@@ -69,28 +63,34 @@ function webApi() {
 
     checkForUpdates: () => Promise.resolve(),
     restartApp: () => {},
-    onUpdateProgress: (_cb: (data: ProgressInfo) => void) => () => {},
-    onUpdateAvailable: (_cb: () => void) => () => {},
-    onUpdateNotAvailable: (_cb: () => void) => () => {},
-    onUpdateDownloaded: (_cb: (version: string) => void) => () => {},
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    onUpdateProgress: (_callback: (data: ProgressInfo) => void) => () => {
+      console.warn('Not supported for WEB API');
+    },
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    onUpdateAvailable: (_callback: () => void) => () => {
+      console.warn('Not supported for WEB API');
+    },
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    onUpdateNotAvailable: (_callback: () => void) => () => {
+      console.warn('Not supported for WEB API');
+    },
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    onUpdateDownloaded: (_callback: (version: string) => void) => () => {
+      console.warn('Not supported for WEB API');
+    },
 
     openUrl: (url: string) => {
       window.open(url, '_blank');
       return Promise.resolve();
     },
-
     selectDatabase: () =>
-      Promise.resolve({ success: true, data: { canceled: true, filePath: undefined } } as Response<DBSelector>),
+      Promise.resolve({ success: true, data: { canceled: true, filePath: '' } } as Response<DBSelector>),
     openDatabase: () =>
-      Promise.resolve({ success: true, data: { canceled: true, filePath: undefined } } as Response<DBSelector>),
+      Promise.resolve({ success: true, data: { canceled: true, filePath: '' } } as Response<DBSelector>),
     initializeDatabase: (data: { fullPath: string; mode?: DBInitType }) =>
-      Promise.resolve({ success: true } as Response<unknown>),
-
-    listDatabases: () => apiGet<{ success: boolean; databases: { name: string; path: string }[] }>('/api/databases'),
-    createDatabase: (name: string) =>
-      apiPost<{ success: boolean; message?: string }>('/api/databases/create', { name }),
-    connectDatabase: (path: string) =>
-      apiPost<{ success: boolean; message?: string }>('/api/databases/connect', { path }),
+      apiPost<{ success: boolean; message?: string }>('/api/databases', data),
+    getDatabaseList: () => apiGet<Response<string[]>>('/api/databases'),
 
     getAllSettings: () => apiGet<Response<Settings>>('/api/settings'),
     updateSettings: (data: SettingsUpdate) => apiPut<Response<SettingsUpdate>>('/api/settings', data),
@@ -160,6 +160,7 @@ function webApi() {
     duplicateInvoice: (id: number, invoiceType: InvoiceType) =>
       apiPost<Response<Invoice>>('/api/invoices/duplicate', { invoiceId: id, invoiceType }),
 
+    //TODO
     exportAllData: async (): Promise<Response<ExportMeta>> => {
       const result = await apiGet<{ success: boolean; data?: unknown }>('/api/export');
       if (!result.success || !result.data) return result as Response<ExportMeta>;
@@ -198,15 +199,6 @@ function webApi() {
       });
     }
   };
-}
+};
 
 export type Api = ReturnType<typeof webApi>;
-
-export function getApi(): Api {
-  if (!isWebMode()) {
-    return window.electronAPI as Api;
-  }
-  return webApi();
-}
-
-export const isWebMode = () => !(isElectron && window.electronAPI);

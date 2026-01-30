@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { getApi } from '../../api';
+import { getApi } from '../../api/restApi';
 import type { CategoryAdd } from '../../types/category';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';

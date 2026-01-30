@@ -1,28 +1,28 @@
 import { type Express, type Request, type Response } from 'express';
-import type { Database } from 'sqlite3';
 import * as categoriesService from '../../shared/services/categories';
-import { parseFilter } from '../utils/functions';
+import { parseFilter, requireDB } from '../utils/functions';
+import { dbInstance } from './database';
 
-export const initCategoriesController = (app: Express, db: Database) => {
-  app.get('/api/categories', async (req: Request, res: Response) => {
+export const initCategoriesController = (app: Express) => {
+  app.get('/api/categories', requireDB, async (req: Request, res: Response) => {
     const filter = parseFilter(req.query.filter as string);
-    const result = await categoriesService.getAllCategories(db, filter);
+    const result = await categoriesService.getAllCategories(dbInstance!, filter);
     res.json(result);
   });
-  app.post('/api/categories', async (req: Request, res: Response) => {
-    const result = await categoriesService.addCategory(db, req.body);
+  app.post('/api/categories', requireDB, async (req: Request, res: Response) => {
+    const result = await categoriesService.addCategory(dbInstance!, req.body);
     res.json(result);
   });
-  app.put('/api/categories', async (req: Request, res: Response) => {
-    const result = await categoriesService.updateCategory(db, req.body);
+  app.put('/api/categories', requireDB, async (req: Request, res: Response) => {
+    const result = await categoriesService.updateCategory(dbInstance!, req.body);
     res.json(result);
   });
-  app.delete('/api/categories/:id', async (req: Request, res: Response) => {
-    const result = await categoriesService.deleteCategory(db, Number(req.params.id));
+  app.delete('/api/categories/:id', requireDB, async (req: Request, res: Response) => {
+    const result = await categoriesService.deleteCategory(dbInstance!, Number(req.params.id));
     res.json(result);
   });
-  app.post('/api/categories/batch', async (req: Request, res: Response) => {
-    const result = await categoriesService.batchAddCategory(db, req.body);
+  app.post('/api/categories/batch', requireDB, async (req: Request, res: Response) => {
+    const result = await categoriesService.batchAddCategory(dbInstance!, req.body);
     res.json(result);
   });
 };

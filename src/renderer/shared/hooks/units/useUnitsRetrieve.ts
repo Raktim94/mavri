@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from 'react';
 import { useAppDispatch } from '../../../state/configureStore';
 import { setUnitOptions } from '../../../state/pageSlice';
-import { getApi } from '../../api';
+import { getApi } from '../../api/restApi';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
 import type { Unit } from '../../types/unit';

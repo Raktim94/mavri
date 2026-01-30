@@ -1,8 +1,8 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getApi } from '../../api';
 import { useAppDispatch } from '../../../state/configureStore';
 import { addToast } from '../../../state/pageSlice';
+import { getApi } from '../../api/restApi';
 import type { Category } from '../../types/category';
 import type { ItemAdd } from '../../types/item';
 import type { RequestHook } from '../../types/requestHook';

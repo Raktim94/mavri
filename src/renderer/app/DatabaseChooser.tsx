@@ -14,14 +14,17 @@ import {
 import { useCallback, useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n';
+import { isWebMode } from '../shared/api/restApi';
 import { DBInitType } from '../shared/enums/dbInitType';
 import { useDBInit } from '../shared/hooks/dbSelector/useDBInit';
+import { useDBListSelector } from '../shared/hooks/dbSelector/useDBListSelector';
 import { useDBOpener } from '../shared/hooks/dbSelector/useDBOpener';
 import { useDBSelector } from '../shared/hooks/dbSelector/useDBSelector';
 import type { DBSelector } from '../shared/types/dbSelector';
 import type { Response } from '../shared/types/response';
 import { useAppDispatch } from '../state/configureStore';
 import { addToast } from '../state/pageSlice';
+import { DBSetterComponent } from './DBNameSetter';
 
 interface Props {
   onDatabaseRead?: () => void;
@@ -34,6 +37,16 @@ export const DatabaseChooser: FC<Props> = ({ onDatabaseRead }) => {
   const [savedDbs, setSavedDbs] = useState<string[]>([]);
   const [selectionMode, setSelectionMode] = useState<DBInitType | undefined>(undefined);
   const [isInitializing, setIsInitializing] = useState(false);
+  const [isDBSetterModalOpen, setIsDBSetterModalOpen] = useState(false);
+
+  const { execute: getDBList } = useDBListSelector({
+    immediate: false,
+    onDone: (results: Response<string[]>) => {
+      if (results.data) {
+        setSavedDbs(results.data);
+      }
+    }
+  });
 
   const { execute: selectDB } = useDBSelector({
     immediate: false,
@@ -95,10 +108,14 @@ export const DatabaseChooser: FC<Props> = ({ onDatabaseRead }) => {
   );
 
   const handleSelectPath = async () => {
-    selectDB();
+    if (isWebMode()) {
+      setIsDBSetterModalOpen(true);
+    } else {
+      selectDB();
+    }
   };
 
-  const handleOpenPath = async () => {
+  const handleOpenPath = () => {
     openDB();
   };
 
@@ -129,6 +146,10 @@ export const DatabaseChooser: FC<Props> = ({ onDatabaseRead }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch]);
 
+  useEffect(() => {
+    if (isWebMode()) getDBList();
+  }, [getDBList]);
+
   return (
     <Box
       sx={{
@@ -141,6 +162,20 @@ export const DatabaseChooser: FC<Props> = ({ onDatabaseRead }) => {
         pt: 5
       }}
     >
+      {isWebMode() && isDBSetterModalOpen && (
+        <>
+          <DBSetterComponent
+            isOpen={isDBSetterModalOpen}
+            onCancel={() => setIsDBSetterModalOpen(false)}
+            onSave={name => {
+              setSelectionMode(DBInitType.create);
+              setSelectedPath(`${name}.db`);
+              setIsDBSetterModalOpen(false);
+            }}
+          />
+        </>
+      )}
+
       <Typography variant="h5" noWrap component="div" sx={{ color: theme.palette.secondary.main }}>
         {t('databaseChooser.title')}
       </Typography>
@@ -160,9 +195,11 @@ export const DatabaseChooser: FC<Props> = ({ onDatabaseRead }) => {
         <Button variant="contained" onClick={handleSelectPath} disabled={isInitializing}>
           {t('databaseChooser.createNew')}
         </Button>
-        <Button variant="contained" onClick={handleOpenPath} disabled={isInitializing}>
-          {t('databaseChooser.openExisting')}
-        </Button>
+        {!isWebMode() && (
+          <Button variant="contained" onClick={handleOpenPath} disabled={isInitializing}>
+            {t('databaseChooser.openExisting')}
+          </Button>
+        )}
       </Box>
 
       {savedDbs.length > 0 && (

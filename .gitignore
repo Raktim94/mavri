@@ -35,3 +35,5 @@ dist-be
 /coverage
 
 release
+
+dbDirectory/*.db

@@ -44,6 +44,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   selectDatabase: () => ipcRenderer.invoke('show-save-db-dialog'),
   openDatabase: () => ipcRenderer.invoke('show-open-db-dialog'),
   initializeDatabase: (data: { fullPath: string; mode?: DBInitType }) => ipcRenderer.invoke('initialize-db', data),
+  getDatabaseList: () => console.warn('Not supported for Electron API'),
 
   openUrl: (url: string) => ipcRenderer.invoke('open-url', url),
 
