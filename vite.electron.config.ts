@@ -9,10 +9,10 @@ export default defineConfig({
     exclude: ['@electron-webauthn/native', 'electron-webauthn']
   },
   build: {
-    outDir: 'dist-be/main',
+    outDir: 'dist-be/backend/main',
     target: 'node20',
     lib: {
-      entry: 'src/main/main.ts',
+      entry: 'src/backend/main/main.ts',
       formats: ['cjs'],
       fileName: () => 'main.cjs'
     },
@@ -37,7 +37,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@main': path.resolve(__dirname, 'src/main')
+      '@main': path.resolve(__dirname, 'src/backend/main')
     }
   },
   publicDir: false,
@@ -46,7 +46,7 @@ export default defineConfig({
     viteStaticCopy({
       targets: [
         {
-          src: 'src/main/assets/**/*',
+          src: 'src/backend/main/assets/**/*',
           dest: 'assets'
         }
       ]

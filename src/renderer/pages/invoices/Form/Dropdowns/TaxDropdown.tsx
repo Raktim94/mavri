@@ -12,9 +12,9 @@ import {
 } from '@mui/material';
 import { memo, useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import { InvoiceTaxOptionType } from '../../../../../shared/enums/invoiceTaxOptionType';
 import { AmountInput } from '../../../../shared/components/inputs/amountInput/AmountInput';
 import { PageHeader } from '../../../../shared/components/layout/pageHeader/PageHeader';
+import { InvoiceTaxOptionType } from '../../../../shared/enums/invoiceTaxOptionType';
 import { InvoiceItemTaxType, InvoiceTaxType } from '../../../../shared/enums/taxType';
 import { useForm } from '../../../../shared/hooks/useForm';
 import type { TaxForm } from '../../../../shared/types/invoice';

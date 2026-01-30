@@ -19,7 +19,7 @@ export const up = async (db: sqlite3.Database) => {
     await runAsync(
       db,
       `
-      CREATE TABLE style_profiles (
+      CREATE TABLE IF NOT EXISTS style_profiles (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL UNIQUE,
         isArchived INTEGER NOT NULL DEFAULT 0 CHECK (isArchived IN (0,1)),

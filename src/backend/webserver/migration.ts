@@ -1,10 +1,8 @@
-import { app } from 'electron';
-import { join, resolve } from 'path';
+import path from 'path';
 import sqlite3 from 'sqlite3';
 import { runMigrations as runMigrationsShared } from '../shared/db/migrationRunner';
 
-const isDev = !app.isPackaged;
-const migrationsPath = isDev ? join(resolve(), 'dist-be/migrations') : join(app.getAppPath(), 'dist-be/migrations');
+const migrationsPath = process.env.MIGRATIONS_PATH || path.resolve(process.cwd(), 'dist-be', 'backend', 'migrations');
 
 export const runMigrations = async (db: sqlite3.Database) => {
   return runMigrationsShared(db, migrationsPath);
