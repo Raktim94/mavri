@@ -13,7 +13,7 @@ export const up = async (db: sqlite3.Database) => {
       `
     );
 
-    if (!colInfo) return;
+    if (colInfo && colInfo.type === 'TEXT') return;
 
     await runAsync(db, 'PRAGMA foreign_keys = OFF;');
     await runAsync(db, 'BEGIN TRANSACTION;');

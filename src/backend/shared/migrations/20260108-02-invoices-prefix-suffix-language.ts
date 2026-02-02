@@ -1,9 +1,20 @@
 import sqlite3 from 'sqlite3';
-import { runAsync } from '../utils/dbFuntions';
+import { getFirstRow, runAsync } from '../utils/dbFuntions';
 import { mapSqliteError } from '../utils/errorFunctions';
 
 export const up = async (db: sqlite3.Database) => {
   try {
+    const colInfo = await getFirstRow(
+      db,
+      `
+              SELECT *
+              FROM pragma_table_info('invoices')
+              WHERE name = 'invoicePrefix'
+            `
+    );
+
+    if (colInfo) return;
+
     await runAsync(db, 'PRAGMA foreign_keys = OFF;');
     await runAsync(db, 'BEGIN TRANSACTION;');
     await runAsync(db, 'DROP TABLE IF EXISTS invoices_new;');

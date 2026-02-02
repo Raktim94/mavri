@@ -46,14 +46,43 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onSaveProfile
                 ...data,
                 name: name,
                 isArchived: false,
-                customizationLabelUpperCase: data.customizationLabelUpperCase ?? false
+                color: data?.customizationColor,
+                logoSize: data?.customizationLogoSize,
+                fontSize: data?.customizationFontSizeSize,
+                layout: data?.customizationLayout,
+                tableHeaderStyle: data?.customizationTableHeaderStyle,
+                tableRowStyle: data?.customizationTableRowStyle,
+                pageFormat: data?.customizationPageFormat,
+                labelUpperCase: data?.customizationLabelUpperCase ?? false,
+                watermarkFileName: data?.customizationWatermarkFileName ?? undefined,
+                watermarkFileType: data?.customizationWatermarkFileType ?? undefined,
+                watermarkFileSize: data?.customizationWatermarkFileSize ?? undefined,
+                watermarkFileData: data?.customizationWatermarkFileData ?? undefined,
+                paidWatermarkFileName: data?.customizationPaidWatermarkFileName ?? undefined,
+                paidWatermarkFileType: data?.customizationPaidWatermarkFileType ?? undefined,
+                paidWatermarkFileSize: data?.customizationPaidWatermarkFileSize ?? undefined,
+                paidWatermarkFileData: data?.customizationPaidWatermarkFileData ?? undefined
               });
             } else {
               onSaveProfile?.({
-                ...form,
                 name: name,
                 isArchived: false,
-                customizationLabelUpperCase: form.customizationLabelUpperCase ?? false
+                color: form?.customizationColor,
+                logoSize: form?.customizationLogoSize,
+                fontSize: form?.customizationFontSizeSize,
+                layout: form?.customizationLayout,
+                tableHeaderStyle: form?.customizationTableHeaderStyle,
+                tableRowStyle: form?.customizationTableRowStyle,
+                pageFormat: form?.customizationPageFormat,
+                labelUpperCase: form?.customizationLabelUpperCase ?? false,
+                watermarkFileName: form?.customizationWatermarkFileName ?? undefined,
+                watermarkFileType: form?.customizationWatermarkFileType ?? undefined,
+                watermarkFileSize: form?.customizationWatermarkFileSize ?? undefined,
+                watermarkFileData: form?.customizationWatermarkFileData ?? undefined,
+                paidWatermarkFileName: form?.customizationPaidWatermarkFileName ?? undefined,
+                paidWatermarkFileType: form?.customizationPaidWatermarkFileType ?? undefined,
+                paidWatermarkFileSize: form?.customizationPaidWatermarkFileSize ?? undefined,
+                paidWatermarkFileData: form?.customizationPaidWatermarkFileData ?? undefined
               });
             }
             setIsProfileModalOpen(false);

@@ -1,5 +1,5 @@
 import { FormControlLabel, Grid, Switch, TextField } from '@mui/material';
-import { useCallback, useEffect, useState, type FC } from 'react';
+import { useCallback, useEffect, useMemo, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CustomizationLayout } from '../../shared/components/layout/customizationLayout/CustomizationLayout';
 import { useForm } from '../../shared/hooks/useForm';
@@ -16,22 +16,22 @@ export const Form: FC<Props> = ({ handleChange = () => {}, styleProfile }) => {
   const { form, setForm, update } = useForm<StyleProfileFromData>({
     id: styleProfile?.id,
     name: styleProfile?.name ?? '',
-    customizationColor: styleProfile?.customizationColor,
-    customizationLogoSize: styleProfile?.customizationLogoSize,
-    customizationFontSizeSize: styleProfile?.customizationFontSizeSize,
-    customizationLayout: styleProfile?.customizationLayout,
-    customizationTableHeaderStyle: styleProfile?.customizationTableHeaderStyle,
-    customizationTableRowStyle: styleProfile?.customizationTableRowStyle,
-    customizationPageFormat: styleProfile?.customizationPageFormat,
-    customizationLabelUpperCase: styleProfile?.customizationLabelUpperCase ?? false,
-    customizationWatermarkFileName: styleProfile?.customizationWatermarkFileName ?? undefined,
-    customizationWatermarkFileType: styleProfile?.customizationWatermarkFileType ?? undefined,
-    customizationWatermarkFileSize: styleProfile?.customizationWatermarkFileSize ?? undefined,
-    customizationWatermarkFileData: styleProfile?.customizationWatermarkFileData ?? undefined,
-    customizationPaidWatermarkFileName: styleProfile?.customizationPaidWatermarkFileName ?? undefined,
-    customizationPaidWatermarkFileType: styleProfile?.customizationPaidWatermarkFileType ?? undefined,
-    customizationPaidWatermarkFileSize: styleProfile?.customizationPaidWatermarkFileSize ?? undefined,
-    customizationPaidWatermarkFileData: styleProfile?.customizationPaidWatermarkFileData ?? undefined,
+    color: styleProfile?.color,
+    logoSize: styleProfile?.logoSize,
+    fontSize: styleProfile?.fontSize,
+    layout: styleProfile?.layout,
+    tableHeaderStyle: styleProfile?.tableHeaderStyle,
+    tableRowStyle: styleProfile?.tableRowStyle,
+    pageFormat: styleProfile?.pageFormat,
+    labelUpperCase: styleProfile?.labelUpperCase ?? false,
+    watermarkFileName: styleProfile?.watermarkFileName ?? undefined,
+    watermarkFileType: styleProfile?.watermarkFileType ?? undefined,
+    watermarkFileSize: styleProfile?.watermarkFileSize ?? undefined,
+    watermarkFileData: styleProfile?.watermarkFileData ?? undefined,
+    paidWatermarkFileName: styleProfile?.paidWatermarkFileName ?? undefined,
+    paidWatermarkFileType: styleProfile?.paidWatermarkFileType ?? undefined,
+    paidWatermarkFileSize: styleProfile?.paidWatermarkFileSize ?? undefined,
+    paidWatermarkFileData: styleProfile?.paidWatermarkFileData ?? undefined,
     isArchived: styleProfile?.isArchived ?? false
   });
 
@@ -42,8 +42,22 @@ export const Form: FC<Props> = ({ handleChange = () => {}, styleProfile }) => {
   const handleChangeStyleProfile = useCallback(
     (newData: CustomizationForm) => {
       setForm({
-        ...newData,
-        customizationLabelUpperCase: newData?.customizationLabelUpperCase ?? false,
+        color: newData?.customizationColor,
+        logoSize: newData?.customizationLogoSize,
+        fontSize: newData?.customizationFontSizeSize,
+        layout: newData?.customizationLayout,
+        tableHeaderStyle: newData?.customizationTableHeaderStyle,
+        tableRowStyle: newData?.customizationTableRowStyle,
+        pageFormat: newData?.customizationPageFormat,
+        labelUpperCase: newData?.customizationLabelUpperCase ?? false,
+        watermarkFileName: newData?.customizationWatermarkFileName ?? undefined,
+        watermarkFileType: newData?.customizationWatermarkFileType ?? undefined,
+        watermarkFileSize: newData?.customizationWatermarkFileSize ?? undefined,
+        watermarkFileData: newData?.customizationWatermarkFileData ?? undefined,
+        paidWatermarkFileName: newData?.customizationPaidWatermarkFileName ?? undefined,
+        paidWatermarkFileType: newData?.customizationPaidWatermarkFileType ?? undefined,
+        paidWatermarkFileSize: newData?.customizationPaidWatermarkFileSize ?? undefined,
+        paidWatermarkFileData: newData?.customizationPaidWatermarkFileData ?? undefined,
         id: styleProfile?.id,
         name: form?.name,
         isArchived: form?.isArchived
@@ -60,6 +74,51 @@ export const Form: FC<Props> = ({ handleChange = () => {}, styleProfile }) => {
     }
   };
 
+  const customizationData = useMemo(() => {
+    return {
+      customizationColor: styleProfile?.color,
+      customizationLogoSize: styleProfile?.logoSize,
+      customizationFontSizeSize: styleProfile?.fontSize,
+      customizationLayout: styleProfile?.layout,
+      customizationTableHeaderStyle: styleProfile?.tableHeaderStyle,
+      customizationTableRowStyle: styleProfile?.tableRowStyle,
+      customizationPageFormat: styleProfile?.pageFormat,
+      customizationLabelUpperCase: styleProfile?.labelUpperCase ?? false,
+      customizationWatermarkFileName: styleProfile?.watermarkFileName ?? undefined,
+      customizationWatermarkFileType: styleProfile?.watermarkFileType ?? undefined,
+      customizationWatermarkFileSize: styleProfile?.watermarkFileSize ?? undefined,
+      customizationWatermarkFileData: styleProfile?.watermarkFileData ?? undefined,
+      customizationPaidWatermarkFileName: styleProfile?.paidWatermarkFileName ?? undefined,
+      customizationPaidWatermarkFileType: styleProfile?.paidWatermarkFileType ?? undefined,
+      customizationPaidWatermarkFileSize: styleProfile?.paidWatermarkFileSize ?? undefined,
+      customizationPaidWatermarkFileData: styleProfile?.paidWatermarkFileData ?? undefined
+    };
+  }, [styleProfile]);
+
+  useEffect(() => {
+    setForm({
+      id: styleProfile?.id,
+      name: styleProfile?.name ?? '',
+      color: styleProfile?.color,
+      logoSize: styleProfile?.logoSize,
+      fontSize: styleProfile?.fontSize,
+      layout: styleProfile?.layout,
+      tableHeaderStyle: styleProfile?.tableHeaderStyle,
+      tableRowStyle: styleProfile?.tableRowStyle,
+      pageFormat: styleProfile?.pageFormat,
+      labelUpperCase: styleProfile?.labelUpperCase ?? false,
+      watermarkFileName: styleProfile?.watermarkFileName ?? undefined,
+      watermarkFileType: styleProfile?.watermarkFileType ?? undefined,
+      watermarkFileSize: styleProfile?.watermarkFileSize ?? undefined,
+      watermarkFileData: styleProfile?.watermarkFileData ?? undefined,
+      paidWatermarkFileName: styleProfile?.paidWatermarkFileName ?? undefined,
+      paidWatermarkFileType: styleProfile?.paidWatermarkFileType ?? undefined,
+      paidWatermarkFileSize: styleProfile?.paidWatermarkFileSize ?? undefined,
+      paidWatermarkFileData: styleProfile?.paidWatermarkFileData ?? undefined,
+      isArchived: styleProfile?.isArchived ?? false
+    });
+  }, [styleProfile, setForm]);
+
   useEffect(() => {
     if (!form) return;
 
@@ -74,7 +133,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, styleProfile }) => {
 
   return (
     <CustomizationLayout
-      data={styleProfile}
+      data={customizationData}
       onChange={handleChangeStyleProfile}
       renderCustomTop={() => {
         return (

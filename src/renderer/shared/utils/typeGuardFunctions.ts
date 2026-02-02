@@ -22,149 +22,102 @@ export const isStyleProfileFromData = (data: unknown): data is StyleProfileFromD
     return false;
 
   if (
-    d.customizationLabelUpperCase !== undefined &&
-    d.customizationLabelUpperCase !== null &&
-    d.customizationLabelUpperCase !== '' &&
-    typeof d.customizationLabelUpperCase !== 'boolean'
+    d.labelUpperCase !== undefined &&
+    d.labelUpperCase !== null &&
+    d.labelUpperCase !== '' &&
+    typeof d.labelUpperCase !== 'boolean'
   )
     return false;
 
-  if (
-    d.customizationWatermarkFileData !== undefined &&
-    d.customizationWatermarkFileData !== '' &&
-    d.customizationWatermarkFileData != null
-  ) {
-    const isBlob = d.customizationWatermarkFileData instanceof Uint8Array;
+  if (d.watermarkFileData !== undefined && d.watermarkFileData !== '' && d.watermarkFileData != null) {
+    const isBlob = d.watermarkFileData instanceof Uint8Array;
     if (!isBlob) return false;
   }
 
-  if (
-    d.customizationPaidWatermarkFileData !== undefined &&
-    d.customizationPaidWatermarkFileData !== '' &&
-    d.customizationPaidWatermarkFileData != null
-  ) {
-    const isBlob = d.customizationPaidWatermarkFileData instanceof Uint8Array;
+  if (d.paidWatermarkFileData !== undefined && d.paidWatermarkFileData !== '' && d.paidWatermarkFileData != null) {
+    const isBlob = d.paidWatermarkFileData instanceof Uint8Array;
     if (!isBlob) return false;
   }
 
-  if (d.customizationColor !== undefined && d.customizationColor !== null && d.customizationColor !== '') {
-    if (typeof d.customizationColor !== 'string') return false;
+  if (d.color !== undefined && d.color !== null && d.color !== '') {
+    if (typeof d.color !== 'string') return false;
   }
 
-  if (
-    d.customizationWatermarkFileName !== undefined &&
-    d.customizationWatermarkFileName !== null &&
-    d.customizationWatermarkFileName !== ''
-  ) {
-    if (typeof d.customizationWatermarkFileName !== 'string') return false;
+  if (d.watermarkFileName !== undefined && d.watermarkFileName !== null && d.watermarkFileName !== '') {
+    if (typeof d.watermarkFileName !== 'string') return false;
   }
 
-  if (
-    d.customizationWatermarkFileType !== undefined &&
-    d.customizationWatermarkFileType !== null &&
-    d.customizationWatermarkFileType !== ''
-  ) {
-    if (typeof d.customizationWatermarkFileType !== 'string') return false;
+  if (d.watermarkFileType !== undefined && d.watermarkFileType !== null && d.watermarkFileType !== '') {
+    if (typeof d.watermarkFileType !== 'string') return false;
   }
 
-  if (
-    d.customizationPaidWatermarkFileName !== undefined &&
-    d.customizationPaidWatermarkFileName !== null &&
-    d.customizationPaidWatermarkFileName !== ''
-  ) {
-    if (typeof d.customizationPaidWatermarkFileName !== 'string') return false;
+  if (d.paidWatermarkFileName !== undefined && d.paidWatermarkFileName !== null && d.paidWatermarkFileName !== '') {
+    if (typeof d.paidWatermarkFileName !== 'string') return false;
   }
 
-  if (
-    d.customizationPaidWatermarkFileType !== undefined &&
-    d.customizationPaidWatermarkFileType !== null &&
-    d.customizationPaidWatermarkFileType !== ''
-  ) {
-    if (typeof d.customizationPaidWatermarkFileType !== 'string') return false;
+  if (d.paidWatermarkFileType !== undefined && d.paidWatermarkFileType !== null && d.paidWatermarkFileType !== '') {
+    if (typeof d.paidWatermarkFileType !== 'string') return false;
   }
 
+  if (d.watermarkFileSize !== undefined && d.watermarkFileSize !== null && typeof d.watermarkFileSize !== 'number')
+    return false;
+
   if (
-    d.customizationWatermarkFileSize !== undefined &&
-    d.customizationWatermarkFileSize !== null &&
-    typeof d.customizationWatermarkFileSize !== 'number'
+    d.paidWatermarkFileSize !== undefined &&
+    d.paidWatermarkFileSize !== null &&
+    typeof d.paidWatermarkFileSize !== 'number'
   )
     return false;
 
   if (
-    d.customizationPaidWatermarkFileSize !== undefined &&
-    d.customizationPaidWatermarkFileSize !== null &&
-    typeof d.customizationPaidWatermarkFileSize !== 'number'
+    d.logoSize !== undefined &&
+    d.logoSize !== null &&
+    !(typeof d.logoSize !== 'string' || d.logoSize === 'medium' || d.logoSize === 'small' || d.logoSize === 'large')
   )
     return false;
 
   if (
-    d.customizationLogoSize !== undefined &&
-    d.customizationLogoSize !== null &&
+    d.fontSize !== undefined &&
+    d.fontSize !== null &&
+    !(typeof d.fontSize !== 'string' || d.fontSize === 'medium' || d.fontSize === 'small' || d.fontSize === 'large')
+  )
+    return false;
+
+  if (
+    d.layout !== undefined &&
+    d.layout !== null &&
+    !(typeof d.layout !== 'string' || d.layout === 'classic' || d.layout === 'modern' || d.layout === 'compact')
+  )
+    return false;
+
+  if (
+    d.tableHeaderStyle !== undefined &&
+    d.tableHeaderStyle !== null &&
     !(
-      typeof d.customizationLogoSize !== 'string' ||
-      d.customizationLogoSize === 'medium' ||
-      d.customizationLogoSize === 'small' ||
-      d.customizationLogoSize === 'large'
+      typeof d.tableHeaderStyle !== 'string' ||
+      d.tableHeaderStyle === 'light' ||
+      d.tableHeaderStyle === 'dark' ||
+      d.tableHeaderStyle === 'outline'
     )
   )
     return false;
 
   if (
-    d.customizationFontSizeSize !== undefined &&
-    d.customizationFontSizeSize !== null &&
+    d.tableRowStyle !== undefined &&
+    d.tableRowStyle !== null &&
     !(
-      typeof d.customizationFontSizeSize !== 'string' ||
-      d.customizationFontSizeSize === 'medium' ||
-      d.customizationFontSizeSize === 'small' ||
-      d.customizationFontSizeSize === 'large'
+      typeof d.tableRowStyle !== 'string' ||
+      d.tableRowStyle === 'classic' ||
+      d.tableRowStyle === 'stripped' ||
+      d.tableRowStyle === 'bordered'
     )
   )
     return false;
 
   if (
-    d.customizationLayout !== undefined &&
-    d.customizationLayout !== null &&
-    !(
-      typeof d.customizationLayout !== 'string' ||
-      d.customizationLayout === 'classic' ||
-      d.customizationLayout === 'modern' ||
-      d.customizationLayout === 'compact'
-    )
-  )
-    return false;
-
-  if (
-    d.customizationTableHeaderStyle !== undefined &&
-    d.customizationTableHeaderStyle !== null &&
-    !(
-      typeof d.customizationTableHeaderStyle !== 'string' ||
-      d.customizationTableHeaderStyle === 'light' ||
-      d.customizationTableHeaderStyle === 'dark' ||
-      d.customizationTableHeaderStyle === 'outline'
-    )
-  )
-    return false;
-
-  if (
-    d.customizationTableRowStyle !== undefined &&
-    d.customizationTableRowStyle !== null &&
-    !(
-      typeof d.customizationTableRowStyle !== 'string' ||
-      d.customizationTableRowStyle === 'classic' ||
-      d.customizationTableRowStyle === 'stripped' ||
-      d.customizationTableRowStyle === 'bordered'
-    )
-  )
-    return false;
-
-  if (
-    d.customizationPageFormat !== undefined &&
-    d.customizationPageFormat !== null &&
-    !(
-      typeof d.customizationPageFormat !== 'string' ||
-      d.customizationPageFormat === 'A4' ||
-      d.customizationPageFormat === 'LETTER'
-    )
+    d.pageFormat !== undefined &&
+    d.pageFormat !== null &&
+    !(typeof d.pageFormat !== 'string' || d.pageFormat === 'A4' || d.pageFormat === 'LETTER')
   )
     return false;
 

@@ -19,34 +19,34 @@ export const StyleProfilesPage = () => {
   const { t } = useTranslation();
   const excelColumns = [
     'name',
-    'customizationColor',
-    'customizationLogoSize',
-    'customizationFontSizeSize',
-    'customizationLayout',
-    'customizationTableHeaderStyle',
-    'customizationTableRowStyle',
-    'customizationPageFormat',
-    'customizationLabelUpperCase',
-    'customizationWatermarkFileName',
-    'customizationWatermarkFileType',
-    'customizationWatermarkFileSize',
-    'customizationPaidWatermarkFileName',
-    'customizationPaidWatermarkFileType',
-    'customizationPaidWatermarkFileSize',
+    'color',
+    'logoSize',
+    'fontSize',
+    'layout',
+    'tableHeaderStyle',
+    'tableRowStyle',
+    'pageFormat',
+    'labelUpperCase',
+    'watermarkFileName',
+    'watermarkFileType',
+    'watermarkFileSize',
+    'paidWatermarkFileName',
+    'paidWatermarkFileType',
+    'paidWatermarkFileSize',
     'isArchived'
   ];
   const excelFileName = 'style_profiles';
   const excelTemplateData: Rows = [
     {
       name: 'Test Profile',
-      customizationColor: '#006400',
-      customizationLogoSize: 'medium',
-      customizationFontSizeSize: 'medium',
-      customizationLayout: 'classic',
-      customizationTableHeaderStyle: 'light',
-      customizationTableRowStyle: 'classic',
-      customizationPageFormat: 'A4',
-      customizationLabelUpperCase: true,
+      color: '#006400',
+      logoSize: 'medium',
+      fontSize: 'medium',
+      layout: 'classic',
+      tableHeaderStyle: 'light',
+      tableRowStyle: 'classic',
+      pageFormat: 'A4',
+      labelUpperCase: true,
       isArchived: false
     }
   ];

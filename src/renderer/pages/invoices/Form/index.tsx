@@ -147,31 +147,26 @@ const InvoiceFormComponent: FC<Props> = ({
           ...invoiceForm,
           styleProfilesId: data.id,
           styleProfileNameSnapshot: data.name,
-          customizationColor: data.customizationColor ?? invoiceForm.customizationColor,
-          customizationLogoSize: data.customizationLogoSize ?? invoiceForm.customizationLogoSize,
-          customizationFontSizeSize: data.customizationFontSizeSize ?? invoiceForm.customizationFontSizeSize,
-          customizationLayout: data.customizationLayout ?? invoiceForm.customizationLayout,
-          customizationTableHeaderStyle:
-            data.customizationTableHeaderStyle ?? invoiceForm.customizationTableHeaderStyle,
-          customizationTableRowStyle: data.customizationTableRowStyle ?? invoiceForm.customizationTableRowStyle,
-          customizationPageFormat: data.customizationPageFormat ?? invoiceForm.customizationPageFormat,
-          customizationLabelUpperCase: data.customizationLabelUpperCase,
-          customizationWatermarkFileName:
-            data.customizationWatermarkFileName ?? invoiceForm.customizationWatermarkFileName,
-          customizationWatermarkFileType:
-            data.customizationWatermarkFileType ?? invoiceForm.customizationWatermarkFileType,
-          customizationWatermarkFileSize:
-            data.customizationWatermarkFileSize ?? invoiceForm.customizationWatermarkFileSize,
-          customizationWatermarkFileData:
-            data.customizationWatermarkFileData ?? invoiceForm.customizationWatermarkFileData,
+          customizationColor: data.color ?? invoiceForm.customizationColor,
+          customizationLogoSize: data.logoSize ?? invoiceForm.customizationLogoSize,
+          customizationFontSizeSize: data.fontSize ?? invoiceForm.customizationFontSizeSize,
+          customizationLayout: data.layout ?? invoiceForm.customizationLayout,
+          customizationTableHeaderStyle: data.tableHeaderStyle ?? invoiceForm.customizationTableHeaderStyle,
+          customizationTableRowStyle: data.tableRowStyle ?? invoiceForm.customizationTableRowStyle,
+          customizationPageFormat: data.pageFormat ?? invoiceForm.customizationPageFormat,
+          customizationLabelUpperCase: data.labelUpperCase,
+          customizationWatermarkFileName: data.watermarkFileName ?? invoiceForm.customizationWatermarkFileName,
+          customizationWatermarkFileType: data.watermarkFileType ?? invoiceForm.customizationWatermarkFileType,
+          customizationWatermarkFileSize: data.watermarkFileSize ?? invoiceForm.customizationWatermarkFileSize,
+          customizationWatermarkFileData: data.watermarkFileData ?? invoiceForm.customizationWatermarkFileData,
           customizationPaidWatermarkFileName:
-            data.customizationPaidWatermarkFileName ?? invoiceForm.customizationPaidWatermarkFileName,
+            data.paidWatermarkFileName ?? invoiceForm.customizationPaidWatermarkFileName,
           customizationPaidWatermarkFileType:
-            data.customizationPaidWatermarkFileType ?? invoiceForm.customizationPaidWatermarkFileType,
+            data.paidWatermarkFileType ?? invoiceForm.customizationPaidWatermarkFileType,
           customizationPaidWatermarkFileSize:
-            data.customizationPaidWatermarkFileSize ?? invoiceForm.customizationPaidWatermarkFileSize,
+            data.paidWatermarkFileSize ?? invoiceForm.customizationPaidWatermarkFileSize,
           customizationPaidWatermarkFileData:
-            data.customizationPaidWatermarkFileData ?? invoiceForm.customizationPaidWatermarkFileData
+            data.paidWatermarkFileData ?? invoiceForm.customizationPaidWatermarkFileData
         });
       });
     },

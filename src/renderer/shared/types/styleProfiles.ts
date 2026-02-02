@@ -7,20 +7,20 @@ import type { TableRowStyle } from '../enums/tableRowStyle';
 export interface StyleProfileMeta {
   id: number;
   name: string;
-  customizationColor?: string;
-  customizationLogoSize?: SizeType;
-  customizationFontSizeSize?: SizeType;
-  customizationLayout?: LayoutType;
-  customizationTableHeaderStyle?: TableHeaderStyle;
-  customizationTableRowStyle?: TableRowStyle;
-  customizationPageFormat?: PageFormat;
-  customizationLabelUpperCase: boolean;
-  customizationWatermarkFileName?: string;
-  customizationWatermarkFileType?: string;
-  customizationWatermarkFileSize?: number;
-  customizationPaidWatermarkFileName?: string;
-  customizationPaidWatermarkFileType?: string;
-  customizationPaidWatermarkFileSize?: number;
+  color?: string;
+  logoSize?: SizeType;
+  fontSize?: SizeType;
+  layout?: LayoutType;
+  tableHeaderStyle?: TableHeaderStyle;
+  tableRowStyle?: TableRowStyle;
+  pageFormat?: PageFormat;
+  labelUpperCase: boolean;
+  watermarkFileName?: string;
+  watermarkFileType?: string;
+  watermarkFileSize?: number;
+  paidWatermarkFileName?: string;
+  paidWatermarkFileType?: string;
+  paidWatermarkFileSize?: number;
   isArchived: boolean;
   invoiceCount: number;
   quotesCount: number;
@@ -29,37 +29,37 @@ export interface StyleProfileMeta {
 }
 
 export interface StyleProfile extends StyleProfileMeta {
-  customizationWatermarkFileData?: Uint8Array;
-  customizationPaidWatermarkFileData?: Uint8Array;
+  watermarkFileData?: Uint8Array;
+  paidWatermarkFileData?: Uint8Array;
 }
 
 export interface StyleProfileWeb extends StyleProfileMeta {
-  customizationWatermarkFileData?: string | null;
-  customizationPaidWatermarkFileData?: string | null;
+  watermarkFileData?: string | null;
+  paidWatermarkFileData?: string | null;
 }
 
 export interface StyleProfileAddMeta {
   name: string;
-  customizationColor?: string;
-  customizationLogoSize?: SizeType;
-  customizationFontSizeSize?: SizeType;
-  customizationLayout?: LayoutType;
-  customizationTableHeaderStyle?: TableHeaderStyle;
-  customizationTableRowStyle?: TableRowStyle;
-  customizationPageFormat?: PageFormat;
-  customizationLabelUpperCase: boolean;
-  customizationWatermarkFileName?: string;
-  customizationWatermarkFileType?: string;
-  customizationWatermarkFileSize?: number;
-  customizationPaidWatermarkFileName?: string;
-  customizationPaidWatermarkFileType?: string;
-  customizationPaidWatermarkFileSize?: number;
+  color?: string;
+  logoSize?: SizeType;
+  fontSize?: SizeType;
+  layout?: LayoutType;
+  tableHeaderStyle?: TableHeaderStyle;
+  tableRowStyle?: TableRowStyle;
+  pageFormat?: PageFormat;
+  labelUpperCase: boolean;
+  watermarkFileName?: string;
+  watermarkFileType?: string;
+  watermarkFileSize?: number;
+  paidWatermarkFileName?: string;
+  paidWatermarkFileType?: string;
+  paidWatermarkFileSize?: number;
   isArchived: boolean;
 }
 
 export interface StyleProfileAdd extends StyleProfileAddMeta {
-  customizationWatermarkFileData?: Uint8Array;
-  customizationPaidWatermarkFileData?: Uint8Array;
+  watermarkFileData?: Uint8Array;
+  paidWatermarkFileData?: Uint8Array;
 }
 
 export interface StyleProfileUpdate extends StyleProfileAdd {
@@ -67,8 +67,8 @@ export interface StyleProfileUpdate extends StyleProfileAdd {
 }
 
 export interface StyleProfileAddWeb extends StyleProfileAddMeta {
-  customizationWatermarkFileData?: string | null;
-  customizationPaidWatermarkFileData?: string | null;
+  watermarkFileData?: string | null;
+  paidWatermarkFileData?: string | null;
 }
 
 export interface StyleProfileUpdateWeb extends StyleProfileAddWeb {
@@ -78,21 +78,21 @@ export interface StyleProfileUpdateWeb extends StyleProfileAddWeb {
 export interface StyleProfileFromData {
   id?: number;
   name: string;
-  customizationColor?: string;
-  customizationLogoSize?: SizeType;
-  customizationFontSizeSize?: SizeType;
-  customizationLayout?: LayoutType;
-  customizationTableHeaderStyle?: TableHeaderStyle;
-  customizationTableRowStyle?: TableRowStyle;
-  customizationPageFormat?: PageFormat;
-  customizationLabelUpperCase: boolean;
-  customizationWatermarkFileName?: string;
-  customizationWatermarkFileType?: string;
-  customizationWatermarkFileSize?: number;
-  customizationWatermarkFileData?: Uint8Array;
-  customizationPaidWatermarkFileName?: string;
-  customizationPaidWatermarkFileType?: string;
-  customizationPaidWatermarkFileSize?: number;
-  customizationPaidWatermarkFileData?: Uint8Array;
+  color?: string;
+  logoSize?: SizeType;
+  fontSize?: SizeType;
+  layout?: LayoutType;
+  tableHeaderStyle?: TableHeaderStyle;
+  tableRowStyle?: TableRowStyle;
+  pageFormat?: PageFormat;
+  labelUpperCase: boolean;
+  watermarkFileName?: string;
+  watermarkFileType?: string;
+  watermarkFileSize?: number;
+  watermarkFileData?: Uint8Array;
+  paidWatermarkFileName?: string;
+  paidWatermarkFileType?: string;
+  paidWatermarkFileSize?: number;
+  paidWatermarkFileData?: Uint8Array;
   isArchived: boolean;
 }
