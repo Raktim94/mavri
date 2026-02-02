@@ -31,14 +31,14 @@ const base64ToBytesOrUndef = (b64?: string | null) => (b64 ? base64ToBytes(b64) 
 
 const mapStyleProfileFromWeb = <T extends StyleProfileWeb | StyleProfileUpdateWeb>(sp: T) => ({
   ...sp,
-  customizationPaidWatermarkFileData: base64ToBytesOrUndef(sp.customizationPaidWatermarkFileData),
-  customizationWatermarkFileData: base64ToBytesOrUndef(sp.customizationWatermarkFileData)
+  paidWatermarkFileData: base64ToBytesOrUndef(sp.paidWatermarkFileData),
+  watermarkFileData: base64ToBytesOrUndef(sp.watermarkFileData)
 });
 
 const mapStyleProfileToWeb = async <T extends StyleProfileUpdate | StyleProfileAdd>(data: T) => ({
   ...data,
-  customizationPaidWatermarkFileData: await fileToBase64(data.customizationPaidWatermarkFileData),
-  customizationWatermarkFileData: await fileToBase64(data.customizationWatermarkFileData)
+  paidWatermarkFileData: await fileToBase64(data.paidWatermarkFileData),
+  watermarkFileData: await fileToBase64(data.watermarkFileData)
 });
 
 const mapAttachmentFromWeb = (ia: InvoiceAttachmentWeb) => ({
@@ -54,18 +54,39 @@ const mapAttachmentToWeb = async (ia: InvoiceAttachment) => ({
 const mapInvoiceFromWeb = (i: InvoiceWeb) => ({
   ...i,
   signatureData: base64ToBytesOrUndef(i.signatureData),
-  businessLogoSnapshot: base64ToBytesOrUndef(i.businessLogoSnapshot),
-  customizationPaidWatermarkFileData: base64ToBytesOrUndef(i.customizationPaidWatermarkFileData),
-  customizationWatermarkFileData: base64ToBytesOrUndef(i.customizationWatermarkFileData),
+  invoiceBusinessSnapshot: i.invoiceBusinessSnapshot
+    ? {
+        ...i.invoiceBusinessSnapshot,
+        businessLogo: base64ToBytesOrUndef(i.invoiceBusinessSnapshot?.businessLogo)
+      }
+    : i.invoiceBusinessSnapshot,
+  invoiceCustomization: i.invoiceCustomization
+    ? {
+        ...i.invoiceCustomization,
+        paidWatermarkFileData: base64ToBytesOrUndef(i.invoiceCustomization?.paidWatermarkFileData),
+        watermarkFileData: base64ToBytesOrUndef(i.invoiceCustomization?.watermarkFileData)
+      }
+    : i.invoiceCustomization,
   invoiceAttachments: (i.invoiceAttachments ?? []).map(mapAttachmentFromWeb)
 });
 
 const mapInvoiceToWeb = async (data: InvoiceUpdate | InvoiceAdd) => ({
   ...data,
   signatureData: await fileToBase64(data.signatureData),
-  businessLogoSnapshot: await fileToBase64(data.businessLogoSnapshot),
-  customizationPaidWatermarkFileData: await fileToBase64(data.customizationPaidWatermarkFileData),
-  customizationWatermarkFileData: await fileToBase64(data.customizationWatermarkFileData),
+  invoiceBusinessSnapshot: data.invoiceBusinessSnapshot
+    ? {
+        ...data.invoiceBusinessSnapshot,
+        businessLogo: await fileToBase64(data.invoiceBusinessSnapshot?.businessLogo)
+      }
+    : data.invoiceBusinessSnapshot,
+  invoiceCustomization: data.invoiceCustomization
+    ? {
+        ...data.invoiceCustomization,
+        paidWatermarkFileData: await fileToBase64(data.invoiceCustomization?.paidWatermarkFileData),
+        watermarkFileData: await fileToBase64(data.invoiceCustomization?.watermarkFileData)
+      }
+    : data.invoiceCustomization,
+
   invoiceAttachments: await Promise.all((data.invoiceAttachments ?? []).map(mapAttachmentToWeb))
 });
 
@@ -275,6 +296,7 @@ export const webApi = () => {
         Object.keys(params).length ? params : undefined
       );
 
+      console.log(response);
       return {
         ...response,
         data: response.data?.map(mapInvoiceFromWeb)

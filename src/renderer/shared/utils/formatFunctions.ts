@@ -71,10 +71,10 @@ export const formatAmount = (amount: number, amountFormat: AmountFormat = Amount
 export const supportsCurrencySubunit = (storeSettings?: Settings, invoiceForm?: InvoiceFromData) =>
   Boolean(
     storeSettings &&
-      invoiceForm?.currencySymbolSnapshot !== undefined &&
-      invoiceForm.currencyCodeSnapshot !== undefined &&
-      invoiceForm.currencySubunitSnapshot !== undefined &&
-      invoiceForm.currencyFormat !== undefined
+      invoiceForm?.invoiceCurrencySnapshot?.currencySymbol !== undefined &&
+      invoiceForm?.invoiceCurrencySnapshot?.currencyCode !== undefined &&
+      invoiceForm?.invoiceCurrencySnapshot?.currencySubunit !== undefined &&
+      invoiceForm?.currencyFormat !== undefined
   );
 
 export const createCurrencyFormatter = (storeSettings: Settings, invoiceForm: InvoiceFromData) => {
@@ -86,8 +86,8 @@ export const createCurrencyFormatter = (storeSettings: Settings, invoiceForm: In
           amount,
           amountFormat: storeSettings.amountFormat,
           format: invoiceForm.currencyFormat as CurrencyFormat,
-          symbol: invoiceForm.currencySymbolSnapshot!,
-          code: invoiceForm.currencyCodeSnapshot!
+          symbol: invoiceForm.invoiceCurrencySnapshot!.currencySymbol!,
+          code: invoiceForm.invoiceCurrencySnapshot!.currencyCode!
         })
       : formatAmount(amount, storeSettings.amountFormat);
 };

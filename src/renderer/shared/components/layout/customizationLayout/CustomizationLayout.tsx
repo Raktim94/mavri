@@ -46,18 +46,18 @@ export const CustomizationLayout: FC<Props> = ({
       if (fileUnitArray)
         setForm(prev => ({
           ...prev,
-          customizationPaidWatermarkFileData: fileUnitArray,
-          customizationPaidWatermarkFileSize: file.size,
-          customizationPaidWatermarkFileType: file.type,
-          customizationPaidWatermarkFileName: filename
+          paidWatermarkFileData: fileUnitArray,
+          paidWatermarkFileSize: file.size,
+          paidWatermarkFileType: file.type,
+          paidWatermarkFileName: filename
         }));
     } else {
       setForm(prev => ({
         ...prev,
-        customizationPaidWatermarkFileData: undefined,
-        customizationPaidWatermarkFileSize: undefined,
-        customizationPaidWatermarkFileType: undefined,
-        customizationPaidWatermarkFileName: undefined
+        paidWatermarkFileData: undefined,
+        paidWatermarkFileSize: undefined,
+        paidWatermarkFileType: undefined,
+        paidWatermarkFileName: undefined
       }));
     }
   };
@@ -68,18 +68,18 @@ export const CustomizationLayout: FC<Props> = ({
       if (fileUnitArray)
         setForm(prev => ({
           ...prev,
-          customizationWatermarkFileData: fileUnitArray,
-          customizationWatermarkFileSize: file.size,
-          customizationWatermarkFileType: file.type,
-          customizationWatermarkFileName: filename
+          watermarkFileData: fileUnitArray,
+          watermarkFileSize: file.size,
+          watermarkFileType: file.type,
+          watermarkFileName: filename
         }));
     } else {
       setForm(prev => ({
         ...prev,
-        customizationWatermarkFileData: undefined,
-        customizationWatermarkFileSize: undefined,
-        customizationWatermarkFileType: undefined,
-        customizationWatermarkFileName: undefined
+        watermarkFileData: undefined,
+        watermarkFileSize: undefined,
+        watermarkFileType: undefined,
+        watermarkFileName: undefined
       }));
     }
   };
@@ -101,8 +101,8 @@ export const CustomizationLayout: FC<Props> = ({
     if (data) {
       setForm(data);
 
-      updateUrl(data.customizationWatermarkFileData, data.customizationWatermarkFileType, setWatermarkUrl);
-      updateUrl(data.customizationPaidWatermarkFileData, data.customizationPaidWatermarkFileType, setWatermarkPaidUrl);
+      updateUrl(data.watermarkFileData, data.watermarkFileType, setWatermarkUrl);
+      updateUrl(data.paidWatermarkFileData, data.paidWatermarkFileType, setWatermarkPaidUrl);
     }
   }, [data, setForm, updateUrl]);
 
@@ -117,8 +117,8 @@ export const CustomizationLayout: FC<Props> = ({
     }
     if (!isChanged) return;
 
-    updateUrl(form.customizationWatermarkFileData, form.customizationWatermarkFileType, setWatermarkUrl);
-    updateUrl(form.customizationPaidWatermarkFileData, form.customizationPaidWatermarkFileType, setWatermarkPaidUrl);
+    updateUrl(form.watermarkFileData, form.watermarkFileType, setWatermarkUrl);
+    updateUrl(form.paidWatermarkFileData, form.paidWatermarkFileType, setWatermarkPaidUrl);
 
     lastEmittedRef.current = form;
     onChange?.(form);
@@ -135,11 +135,11 @@ export const CustomizationLayout: FC<Props> = ({
                 zIndex: theme => theme.zIndex.modal + 2
               }
             }}
-            value={form.customizationColor ?? ''}
+            value={form.color ?? ''}
             label={t('common.color')}
             format="hex"
             onChange={(_e, newValue) => {
-              update('customizationColor', newValue.hex);
+              update('color', newValue.hex);
             }}
           />
         </Grid>
@@ -148,9 +148,9 @@ export const CustomizationLayout: FC<Props> = ({
             <FormLabel component="legend">{t('common.pageFormat')}</FormLabel>
             <RadioGroup
               row
-              value={form.customizationPageFormat ?? ''}
+              value={form.pageFormat ?? ''}
               onChange={(_e, newValue) => {
-                update('customizationPageFormat', newValue as PageFormat);
+                update('pageFormat', newValue as PageFormat);
               }}
             >
               <FormControlLabel value={PageFormat.a4} control={<Radio />} label="A4" />
@@ -163,9 +163,9 @@ export const CustomizationLayout: FC<Props> = ({
             <FormLabel component="legend">{t('common.tableHeaderStyle')}</FormLabel>
             <RadioGroup
               row
-              value={form.customizationTableHeaderStyle ?? ''}
+              value={form.tableHeaderStyle ?? ''}
               onChange={(_e, newValue) => {
-                update('customizationTableHeaderStyle', newValue as TableHeaderStyle);
+                update('tableHeaderStyle', newValue as TableHeaderStyle);
               }}
             >
               <FormControlLabel value={TableHeaderStyle.dark} control={<Radio />} label={t('common.dark')} />
@@ -179,9 +179,9 @@ export const CustomizationLayout: FC<Props> = ({
             <FormLabel component="legend">{t('common.tableRowStyle')}</FormLabel>
             <RadioGroup
               row
-              value={form.customizationTableRowStyle ?? ''}
+              value={form.tableRowStyle ?? ''}
               onChange={(_e, newValue) => {
-                update('customizationTableRowStyle', newValue as TableRowStyle);
+                update('tableRowStyle', newValue as TableRowStyle);
               }}
             >
               <FormControlLabel value={TableRowStyle.bordered} control={<Radio />} label={t('common.bordered')} />
@@ -195,9 +195,9 @@ export const CustomizationLayout: FC<Props> = ({
             <FormLabel component="legend">{t('common.fontSizeStyle')}</FormLabel>
             <RadioGroup
               row
-              value={form.customizationFontSizeSize ?? ''}
+              value={form.fontSize ?? ''}
               onChange={(_e, newValue) => {
-                update('customizationFontSizeSize', newValue as SizeType);
+                update('fontSize', newValue as SizeType);
               }}
             >
               <FormControlLabel value={SizeType.small} control={<Radio />} label={t('common.small')} />
@@ -211,9 +211,9 @@ export const CustomizationLayout: FC<Props> = ({
             <FormLabel component="legend">{t('common.logoSizeStyle')}</FormLabel>
             <RadioGroup
               row
-              value={form.customizationLogoSize ?? ''}
+              value={form.logoSize ?? ''}
               onChange={(_e, newValue) => {
-                update('customizationLogoSize', newValue as SizeType);
+                update('logoSize', newValue as SizeType);
               }}
             >
               <FormControlLabel value={SizeType.small} control={<Radio />} label={t('common.small')} />
@@ -227,9 +227,9 @@ export const CustomizationLayout: FC<Props> = ({
             <FormLabel component="legend">{t('common.layout')}</FormLabel>
             <RadioGroup
               row
-              value={form.customizationLayout ?? ''}
+              value={form.layout ?? ''}
               onChange={(_e, newValue) => {
-                update('customizationLayout', newValue as LayoutType);
+                update('layout', newValue as LayoutType);
               }}
             >
               <FormControlLabel value={LayoutType.classic} control={<Radio />} label={t('common.classic')} />
@@ -242,9 +242,9 @@ export const CustomizationLayout: FC<Props> = ({
           <FormControlLabel
             control={
               <Switch
-                checked={form.customizationLabelUpperCase ?? false}
+                checked={form.labelUpperCase ?? false}
                 onChange={(_e, newValue) => {
-                  update('customizationLabelUpperCase', newValue);
+                  update('labelUpperCase', newValue);
                 }}
               />
             }

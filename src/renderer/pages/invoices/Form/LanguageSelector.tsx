@@ -27,8 +27,8 @@ const LanguageSelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
             </Typography>
           }
           secondary={
-            invoiceForm?.currencyCodeSnapshot &&
-            invoiceForm?.currencySymbolSnapshot && (
+            invoiceForm?.invoiceCurrencySnapshot?.currencyCode &&
+            invoiceForm?.invoiceCurrencySnapshot?.currencySymbol && (
               <Typography
                 component="div"
                 variant="body2"

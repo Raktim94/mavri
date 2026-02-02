@@ -94,12 +94,13 @@ const ItemsListComponent: FC<Props> = ({ invoiceForm, setInvoiceForm, onEdit = (
         strategy={verticalListSortingStrategy}
       >
         {invoiceForm?.invoiceItems?.map((invoiceItem, index) => {
-          const { unitPriceCentsSnapshot = 0, quantity, itemNameSnapshot, taxType, taxRate } = invoiceItem;
+          const { quantity, taxType, taxRate, invoiceItemSnapshot } = invoiceItem;
+          const { unitPriceCents = 0, itemName } = invoiceItemSnapshot;
 
           const { formattedUnitPrice, formattedTotal, formattedTax } = getItemFinancialData({
             storeSettings,
             invoiceForm,
-            unitPriceCents: unitPriceCentsSnapshot,
+            unitPriceCents: unitPriceCents,
             quantity,
             taxType,
             taxRate,
@@ -174,7 +175,7 @@ const ItemsListComponent: FC<Props> = ({ invoiceForm, setInvoiceForm, onEdit = (
                         flexDirection: 'row'
                       }}
                     >
-                      {itemNameSnapshot}
+                      {itemName}
                     </Typography>
                   }
                   secondary={

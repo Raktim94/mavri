@@ -111,6 +111,27 @@ export const InvoicesPage: FC<Props> = ({ type }) => {
   };
   const exportInvoices = useCallback(
     async (invoices: Invoice[]) => {
+      const mapBusinessSnapshot = (inv: Invoice) => {
+        if (!inv.invoiceBusinessSnapshot) return;
+
+        const { businessLogo, ...rest } = inv.invoiceBusinessSnapshot;
+
+        void businessLogo;
+
+        return rest;
+      };
+      const mapCustomization = (inv: Invoice) => {
+        if (!inv.invoiceCustomization) return;
+
+        const { watermarkFileData, paidWatermarkFileData, ...rest } = inv.invoiceCustomization;
+
+        void watermarkFileData;
+        void paidWatermarkFileData;
+
+        return rest;
+      };
+      const mapCurrencySnapshot = (inv: Invoice) => inv.invoiceCurrencySnapshot;
+      const mapClientSnapshot = (inv: Invoice) => inv.invoiceClientSnapshot;
       const mapPayment = (inv: Invoice) => (inv.invoicePayments ?? []).map(p => p);
       const mapItem = (inv: Invoice) => (inv.invoiceItems ?? []).map(it => it);
       const toRow = (obj: unknown): Row => Object.fromEntries(Object.entries(obj as Record<string, unknown>)) as Row;
@@ -121,19 +142,21 @@ export const InvoicesPage: FC<Props> = ({ type }) => {
           invoiceItems,
           currencyFormat,
           invoiceAttachments,
-          customizationWatermarkFileData,
-          customizationPaidWatermarkFileData,
+          invoiceCustomization,
           signatureData,
-          businessLogoSnapshot,
+          invoiceBusinessSnapshot,
+          invoiceClientSnapshot,
+          invoiceCurrencySnapshot,
           ...rest
         } = invoice;
 
+        void invoiceCustomization;
+        void invoiceCurrencySnapshot;
         void invoicePayments;
         void invoiceItems;
         void currencyFormat;
-        void businessLogoSnapshot;
-        void customizationWatermarkFileData;
-        void customizationPaidWatermarkFileData;
+        void invoiceBusinessSnapshot;
+        void invoiceClientSnapshot;
         void signatureData;
         void invoiceAttachments;
 
@@ -142,12 +165,20 @@ export const InvoicesPage: FC<Props> = ({ type }) => {
 
       const invoicesData = invoices;
       const invoicesSheet = invoicesData.map(cleanInvoice);
+      const invoiceClientSnapshotsSheet = invoicesData.flatMap(mapClientSnapshot);
+      const invoiceBusinessSnapshotSheet = invoicesData.flatMap(mapBusinessSnapshot);
+      const invoiceCustomization = invoicesData.flatMap(mapCustomization);
+      const invoiceCurrencySnapshotsSheet = invoicesData.flatMap(mapCurrencySnapshot);
       const itemsSheet = invoicesData.flatMap(mapItem);
       const paymentsSheet = invoicesData.flatMap(mapPayment);
 
       await exportExcel(
         [
           { name: type === InvoiceType.quotation ? 'Quotes' : 'Invoices', rows: invoicesSheet.map(toRow) },
+          { name: 'Business Snapshots', rows: invoiceBusinessSnapshotSheet.map(toRow) },
+          { name: 'Client Snapshots', rows: invoiceClientSnapshotsSheet.map(toRow) },
+          { name: 'Currency Snapshots', rows: invoiceCurrencySnapshotsSheet.map(toRow) },
+          { name: 'Customizations', rows: invoiceCustomization.map(toRow) },
           { name: 'Payments', rows: paymentsSheet.map(toRow) },
           { name: 'Items', rows: itemsSheet.map(toRow) }
         ],

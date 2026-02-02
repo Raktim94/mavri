@@ -57,18 +57,18 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
     let rowBorder: string | undefined = '1px solid #e0e0e0';
     let rowBorderCell: string | undefined = undefined;
 
-    if (invoiceForm?.customizationTableHeaderStyle === TableHeaderStyle.light) {
-      rowBckgColor = lightenHex({ hex: invoiceForm?.customizationColor, amount: 0.9 });
+    if (invoiceForm?.invoiceCustomization?.tableHeaderStyle === TableHeaderStyle.light) {
+      rowBckgColor = lightenHex({ hex: invoiceForm?.invoiceCustomization?.color, amount: 0.9 });
       rowBorder = undefined;
-    } else if (invoiceForm?.customizationTableHeaderStyle === TableHeaderStyle.dark) {
+    } else if (invoiceForm?.invoiceCustomization?.tableHeaderStyle === TableHeaderStyle.dark) {
       rowFontColor = '#ffffff';
-      rowBckgColor = invoiceForm?.customizationColor ?? 'inherit';
+      rowBckgColor = invoiceForm?.invoiceCustomization?.color ?? 'inherit';
       rowBorder = undefined;
     }
 
     if (
-      invoiceForm?.customizationTableRowStyle === TableRowStyle.bordered &&
-      invoiceForm?.customizationTableHeaderStyle === TableHeaderStyle.outline
+      invoiceForm?.invoiceCustomization?.tableRowStyle === TableRowStyle.bordered &&
+      invoiceForm?.invoiceCustomization?.tableHeaderStyle === TableHeaderStyle.outline
     ) {
       rowBorder = undefined;
       rowBorderCell = '1px solid #e0e0e0';
@@ -82,9 +82,9 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
     let rowBorderCell: string | undefined = undefined;
     let rowColor = undefined;
 
-    if (invoiceForm?.customizationTableRowStyle === TableRowStyle.bordered) {
+    if (invoiceForm?.invoiceCustomization?.tableRowStyle === TableRowStyle.bordered) {
       rowBorderCell = '1px solid #e0e0e0';
-    } else if (invoiceForm?.customizationTableRowStyle === TableRowStyle.stripped) {
+    } else if (invoiceForm?.invoiceCustomization?.tableRowStyle === TableRowStyle.stripped) {
       rowBorderBottom = undefined;
       rowColor = '#e0e0e0';
     }
@@ -114,7 +114,9 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
           <Text
             style={[
               PDF_STYLES.tableCellHeader,
-              { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].tableCellHeader }
+              {
+                fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCellHeader
+              }
             ]}
           >
             #
@@ -124,7 +126,9 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
           <Text
             style={[
               PDF_STYLES.tableCellHeader,
-              { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].tableCellHeader }
+              {
+                fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCellHeader
+              }
             ]}
           >
             {itemLabel}
@@ -134,7 +138,9 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
           <Text
             style={[
               PDF_STYLES.tableCellHeader,
-              { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].tableCellHeader }
+              {
+                fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCellHeader
+              }
             ]}
           >
             {unitLabel}
@@ -144,7 +150,9 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
           <Text
             style={[
               PDF_STYLES.tableCellHeader,
-              { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].tableCellHeader }
+              {
+                fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCellHeader
+              }
             ]}
           >
             {qtyLabel}
@@ -154,7 +162,9 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
           <Text
             style={[
               PDF_STYLES.tableCellHeader,
-              { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].tableCellHeader }
+              {
+                fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCellHeader
+              }
             ]}
           >
             {unitCostLabel}
@@ -171,7 +181,9 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
           <Text
             style={[
               PDF_STYLES.tableCellHeader,
-              { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].tableCellHeader }
+              {
+                fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCellHeader
+              }
             ]}
           >
             {totalLabel}
@@ -179,12 +191,13 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
         </View>
       </View>
       {invoiceForm?.invoiceItems?.map((item, index) => {
-        const { unitPriceCentsSnapshot = 0, quantity, itemNameSnapshot, unitNameSnapshot, taxType, taxRate } = item;
+        const { quantity, taxType, taxRate, invoiceItemSnapshot } = item;
+        const { unitPriceCents = 0, itemName, unitName } = invoiceItemSnapshot;
 
         const { formattedUnitPrice, formattedTotal, formattedTax } = getItemFinancialData({
           storeSettings,
           invoiceForm,
-          unitPriceCents: unitPriceCentsSnapshot,
+          unitPriceCents: unitPriceCents,
           quantity,
           taxType,
           taxRate,
@@ -205,7 +218,7 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
             <View style={[PDF_STYLES.tableCol, PDF_STYLES.w5, { borderLeft: rowStyle.borderCell }]}>
               <Text
                 style={[
-                  { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].tableCell }
+                  { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCell }
                 ]}
               >
                 {index + 1}
@@ -214,17 +227,18 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
             <View style={[PDF_STYLES.tableCol, PDF_STYLES.w35, { borderLeft: rowStyle.borderCell }]}>
               <Text
                 style={[
-                  { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].tableCell }
+                  { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCell }
                 ]}
               >
-                {itemNameSnapshot}
+                {itemName}
               </Text>
               {taxType && (
                 <Text
                   style={[
                     PDF_STYLES.tableCellSubtle,
                     {
-                      fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].tableCellSubtle
+                      fontSize:
+                        FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCellSubtle
                     }
                   ]}
                 >
@@ -237,10 +251,10 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
             >
               <Text
                 style={[
-                  { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].tableCell }
+                  { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCell }
                 ]}
               >
-                {unitNameSnapshot}
+                {unitName}
               </Text>
             </View>
             <View
@@ -248,7 +262,7 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
             >
               <Text
                 style={[
-                  { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].tableCell }
+                  { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCell }
                 ]}
               >
                 {quantity}
@@ -259,7 +273,7 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
             >
               <Text
                 style={[
-                  { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].tableCell }
+                  { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCell }
                 ]}
               >
                 {formattedUnitPrice}
@@ -275,7 +289,7 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
             >
               <Text
                 style={[
-                  { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].tableCell }
+                  { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCell }
                 ]}
               >
                 {formattedTotal}

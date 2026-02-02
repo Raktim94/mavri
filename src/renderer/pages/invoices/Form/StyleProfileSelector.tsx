@@ -26,14 +26,13 @@ const StyleProfileSelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
             </Typography>
           }
           secondary={
-            invoiceForm?.currencyCodeSnapshot &&
-            invoiceForm?.currencySymbolSnapshot && (
+            invoiceForm?.invoiceStyleProfileSnapshot?.styleProfileName && (
               <Typography
                 component="div"
                 variant="body2"
                 sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}
               >
-                {invoiceForm.styleProfileNameSnapshot}
+                {invoiceForm?.invoiceStyleProfileSnapshot?.styleProfileName}
               </Typography>
             )
           }

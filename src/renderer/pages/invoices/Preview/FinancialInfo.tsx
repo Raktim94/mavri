@@ -79,7 +79,9 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels 
               style={[
                 PDF_STYLES.regularBold,
                 PDF_STYLES.w50,
-                { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
+                {
+                  fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regularBold
+                }
               ]}
             >
               <Text>{subTotalLabel}</Text>
@@ -89,7 +91,9 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels 
                 PDF_STYLES.regularBold,
                 PDF_STYLES.w50,
                 PDF_STYLES.alignEnd,
-                { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
+                {
+                  fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regularBold
+                }
               ]}
             >
               <Text>{formattedSubTotalAmount}</Text>
@@ -106,7 +110,9 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels 
               style={[
                 PDF_STYLES.regular,
                 PDF_STYLES.w50,
-                { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regular }
+                {
+                  fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regular
+                }
               ]}
             >
               <Text>
@@ -120,7 +126,9 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels 
                 PDF_STYLES.regular,
                 PDF_STYLES.w50,
                 PDF_STYLES.alignEnd,
-                { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regular }
+                {
+                  fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regular
+                }
               ]}
             >
               <Text>{discountAmountFormatted}</Text>
@@ -137,7 +145,9 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels 
               style={[
                 PDF_STYLES.regular,
                 PDF_STYLES.w50,
-                { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regular }
+                {
+                  fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regular
+                }
               ]}
             >
               <Text>
@@ -156,7 +166,9 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels 
                 PDF_STYLES.regular,
                 PDF_STYLES.w50,
                 PDF_STYLES.alignEnd,
-                { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regular }
+                {
+                  fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regular
+                }
               ]}
             >
               <Text>{formattedTotalTaxAmount}</Text>
@@ -173,7 +185,9 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels 
               style={[
                 PDF_STYLES.regular,
                 PDF_STYLES.w50,
-                { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regular }
+                {
+                  fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regular
+                }
               ]}
             >
               <Text>{shippingFeeLabel}</Text>
@@ -183,7 +197,9 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels 
                 PDF_STYLES.regular,
                 PDF_STYLES.w50,
                 PDF_STYLES.alignEnd,
-                { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regular }
+                {
+                  fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regular
+                }
               ]}
             >
               <Text>{shippingAmountFormatted}</Text>
@@ -209,7 +225,9 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels 
               style={[
                 PDF_STYLES.regularBold,
                 PDF_STYLES.w50,
-                { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
+                {
+                  fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regularBold
+                }
               ]}
             >
               <Text>{totalLabel}</Text>
@@ -219,7 +237,7 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels 
                 PDF_STYLES.regularBold,
                 PDF_STYLES.w50,
                 PDF_STYLES.alignEnd,
-                { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
+                { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regularBold }
               ]}
             >
               <Text>{totalAmountFormatted}</Text>
@@ -238,7 +256,7 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels 
                 style={[
                   PDF_STYLES.regular,
                   PDF_STYLES.w50,
-                  { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regular }
+                  { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regular }
                 ]}
               >
                 <Text>{paidLabel}</Text>
@@ -248,7 +266,7 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels 
                   PDF_STYLES.regular,
                   PDF_STYLES.w50,
                   PDF_STYLES.alignEnd,
-                  { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regular }
+                  { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regular }
                 ]}
               >
                 <Text>{totalAmountPaidFormatted}</Text>
@@ -265,7 +283,7 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels 
               style={[
                 PDF_STYLES.regularBold,
                 PDF_STYLES.w50,
-                { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
+                { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regularBold }
               ]}
             >
               <Text>{balanceDueLabel}</Text>
@@ -276,8 +294,8 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels 
                 PDF_STYLES.w50,
                 PDF_STYLES.alignEnd,
                 {
-                  color: invoiceForm?.customizationColor,
-                  fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold
+                  color: invoiceForm?.invoiceCustomization?.color,
+                  fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regularBold
                 }
               ]}
             >

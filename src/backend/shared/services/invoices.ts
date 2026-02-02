@@ -1,7 +1,18 @@
 import type { Database } from 'sqlite3';
 import type { Response } from '../../shared/types/response';
 import type { EntityWithId } from '../types/entityWithId';
-import type { Invoice, InvoiceAttachment, InvoiceItem, InvoicePayment } from '../types/invoice';
+import type {
+  Invoice,
+  InvoiceAttachment,
+  InvoiceBusinessSnapshots,
+  InvoiceClientSnapshots,
+  InvoiceCurrencySnapshots,
+  InvoiceCustomization,
+  InvoiceItem,
+  InvoiceItemSnapshots,
+  InvoicePayment,
+  InvoiceStyleProfileSnapshots
+} from '../types/invoice';
 import type { FilterData } from '../types/invoiceFilter';
 import { getAllRows, getFirstRow, runDb } from '../utils/dbFuntions';
 import { mapSqliteError } from '../utils/errorFunctions';
@@ -39,7 +50,59 @@ export const handleEntity =
       return { success: false, ...mapSqliteError(error) };
     }
   };
-
+const invoiceCurrencySnapshotsFields: (keyof InvoiceCurrencySnapshots)[] = [
+  'parentInvoiceId',
+  'currencyCode',
+  'currencySymbol',
+  'currencySubunit'
+];
+const invoiceClientSnapshotsFields: (keyof InvoiceClientSnapshots)[] = [
+  'parentInvoiceId',
+  'clientName',
+  'clientAddress',
+  'clientEmail',
+  'clientPhone',
+  'clientCode',
+  'clientAdditional'
+];
+const invoiceBusinessSnapshotsFields: (keyof InvoiceBusinessSnapshots)[] = [
+  'parentInvoiceId',
+  'businessName',
+  'businessAddress',
+  'businessRole',
+  'businessShortName',
+  'businessEmail',
+  'businessPhone',
+  'businessAdditional',
+  'businessPaymentInformation',
+  'businessLogo',
+  'businessFileSize',
+  'businessFileType',
+  'businessFileName'
+];
+const invoiceStyleProfileSnapshotsFields: (keyof InvoiceStyleProfileSnapshots)[] = [
+  'parentInvoiceId',
+  'styleProfileName'
+];
+const invoiceCustomizationFields: (keyof InvoiceCustomization)[] = [
+  'parentInvoiceId',
+  'color',
+  'logoSize',
+  'fontSize',
+  'layout',
+  'tableHeaderStyle',
+  'tableRowStyle',
+  'pageFormat',
+  'labelUpperCase',
+  'watermarkFileName',
+  'watermarkFileType',
+  'watermarkFileSize',
+  'watermarkFileData',
+  'paidWatermarkFileName',
+  'paidWatermarkFileType',
+  'paidWatermarkFileSize',
+  'paidWatermarkFileData'
+];
 const invoiceFields: (keyof Invoice)[] = [
   'invoiceType',
   'convertedFromQuotationId',
@@ -55,29 +118,8 @@ const invoiceFields: (keyof Invoice)[] = [
   'thanksNotes',
   'termsConditionNotes',
   'discountName',
-  'businessNameSnapshot',
-  'businessAddressSnapshot',
-  'businessRoleSnapshot',
-  'businessShortNameSnapshot',
-  'businessEmailSnapshot',
-  'businessPhoneSnapshot',
-  'businessAdditionalSnapshot',
-  'businessPaymentInformationSnapshot',
-  'businessLogoSnapshot',
-  'businessFileSizeSnapshot',
-  'businessFileTypeSnapshot',
-  'businessFileNameSnapshot',
-  'clientNameSnapshot',
-  'clientAddressSnapshot',
-  'clientEmailSnapshot',
-  'clientPhoneSnapshot',
-  'clientCodeSnapshot',
-  'clientAdditionalSnapshot',
-  'currencyCodeSnapshot',
-  'currencySymbolSnapshot',
   'invoicePrefix',
   'invoiceSuffix',
-  'currencySubunitSnapshot',
   'discountType',
   'discountAmountCents',
   'discountPercent',
@@ -85,41 +127,21 @@ const invoiceFields: (keyof Invoice)[] = [
   'taxName',
   'taxRate',
   'taxType',
-  'customizationColor',
   'language',
-  'customizationLogoSize',
-  'customizationFontSizeSize',
-  'customizationLayout',
-  'customizationTableHeaderStyle',
-  'customizationTableRowStyle',
-  'customizationPageFormat',
-  'customizationLabelUpperCase',
-  'customizationWatermarkFileName',
-  'customizationWatermarkFileType',
-  'customizationWatermarkFileSize',
-  'customizationWatermarkFileData',
-  'customizationPaidWatermarkFileName',
-  'customizationPaidWatermarkFileType',
-  'customizationPaidWatermarkFileSize',
-  'customizationPaidWatermarkFileData',
   'signatureData',
   'signatureSize',
   'signatureType',
   'signatureName',
-  'styleProfilesId',
-  'styleProfileNameSnapshot'
+  'styleProfilesId'
 ];
 const attachmentFields: (keyof InvoiceAttachment)[] = ['parentInvoiceId', 'fileSize', 'fileType', 'fileName', 'data'];
 const paymentsFields: (keyof InvoicePayment)[] = ['parentInvoiceId', 'amountCents', 'paidAt', 'paymentMethod', 'notes'];
-const itemsFields: (keyof InvoiceItem)[] = [
-  'parentInvoiceId',
-  'itemId',
-  'itemNameSnapshot',
-  'unitPriceCentsSnapshot',
-  'unitNameSnapshot',
-  'quantity',
-  'taxRate',
-  'taxType'
+const itemsFields: (keyof InvoiceItem)[] = ['parentInvoiceId', 'itemId', 'quantity', 'taxRate', 'taxType'];
+const itemsSnapshotFields: (keyof InvoiceItemSnapshots)[] = [
+  'parentInvoiceItemId',
+  'itemName',
+  'unitPriceCents',
+  'unitName'
 ];
 
 const getInvoices = async (db: Database, options: GetInvoicesOptions) => {
@@ -128,8 +150,8 @@ const getInvoices = async (db: Database, options: GetInvoicesOptions) => {
   const whereClause = filter
     ? getWhereClauseFromFilters({
         filters: filter,
-        businessNameSnapshotColumn: 'i.businessNameSnapshot',
-        clientNameSnapshotColumn: 'i.clientNameSnapshot',
+        businessNameSnapshotColumn: 'ibs.businessName',
+        clientNameSnapshotColumn: 'ics.clientName',
         archivedColumn: 'i.isArchived',
         issuedAtColumn: 'i.issuedAt',
         statusColumn: 'i.status'
@@ -145,6 +167,8 @@ const getInvoices = async (db: Database, options: GetInvoicesOptions) => {
         SELECT i.*, c.format as currencyFormat
         FROM invoices i
         INNER JOIN currencies as c on c.id = i.currencyId
+        INNER JOIN invoice_business_snapshots as ibs on ibs.parentInvoiceId = i.id
+        INNER JOIN invoice_client_snapshots as ics on ics.parentInvoiceId = i.id
         ${whereSql}
         ORDER BY i.createdAt DESC
       `;
@@ -167,12 +191,57 @@ const getInvoices = async (db: Database, options: GetInvoicesOptions) => {
     `SELECT ia.* FROM attachments as ia WHERE parentInvoiceId IN (${placeholders})`,
     invoiceIds
   );
+  const invoiceBusinessSnapshots = await getAllRows<InvoiceBusinessSnapshots>(
+    db,
+    `SELECT ibs.* FROM invoice_business_snapshots as ibs WHERE parentInvoiceId IN (${placeholders})`,
+    invoiceIds
+  );
+  const invoiceClientSnapshots = await getAllRows<InvoiceClientSnapshots>(
+    db,
+    `SELECT ics.* FROM invoice_client_snapshots as ics WHERE parentInvoiceId IN (${placeholders})`,
+    invoiceIds
+  );
+  const invoiceCurrencySnapshots = await getAllRows<InvoiceClientSnapshots>(
+    db,
+    `SELECT cs.* FROM invoice_currency_snapshots as cs WHERE parentInvoiceId IN (${placeholders})`,
+    invoiceIds
+  );
+  const invoiceCustomization = await getAllRows<InvoiceCustomization>(
+    db,
+    `SELECT c.* FROM invoice_customizations as c WHERE parentInvoiceId IN (${placeholders})`,
+    invoiceIds
+  );
+  const invoiceStyleProfileSnapshots = await getAllRows<InvoiceStyleProfileSnapshots>(
+    db,
+    `SELECT sps.* FROM invoice_style_profile_snapshots as sps WHERE parentInvoiceId IN (${placeholders})`,
+    invoiceIds
+  );
+
+  const invoiceItemIds = invoiceItems.map(i => i.id) as number[];
+  const placeholdersItems = invoiceItemIds.map(() => '?').join(', ');
+  const invoiceItemSnapshots = await getAllRows<InvoiceItemSnapshots>(
+    db,
+    `SELECT sps.* FROM invoice_item_snaphots as sps WHERE parentInvoiceItemId IN (${placeholdersItems})`,
+    invoiceItemIds
+  );
 
   return invoices.map(invoice => ({
     ...invoice,
     invoicePayments: invoicePayments.filter(p => p.parentInvoiceId === invoice.id),
-    invoiceItems: invoiceItems.filter(p => p.parentInvoiceId === invoice.id),
-    invoiceAttachments: invoiceAttachments.filter(p => p.parentInvoiceId === invoice.id)
+    invoiceItems: invoiceItems
+      .filter(p => p.parentInvoiceId === invoice.id)
+      .map(p => {
+        return {
+          ...p,
+          invoiceItemSnapshot: invoiceItemSnapshots.find(iis => iis.parentInvoiceItemId === p.id)
+        };
+      }),
+    invoiceAttachments: invoiceAttachments.filter(p => p.parentInvoiceId === invoice.id),
+    invoiceBusinessSnapshot: invoiceBusinessSnapshots.find(p => p.parentInvoiceId === invoice.id),
+    invoiceClientSnapshot: invoiceClientSnapshots.find(p => p.parentInvoiceId === invoice.id),
+    invoiceCurrencySnapshot: invoiceCurrencySnapshots.find(p => p.parentInvoiceId === invoice.id),
+    invoiceCustomization: invoiceCustomization.find(p => p.parentInvoiceId === invoice.id),
+    invoiceStyleProfileSnapshot: invoiceStyleProfileSnapshots.find(p => p.parentInvoiceId === invoice.id)
   }));
 };
 
@@ -192,6 +261,36 @@ export const deleteInvoice = async (db: Database, id: number) => {
 
 export const addInvoice = async (db: Database, data: Invoice) => {
   const handleInvoice = handleEntity<Invoice>(db, 'invoices', invoiceFields);
+  const handleInvoiceBusinessSnapshots = handleEntity<InvoiceBusinessSnapshots>(
+    db,
+    'invoice_business_snapshots',
+    invoiceBusinessSnapshotsFields
+  );
+  const handleInvoiceClientSnapshots = handleEntity<InvoiceClientSnapshots>(
+    db,
+    'invoice_client_snapshots',
+    invoiceClientSnapshotsFields
+  );
+  const handleInvoiceCurrencySnapshots = handleEntity<InvoiceCurrencySnapshots>(
+    db,
+    'invoice_currency_snapshots',
+    invoiceCurrencySnapshotsFields
+  );
+  const handleInvoiceCustomization = handleEntity<InvoiceCustomization>(
+    db,
+    'invoice_customizations',
+    invoiceCustomizationFields
+  );
+  const handleInvoiceStyleProfileSnapshots = handleEntity<InvoiceStyleProfileSnapshots>(
+    db,
+    'invoice_style_profile_snapshots',
+    invoiceStyleProfileSnapshotsFields
+  );
+  const handleInvoiceItemSnapshots = handleEntity<InvoiceItemSnapshots>(
+    db,
+    'invoice_item_snaphots',
+    itemsSnapshotFields
+  );
   const handleInvoicePayments = handleEntity<InvoicePayment>(db, 'invoice_payments', paymentsFields);
   const handleInvoiceItems = handleEntity<InvoiceItem>(db, 'invoice_items', itemsFields);
   const handleAttachments = handleEntity<InvoiceAttachment>(db, 'attachments', attachmentFields);
@@ -207,14 +306,76 @@ export const addInvoice = async (db: Database, data: Invoice) => {
     }
 
     const newId = result.data;
+    if (data.styleProfilesId && data.invoiceStyleProfileSnapshot) {
+      const ibs = await handleInvoiceStyleProfileSnapshots({
+        ...data.invoiceStyleProfileSnapshot,
+        parentInvoiceId: newId
+      });
+      if (!ibs.success) {
+        await runDb(db, 'ROLLBACK');
+        return { success: false, key: ibs.key, message: ibs.message };
+      }
+    }
+    if (data.invoiceCustomization) {
+      const ibs = await handleInvoiceCustomization({
+        ...data.invoiceCustomization,
+        parentInvoiceId: newId
+      });
+      if (!ibs.success) {
+        await runDb(db, 'ROLLBACK');
+        return { success: false, key: ibs.key, message: ibs.message };
+      }
+    }
+    if (data.currencyId && data.invoiceCurrencySnapshot) {
+      const ibs = await handleInvoiceCurrencySnapshots({
+        ...data.invoiceCurrencySnapshot,
+        parentInvoiceId: newId
+      });
+      if (!ibs.success) {
+        await runDb(db, 'ROLLBACK');
+        return { success: false, key: ibs.key, message: ibs.message };
+      }
+    }
+    if (data.businessId && data.invoiceBusinessSnapshot) {
+      const ibs = await handleInvoiceBusinessSnapshots({
+        ...data.invoiceBusinessSnapshot,
+        parentInvoiceId: newId
+      });
+      if (!ibs.success) {
+        await runDb(db, 'ROLLBACK');
+        return { success: false, key: ibs.key, message: ibs.message };
+      }
+    }
+    if (data.clientId && data.invoiceClientSnapshot) {
+      const ibs = await handleInvoiceClientSnapshots({
+        ...data.invoiceClientSnapshot,
+        parentInvoiceId: newId
+      });
+      if (!ibs.success) {
+        await runDb(db, 'ROLLBACK');
+        return { success: false, key: ibs.key, message: ibs.message };
+      }
+    }
 
     let failure = undefined;
+
     for (const item of data.invoiceItems ?? []) {
       const r = await handleInvoiceItems({ ...item, parentInvoiceId: newId });
-      if (!r.success) {
+      if (!r.success || !result.data) {
         await runDb(db, 'ROLLBACK');
         failure = r;
         break;
+      }
+      const newItemId = result.data;
+      if (item.itemId && item.invoiceItemSnapshot) {
+        const ibs = await handleInvoiceItemSnapshots({
+          ...item.invoiceItemSnapshot,
+          parentInvoiceItemId: newItemId
+        });
+        if (!ibs.success) {
+          await runDb(db, 'ROLLBACK');
+          return { success: false, key: ibs.key, message: ibs.message };
+        }
       }
     }
 
@@ -262,6 +423,31 @@ export const updateInvoice = async (db: Database, data: Invoice) => {
   const handleInvoice = handleEntity<Invoice>(db, 'invoices', invoiceFields);
   const handleInvoicePayments = handleEntity<InvoicePayment>(db, 'invoice_payments', paymentsFields);
   const handleAttachments = handleEntity<InvoiceAttachment>(db, 'attachments', attachmentFields);
+  const handleInvoiceBusinessSnapshots = handleEntity<InvoiceBusinessSnapshots>(
+    db,
+    'invoice_business_snapshots',
+    invoiceBusinessSnapshotsFields
+  );
+  const handleInvoiceStyleProfileSnapshots = handleEntity<InvoiceStyleProfileSnapshots>(
+    db,
+    'invoice_style_profile_snapshots',
+    invoiceStyleProfileSnapshotsFields
+  );
+  const handleInvoiceClientSnapshots = handleEntity<InvoiceClientSnapshots>(
+    db,
+    'invoice_client_snapshots',
+    invoiceClientSnapshotsFields
+  );
+  const handleInvoiceCurrencySnapshots = handleEntity<InvoiceCurrencySnapshots>(
+    db,
+    'invoice_currency_snapshots',
+    invoiceCurrencySnapshotsFields
+  );
+  const handleInvoiceCustomization = handleEntity<InvoiceCustomization>(
+    db,
+    'invoice_customizations',
+    invoiceCustomizationFields
+  );
 
   try {
     await runDb(db, 'BEGIN TRANSACTION');
@@ -272,21 +458,88 @@ export const updateInvoice = async (db: Database, data: Invoice) => {
       return { success: false, key: result.key };
     }
 
+    if (data.styleProfilesId && data.invoiceStyleProfileSnapshot) {
+      const ibs = await handleInvoiceStyleProfileSnapshots(
+        {
+          ...data.invoiceStyleProfileSnapshot,
+          parentInvoiceId: data.id
+        },
+        true
+      );
+      if (!ibs.success) {
+        await runDb(db, 'ROLLBACK');
+        return { success: false, key: ibs.key, message: ibs.message };
+      }
+    }
+    if (data.invoiceCustomization) {
+      const ibs = await handleInvoiceCustomization(
+        {
+          ...data.invoiceCustomization,
+          parentInvoiceId: data.id
+        },
+        true
+      );
+      if (!ibs.success) {
+        await runDb(db, 'ROLLBACK');
+        return { success: false, key: ibs.key, message: ibs.message };
+      }
+    }
+    if (data.currencyId && data.invoiceCurrencySnapshot) {
+      const ibs = await handleInvoiceCurrencySnapshots(
+        {
+          ...data.invoiceCurrencySnapshot,
+          parentInvoiceId: data.id
+        },
+        true
+      );
+      if (!ibs.success) {
+        await runDb(db, 'ROLLBACK');
+        return { success: false, key: ibs.key, message: ibs.message };
+      }
+    }
+    if (data.businessId && data.invoiceBusinessSnapshot) {
+      const ibs = await handleInvoiceBusinessSnapshots(
+        {
+          ...data.invoiceBusinessSnapshot,
+          parentInvoiceId: data.id
+        },
+        true
+      );
+      if (!ibs.success) {
+        await runDb(db, 'ROLLBACK');
+        return { success: false, key: ibs.key, message: ibs.message };
+      }
+    }
+    if (data.clientId && data.invoiceClientSnapshot) {
+      const ibs = await handleInvoiceClientSnapshots(
+        {
+          ...data.invoiceClientSnapshot,
+          parentInvoiceId: data.id
+        },
+        true
+      );
+      if (!ibs.success) {
+        await runDb(db, 'ROLLBACK');
+        return { success: false, key: ibs.key, message: ibs.message };
+      }
+    }
+
     await runDb(db, 'DELETE FROM invoice_items WHERE parentInvoiceId = ?;', [data.id]);
 
     for (const item of data.invoiceItems ?? []) {
+      const newItemID = await runDb(
+        db,
+        `INSERT INTO invoice_items (parentInvoiceId, itemId, quantity, taxRate, taxType) VALUES (?, ?, ?, ?, ?)`,
+        [data.id, item.itemId, item.quantity, item.taxRate, item.taxType ?? null]
+      );
       await runDb(
         db,
-        `INSERT INTO invoice_items (parentInvoiceId, itemId, itemNameSnapshot, unitPriceCentsSnapshot, unitNameSnapshot, quantity, taxRate, taxType) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO invoice_item_snaphots (parentInvoiceItemId, itemName, unitPriceCents, unitName) VALUES (?, ?, ?, ?)`,
         [
-          data.id,
-          item.itemId,
-          item.itemNameSnapshot,
-          item.unitPriceCentsSnapshot,
-          item.unitNameSnapshot ?? null,
-          item.quantity,
-          item.taxRate,
-          item.taxType ?? null
+          newItemID,
+          item.invoiceItemSnapshot.itemName,
+          item.invoiceItemSnapshot.unitPriceCents,
+          item.invoiceItemSnapshot.unitName ?? null
         ]
       );
     }
@@ -375,46 +628,18 @@ export const duplicateInvoice = async (db: Database, invoiceId: number, invoiceT
         INSERT INTO invoices (
           invoiceType, convertedFromQuotationId, businessId, clientId, currencyId,
           issuedAt, dueDate, invoiceNumber, isArchived, status, customerNotes,
-          thanksNotes, termsConditionNotes, discountName, businessNameSnapshot,
-          businessShortNameSnapshot, businessAddressSnapshot,
-          businessRoleSnapshot, businessEmailSnapshot, businessPhoneSnapshot,
-          businessAdditionalSnapshot, language, customizationColor, customizationLogoSize,
-          customizationFontSizeSize, customizationLayout,
-          customizationTableHeaderStyle, customizationPageFormat, customizationLabelUpperCase,
-          customizationWatermarkFileName, customizationWatermarkFileType, customizationWatermarkFileSize,
-          customizationWatermarkFileData, customizationPaidWatermarkFileName,
-          customizationPaidWatermarkFileType, customizationPaidWatermarkFileSize, customizationPaidWatermarkFileData,
-          businessPaymentInformationSnapshot, businessLogoSnapshot,
-          businessFileSizeSnapshot, businessFileTypeSnapshot,
-          businessFileNameSnapshot, clientNameSnapshot,
-          clientAddressSnapshot, clientEmailSnapshot,
-          clientPhoneSnapshot, clientCodeSnapshot, clientAdditionalSnapshot,
-          currencyCodeSnapshot, currencySymbolSnapshot, currencySubunitSnapshot,
+          thanksNotes, termsConditionNotes, discountName, language, 
           discountType, discountAmountCents, discountPercent, shippingFeeCents,
           invoicePrefix, invoiceSuffix, taxName, taxRate, taxType, signatureData,
-          signatureSize, signatureType, signatureName, styleProfilesId, styleProfileNameSnapshot
+          signatureSize, signatureType, signatureName, styleProfilesId
         )
         SELECT
           ?, ?, businessId, clientId, currencyId,
           issuedAt, dueDate, ?, isArchived, ?, customerNotes,
-          thanksNotes, termsConditionNotes, discountName, businessNameSnapshot,
-          businessShortNameSnapshot, businessAddressSnapshot,
-          businessRoleSnapshot, businessEmailSnapshot, businessPhoneSnapshot,
-          businessAdditionalSnapshot, language, customizationColor, customizationLogoSize,
-          customizationFontSizeSize, customizationLayout,
-          customizationTableHeaderStyle, customizationPageFormat, customizationLabelUpperCase,
-          customizationWatermarkFileName, customizationWatermarkFileType, customizationWatermarkFileSize,
-          customizationWatermarkFileData, customizationPaidWatermarkFileName,
-          customizationPaidWatermarkFileType, customizationPaidWatermarkFileSize, customizationPaidWatermarkFileData,
-          businessPaymentInformationSnapshot, businessLogoSnapshot,
-          businessFileSizeSnapshot, businessFileTypeSnapshot,
-          businessFileNameSnapshot, clientNameSnapshot,
-          clientAddressSnapshot, clientEmailSnapshot,
-          clientPhoneSnapshot, clientCodeSnapshot, clientAdditionalSnapshot,
-          currencyCodeSnapshot, currencySymbolSnapshot, currencySubunitSnapshot,
+          thanksNotes, termsConditionNotes, discountName, language, 
           discountType, discountAmountCents, discountPercent, shippingFeeCents,
           invoicePrefix, invoiceSuffix, taxName, taxRate, taxType, signatureData,
-          signatureSize, signatureType, signatureName, styleProfilesId, styleProfileNameSnapshot
+          signatureSize, signatureType, signatureName, styleProfilesId
         FROM invoices WHERE id = ?;
       `;
 
@@ -428,9 +653,168 @@ export const duplicateInvoice = async (db: Database, invoiceId: number, invoiceT
 
     await runDb(
       db,
-      `INSERT INTO invoice_items (parentInvoiceId, itemId, itemNameSnapshot, unitPriceCentsSnapshot, unitNameSnapshot, quantity, taxRate, taxType)
-       SELECT ?, itemId, itemNameSnapshot, unitPriceCentsSnapshot, unitNameSnapshot, quantity, taxRate, taxType
+      `INSERT INTO invoice_business_snapshots (
+          parentInvoiceId,
+          businessName,
+          businessShortName,
+          businessAddress,
+          businessRole,
+          businessEmail,
+          businessPhone,
+          businessAdditional,
+          businessPaymentInformation,
+          businessLogo,
+          businessFileSize,
+          businessFileType,
+          businessFileName
+      )
+      SELECT
+          ?,
+          businessName,
+          businessShortName,
+          businessAddress,
+          businessRole,
+          businessEmail,
+          businessPhone,
+          businessAdditional,
+          businessPaymentInformation,
+          businessLogo,
+          businessFileSize,
+          businessFileType,
+          businessFileName
+      FROM invoice_business_snapshots
+      WHERE parentInvoiceId = ?;`,
+      [duplicatedRowID, invoiceId]
+    );
+
+    await runDb(
+      db,
+      `INSERT INTO invoice_client_snapshots (
+          parentInvoiceId,
+          clientName,
+          clientAddress,
+          clientEmail,
+          clientPhone,
+          clientCode,
+          clientAdditional
+      )
+      SELECT
+          ?,
+          clientName,
+          clientAddress,
+          clientEmail,
+          clientPhone,
+          clientCode,
+          clientAdditional
+      FROM invoice_client_snapshots
+      WHERE parentInvoiceId = ?;`,
+      [duplicatedRowID, invoiceId]
+    );
+
+    await runDb(
+      db,
+      `INSERT INTO invoice_currency_snapshots (
+          parentInvoiceId,
+          currencyCode,
+          currencySymbol,
+          currencySubunit
+      )
+      SELECT
+          ?,
+          currencyCode,
+          currencySymbol,
+          currencySubunit
+      FROM invoice_currency_snapshots
+      WHERE parentInvoiceId = ?;`,
+      [duplicatedRowID, invoiceId]
+    );
+
+    await runDb(
+      db,
+      `INSERT INTO invoice_customizations (
+          parentInvoiceId,
+          color,
+          logoSize,
+          fontSize,
+          layout,
+          tableHeaderStyle,
+          tableRowStyle,
+          pageFormat,
+          labelUpperCase,
+          watermarkFileName,
+          watermarkFileType,
+          watermarkFileSize,
+          watermarkFileData,
+          paidWatermarkFileName,
+          paidWatermarkFileType,
+          paidWatermarkFileSize,
+          paidWatermarkFileData
+      )
+      SELECT
+          ?,
+          color,
+          logoSize,
+          fontSize,
+          layout,
+          tableHeaderStyle,
+          tableRowStyle,
+          pageFormat,
+          labelUpperCase,
+          watermarkFileName,
+          watermarkFileType,
+          watermarkFileSize,
+          watermarkFileData,
+          paidWatermarkFileName,
+          paidWatermarkFileType,
+          paidWatermarkFileSize,
+          paidWatermarkFileData
+      FROM invoice_customizations
+      WHERE parentInvoiceId = ?;`,
+      [duplicatedRowID, invoiceId]
+    );
+
+    await runDb(
+      db,
+      `INSERT INTO invoice_style_profile_snapshots (
+          parentInvoiceId,
+          styleProfileName
+      )
+      SELECT
+          ?,
+          styleProfileName
+      FROM invoice_style_profile_snapshots
+      WHERE parentInvoiceId = ?;`,
+      [duplicatedRowID, invoiceId]
+    );
+
+    await runDb(
+      db,
+      `INSERT INTO invoice_items (parentInvoiceId, itemId, quantity, taxRate, taxType)
+       SELECT ?, itemId,quantity, taxRate, taxType
        FROM invoice_items WHERE parentInvoiceId = ?;`,
+      [duplicatedRowID, invoiceId]
+    );
+
+    await runDb(
+      db,
+      `INSERT INTO invoice_item_snaphots (
+        parentInvoiceItemId,
+        itemName,
+        unitPriceCents,
+        unitName
+      )
+      SELECT
+        newItems.id,
+        snap.itemName,
+        snap.unitPriceCents,
+        snap.unitName
+      FROM invoice_item_snaphots AS snap
+      JOIN invoice_items AS oldItems
+        ON snap.parentInvoiceItemId = oldItems.id
+      JOIN invoice_items AS newItems
+       ON newItems.itemId = oldItems.itemId
+       AND newItems.parentInvoiceId = ?
+      WHERE oldItems.parentInvoiceId = ?;`,
       [duplicatedRowID, invoiceId]
     );
 

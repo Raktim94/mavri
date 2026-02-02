@@ -9,7 +9,7 @@ interface Props {
 }
 const WatermarkPaidInfoComponent: FC<Props> = ({ watermarkPaidUrl, invoiceForm }) => {
   if (!watermarkPaidUrl) return null;
-  if (!invoiceForm?.customizationPaidWatermarkFileData) return null;
+  if (!invoiceForm?.invoiceCustomization?.paidWatermarkFileData) return null;
 
   return <Image src={watermarkPaidUrl} style={PDF_STYLES.watermarkPaid} />;
 };

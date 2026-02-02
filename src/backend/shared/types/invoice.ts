@@ -9,6 +9,77 @@ import type { TableHeaderStyle } from '../enums/tableHeaderStyle';
 import type { TableRowStyle } from '../enums/tableRowStyle';
 import type { InvoiceItemTaxType, InvoiceTaxType } from '../enums/taxType';
 
+export interface InvoiceItemSnapshots {
+  parentInvoiceItemId: number;
+  id?: number;
+  itemName: string;
+  unitPriceCents: number;
+  unitName?: string;
+}
+
+export interface InvoiceCurrencySnapshots {
+  parentInvoiceId: number;
+  id?: number;
+  currencyCode: string;
+  currencySymbol: string;
+  currencySubunit: number;
+}
+
+export interface InvoiceClientSnapshots {
+  parentInvoiceId: number;
+  id?: number;
+  clientName: string;
+  clientAddress?: string;
+  clientEmail?: string;
+  clientPhone?: string;
+  clientCode?: string;
+  clientAdditional?: string;
+}
+
+export interface InvoiceBusinessSnapshots {
+  parentInvoiceId: number;
+  id?: number;
+  businessName: string;
+  businessAddress?: string;
+  businessRole?: string;
+  businessShortName: string;
+  businessEmail?: string;
+  businessPhone?: string;
+  businessAdditional?: string;
+  businessPaymentInformation?: string;
+  businessLogo?: Uint8Array;
+  businessFileSize?: number;
+  businessFileType?: string;
+  businessFileName?: string;
+}
+
+export interface InvoiceStyleProfileSnapshots {
+  parentInvoiceId: number;
+  id?: number;
+  styleProfileName?: string;
+}
+
+export interface InvoiceCustomization {
+  parentInvoiceId: number;
+  id?: number;
+  color: string;
+  logoSize: SizeType;
+  fontSize: SizeType;
+  layout: LayoutType;
+  tableHeaderStyle: TableHeaderStyle;
+  tableRowStyle: TableRowStyle;
+  pageFormat: PageFormat;
+  labelUpperCase: boolean;
+  watermarkFileName?: string;
+  watermarkFileType?: string;
+  watermarkFileSize?: number;
+  watermarkFileData?: Uint8Array;
+  paidWatermarkFileName?: string;
+  paidWatermarkFileType?: string;
+  paidWatermarkFileSize?: number;
+  paidWatermarkFileData?: Uint8Array;
+}
+
 export interface Invoice {
   id?: number;
   invoiceType: InvoiceType;
@@ -27,29 +98,8 @@ export interface Invoice {
   thanksNotes?: string;
   termsConditionNotes?: string;
   discountName?: string;
-  businessNameSnapshot: string;
-  businessAddressSnapshot?: string;
-  businessRoleSnapshot?: string;
-  businessShortNameSnapshot: string;
-  businessEmailSnapshot?: string;
-  businessPhoneSnapshot?: string;
-  businessAdditionalSnapshot?: string;
-  businessPaymentInformationSnapshot?: string;
-  businessLogoSnapshot?: Uint8Array;
-  businessFileSizeSnapshot?: number;
-  businessFileTypeSnapshot?: string;
-  businessFileNameSnapshot?: string;
-  clientNameSnapshot: string;
-  clientAddressSnapshot?: string;
-  clientEmailSnapshot?: string;
-  clientPhoneSnapshot?: string;
-  clientCodeSnapshot?: string;
-  clientAdditionalSnapshot?: string;
-  currencyCodeSnapshot: string;
-  currencySymbolSnapshot: string;
   invoicePrefix?: string;
   invoiceSuffix?: string;
-  currencySubunitSnapshot: number;
   discountType?: DiscountType;
   discountAmountCents: number;
   discountPercent: number;
@@ -60,29 +110,17 @@ export interface Invoice {
   invoicePayments: InvoicePayment[];
   invoiceItems: InvoiceItem[];
   invoiceAttachments: InvoiceAttachment[];
-  customizationColor: string;
-  customizationLogoSize: SizeType;
-  customizationFontSizeSize: SizeType;
-  customizationLayout: LayoutType;
-  customizationTableHeaderStyle: TableHeaderStyle;
-  customizationTableRowStyle: TableRowStyle;
-  customizationPageFormat: PageFormat;
-  customizationLabelUpperCase: boolean;
-  customizationWatermarkFileName?: string;
-  customizationWatermarkFileType?: string;
-  customizationWatermarkFileSize?: number;
-  customizationWatermarkFileData?: Uint8Array;
-  customizationPaidWatermarkFileName?: string;
-  customizationPaidWatermarkFileType?: string;
-  customizationPaidWatermarkFileSize?: number;
-  customizationPaidWatermarkFileData?: Uint8Array;
   language: Language;
   signatureData?: Uint8Array;
   signatureSize?: number;
   signatureType?: string;
   signatureName?: string;
   styleProfilesId?: number;
-  styleProfileNameSnapshot?: string;
+  invoiceStyleProfileSnapshot?: InvoiceStyleProfileSnapshots;
+  invoiceCustomization?: InvoiceCustomization;
+  invoiceBusinessSnapshot?: InvoiceBusinessSnapshots;
+  invoiceClientSnapshot?: InvoiceClientSnapshots;
+  invoiceCurrencySnapshot?: InvoiceCurrencySnapshots;
 }
 
 export interface InvoiceAttachment {
@@ -111,9 +149,7 @@ export interface InvoiceItem {
   id: number;
   parentInvoiceId: number;
   itemId: number;
-  itemNameSnapshot: string;
-  unitPriceCentsSnapshot: number;
-  unitNameSnapshot?: string;
+  invoiceItemSnapshot: InvoiceItemSnapshots;
   quantity: string;
   createdAt: string;
   updatedAt: string;

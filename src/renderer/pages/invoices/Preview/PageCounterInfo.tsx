@@ -19,7 +19,7 @@ const PageCounterInfoComponent: FC<Props> = ({ invoiceForm, labels }) => {
       fixed
       style={[
         PDF_STYLES.pageCounter,
-        { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].pageCounter }
+        { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].pageCounter }
       ]}
       render={({ pageNumber, totalPages }) =>
         totalPages > 1 ? `${pageLabel} ${pageNumber} ${ofLabel} ${totalPages}` : ''

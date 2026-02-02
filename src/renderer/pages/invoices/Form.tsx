@@ -77,7 +77,12 @@ const InvoiceFormComponent: FC<Props> = ({
       if (invoice) {
         setInvoiceForm({
           ...invoice,
-          businessLogoSnapshot: invoice.businessLogoSnapshot
+          invoiceBusinessSnapshot: invoice.invoiceBusinessSnapshot
+            ? {
+                ...invoice.invoiceBusinessSnapshot,
+                businessLogo: invoice.invoiceBusinessSnapshot?.businessLogo
+              }
+            : invoice.invoiceBusinessSnapshot
         });
       } else {
         setInvoiceForm({
@@ -92,14 +97,16 @@ const InvoiceFormComponent: FC<Props> = ({
           invoicePayments: [],
           invoiceAttachments: [],
           language: Language.en,
-          customizationColor: '#006400',
-          customizationLogoSize: SizeType.medium,
-          customizationFontSizeSize: SizeType.medium,
-          customizationLayout: LayoutType.classic,
-          customizationTableHeaderStyle: TableHeaderStyle.light,
-          customizationTableRowStyle: TableRowStyle.classic,
-          customizationPageFormat: PageFormat.a4,
-          customizationLabelUpperCase: false
+          invoiceCustomization: {
+            color: '#006400',
+            logoSize: SizeType.medium,
+            fontSize: SizeType.medium,
+            layout: LayoutType.classic,
+            tableHeaderStyle: TableHeaderStyle.light,
+            tableRowStyle: TableRowStyle.classic,
+            pageFormat: PageFormat.a4,
+            labelUpperCase: false
+          }
         });
       }
     });
@@ -118,7 +125,10 @@ const InvoiceFormComponent: FC<Props> = ({
     if (newStyleProfile && newRowStyleProfile && invoiceForm) {
       setInvoiceForm({
         ...invoiceForm,
-        styleProfileNameSnapshot: newRowStyleProfile.name,
+        invoiceStyleProfileSnapshot: {
+          ...invoiceForm.invoiceStyleProfileSnapshot,
+          styleProfileName: newRowStyleProfile.name
+        },
         styleProfilesId: newRowStyleProfile.id
       });
     }

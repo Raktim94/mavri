@@ -12,7 +12,7 @@ interface Props {
 const BusinessInfoComponent: FC<Props> = ({ invoiceForm, logoUrl }) => {
   return (
     <View style={[PDF_STYLES.row, PDF_STYLES.alignStart, PDF_STYLES.gap5]}>
-      {invoiceForm?.customizationLayout === LayoutType.classic && (
+      {invoiceForm?.invoiceCustomization?.layout === LayoutType.classic && (
         <LogoInfo invoiceForm={invoiceForm} logoUrl={logoUrl} />
       )}
 
@@ -20,65 +20,73 @@ const BusinessInfoComponent: FC<Props> = ({ invoiceForm, logoUrl }) => {
         style={[
           PDF_STYLES.gap4,
           PDF_STYLES.alignStart,
-          invoiceForm?.customizationLayout === LayoutType.compact ? PDF_STYLES.w100 : PDF_STYLES.w50
+          invoiceForm?.invoiceCustomization?.layout === LayoutType.compact ? PDF_STYLES.w100 : PDF_STYLES.w50
         ]}
       >
         <Text
           style={[
             PDF_STYLES.business,
-            { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].business }
+            { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].business }
           ]}
         >
-          {invoiceForm?.businessNameSnapshot}
+          {invoiceForm?.invoiceBusinessSnapshot?.businessName}
         </Text>
-        {invoiceForm?.businessRoleSnapshot && (
+        {invoiceForm?.invoiceBusinessSnapshot?.businessRole && (
           <Text
             style={[
               PDF_STYLES.businessText,
-              { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].businessText }
+              { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].businessText }
             ]}
           >
-            {invoiceForm?.businessRoleSnapshot}
+            {invoiceForm?.invoiceBusinessSnapshot?.businessRole}
           </Text>
         )}
-        {invoiceForm?.businessAddressSnapshot && (
+        {invoiceForm?.invoiceBusinessSnapshot?.businessAddress && (
           <Text
             style={[
               PDF_STYLES.businessText,
-              { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].businessText }
+              {
+                fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].businessText
+              }
             ]}
           >
-            {invoiceForm?.businessAddressSnapshot}
+            {invoiceForm?.invoiceBusinessSnapshot?.businessAddress}
           </Text>
         )}
-        {invoiceForm?.businessEmailSnapshot && (
+        {invoiceForm?.invoiceBusinessSnapshot?.businessEmail && (
           <Text
             style={[
               PDF_STYLES.businessText,
-              { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].businessText }
+              {
+                fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].businessText
+              }
             ]}
           >
-            {invoiceForm?.businessEmailSnapshot}
+            {invoiceForm?.invoiceBusinessSnapshot?.businessEmail}
           </Text>
         )}
-        {invoiceForm?.businessPhoneSnapshot && (
+        {invoiceForm?.invoiceBusinessSnapshot?.businessPhone && (
           <Text
             style={[
               PDF_STYLES.businessText,
-              { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].businessText }
+              {
+                fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].businessText
+              }
             ]}
           >
-            {invoiceForm?.businessPhoneSnapshot}
+            {invoiceForm?.invoiceBusinessSnapshot?.businessPhone}
           </Text>
         )}
-        {invoiceForm?.businessAdditionalSnapshot && (
+        {invoiceForm?.invoiceBusinessSnapshot?.businessAdditional && (
           <Text
             style={[
               PDF_STYLES.businessText,
-              { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].businessText }
+              {
+                fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].businessText
+              }
             ]}
           >
-            {invoiceForm?.businessAdditionalSnapshot}
+            {invoiceForm?.invoiceBusinessSnapshot?.businessAdditional}
           </Text>
         )}
       </View>

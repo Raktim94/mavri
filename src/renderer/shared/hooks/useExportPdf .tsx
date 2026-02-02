@@ -44,8 +44,11 @@ export const getLogoUrl = async (invoiceForm?: InvoiceFromData) => {
 
   let logoUrl: string | undefined;
 
-  if (invoiceForm.businessLogoSnapshot) {
-    logoUrl = await toDataUrl(invoiceForm.businessLogoSnapshot, invoiceForm.businessFileTypeSnapshot);
+  if (invoiceForm.invoiceBusinessSnapshot?.businessLogo) {
+    logoUrl = await toDataUrl(
+      invoiceForm.invoiceBusinessSnapshot?.businessLogo,
+      invoiceForm.invoiceBusinessSnapshot?.businessFileType
+    );
   }
 
   return logoUrl;
@@ -56,10 +59,10 @@ export const getWatermarkUrl = async (invoiceForm?: InvoiceFromData) => {
 
   let watermarkUrl: string | undefined;
 
-  if (invoiceForm.customizationWatermarkFileData) {
+  if (invoiceForm.invoiceCustomization?.watermarkFileData) {
     watermarkUrl = await toDataUrl(
-      invoiceForm.customizationWatermarkFileData,
-      invoiceForm.customizationWatermarkFileType
+      invoiceForm.invoiceCustomization?.watermarkFileData,
+      invoiceForm.invoiceCustomization?.watermarkFileType
     );
   }
 
@@ -71,10 +74,10 @@ export const getWatermarkPaidUrl = async (invoiceForm?: InvoiceFromData) => {
 
   let watermarkPaidUrl: string | undefined;
 
-  if (invoiceForm.customizationPaidWatermarkFileData) {
+  if (invoiceForm.invoiceCustomization?.paidWatermarkFileData) {
     watermarkPaidUrl = await toDataUrl(
-      invoiceForm.customizationPaidWatermarkFileData,
-      invoiceForm.customizationPaidWatermarkFileType
+      invoiceForm.invoiceCustomization?.paidWatermarkFileData,
+      invoiceForm.invoiceCustomization?.paidWatermarkFileType
     );
   }
 
@@ -117,7 +120,7 @@ export const useExportPdf = (data: { invoiceForm?: InvoiceFromData; storeSetting
     const year = issuedAtDate && storeSettings?.shouldIncludeYear ? `_${issuedAtDate.getFullYear()}` : '';
     const month = issuedAtDate && storeSettings?.shouldIncludeMonth ? `_${MONTH_NAMES[issuedAtDate.getMonth()]}` : '';
     const businessName = storeSettings?.shouldIncludeBusinessName
-      ? `${invoiceForm.businessNameSnapshot ? invoiceForm.businessNameSnapshot?.trim().replaceAll(' ', '_') + '_' : ''}`
+      ? `${invoiceForm?.invoiceBusinessSnapshot?.businessName ? invoiceForm?.invoiceBusinessSnapshot?.businessName.trim().replaceAll(' ', '_') + '_' : ''}`
       : '';
     a.href = url;
     a.download = `${businessName}${subTypeName}${invoiceNumber}${year}${month}.pdf`;

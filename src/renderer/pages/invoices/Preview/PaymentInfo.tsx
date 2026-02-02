@@ -8,14 +8,14 @@ interface Props {
   paymentInfoLabel: string;
 }
 const PaymentInfoComponent: FC<Props> = ({ invoiceForm, paymentInfoLabel }) => {
-  if (!invoiceForm?.businessPaymentInformationSnapshot) return null;
+  if (!invoiceForm?.invoiceBusinessSnapshot?.businessPaymentInformation) return null;
 
   return (
     <View style={[PDF_STYLES.alignStart, PDF_STYLES.gap4, PDF_STYLES.maxw50]}>
       <Text
         style={[
           PDF_STYLES.regularBold,
-          { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
+          { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regularBold }
         ]}
       >
         {paymentInfoLabel}:
@@ -23,10 +23,10 @@ const PaymentInfoComponent: FC<Props> = ({ invoiceForm, paymentInfoLabel }) => {
       <Text
         style={[
           PDF_STYLES.businessText,
-          { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].businessText }
+          { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].businessText }
         ]}
       >
-        {invoiceForm?.businessPaymentInformationSnapshot}
+        {invoiceForm?.invoiceBusinessSnapshot?.businessPaymentInformation}
       </Text>
     </View>
   );

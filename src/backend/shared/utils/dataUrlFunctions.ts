@@ -1,7 +1,7 @@
 import type { Response } from '../../shared/types/response';
 import type { Business } from '../types/business';
 import type { EntityWithCounts } from '../types/entityWithCounts';
-import type { Invoice } from '../types/invoice';
+import type { Invoice, InvoiceBusinessSnapshots, InvoiceCustomization } from '../types/invoice';
 import type { StyleProfile } from '../types/styleProfiles';
 import { fromBase64 } from './generalFunctions';
 
@@ -23,28 +23,22 @@ export const encodeResultBusiness = (
   data: Array.isArray(result.data) ? result.data.map(encodeLogo) : encodeLogo(result.data)
 });
 
-export const decodeStyleProfile = <
-  T extends { customizationPaidWatermarkFileData?: unknown; customizationWatermarkFileData?: unknown }
->(
+export const decodeStyleProfile = <T extends { paidWatermarkFileData?: unknown; watermarkFileData?: unknown }>(
   data: T
 ) => ({
   ...data,
-  customizationPaidWatermarkFileData: data.customizationPaidWatermarkFileData
-    ? fromBase64(data.customizationPaidWatermarkFileData as string)
-    : null,
-  customizationWatermarkFileData: data.customizationWatermarkFileData
-    ? fromBase64(data.customizationWatermarkFileData as string)
-    : null
+  paidWatermarkFileData: data.paidWatermarkFileData ? fromBase64(data.paidWatermarkFileData as string) : null,
+  watermarkFileData: data.watermarkFileData ? fromBase64(data.watermarkFileData as string) : null
 });
 
 export const encodeStyleProfile = (data?: (StyleProfile & EntityWithCounts) | null) => {
   if (!data) return data;
-  const bufWatermarPaid = data.customizationPaidWatermarkFileData as Buffer | null;
-  const bufWatermark = data.customizationWatermarkFileData as Buffer | null;
+  const bufWatermarPaid = data.paidWatermarkFileData as Buffer | null;
+  const bufWatermark = data.watermarkFileData as Buffer | null;
   return {
     ...data,
-    customizationPaidWatermarkFileData: bufWatermarPaid ? bufWatermarPaid.toString('base64') : null,
-    customizationWatermarkFileData: bufWatermark ? bufWatermark.toString('base64') : null
+    paidWatermarkFileData: bufWatermarPaid ? bufWatermarPaid.toString('base64') : null,
+    watermarkFileData: bufWatermark ? bufWatermark.toString('base64') : null
   };
 };
 
@@ -82,26 +76,27 @@ export const encodeInvoiceAttachments = <T extends { data?: unknown }>(attachmen
 export const decodeInvoice = <T extends Record<string, unknown>>(invoice: T) => ({
   ...invoice,
   signatureData: invoice.signatureData ? fromBase64(invoice.signatureData) : null,
-  businessLogoSnapshot: invoice.businessLogoSnapshot ? fromBase64(invoice.businessLogoSnapshot) : null,
-  customizationPaidWatermarkFileData: invoice.customizationPaidWatermarkFileData
-    ? fromBase64(invoice.customizationPaidWatermarkFileData)
-    : null,
-  customizationWatermarkFileData: invoice.customizationWatermarkFileData
-    ? fromBase64(invoice.customizationWatermarkFileData)
-    : null,
-  invoiceAttachments: decodeInvoiceAttachments(invoice.invoiceAttachments as { data?: unknown }[] | null | undefined)
+  invoiceCustomization: decodeInvoiceCustomizationImport(invoice?.invoiceCustomization as InvoiceCustomization),
+  invoiceAttachments: decodeInvoiceAttachments(invoice.invoiceAttachments as { data?: unknown }[] | null | undefined),
+  invoiceBusinessSnapshot: decodeInvoiceBusinessSnapshotImport(
+    invoice?.invoiceBusinessSnapshot as InvoiceBusinessSnapshots
+  )
 });
 
-export const decodeInvoiceWithouthAttachments = (invoice: Invoice) => ({
+export const decodeInvoiceBusinessSnapshotImport = (invoiceBS: InvoiceBusinessSnapshots) => ({
+  ...invoiceBS,
+  businessLogo: invoiceBS.businessLogo ? fromBase64(invoiceBS.businessLogo) : null
+});
+
+export const decodeInvoiceCustomizationImport = (invoiceC: InvoiceCustomization) => ({
+  ...invoiceC,
+  paidWatermarkFileData: invoiceC.paidWatermarkFileData ? fromBase64(invoiceC.paidWatermarkFileData) : null,
+  watermarkFileData: invoiceC.watermarkFileData ? fromBase64(invoiceC.watermarkFileData) : null
+});
+
+export const decodeInvoiceImport = (invoice: Invoice) => ({
   ...invoice,
-  signatureData: invoice.signatureData ? fromBase64(invoice.signatureData) : null,
-  businessLogoSnapshot: invoice.businessLogoSnapshot ? fromBase64(invoice.businessLogoSnapshot) : null,
-  customizationPaidWatermarkFileData: invoice.customizationPaidWatermarkFileData
-    ? fromBase64(invoice.customizationPaidWatermarkFileData)
-    : null,
-  customizationWatermarkFileData: invoice.customizationWatermarkFileData
-    ? fromBase64(invoice.customizationWatermarkFileData)
-    : null
+  signatureData: invoice.signatureData ? fromBase64(invoice.signatureData) : null
 });
 
 export const encodeInvoice = <T extends Record<string, unknown>>(invoice?: T | null) => {
@@ -109,33 +104,38 @@ export const encodeInvoice = <T extends Record<string, unknown>>(invoice?: T | n
   return {
     ...invoice,
     signatureData: invoice.signatureData ? (invoice.signatureData as Buffer).toString('base64') : null,
-    businessLogoSnapshot: invoice.businessLogoSnapshot
-      ? (invoice.businessLogoSnapshot as Buffer).toString('base64')
-      : null,
-    customizationPaidWatermarkFileData: invoice.customizationPaidWatermarkFileData
-      ? (invoice.customizationPaidWatermarkFileData as Buffer).toString('base64')
-      : null,
-    customizationWatermarkFileData: invoice.customizationWatermarkFileData
-      ? (invoice.customizationWatermarkFileData as Buffer).toString('base64')
-      : null,
+    invoiceCustomization: encodeInvoiceCustomizationExport(invoice?.invoiceCustomization as InvoiceCustomization),
+    invoiceBusinessSnapshot: encodeInvoiceBusinessSnapshotExport(
+      invoice?.invoiceBusinessSnapshot as InvoiceBusinessSnapshots
+    ),
     invoiceAttachments: encodeInvoiceAttachments(invoice.invoiceAttachments as { data?: unknown }[] | null | undefined)
   };
 };
 
-export const encodeInvoiceWithouthAttachments = (invoice?: Invoice | null) => {
+export const encodeInvoiceBusinessSnapshotExport = (invoiceBS?: InvoiceBusinessSnapshots | null) => {
+  if (!invoiceBS) return invoiceBS;
+  return {
+    ...invoiceBS,
+    businessLogo: invoiceBS.businessLogo ? (invoiceBS.businessLogo as Buffer).toString('base64') : null
+  };
+};
+
+export const encodeInvoiceCustomizationExport = (invoiceC?: InvoiceCustomization | null) => {
+  if (!invoiceC) return invoiceC;
+  return {
+    ...invoiceC,
+    paidWatermarkFileData: invoiceC.paidWatermarkFileData
+      ? (invoiceC.paidWatermarkFileData as Buffer).toString('base64')
+      : null,
+    watermarkFileData: invoiceC.watermarkFileData ? (invoiceC.watermarkFileData as Buffer).toString('base64') : null
+  };
+};
+
+export const encodeInvoiceExport = (invoice?: Invoice | null) => {
   if (!invoice) return invoice;
   return {
     ...invoice,
-    signatureData: invoice.signatureData ? (invoice.signatureData as Buffer).toString('base64') : null,
-    businessLogoSnapshot: invoice.businessLogoSnapshot
-      ? (invoice.businessLogoSnapshot as Buffer).toString('base64')
-      : null,
-    customizationPaidWatermarkFileData: invoice.customizationPaidWatermarkFileData
-      ? (invoice.customizationPaidWatermarkFileData as Buffer).toString('base64')
-      : null,
-    customizationWatermarkFileData: invoice.customizationWatermarkFileData
-      ? (invoice.customizationWatermarkFileData as Buffer).toString('base64')
-      : null
+    signatureData: invoice.signatureData ? (invoice.signatureData as Buffer).toString('base64') : null
   };
 };
 

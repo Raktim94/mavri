@@ -14,13 +14,13 @@ const ClientInfoComponent: FC<Props> = ({ invoiceForm, billToLabel }) => {
       style={[
         PDF_STYLES.alignStart,
         PDF_STYLES.gap4,
-        invoiceForm?.customizationLayout === LayoutType.compact ? PDF_STYLES.w100 : PDF_STYLES.w50
+        invoiceForm?.invoiceCustomization?.layout === LayoutType.compact ? PDF_STYLES.w100 : PDF_STYLES.w50
       ]}
     >
       <Text
         style={[
           PDF_STYLES.regularBold,
-          { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
+          { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regularBold }
         ]}
       >
         {billToLabel}:
@@ -28,59 +28,59 @@ const ClientInfoComponent: FC<Props> = ({ invoiceForm, billToLabel }) => {
       <Text
         style={[
           PDF_STYLES.businessText,
-          { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].businessText }
+          { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].businessText }
         ]}
       >
-        {invoiceForm?.clientNameSnapshot}
+        {invoiceForm?.invoiceClientSnapshot?.clientName}
       </Text>
-      {invoiceForm?.clientAddressSnapshot && (
+      {invoiceForm?.invoiceClientSnapshot?.clientAddress && (
         <Text
           style={[
             PDF_STYLES.businessText,
-            { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].businessText }
+            { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].businessText }
           ]}
         >
-          {invoiceForm?.clientAddressSnapshot}
+          {invoiceForm?.invoiceClientSnapshot?.clientAddress}
         </Text>
       )}
-      {invoiceForm?.clientEmailSnapshot && (
+      {invoiceForm?.invoiceClientSnapshot?.clientEmail && (
         <Text
           style={[
             PDF_STYLES.businessText,
-            { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].businessText }
+            { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].businessText }
           ]}
         >
-          {invoiceForm?.clientEmailSnapshot}
+          {invoiceForm?.invoiceClientSnapshot?.clientEmail}
         </Text>
       )}
-      {invoiceForm?.clientPhoneSnapshot && (
+      {invoiceForm?.invoiceClientSnapshot?.clientPhone && (
         <Text
           style={[
             PDF_STYLES.businessText,
-            { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].businessText }
+            { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].businessText }
           ]}
         >
-          {invoiceForm?.clientPhoneSnapshot}
+          {invoiceForm?.invoiceClientSnapshot?.clientPhone}
         </Text>
       )}
-      {invoiceForm?.clientCodeSnapshot && (
+      {invoiceForm?.invoiceClientSnapshot?.clientCode && (
         <Text
           style={[
             PDF_STYLES.businessText,
-            { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].businessText }
+            { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].businessText }
           ]}
         >
-          {invoiceForm?.clientCodeSnapshot}
+          {invoiceForm?.invoiceClientSnapshot?.clientCode}
         </Text>
       )}
-      {invoiceForm?.clientAdditionalSnapshot && (
+      {invoiceForm?.invoiceClientSnapshot?.clientAdditional && (
         <Text
           style={[
             PDF_STYLES.businessText,
-            { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].businessText }
+            { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].businessText }
           ]}
         >
-          {invoiceForm?.clientAdditionalSnapshot}
+          {invoiceForm?.invoiceClientSnapshot?.clientAdditional}
         </Text>
       )}
     </View>

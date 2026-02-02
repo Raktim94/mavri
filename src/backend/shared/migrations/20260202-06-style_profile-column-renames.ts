@@ -7,10 +7,10 @@ export const up = async (db: sqlite3.Database) => {
     const colInfo = await getFirstRow(
       db,
       `
-                  SELECT *
-                  FROM pragma_table_info('style_profiles')
-                  WHERE name = 'fontSize'
-                `
+        SELECT *
+        FROM pragma_table_info('style_profiles')
+        WHERE name = 'fontSize'
+      `
     );
 
     if (colInfo) return;

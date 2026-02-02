@@ -117,18 +117,22 @@ const InvoiceFormComponent: FC<Props> = ({
           setInvoiceForm({
             ...invoiceForm,
             businessId: data.id,
-            businessNameSnapshot: data.name,
-            businessAddressSnapshot: data.address,
-            businessRoleSnapshot: data.role,
-            businessShortNameSnapshot: data.shortName,
-            businessEmailSnapshot: data.email,
-            businessPhoneSnapshot: data.phone,
-            businessAdditionalSnapshot: data.additional,
-            businessPaymentInformationSnapshot: data.paymentInformation,
-            businessLogoSnapshot: data.logo ?? undefined,
-            businessFileSizeSnapshot: data.fileSize,
-            businessFileTypeSnapshot: data.fileType,
-            businessFileNameSnapshot: data.fileName
+            invoiceBusinessSnapshot: {
+              ...invoiceForm?.invoiceBusinessSnapshot,
+              parentInvoiceId: invoiceForm?.id,
+              businessName: data.name,
+              businessAddress: data.address,
+              businessRole: data.role,
+              businessShortName: data.shortName,
+              businessEmail: data.email,
+              businessPhone: data.phone,
+              businessAdditional: data.additional,
+              businessPaymentInformation: data.paymentInformation,
+              businessLogo: data.logo ?? undefined,
+              businessFileSize: data.fileSize,
+              businessFileType: data.fileType,
+              businessFileName: data.fileName
+            }
           });
         });
       }
@@ -146,27 +150,34 @@ const InvoiceFormComponent: FC<Props> = ({
         setInvoiceForm({
           ...invoiceForm,
           styleProfilesId: data.id,
-          styleProfileNameSnapshot: data.name,
-          customizationColor: data.color ?? invoiceForm.customizationColor,
-          customizationLogoSize: data.logoSize ?? invoiceForm.customizationLogoSize,
-          customizationFontSizeSize: data.fontSize ?? invoiceForm.customizationFontSizeSize,
-          customizationLayout: data.layout ?? invoiceForm.customizationLayout,
-          customizationTableHeaderStyle: data.tableHeaderStyle ?? invoiceForm.customizationTableHeaderStyle,
-          customizationTableRowStyle: data.tableRowStyle ?? invoiceForm.customizationTableRowStyle,
-          customizationPageFormat: data.pageFormat ?? invoiceForm.customizationPageFormat,
-          customizationLabelUpperCase: data.labelUpperCase,
-          customizationWatermarkFileName: data.watermarkFileName ?? invoiceForm.customizationWatermarkFileName,
-          customizationWatermarkFileType: data.watermarkFileType ?? invoiceForm.customizationWatermarkFileType,
-          customizationWatermarkFileSize: data.watermarkFileSize ?? invoiceForm.customizationWatermarkFileSize,
-          customizationWatermarkFileData: data.watermarkFileData ?? invoiceForm.customizationWatermarkFileData,
-          customizationPaidWatermarkFileName:
-            data.paidWatermarkFileName ?? invoiceForm.customizationPaidWatermarkFileName,
-          customizationPaidWatermarkFileType:
-            data.paidWatermarkFileType ?? invoiceForm.customizationPaidWatermarkFileType,
-          customizationPaidWatermarkFileSize:
-            data.paidWatermarkFileSize ?? invoiceForm.customizationPaidWatermarkFileSize,
-          customizationPaidWatermarkFileData:
-            data.paidWatermarkFileData ?? invoiceForm.customizationPaidWatermarkFileData
+          invoiceStyleProfileSnapshot: {
+            ...invoiceForm?.invoiceStyleProfileSnapshot,
+            parentInvoiceId: invoiceForm?.id,
+            styleProfileName: data.name
+          },
+          invoiceCustomization: {
+            ...invoiceForm?.invoiceCustomization,
+            parentInvoiceId: invoiceForm?.id,
+            color: data.color ?? invoiceForm.invoiceCustomization!.color,
+            logoSize: data.logoSize ?? invoiceForm.invoiceCustomization!.logoSize,
+            fontSize: data.fontSize ?? invoiceForm.invoiceCustomization!.fontSize,
+            layout: data.layout ?? invoiceForm.invoiceCustomization!.layout,
+            tableHeaderStyle: data.tableHeaderStyle ?? invoiceForm.invoiceCustomization!.tableHeaderStyle,
+            tableRowStyle: data.tableRowStyle ?? invoiceForm.invoiceCustomization!.tableRowStyle,
+            pageFormat: data.pageFormat ?? invoiceForm.invoiceCustomization!.pageFormat,
+            labelUpperCase: data.labelUpperCase,
+            watermarkFileName: data.watermarkFileName ?? invoiceForm.invoiceCustomization?.watermarkFileName,
+            watermarkFileType: data.watermarkFileType ?? invoiceForm.invoiceCustomization?.watermarkFileType,
+            watermarkFileSize: data.watermarkFileSize ?? invoiceForm.invoiceCustomization?.watermarkFileSize,
+            watermarkFileData: data.watermarkFileData ?? invoiceForm.invoiceCustomization?.watermarkFileData,
+            paidWatermarkFileName:
+              data.paidWatermarkFileName ?? invoiceForm.invoiceCustomization?.paidWatermarkFileName,
+            paidWatermarkFileType:
+              data.paidWatermarkFileType ?? invoiceForm.invoiceCustomization?.paidWatermarkFileType,
+            paidWatermarkFileSize:
+              data.paidWatermarkFileSize ?? invoiceForm.invoiceCustomization?.paidWatermarkFileSize,
+            paidWatermarkFileData: data.paidWatermarkFileData ?? invoiceForm.invoiceCustomization?.paidWatermarkFileData
+          }
         });
       });
     },
@@ -180,7 +191,7 @@ const InvoiceFormComponent: FC<Props> = ({
       if (invoiceForm?.currencyId !== data.id) {
         if (!invoiceForm) return;
 
-        const prevSubunit = invoiceForm.currencySubunitSnapshot;
+        const prevSubunit = invoiceForm.invoiceCurrencySnapshot?.currencySubunit;
         const newSubunit = data.subunit;
 
         const convert = (raw: number | undefined) => {
@@ -200,7 +211,10 @@ const InvoiceFormComponent: FC<Props> = ({
         const updatedItems = invoiceForm.invoiceItems?.map(it => {
           return {
             ...it,
-            unitPriceCentsSnapshot: convert(it.unitPriceCentsSnapshot)
+            invoiceItemSnapshot: {
+              ...it.invoiceItemSnapshot,
+              unitPriceCents: convert(it.invoiceItemSnapshot.unitPriceCents)
+            }
           };
         });
 
@@ -218,9 +232,13 @@ const InvoiceFormComponent: FC<Props> = ({
           setInvoiceForm({
             ...invoiceForm,
             currencyId: data.id,
-            currencyCodeSnapshot: data.code,
-            currencySymbolSnapshot: data.symbol,
-            currencySubunitSnapshot: data.subunit,
+            invoiceCurrencySnapshot: {
+              ...invoiceForm.invoiceCurrencySnapshot,
+              parentInvoiceId: invoiceForm.id!,
+              currencyCode: data.code,
+              currencySymbol: data.symbol,
+              currencySubunit: data.subunit
+            },
             currencyFormat: data.format,
             invoiceItems: updatedItems ?? invoiceForm.invoiceItems,
             invoicePayments: updatedPayments ?? invoiceForm.invoicePayments,
@@ -242,12 +260,15 @@ const InvoiceFormComponent: FC<Props> = ({
           setInvoiceForm({
             ...invoiceForm,
             clientId: data.id,
-            clientNameSnapshot: data.name,
-            clientAddressSnapshot: data.address,
-            clientEmailSnapshot: data.email,
-            clientPhoneSnapshot: data.phone,
-            clientCodeSnapshot: data.code,
-            clientAdditionalSnapshot: data.additional
+            invoiceClientSnapshot: {
+              ...invoiceForm?.invoiceClientSnapshot,
+              clientName: data.name,
+              clientAddress: data.address,
+              clientEmail: data.email,
+              clientPhone: data.phone,
+              clientCode: data.code,
+              clientAdditional: data.additional
+            }
           });
         });
       }
@@ -262,14 +283,20 @@ const InvoiceFormComponent: FC<Props> = ({
       if (!invoiceForm) return;
 
       const amount = Number(data.amount ?? 0);
-      const unitPrice = invoiceForm.currencySubunitSnapshot ? amount * invoiceForm.currencySubunitSnapshot : amount;
+      const unitPrice = invoiceForm.invoiceCurrencySnapshot?.currencySubunit
+        ? amount * invoiceForm.invoiceCurrencySnapshot?.currencySubunit
+        : amount;
 
+      const newItemID = Date.now();
       const newItem = {
-        id: Date.now(),
+        id: newItemID,
         itemId: data.id,
-        itemNameSnapshot: data.name,
-        unitNameSnapshot: data.unitName,
-        unitPriceCentsSnapshot: unitPrice,
+        invoiceItemSnapshot: {
+          parentInvoiceItemId: newItemID,
+          itemName: data.name,
+          unitName: data.unitName,
+          unitPriceCents: unitPrice
+        },
         quantity: quantity,
         taxName: undefined,
         taxRate: 0,
@@ -359,7 +386,9 @@ const InvoiceFormComponent: FC<Props> = ({
     (data: number) => {
       if (!invoiceForm) return;
 
-      const fee = invoiceForm.currencySubunitSnapshot ? data * invoiceForm.currencySubunitSnapshot : data;
+      const fee = invoiceForm.invoiceCurrencySnapshot?.currencySubunit
+        ? data * invoiceForm.invoiceCurrencySnapshot?.currencySubunit
+        : data;
       startTransition(() => {
         setInvoiceForm({
           ...invoiceForm,
@@ -374,8 +403,8 @@ const InvoiceFormComponent: FC<Props> = ({
     (data: DiscountForm) => {
       if (!invoiceForm) return;
 
-      const discountAmount = invoiceForm.currencySubunitSnapshot
-        ? (data.discountAmount ?? 0) * invoiceForm.currencySubunitSnapshot
+      const discountAmount = invoiceForm.invoiceCurrencySnapshot?.currencySubunit
+        ? (data.discountAmount ?? 0) * invoiceForm.invoiceCurrencySnapshot?.currencySubunit
         : data.discountAmount;
       startTransition(() => {
         setInvoiceForm({
@@ -426,8 +455,8 @@ const InvoiceFormComponent: FC<Props> = ({
       if (!invoiceForm) return;
       if (!data.paidAmount || !data.paidAt || !data.paymentMethod) return;
 
-      const paidAmount = invoiceForm.currencySubunitSnapshot
-        ? (data.paidAmount ?? 0) * invoiceForm.currencySubunitSnapshot
+      const paidAmount = invoiceForm.invoiceCurrencySnapshot?.currencySubunit
+        ? (data.paidAmount ?? 0) * invoiceForm.invoiceCurrencySnapshot?.currencySubunit
         : data.paidAmount;
 
       const payment = {

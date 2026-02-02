@@ -50,7 +50,7 @@ const OverviewComponent: FC<Props> = ({ groupedMeta, dates, currencyCode }) => {
     });
     const trendChartDataRaw = filteredInvoices.map(inv => {
       const totalAmountCents = getTotalAmountCents(inv);
-      const totalAmount = totalAmountCents / inv.currencySubunitSnapshot;
+      const totalAmount = totalAmountCents / (inv.invoiceCurrencySnapshot?.currencySubunit ?? 0);
       return {
         date: inv.issuedAt,
         total: totalAmount
@@ -60,9 +60,9 @@ const OverviewComponent: FC<Props> = ({ groupedMeta, dates, currencyCode }) => {
     const clientRevenueData = Object.values(
       filteredInvoices.reduce(
         (acc, inv) => {
-          const name = inv.clientNameSnapshot;
+          const name = inv.invoiceClientSnapshot?.clientName ?? '';
           const totalAmountCents = getTotalAmountCents(inv);
-          const revenue = totalAmountCents / inv.currencySubunitSnapshot;
+          const revenue = totalAmountCents / (inv.invoiceCurrencySnapshot?.currencySubunit ?? 0);
 
           if (!acc[name]) {
             acc[name] = {
@@ -84,10 +84,10 @@ const OverviewComponent: FC<Props> = ({ groupedMeta, dates, currencyCode }) => {
       filteredInvoices.reduce(
         (acc, inv) => {
           inv.invoiceItems.forEach(item => {
-            const name = item.itemNameSnapshot;
+            const name = item.invoiceItemSnapshot.itemName;
             const quantity = item.quantity;
             const itemTotalAmountCents = getItemTotalAmountCents(item);
-            const itemTotalAmount = itemTotalAmountCents / inv.currencySubunitSnapshot;
+            const itemTotalAmount = itemTotalAmountCents / (inv.invoiceCurrencySnapshot?.currencySubunit ?? 0);
 
             if (!acc[name]) {
               acc[name] = {

@@ -20,7 +20,7 @@ interface Props {
 const HeaderInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, logoUrl, pdfTexts }) => {
   return (
     <View style={PDF_STYLES.header}>
-      {invoiceForm?.customizationLayout === LayoutType.modern && (
+      {invoiceForm?.invoiceCustomization?.layout === LayoutType.modern && (
         <View style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart, PDF_STYLES.pb20]}>
           <TitleInfo
             invoiceForm={invoiceForm}
@@ -32,7 +32,7 @@ const HeaderInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, logoUrl, p
           <LogoInfo invoiceForm={invoiceForm} logoUrl={logoUrl} />
         </View>
       )}
-      {invoiceForm?.customizationLayout === LayoutType.compact && (
+      {invoiceForm?.invoiceCustomization?.layout === LayoutType.compact && (
         <>
           <View style={[PDF_STYLES.alignCenter, PDF_STYLES.pb20]}>
             <TitleInfo
@@ -67,7 +67,7 @@ const HeaderInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, logoUrl, p
           </View>
         </>
       )}
-      {invoiceForm?.customizationLayout !== LayoutType.compact && (
+      {invoiceForm?.invoiceCustomization?.layout !== LayoutType.compact && (
         <>
           <View style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart]}>
             <BusinessInfo invoiceForm={invoiceForm} logoUrl={logoUrl} />

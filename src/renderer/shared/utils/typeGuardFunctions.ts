@@ -3,7 +3,13 @@ import type { BusinessFromData } from '../types/business';
 import type { CategoryFromData } from '../types/category';
 import type { ClientFromData } from '../types/client';
 import type { CurrencyFromData } from '../types/currency';
-import type { InvoiceFromData } from '../types/invoice';
+import type {
+  InvoiceBusinessSnapshots,
+  InvoiceClientSnapshots,
+  InvoiceCurrencySnapshots,
+  InvoiceCustomization,
+  InvoiceFromData
+} from '../types/invoice';
 import type { ItemFromData } from '../types/item';
 import type { StyleProfileFromData } from '../types/styleProfiles';
 import type { UnitFromData } from '../types/unit';
@@ -301,6 +307,171 @@ export const isCurrencyFromData = (data: unknown): data is CurrencyFromData => {
   return true;
 };
 
+export const isInvoiceBusinessSnapshotFromData = (data: unknown): data is InvoiceBusinessSnapshots => {
+  if (typeof data !== 'object' || data === null) return false;
+
+  const d = data as Record<string, unknown>;
+
+  if (d.businessName !== undefined && d.businessName !== null && typeof d.businessName !== 'string') return false;
+  if (d.businessShortName !== undefined && d.businessShortName !== null && typeof d.businessShortName !== 'string')
+    return false;
+  if (d.id !== undefined && d.id !== null && d.id !== '' && typeof d.id !== 'number') return false;
+  if (
+    d.parentInvoiceId !== undefined &&
+    d.parentInvoiceId !== null &&
+    d.parentInvoiceId !== '' &&
+    typeof d.parentInvoiceId !== 'number'
+  )
+    return false;
+  if (d.createdAt !== undefined && d.createdAt !== null && d.createdAt !== '' && typeof d.createdAt !== 'string')
+    return false;
+  if (d.updatedAt !== undefined && d.updatedAt !== null && d.updatedAt !== '' && typeof d.updatedAt !== 'string')
+    return false;
+
+  const stringFields = [
+    'businessAddress',
+    'businessRole',
+    'businessEmail',
+    'businessPhone',
+    'businessAdditional',
+    'businessPaymentInformation',
+    'businessFileType',
+    'businessFileName'
+  ];
+
+  for (const key of stringFields) {
+    const val = d[key];
+    if (val !== undefined && val !== null && typeof val !== 'string') return false;
+  }
+
+  const numberFields = ['businessFileSize'];
+
+  for (const key of numberFields) {
+    const val = d[key];
+    if (val !== undefined && val !== null && typeof val !== 'number') return false;
+  }
+
+  if (d.businessLogo !== undefined && d.businessLogo !== null && !(d.businessLogo instanceof Uint8Array)) return false;
+
+  return true;
+};
+
+export const isInvoiceClientSnapshotFromData = (data: unknown): data is InvoiceClientSnapshots => {
+  if (typeof data !== 'object' || data === null) return false;
+
+  const d = data as Record<string, unknown>;
+
+  if (d.clientName !== undefined && d.clientName !== null && typeof d.clientName !== 'string') return false;
+
+  if (d.id !== undefined && d.id !== null && d.id !== '' && typeof d.id !== 'number') return false;
+  if (
+    d.parentInvoiceId !== undefined &&
+    d.parentInvoiceId !== null &&
+    d.parentInvoiceId !== '' &&
+    typeof d.parentInvoiceId !== 'number'
+  )
+    return false;
+  if (d.createdAt !== undefined && d.createdAt !== null && d.createdAt !== '' && typeof d.createdAt !== 'string')
+    return false;
+  if (d.updatedAt !== undefined && d.updatedAt !== null && d.updatedAt !== '' && typeof d.updatedAt !== 'string')
+    return false;
+
+  const stringFields = ['clientAddress', 'clientEmail', 'clientPhone', 'clientCode', 'clientAdditional'];
+
+  for (const key of stringFields) {
+    const val = d[key];
+    if (val !== undefined && val !== null && typeof val !== 'string') return false;
+  }
+
+  return true;
+};
+
+export const isInvoiceCurrencySnapshotFromData = (data: unknown): data is InvoiceCurrencySnapshots => {
+  if (typeof data !== 'object' || data === null) return false;
+
+  const d = data as Record<string, unknown>;
+
+  if (d.id !== undefined && d.id !== null && d.id !== '' && typeof d.id !== 'number') return false;
+  if (
+    d.parentInvoiceId !== undefined &&
+    d.parentInvoiceId !== null &&
+    d.parentInvoiceId !== '' &&
+    typeof d.parentInvoiceId !== 'number'
+  )
+    return false;
+  if (d.createdAt !== undefined && d.createdAt !== null && d.createdAt !== '' && typeof d.createdAt !== 'string')
+    return false;
+  if (d.updatedAt !== undefined && d.updatedAt !== null && d.updatedAt !== '' && typeof d.updatedAt !== 'string')
+    return false;
+  if (d.currencyCode !== undefined && d.currencyCode !== null && typeof d.currencyCode !== 'string') return false;
+  if (d.currencySymbol !== undefined && d.currencySymbol !== null && typeof d.currencySymbol !== 'string') return false;
+  if (d.currencySubunit !== undefined && d.currencySubunit !== null && typeof d.currencySubunit !== 'number')
+    return false;
+
+  return true;
+};
+
+export const isInvoiceCustomizationFromData = (data: unknown): data is InvoiceCustomization => {
+  if (typeof data !== 'object' || data === null) return false;
+
+  const d = data as Record<string, unknown>;
+
+  if (d.id !== undefined && d.id !== null && d.id !== '' && typeof d.id !== 'number') return false;
+  if (
+    d.parentInvoiceId !== undefined &&
+    d.parentInvoiceId !== null &&
+    d.parentInvoiceId !== '' &&
+    typeof d.parentInvoiceId !== 'number'
+  )
+    return false;
+  if (d.createdAt !== undefined && d.createdAt !== null && d.createdAt !== '' && typeof d.createdAt !== 'string')
+    return false;
+  if (d.updatedAt !== undefined && d.updatedAt !== null && d.updatedAt !== '' && typeof d.updatedAt !== 'string')
+    return false;
+
+  if (d.color !== undefined && d.color !== null && typeof d.color !== 'string') return false;
+  if (d.logoSize !== undefined && d.logoSize !== null && typeof d.logoSize !== 'string') return false;
+  if (d.fontSize !== undefined && d.fontSize !== null && typeof d.fontSize !== 'string') return false;
+  if (d.layout !== undefined && d.layout !== null && typeof d.layout !== 'string') return false;
+  if (d.tableHeaderStyle !== undefined && d.tableHeaderStyle !== null && typeof d.tableHeaderStyle !== 'string')
+    return false;
+  if (d.tableRowStyle !== undefined && d.tableRowStyle !== null && typeof d.tableRowStyle !== 'string') return false;
+  if (d.pageFormat !== undefined && d.pageFormat !== null && typeof d.pageFormat !== 'string') return false;
+
+  if (
+    d.labelUpperCase !== undefined &&
+    d.labelUpperCase !== null &&
+    d.labelUpperCase !== '' &&
+    typeof d.labelUpperCase !== 'boolean'
+  )
+    return false;
+
+  const stringFields = ['watermarkFileName', 'watermarkFileType', 'paidWatermarkFileName', 'paidWatermarkFileType'];
+
+  for (const key of stringFields) {
+    const val = d[key];
+    if (val !== undefined && val !== null && typeof val !== 'string') return false;
+  }
+
+  const numberFields = ['paidWatermarkFileSize', 'watermarkFileSize'];
+
+  for (const key of numberFields) {
+    const val = d[key];
+    if (val !== undefined && val !== null && typeof val !== 'number') return false;
+  }
+
+  if (d.watermarkFileData !== undefined && d.watermarkFileData !== null && !(d.watermarkFileData instanceof Uint8Array))
+    return false;
+  if (
+    d.paidWatermarkFileData !== undefined &&
+    d.paidWatermarkFileData !== null &&
+    !(d.paidWatermarkFileData instanceof Uint8Array)
+  )
+    return false;
+
+  return true;
+};
+
 export const isInvoiceFromData = (data: unknown): data is InvoiceFromData => {
   if (typeof data !== 'object' || data === null) return false;
 
@@ -314,76 +485,12 @@ export const isInvoiceFromData = (data: unknown): data is InvoiceFromData => {
   if (d.language !== undefined && d.language !== null && typeof d.language !== 'string') return false;
   if (d.invoiceNumber !== undefined && d.invoiceNumber !== null && typeof d.invoiceNumber !== 'string') return false;
   if (d.status !== undefined && d.status !== null && typeof d.status !== 'string') return false;
-  if (d.customizationColor !== undefined && d.customizationColor !== null && typeof d.customizationColor !== 'string')
-    return false;
-  if (
-    d.customizationLogoSize !== undefined &&
-    d.customizationLogoSize !== null &&
-    typeof d.customizationLogoSize !== 'string'
-  )
-    return false;
-  if (
-    d.customizationFontSizeSize !== undefined &&
-    d.customizationFontSizeSize !== null &&
-    typeof d.customizationFontSizeSize !== 'string'
-  )
-    return false;
-  if (
-    d.customizationLayout !== undefined &&
-    d.customizationLayout !== null &&
-    typeof d.customizationLayout !== 'string'
-  )
-    return false;
-  if (
-    d.customizationTableHeaderStyle !== undefined &&
-    d.customizationTableHeaderStyle !== null &&
-    typeof d.customizationTableHeaderStyle !== 'string'
-  )
-    return false;
-  if (
-    d.customizationTableRowStyle !== undefined &&
-    d.customizationTableRowStyle !== null &&
-    typeof d.customizationTableRowStyle !== 'string'
-  )
-    return false;
-  if (
-    d.customizationPageFormat !== undefined &&
-    d.customizationPageFormat !== null &&
-    typeof d.customizationPageFormat !== 'string'
-  )
-    return false;
-  if (
-    d.businessNameSnapshot !== undefined &&
-    d.businessNameSnapshot !== null &&
-    typeof d.businessNameSnapshot !== 'string'
-  )
-    return false;
-  if (
-    d.businessShortNameSnapshot !== undefined &&
-    d.businessShortNameSnapshot !== null &&
-    typeof d.businessShortNameSnapshot !== 'string'
-  )
-    return false;
-  if (d.clientNameSnapshot !== undefined && d.clientNameSnapshot !== null && typeof d.clientNameSnapshot !== 'string')
-    return false;
-  if (
-    d.currencyCodeSnapshot !== undefined &&
-    d.currencyCodeSnapshot !== null &&
-    typeof d.currencyCodeSnapshot !== 'string'
-  )
-    return false;
-  if (
-    d.currencySymbolSnapshot !== undefined &&
-    d.currencySymbolSnapshot !== null &&
-    typeof d.currencySymbolSnapshot !== 'string'
-  )
-    return false;
-  if (
-    d.currencySubunitSnapshot !== undefined &&
-    d.currencySubunitSnapshot !== null &&
-    typeof d.currencySubunitSnapshot !== 'number'
-  )
-    return false;
+
+  if (!isInvoiceBusinessSnapshotFromData(d.invoiceBusinessSnapshot)) return false;
+  if (!isInvoiceClientSnapshotFromData(d.invoiceClientSnapshot)) return false;
+  if (!isInvoiceCurrencySnapshotFromData(d.invoiceCurrencySnapshot)) return false;
+  if (!isInvoiceCustomizationFromData(d.invoiceCustomization)) return false;
+
   if (d.taxRate !== undefined && d.taxRate !== null && typeof d.taxRate !== 'number') return false;
 
   if (d.id !== undefined && d.id !== null && d.id !== '' && typeof d.id !== 'number') return false;
@@ -404,39 +511,15 @@ export const isInvoiceFromData = (data: unknown): data is InvoiceFromData => {
 
   if (d.isArchived !== undefined && d.isArchived !== null && d.isArchived !== '' && typeof d.isArchived !== 'boolean')
     return false;
-  if (
-    d.customizationLabelUpperCase !== undefined &&
-    d.customizationLabelUpperCase !== null &&
-    d.customizationLabelUpperCase !== '' &&
-    typeof d.customizationLabelUpperCase !== 'boolean'
-  )
-    return false;
 
   const stringFields = [
     'customerNotes',
     'thanksNotes',
     'termsConditionNotes',
     'discountName',
-    'businessAddressSnapshot',
-    'businessRoleSnapshot',
-    'businessEmailSnapshot',
-    'businessPhoneSnapshot',
-    'businessAdditionalSnapshot',
-    'businessPaymentInformationSnapshot',
-    'businessFileTypeSnapshot',
-    'businessFileNameSnapshot',
-    'clientAddressSnapshot',
-    'clientEmailSnapshot',
-    'clientPhoneSnapshot',
-    'clientCodeSnapshot',
-    'clientAdditionalSnapshot',
     'taxName',
     'invoicePrefix',
     'invoiceSuffix',
-    'customizationWatermarkFileName',
-    'customizationWatermarkFileType',
-    'customizationPaidWatermarkFileName',
-    'customizationPaidWatermarkFileType',
     'signatureType',
     'signatureName'
   ];
@@ -446,15 +529,7 @@ export const isInvoiceFromData = (data: unknown): data is InvoiceFromData => {
     if (val !== undefined && val !== null && typeof val !== 'string') return false;
   }
 
-  const numberFields = [
-    'customizationPaidWatermarkFileSize',
-    'customizationWatermarkFileSize',
-    'businessFileSizeSnapshot',
-    'signatureSize',
-    'discountAmountCents',
-    'discountPercent',
-    'shippingFeeCents'
-  ];
+  const numberFields = ['signatureSize', 'discountAmountCents', 'discountPercent', 'shippingFeeCents'];
 
   for (const key of numberFields) {
     const val = d[key];
@@ -462,24 +537,6 @@ export const isInvoiceFromData = (data: unknown): data is InvoiceFromData => {
   }
 
   if (d.signatureData !== undefined && d.signatureData !== null && !(d.signatureData instanceof Uint8Array))
-    return false;
-  if (
-    d.businessLogoSnapshot !== undefined &&
-    d.businessLogoSnapshot !== null &&
-    !(d.businessLogoSnapshot instanceof Uint8Array)
-  )
-    return false;
-  if (
-    d.customizationWatermarkFileData !== undefined &&
-    d.customizationWatermarkFileData !== null &&
-    !(d.customizationWatermarkFileData instanceof Uint8Array)
-  )
-    return false;
-  if (
-    d.customizationPaidWatermarkFileData !== undefined &&
-    d.customizationPaidWatermarkFileData !== null &&
-    !(d.customizationPaidWatermarkFileData instanceof Uint8Array)
-  )
     return false;
 
   if (d.discountType !== undefined && d.discountType !== null && typeof d.discountType !== 'string') return false;

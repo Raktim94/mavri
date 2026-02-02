@@ -46,8 +46,14 @@ const InvoiceListItemComponent: FC<Props> = ({ item, isSelected, onEdit }) => {
   const overdueDaysLeft = useMemo(() => getDaysLeft(item.dueDate), [item]);
   const totalAmountCents = useMemo(() => getTotalAmountCents(item), [item]);
   const remainingCents = useMemo(() => getBalanceDueCents(item), [item]);
-  const remainingAmount = useMemo(() => remainingCents / item.currencySubunitSnapshot, [remainingCents, item]);
-  const totalAmount = useMemo(() => totalAmountCents / item.currencySubunitSnapshot, [totalAmountCents, item]);
+  const remainingAmount = useMemo(
+    () => remainingCents / (item.invoiceCurrencySnapshot?.currencySubunit ?? 0),
+    [remainingCents, item]
+  );
+  const totalAmount = useMemo(
+    () => totalAmountCents / (item.invoiceCurrencySnapshot?.currencySubunit ?? 0),
+    [totalAmountCents, item]
+  );
 
   return (
     <>
@@ -145,10 +151,10 @@ const InvoiceListItemComponent: FC<Props> = ({ item, isSelected, onEdit }) => {
                   variant="body1"
                   sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                 >
-                  {item.clientNameSnapshot}
+                  {item.invoiceClientSnapshot?.clientName}
                 </Typography>
 
-                {settings && (
+                {settings && item.invoiceCurrencySnapshot && (
                   <Typography
                     component="div"
                     variant="body1"
@@ -158,8 +164,8 @@ const InvoiceListItemComponent: FC<Props> = ({ item, isSelected, onEdit }) => {
                       amount: totalAmount,
                       amountFormat: settings.amountFormat,
                       format: item.currencyFormat as CurrencyFormat,
-                      symbol: item.currencySymbolSnapshot,
-                      code: item.currencyCodeSnapshot
+                      symbol: item.invoiceCurrencySnapshot?.currencySymbol,
+                      code: item.invoiceCurrencySnapshot?.currencyCode
                     })}
                   </Typography>
                 )}
@@ -225,7 +231,7 @@ const InvoiceListItemComponent: FC<Props> = ({ item, isSelected, onEdit }) => {
                       date: formatDate(latestPaidAt, settings.dateFormat)
                     })}
                   </Typography>
-                  {remainingAmount < 0 && (
+                  {remainingAmount < 0 && item.invoiceCurrencySnapshot && (
                     <Typography
                       color={theme.palette.info.main}
                       component="div"
@@ -238,33 +244,36 @@ const InvoiceListItemComponent: FC<Props> = ({ item, isSelected, onEdit }) => {
                           amount: Math.abs(remainingAmount),
                           amountFormat: settings.amountFormat,
                           format: item.currencyFormat as CurrencyFormat,
-                          symbol: item.currencySymbolSnapshot,
-                          code: item.currencyCodeSnapshot
+                          symbol: item.invoiceCurrencySnapshot.currencySymbol,
+                          code: item.invoiceCurrencySnapshot.currencyCode
                         })
                       })}
                     </Typography>
                   )}
                 </>
               )}
-              {item.status === InvoiceStatus.partiallyPaid && latestPaidAt && settings && (
-                <Typography
-                  color={theme.palette.info.main}
-                  component="div"
-                  variant="body2"
-                  fontSize={'small'}
-                  sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                >
-                  {t('invoices.partiallyPaid', {
-                    amount: getFormattedCurrency({
-                      amount: remainingAmount,
-                      amountFormat: settings.amountFormat,
-                      format: item.currencyFormat as CurrencyFormat,
-                      symbol: item.currencySymbolSnapshot,
-                      code: item.currencyCodeSnapshot
-                    })
-                  })}
-                </Typography>
-              )}
+              {item.status === InvoiceStatus.partiallyPaid &&
+                latestPaidAt &&
+                settings &&
+                item.invoiceCurrencySnapshot && (
+                  <Typography
+                    color={theme.palette.info.main}
+                    component="div"
+                    variant="body2"
+                    fontSize={'small'}
+                    sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                  >
+                    {t('invoices.partiallyPaid', {
+                      amount: getFormattedCurrency({
+                        amount: remainingAmount,
+                        amountFormat: settings.amountFormat,
+                        format: item.currencyFormat as CurrencyFormat,
+                        symbol: item.invoiceCurrencySnapshot.currencySymbol,
+                        code: item.invoiceCurrencySnapshot.currencyCode
+                      })
+                    })}
+                  </Typography>
+                )}
             </Box>
           </CardContent>
         </CardActionArea>

@@ -29,10 +29,10 @@ const InvoiceInformationInfoComponent: FC<Props> = ({ invoiceForm, storeSettings
       style={[
         PDF_STYLES.alignEnd,
         PDF_STYLES.gap4,
-        invoiceForm?.customizationLayout === LayoutType.compact ? PDF_STYLES.w100 : PDF_STYLES.w50
+        invoiceForm?.invoiceCustomization?.layout === LayoutType.compact ? PDF_STYLES.w100 : PDF_STYLES.w50
       ]}
     >
-      {invoiceForm?.customizationLayout === LayoutType.classic && (
+      {invoiceForm?.invoiceCustomization?.layout === LayoutType.classic && (
         <TitleInfo
           invoiceForm={invoiceForm}
           labels={{
@@ -46,7 +46,7 @@ const InvoiceInformationInfoComponent: FC<Props> = ({ invoiceForm, storeSettings
         style={[
           PDF_STYLES.gap3,
           PDF_STYLES.alignEnd,
-          invoiceForm?.customizationLayout === LayoutType.modern
+          invoiceForm?.invoiceCustomization?.layout === LayoutType.modern
             ? {
                 backgroundColor: '#e0e0e0',
                 padding: 5,
@@ -56,11 +56,11 @@ const InvoiceInformationInfoComponent: FC<Props> = ({ invoiceForm, storeSettings
         ]}
       >
         <View style={[PDF_STYLES.row, PDF_STYLES.alignEnd]}>
-          {invoiceForm?.customizationLayout !== LayoutType.classic && (
+          {invoiceForm?.invoiceCustomization?.layout !== LayoutType.classic && (
             <Text
               style={[
                 PDF_STYLES.regularBold,
-                { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
+                { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regularBold }
               ]}
             >
               {invoiceForm?.invoiceType === InvoiceType.invoice ? invoiceNoLabel : quoteNoLabel}:{' '}
@@ -69,7 +69,7 @@ const InvoiceInformationInfoComponent: FC<Props> = ({ invoiceForm, storeSettings
           <Text
             style={[
               PDF_STYLES.regular,
-              { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regular }
+              { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regular }
             ]}
           >
             {invoiceForm?.invoicePrefix}
@@ -82,7 +82,7 @@ const InvoiceInformationInfoComponent: FC<Props> = ({ invoiceForm, storeSettings
             <Text
               style={[
                 PDF_STYLES.regularBold,
-                { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
+                { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regularBold }
               ]}
             >
               {dateLabel}:{' '}
@@ -90,7 +90,7 @@ const InvoiceInformationInfoComponent: FC<Props> = ({ invoiceForm, storeSettings
             <Text
               style={[
                 PDF_STYLES.regular,
-                { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regular }
+                { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regular }
               ]}
             >
               {formatDate(invoiceForm.issuedAt, storeSettings.dateFormat)}
@@ -102,7 +102,7 @@ const InvoiceInformationInfoComponent: FC<Props> = ({ invoiceForm, storeSettings
             <Text
               style={[
                 PDF_STYLES.regularBold,
-                { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
+                { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regularBold }
               ]}
             >
               {dueDateLabel}:{' '}
@@ -110,7 +110,7 @@ const InvoiceInformationInfoComponent: FC<Props> = ({ invoiceForm, storeSettings
             <Text
               style={[
                 PDF_STYLES.regular,
-                { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regular }
+                { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regular }
               ]}
             >
               {formatDate(invoiceForm.dueDate, storeSettings.dateFormat)}
