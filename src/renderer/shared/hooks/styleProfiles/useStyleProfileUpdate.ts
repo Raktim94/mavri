@@ -1,7 +1,8 @@
 import { useCallback } from 'react';
+import { getApi } from '../../api/restApi';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
-import type { StyleProfileUpdate } from '../../types/styleProfiles';
+import type { StyleProfile, StyleProfileUpdate } from '../../types/styleProfiles';
 import { useAsyncAction } from '../useAsyncAction';
 
 interface UseStyleProfileUpdateParams extends RequestHook<Response<StyleProfileUpdate>> {
@@ -14,12 +15,12 @@ export const useStyleProfileUpdate = ({
   showLoader = true,
   onDone
 }: UseStyleProfileUpdateParams) => {
-  const asyncFn = useCallback(async (): Promise<Response<StyleProfileUpdate>> => {
+  const asyncFn = useCallback(async (): Promise<Response<StyleProfile>> => {
     if (!styleProfile) return Promise.resolve({ success: false });
-    return window.electronAPI.updateStyleProfile(styleProfile);
+    return getApi().updateStyleProfile(styleProfile);
   }, [styleProfile]);
 
-  const { data, loading, execute } = useAsyncAction<Response<StyleProfileUpdate>>(asyncFn, {
+  const { data, loading, execute } = useAsyncAction<Response<StyleProfile>>(asyncFn, {
     immediate,
     showLoader,
     onDone

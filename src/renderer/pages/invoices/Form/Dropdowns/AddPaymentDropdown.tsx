@@ -89,6 +89,11 @@ const AddPaymentDropdownComponent: FC<Props> = ({ isOpen, data, onClose, onOpen,
         open={isOpen}
         onClose={() => onClose?.()}
         onOpen={() => onOpen?.()}
+        ModalProps={{
+          sx: {
+            zIndex: theme => theme.zIndex.modal + 1
+          }
+        }}
         slotProps={{
           paper: {
             sx: {
@@ -122,6 +127,13 @@ const AddPaymentDropdownComponent: FC<Props> = ({ isOpen, data, onClose, onOpen,
           {storeSettings && (
             <Grid size={{ xs: 12, md: 6 }}>
               <Autocomplete
+                slotProps={{
+                  popper: {
+                    sx: {
+                      zIndex: theme => theme.zIndex.modal + 2
+                    }
+                  }
+                }}
                 fullWidth
                 options={paymentOption}
                 getOptionLabel={option => option.label}

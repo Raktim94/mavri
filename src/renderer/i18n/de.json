@@ -95,6 +95,7 @@
     "noItem": "Kunde auswählen, um Details anzuzeigen."
   },
   "common": {
+    "addDB": "Datenbank hinzufügen",
     "additional": "Zusätzlich",
     "address": "Adresse",
     "amount": "Betrag",

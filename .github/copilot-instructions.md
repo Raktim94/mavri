@@ -1,73 +1,65 @@
-<!-- GitHub Copilot / AI agent instructions for contributors working on invoice-builder -->
+# Copilot instructions for Invoice Builder
 
-Purpose
+Overview
+--------
+This repository is an Electron app with a separate backend webserver used for the web/docker mode. Key runtime pieces are:
+- Electron main process: built by `vite` via `vite.electron.config.ts` -> outputs `dist-be/backend/main/main.cjs`
+- Preload script: `src/preload/preload.ts` -> built with `vite.preload.config.ts` -> outputs `dist-be/preload/preload.cjs`
+- Renderer (React + Vite): `src/renderer` (dev: `vite`, build: `vite build`)
+- Optional backend webserver: `src/backend/webserver/main.ts` (dev: `npm run dev:webserver`, build: `npm run build:webserver`)
+- Migrations: source files in `src/backend/shared/migrations`, built into `dist-be/backend/migrations` using `vite.migrations.config.ts`.
 
-- Short, actionable notes so an AI coding agent can be productive immediately in this repo.
+Primary developer commands
+--------------------------
+- Full local dev (electron + renderer + preload + migrations):
+  - `npm run dev`
+- Frontend-only dev: `npm run dev:react` (uses Vite)
+- Backend webserver dev: `npm run dev:webserver` (runs `src/backend/webserver/main.ts` via `tsx`)
+- Build production bundles: `npm run build` (runs `build:react`, `build:preload`, `build:migrations`, `build:electron`)
+- Package for Windows: `npm run package` (calls `electron-builder`)
+- Tests: `npm test` (runs `vitest`), coverage: `npm run test:coverage`
 
-Big picture
+Important patterns and conventions
+--------------------------------
+- Multi-config Vite builds: see `vite.electron.config.ts`, `vite.preload.config.ts`, and `vite.migrations.config.ts`. When adding runtime files for main/preload/migrations, update those configs.
+- IPC surface is declared in `src/preload/preload.ts` as `window.electronAPI`. When adding or renaming IPC channels:
+  - Add/remove the `ipcMain` handlers in the Electron main process (src/backend/main)
+  - Mirror the channel name and typings in `src/preload/preload.ts` and update related renderer types under `src/renderer/shared/types`
+  - Keep the exposed function names stable (renderer code expects methods like `electronAPI.getAllInvoices`, `electronAPI.addInvoice`).
+- Web vs Electron mode:
+  - Renderer detects runtime via `isWebMode()` (see `src/renderer/shared/api/restApi`) and either calls the web API or talks to `window.electronAPI`.
+  - Mocking: MSW is enabled via `VITE_ENABLE_MOCKS` (set in `.env.*`), and the renderer starts the worker in `src/renderer/main.tsx`.
+- Database & migrations:
+  - Migrations live in `src/backend/shared/migrations` and are built into `dist-be/backend/migrations`. Use `npm run build:migrations` for CI packaging.
+  - The app uses SQLite (`sqlite3`). Be careful when changing schema—migrations need to run in a controlled order.
 
-- Electron app with three runtime parts:
-  - Renderer: React + Vite (src/renderer). Runs in a BrowserWindow with `contextIsolation: true`.
-  - Preload: small CJS bundle (src/preload) that exposes a curated `window.electronAPI` surface.
-  - Main: Electron main process (src/main) that manages the app lifecycle and SQLite DB.
-  - Reasoning: app separates platform code (DB, file dialogs) from UI, keeping renderer sandboxed.
+Files to inspect for changes
+----------------------------
+- Electron main entry: `src/backend/main/main.ts` (built via `vite.electron.config.ts`)
+- Preload: `src/preload/preload.ts` (exposes `electronAPI`)
+- Renderer entry: `src/renderer/main.tsx` and `src/renderer/app/*`
+- Webserver: `src/backend/webserver/main.ts`
+- Vite configs: `vite.electron.config.ts`, `vite.preload.config.ts`, `vite.migrations.config.ts`, `vite.config.ts`
+- Package scripts in `package.json` (many composite scripts use `concurrently`, `wait-on`, and `electronmon`)
 
-Key files to read first
+Practical tips for changes
+--------------------------
+- Small, focused PRs: prefer narrow changes (one feature/bug per PR). CI builds multiple Vite targets, which can be slow.
+- When adding IPC channels, update types in `src/renderer/shared/types` and ensure the preload exposes matching functions.
+- To run the Electron dev loop locally, use `npm run dev`; it runs multiple watchers and `wait-on` to coordinate start order.
+- If you touch packaging or `electron-builder` config, ask for a human review before merging (release artifacts are sensitive).
 
-- `package.json` — dev scripts and which builds run concurrently (`npm run dev`).
-- `src/main/main.ts` — BrowserWindow creation, dev server detection, and IPC handlers for DB setup.
-- `src/preload/preload.ts` — central source of safe APIs exposed to the renderer (see `electronAPI`).
-- `src/main/ipcHandler.ts` — canonical IPC handlers for CRUD and utility operations; includes a global guard to avoid double-registration.
-- `src/main/database.ts` — DB init / schema / seeding and `setupDB({ fullPath })` behaviour (idempotent; closes old DB when switching path).
-- `src/renderer/app/App.tsx` and `src/renderer/components/databaseChooser/DatabaseChooser.tsx` — renderer DB-chooser UX and saved-DB list logic.
+Commit and PR etiquette
+----------------------
+- Use conventional prefixes: `feat:`, `fix:`, `chore:`, `docs:`. Keep subject short.
+- Include which platform you tested on if the change touches OS-specific code (Windows/Linux/macOS).
 
-Developer workflows (exact commands)
+When to ask a human
+-------------------
+- Changes to packaging, CI, or release steps.
+- Database schema changes that require migration strategy.
+- Large refactors affecting both main, preload, and renderer code.
 
-- Dev (watch builds + open Electron):
-  - `npm run dev` (runs `dev:react`, `dev:preload`, `dev:electron`, then `dev:electron:start`).
-- Build bundles:
-  - `npm run build` (renderer + preload + main) — outputs: `dist/`, `dist-electron/preload/preload.cjs`, `dist-electron/main/main.cjs`.
-- Tests & checks:
-  - `npm test` (Vitest)
-  - `npm run test:coverage`
-  - `npm run lint`, `npm run format`
-
-Environment specifics
-
-- `VITE_ENABLE_MOCKS` — toggles MSW mocks in renderer.
-
-Application configuration
-
-- `DB_NAME` — 'invoice_builder.db' specifies the default database filename for the app. Used in the Electron main process to initialize or open the database.
-- `DEV_SERVER_URL` — 'http://localhost:5173' Provides the URL of the Vite dev server for development. Used in the Electron main process to load the renderer window during development.
-
-IPC / change pattern (exact steps)
-
-1. Add/modify handler in `src/main/ipcHandler.ts` (use `ipcMain.handle('my-channel', handler)`). Keep return shape `{ success: boolean, ... }`.
-2. Expose in `src/preload/preload.ts` with `contextBridge.exposeInMainWorld('electronAPI', { myApi: () => ipcRenderer.invoke('my-channel') })`.
-3. Add types in `src/renderer/types/*` and `src/main/types/*` to keep payloads synced.
-4. Use the API in renderer code (`window.electronAPI.myApi()`), handle `success`/`message`/`key` fields.
-
-DB selection & UX specifics
-
-- DB schema & seeding live in `src/main/database.ts`. Changes to schema must be reflected there and tested.
-- Renderer flow:
-  - Renderer checks DB readiness.
-  - User picks path with `electronAPI.selectDatabase()` (native save dialog).
-  - Renderer calls `electronAPI.initializeDatabase({ fullPath })` to set up or open DB.
-- Saved DB list: renderer stores remembered DB paths in `localStorage` (see `DatabaseChooser.tsx` and `App.tsx`). Search for `databases` to find current keys.
-
-Common pitfalls & fixes
-
-- Re-initializing DB: `setupDB` will close an existing DB when switching to a different path. If you see errors about duplicate handlers or failing `open-url` registration, ensure you are not re-calling init or reloading the main process incorrectly.
-- Preload API changes: always update renderer types and avoid direct `ipcRenderer` calls in renderer.
-
-Where to change for a feature
-
-- IPC additions: `src/main/ipcHandler.ts`, `src/preload/preload.ts`, `src/renderer/types/*`, `src/main/types/*`, then renderer components/hooks.
-- DB migrations: `src/main/database.ts` (no migration system currently — add one when needed).
-- Setup UI: `src/renderer/components/databaseChooser/*` and `src/renderer/app/App.tsx`.
-
-If you want a sample PR that adds a new IPC channel, a migration template, or a styled DatabaseChooser using MUI, tell me which one and I will implement it.
-
-<!-- GitHub Copilot / AI agent instructions for contributors working on invoice-builder -->
+Contact
+-------
+Open a draft PR or an issue describing the intended change and runtime verification steps; maintainers prefer small iterative changes.

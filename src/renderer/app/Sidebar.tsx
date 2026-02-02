@@ -11,6 +11,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { useCallback, useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { getApi } from '../shared/api/restApi';
 import { MenuList } from '../shared/components/lists/menuList/MenuList';
 import type { MenuItem } from '../shared/types/menuItem';
 import { useAppDispatch, useAppSelector } from '../state/configureStore';
@@ -171,7 +172,9 @@ export const Sidebar: FC = () => {
   }, [isDesktop]);
 
   useEffect(() => {
-    window.electronAPI.getAppVersion().then(v => dispatch(setVersion(v)));
+    getApi()
+      .getAppVersion()
+      .then(v => dispatch(setVersion(v)));
   }, [dispatch]);
 
   return (

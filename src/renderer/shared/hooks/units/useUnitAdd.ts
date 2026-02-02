@@ -1,17 +1,18 @@
 import { useCallback } from 'react';
+import { getApi } from '../../api/restApi';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
 import type { Unit, UnitAdd } from '../../types/unit';
 import { useAsyncAction } from '../useAsyncAction';
 
-interface UseUnitAddParams extends RequestHook<Response<Unit>> {
+interface UseUnitAddParams extends RequestHook<Response<UnitAdd>> {
   unit?: UnitAdd;
 }
 
 export const useUnitAdd = ({ unit, immediate = true, showLoader = true, onDone }: UseUnitAddParams) => {
   const asyncFn = useCallback(() => {
     if (!unit) return Promise.resolve({ success: false });
-    return window.electronAPI.addUnit(unit);
+    return getApi().addUnit(unit);
   }, [unit]);
 
   const { data, loading, execute } = useAsyncAction<Response<Unit>>(asyncFn, {

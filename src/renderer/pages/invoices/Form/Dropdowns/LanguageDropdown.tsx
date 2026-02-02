@@ -46,6 +46,11 @@ const LanguageDropdownComponent: FC<Props> = ({ isOpen, onClose, onOpen, onClick
         open={isOpen}
         onClose={() => onClose?.()}
         onOpen={() => onOpen?.()}
+        ModalProps={{
+          sx: {
+            zIndex: theme => theme.zIndex.modal + 1
+          }
+        }}
         slotProps={{
           paper: {
             sx: {

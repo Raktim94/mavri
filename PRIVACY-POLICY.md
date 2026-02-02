@@ -30,7 +30,7 @@ All information you enter remains **local** and under your control.
 All data—including invoices, clients, businesses, items, settings, and reports—is stored:
 
 - **only on your computer**
-- **only in the local application directory or database**
+- **only in the local application directory, database or docker container**
 
 We do not have access to this data and cannot view, copy, or recover it.
 

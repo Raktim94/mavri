@@ -1,16 +1,19 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
-import { HashRouter } from 'react-router-dom';
+import { BrowserRouter, HashRouter } from 'react-router-dom';
 import { App } from './app/App';
 import './globalErrorHandlers';
 import './i18n';
 import reportWebVitals from './reportWebVitals';
+import { isWebMode } from './shared/api/restApi';
 import { GlobalErrorBoundaryWrapper } from './shared/components/feedback/globalErrorBoundaryWrapper/GlobalErrorBoundaryWrapper';
 import { ThemeProviderWrapper } from './shared/components/layout/theme/ThemeProviderWrapper';
 import { store } from './state/configureStore';
 
 const mockEnabled = import.meta.env.VITE_ENABLE_MOCKS;
+
+const Router = isWebMode() ? BrowserRouter : HashRouter;
 
 const startApp = async () => {
   if (mockEnabled === 'true' || mockEnabled === true) {
@@ -27,11 +30,11 @@ const startApp = async () => {
     <StrictMode>
       <Provider store={store}>
         <GlobalErrorBoundaryWrapper>
-          <HashRouter>
+          <Router>
             <ThemeProviderWrapper>
               <App />
             </ThemeProviderWrapper>
-          </HashRouter>
+          </Router>
         </GlobalErrorBoundaryWrapper>
       </Provider>
     </StrictMode>

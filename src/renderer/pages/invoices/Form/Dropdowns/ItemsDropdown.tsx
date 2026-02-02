@@ -1,4 +1,4 @@
-import { SwipeableDrawer } from '@mui/material';
+import { SwipeableDrawer, useMediaQuery, useTheme } from '@mui/material';
 import { memo, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CRUDPage } from '../../../../shared/components/layout/crudPage/CRUDPage';
@@ -19,6 +19,9 @@ interface Props {
 }
 
 const ItemsDropdownComponent: FC<Props> = ({ isOpen, onClose, onOpen, onClick }) => {
+  const theme = useTheme();
+  const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
+
   const { t } = useTranslation();
   const filters: Filter[] = [
     ...createCommonFilters({ t, namespace: 'items', initial: FilterType.active }),
@@ -49,10 +52,15 @@ const ItemsDropdownComponent: FC<Props> = ({ isOpen, onClose, onOpen, onClick })
           open={isOpen}
           onClose={() => onClose?.()}
           onOpen={() => onOpen?.()}
+          ModalProps={{
+            sx: {
+              zIndex: theme => theme.zIndex.modal + 1
+            }
+          }}
           slotProps={{
             paper: {
               sx: {
-                maxWidth: '40%',
+                maxWidth: isDesktop ? '40%' : '100%',
                 height: '80%',
                 mx: 'auto',
                 borderTopLeftRadius: 16,

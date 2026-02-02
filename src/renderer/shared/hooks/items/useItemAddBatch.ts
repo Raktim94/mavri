@@ -2,8 +2,9 @@ import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppDispatch } from '../../../state/configureStore';
 import { addToast } from '../../../state/pageSlice';
+import { getApi } from '../../api/restApi';
 import type { Category } from '../../types/category';
-import type { ItemAdd } from '../../types/item';
+import type { Item, ItemAdd } from '../../types/item';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
 import type { Unit } from '../../types/unit';
@@ -41,13 +42,13 @@ export const useItemAddBatch = ({ items, immediate = true, showLoader = true, on
 
   const asyncFn = useCallback(() => {
     if (!items) return Promise.resolve({ success: false });
-    return window.electronAPI.addBatchItem(items);
+    return getApi().addBatchItem(items);
   }, [items]);
 
-  const { data, loading, execute } = useAsyncAction<Response<ItemAdd[]>>(asyncFn, {
+  const { data, loading, execute } = useAsyncAction<Response<Item[]>>(asyncFn, {
     immediate,
     showLoader,
-    onDone: (data: Response<ItemAdd[]>) => {
+    onDone: (data: Response<Item[]>) => {
       reloadCategories();
       reloadUnits();
       if (onDone) onDone(data);

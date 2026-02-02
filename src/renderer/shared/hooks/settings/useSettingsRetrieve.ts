@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from 'react';
 import { useAppDispatch } from '../../../state/configureStore';
 import { setSettings } from '../../../state/pageSlice';
+import { getApi } from '../../api/restApi';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
 import type { Settings } from '../../types/settings';
@@ -12,7 +13,7 @@ export const useSettingsRetrieve = ({
   onDone
 }: RequestHook<Response<Settings>>) => {
   const dispatch = useAppDispatch();
-  const asyncFn = useCallback(() => window.electronAPI.getAllSettings(), []);
+  const asyncFn = useCallback(() => getApi().getAllSettings(), []);
   const {
     data: settings,
     loading,

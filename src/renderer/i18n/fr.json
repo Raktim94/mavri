@@ -95,6 +95,7 @@
     "noItem": "Sélectionnez un client pour afficher les détails."
   },
   "common": {
+    "addDB": "Ajouter une base de données",
     "additional": "Supplémentaire",
     "address": "Adresse",
     "amount": "Montant",

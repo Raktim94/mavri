@@ -129,15 +129,22 @@ export interface InvoicePayment {
   updatedAt?: string;
 }
 
-export interface InvoiceAttachment {
+export interface InvoiceAttachmentMeta {
   id?: number;
   parentInvoiceId?: number;
   fileSize: number;
   fileType: string;
   fileName: string;
-  data: Uint8Array;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface InvoiceAttachment extends InvoiceAttachmentMeta {
+  data: Uint8Array;
+}
+
+export interface InvoiceAttachmentWeb extends InvoiceAttachmentMeta {
+  data: string;
 }
 
 export interface InvoiceItem {
@@ -154,7 +161,7 @@ export interface InvoiceItem {
   taxType?: InvoiceItemTaxType;
 }
 
-export interface Invoice {
+export interface InvoiceMeta {
   id: number;
   invoiceType: InvoiceType;
   convertedFromQuotationId?: number;
@@ -182,7 +189,6 @@ export interface Invoice {
   businessPhoneSnapshot?: string;
   businessAdditionalSnapshot?: string;
   businessPaymentInformationSnapshot?: string;
-  businessLogoSnapshot?: Uint8Array;
   businessFileSizeSnapshot?: number;
   businessFileTypeSnapshot?: string;
   businessFileNameSnapshot?: string;
@@ -204,7 +210,6 @@ export interface Invoice {
   taxType?: InvoiceTaxType;
   invoicePayments: InvoicePayment[];
   invoiceItems: InvoiceItem[];
-  invoiceAttachments: InvoiceAttachment[];
   currencyFormat: string;
   customizationColor: string;
   customizationLogoSize: SizeType;
@@ -217,13 +222,10 @@ export interface Invoice {
   customizationWatermarkFileName?: string;
   customizationWatermarkFileType?: string;
   customizationWatermarkFileSize?: number;
-  customizationWatermarkFileData?: Uint8Array;
   customizationPaidWatermarkFileName?: string;
   customizationPaidWatermarkFileType?: string;
   customizationPaidWatermarkFileSize?: number;
-  customizationPaidWatermarkFileData?: Uint8Array;
   language: Language;
-  signatureData?: Uint8Array;
   signatureSize?: number;
   signatureType?: string;
   signatureName?: string;
@@ -231,7 +233,22 @@ export interface Invoice {
   styleProfileNameSnapshot?: string;
 }
 
-export interface InvoiceAdd {
+export interface Invoice extends InvoiceMeta {
+  businessLogoSnapshot?: Uint8Array;
+  customizationWatermarkFileData?: Uint8Array;
+  customizationPaidWatermarkFileData?: Uint8Array;
+  signatureData?: Uint8Array;
+  invoiceAttachments: InvoiceAttachment[];
+}
+
+export interface InvoiceWeb extends InvoiceMeta {
+  businessLogoSnapshot?: string | null;
+  customizationWatermarkFileData?: string | null;
+  customizationPaidWatermarkFileData?: string | null;
+  signatureData?: string | null;
+  invoiceAttachments: InvoiceAttachmentWeb[];
+}
+export interface InvoiceAddMeta {
   invoiceType?: InvoiceType;
   convertedFromQuotationId?: number;
   businessId?: number;
@@ -256,7 +273,6 @@ export interface InvoiceAdd {
   businessPhoneSnapshot?: string;
   businessAdditionalSnapshot?: string;
   businessPaymentInformationSnapshot?: string;
-  businessLogoSnapshot?: Uint8Array;
   businessFileSizeSnapshot?: number;
   businessFileTypeSnapshot?: string;
   businessFileNameSnapshot?: string;
@@ -278,7 +294,6 @@ export interface InvoiceAdd {
   taxType?: InvoiceTaxType;
   invoicePayments?: InvoicePayment[];
   invoiceItems?: InvoiceItem[];
-  invoiceAttachments?: InvoiceAttachment[];
   currencyFormat?: string;
   customizationColor?: string;
   customizationLogoSize?: SizeType;
@@ -291,13 +306,10 @@ export interface InvoiceAdd {
   customizationWatermarkFileName?: string;
   customizationWatermarkFileType?: string;
   customizationWatermarkFileSize?: number;
-  customizationWatermarkFileData?: Uint8Array;
   customizationPaidWatermarkFileName?: string;
   customizationPaidWatermarkFileType?: string;
   customizationPaidWatermarkFileSize?: number;
-  customizationPaidWatermarkFileData?: Uint8Array;
   language?: Language;
-  signatureData?: Uint8Array;
   signatureSize?: number;
   signatureType?: string;
   signatureName?: string;
@@ -305,7 +317,27 @@ export interface InvoiceAdd {
   styleProfileNameSnapshot?: string;
 }
 
+export interface InvoiceAdd extends InvoiceAddMeta {
+  businessLogoSnapshot?: Uint8Array;
+  customizationWatermarkFileData?: Uint8Array;
+  customizationPaidWatermarkFileData?: Uint8Array;
+  signatureData?: Uint8Array;
+  invoiceAttachments?: InvoiceAttachment[];
+}
+
 export interface InvoiceUpdate extends InvoiceAdd {
+  id: number;
+}
+
+export interface InvoiceAddWeb extends InvoiceAddMeta {
+  businessLogoSnapshot?: string | null;
+  customizationWatermarkFileData?: string | null;
+  customizationPaidWatermarkFileData?: string | null;
+  signatureData?: string | null;
+  invoiceAttachments?: InvoiceAttachmentWeb[];
+}
+
+export interface InvoiceUpdateWeb extends InvoiceAddWeb {
   id: number;
 }
 
@@ -382,4 +414,13 @@ export interface InvoiceFromData {
   signatureName?: string;
   styleProfilesId?: number;
   styleProfileNameSnapshot?: string;
+}
+export interface InvoiceInfo {
+  id?: number;
+  issuedAt?: string;
+  invoiceType?: InvoiceType;
+  invoiceNumber?: string;
+  dueDate?: string;
+  invoicePrefix?: string;
+  invoiceSuffix?: string;
 }

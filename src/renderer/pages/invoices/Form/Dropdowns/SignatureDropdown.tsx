@@ -126,6 +126,11 @@ const SignatureDropdownComponent: FC<Props> = ({ isOpen, form, onClose, onOpen, 
           clearSignature();
         }}
         onOpen={() => onOpen?.()}
+        ModalProps={{
+          sx: {
+            zIndex: theme => theme.zIndex.modal + 1
+          }
+        }}
         slotProps={{
           paper: {
             sx: {

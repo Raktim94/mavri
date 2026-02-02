@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
-import type { ItemUpdate } from '../../types/item';
+import { getApi } from '../../api/restApi';
+import type { Item, ItemUpdate } from '../../types/item';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
 import { useAsyncAction } from '../useAsyncAction';
@@ -9,12 +10,12 @@ interface UseItemUpdateParams extends RequestHook<Response<ItemUpdate>> {
 }
 
 export const useItemUpdate = ({ item, immediate = true, showLoader = true, onDone }: UseItemUpdateParams) => {
-  const asyncFn = useCallback(async (): Promise<Response<ItemUpdate>> => {
+  const asyncFn = useCallback(async (): Promise<Response<Item>> => {
     if (!item) return Promise.resolve({ success: false });
-    return window.electronAPI.updateItem(item);
+    return getApi().updateItem(item);
   }, [item]);
 
-  const { data, loading, execute } = useAsyncAction<Response<ItemUpdate>>(asyncFn, {
+  const { data, loading, execute } = useAsyncAction<Response<Item>>(asyncFn, {
     immediate,
     showLoader,
     onDone

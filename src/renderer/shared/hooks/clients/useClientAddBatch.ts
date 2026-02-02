@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
-import type { ClientAdd } from '../../types/client';
+import { getApi } from '../../api/restApi';
+import type { Client, ClientAdd } from '../../types/client';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
 import { useAsyncAction } from '../useAsyncAction';
@@ -11,10 +12,10 @@ interface UseClientAddParams extends RequestHook<Response<ClientAdd[]>> {
 export const useClientAddBatch = ({ clients, immediate = true, showLoader = true, onDone }: UseClientAddParams) => {
   const asyncFn = useCallback(() => {
     if (!clients) return Promise.resolve({ success: false });
-    return window.electronAPI.addBatchClient(clients);
+    return getApi().addBatchClient(clients);
   }, [clients]);
 
-  const { data, loading, execute } = useAsyncAction<Response<ClientAdd[]>>(asyncFn, {
+  const { data, loading, execute } = useAsyncAction<Response<Client[]>>(asyncFn, {
     immediate,
     showLoader,
     onDone

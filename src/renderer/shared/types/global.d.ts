@@ -33,56 +33,57 @@ declare global {
       selectDatabase: () => Promise<Response<DBSelector>>;
       openDatabase: () => Promise<Response<DBSelector>>;
       initializeDatabase: (data: { fullPath: string; mode?: DBInitType }) => Promise<Response<unknown>>;
+      getDatabaseList: () => Promise<Response<string[]>>;
 
       getAllSettings: () => Promise<Response<Settings>>;
       updateSettings: (data: SettingsUpdate) => Promise<Response<SettingsUpdate>>;
 
       getAllBusinesses: (filter?: FilterData[]) => Promise<Response<Business[]>>;
-      updateBusiness: (data: BusinessUpdate) => Promise<Response<BusinessUpdate>>;
+      updateBusiness: (data: BusinessUpdate) => Promise<Response<Business>>;
       deleteBusiness: (id: number) => Promise<Response<unknown>>;
       addBusiness: (data: BusinessAdd) => Promise<Response<Business>>;
-      addBatchBusiness: (data: BusinessAdd[]) => Promise<Response<BusinessAdd[]>>;
+      addBatchBusiness: (data: BusinessAdd[]) => Promise<Response<Business[]>>;
 
       getAllStyleProfiles: (filter?: FilterData[]) => Promise<Response<StyleProfile[]>>;
-      updateStyleProfile: (data: StyleProfileUpdate) => Promise<Response<StyleProfileUpdate>>;
+      updateStyleProfile: (data: StyleProfileUpdate) => Promise<Response<StyleProfile>>;
       deleteStyleProfile: (id: number) => Promise<Response<unknown>>;
       addStyleProfile: (data: StyleProfileAdd) => Promise<Response<StyleProfile>>;
-      addBatchStyleProfile: (data: StyleProfileAdd[]) => Promise<Response<StyleProfileAdd[]>>;
+      addBatchStyleProfile: (data: StyleProfileAdd[]) => Promise<Response<StyleProfile[]>>;
 
       getAllClients: (filter?: FilterData[]) => Promise<Response<Client[]>>;
-      updateClient: (data: ClientUpdate) => Promise<Response<ClientUpdate>>;
+      updateClient: (data: ClientUpdate) => Promise<Response<Client>>;
       deleteClient: (id: number) => Promise<Response<unknown>>;
       addClient: (data: ClientAdd) => Promise<Response<Client>>;
-      addBatchClient: (data: ClientAdd[]) => Promise<Response<ClientAdd[]>>;
+      addBatchClient: (data: ClientAdd[]) => Promise<Response<Client[]>>;
 
       getAllItems: (filter?: FilterData[]) => Promise<Response<Item[]>>;
-      updateItem: (data: ItemUpdate) => Promise<Response<ItemUpdate>>;
+      updateItem: (data: ItemUpdate) => Promise<Response<Item>>;
       deleteItem: (id: number) => Promise<Response<unknown>>;
       addItem: (data: ItemAdd) => Promise<Response<Item>>;
-      addBatchItem: (data: ItemAdd[]) => Promise<Response<ItemAdd[]>>;
+      addBatchItem: (data: ItemAdd[]) => Promise<Response<Item[]>>;
 
       getAllUnits: (filter?: FilterData[]) => Promise<Response<Unit[]>>;
-      updateUnit: (data: UnitUpdate) => Promise<Response<UnitUpdate>>;
+      updateUnit: (data: UnitUpdate) => Promise<Response<Unit>>;
       deleteUnit: (id: number) => Promise<Response<unknown>>;
       addUnit: (data: UnitAdd) => Promise<Response<Unit>>;
-      addBatchUnit: (data: UnitAdd[]) => Promise<Response<UnitAdd[]>>;
+      addBatchUnit: (data: UnitAdd[]) => Promise<Response<Unit[]>>;
 
       getAllCategories: (filter?: FilterData[]) => Promise<Response<Category[]>>;
-      updateCategory: (data: CategoryUpdate) => Promise<Response<CategoryUpdate>>;
+      updateCategory: (data: CategoryUpdate) => Promise<Response<Category>>;
       deleteCategory: (id: number) => Promise<Response<unknown>>;
       addCategory: (data: CategoryAdd) => Promise<Response<Category>>;
-      addBatchCategory: (data: CategoryAdd[]) => Promise<Response<CategoryAdd[]>>;
+      addBatchCategory: (data: CategoryAdd[]) => Promise<Response<Category[]>>;
 
       getAllCurrencies: (filter?: FilterData[]) => Promise<Response<Currency[]>>;
-      updateCurrency: (data: CurrencyUpdate) => Promise<Response<CurrencyUpdate>>;
+      updateCurrency: (data: CurrencyUpdate) => Promise<Response<Currency>>;
       deleteCurrency: (id: number) => Promise<Response<unknown>>;
       addCurrency: (data: CurrencyAdd) => Promise<Response<Currency>>;
-      addBatchCurrency: (data: CurrencyAdd[]) => Promise<Response<CurrencyAdd[]>>;
+      addBatchCurrency: (data: CurrencyAdd[]) => Promise<Response<Currency[]>>;
 
       getAllInvoices: (type?: InvoiceType, filter?: FilterData[]) => Promise<Response<Invoice[]>>;
       deleteInvoice: (id: number) => Promise<Response<unknown>>;
       addInvoice: (data: InvoiceAdd) => Promise<Response<Invoice>>;
-      updateInvoice: (data: InvoiceUpdate) => Promise<Response<InvoiceUpdate>>;
+      updateInvoice: (data: InvoiceUpdate) => Promise<Response<Invoice>>;
       duplicateInvoice: (id: number, invoiceType: InvoiceType) => Promise<Response<Invoice>>;
 
       exportAllData: () => Promise<Response<ExportMeta>>;

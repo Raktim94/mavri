@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { getApi } from '../../api/restApi';
 import type { Business } from '../../types/business';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
@@ -10,7 +11,7 @@ export const useBusinessesRetrieve = ({
   filter,
   onDone
 }: RequestHook<Response<Business[]>>) => {
-  const asyncFn = useCallback(() => window.electronAPI.getAllBusinesses(filter), [filter]);
+  const asyncFn = useCallback(() => getApi().getAllBusinesses(filter), [filter]);
   const { data: businesses, execute } = useAsyncAction<Response<Business[]>>(asyncFn, {
     showLoader,
     immediate,

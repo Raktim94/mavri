@@ -8,7 +8,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-dist
+dist-fe
 dist-ssr
 *.local
 
@@ -26,8 +26,9 @@ dist-ssr
 TODO.txt
 
 dist
-dist-electron
+dist-be
 
+.env.docker
 .env
 .env.development
 .env.production
@@ -35,3 +36,9 @@ dist-electron
 /coverage
 
 release
+
+dbDirectory/*.db
+
+dist-fe
+dist-be
+dist-electron

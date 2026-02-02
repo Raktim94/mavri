@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { InvoiceType } from '../main/enums/invoiceType';
 import type { DBInitType } from '../renderer/shared/enums/dbInitType';
+import type { InvoiceType } from '../renderer/shared/enums/invoiceType';
 import type { BusinessAdd, BusinessUpdate } from '../renderer/shared/types/business';
 import type { CategoryAdd, CategoryUpdate } from '../renderer/shared/types/category';
 import type { ClientAdd, ClientUpdate } from '../renderer/shared/types/client';
@@ -44,6 +44,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   selectDatabase: () => ipcRenderer.invoke('show-save-db-dialog'),
   openDatabase: () => ipcRenderer.invoke('show-open-db-dialog'),
   initializeDatabase: (data: { fullPath: string; mode?: DBInitType }) => ipcRenderer.invoke('initialize-db', data),
+  getDatabaseList: () => console.warn('Not supported for Electron API'),
 
   openUrl: (url: string) => ipcRenderer.invoke('open-url', url),
 

@@ -12,9 +12,9 @@ import {
 } from '@mui/material';
 import { memo, useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import { InvoiceTaxOptionType } from '../../../../../main/enums/invoiceTaxOptionType';
 import { AmountInput } from '../../../../shared/components/inputs/amountInput/AmountInput';
 import { PageHeader } from '../../../../shared/components/layout/pageHeader/PageHeader';
+import { InvoiceTaxOptionType } from '../../../../shared/enums/invoiceTaxOptionType';
 import { InvoiceItemTaxType, InvoiceTaxType } from '../../../../shared/enums/taxType';
 import { useForm } from '../../../../shared/hooks/useForm';
 import type { TaxForm } from '../../../../shared/types/invoice';
@@ -96,6 +96,11 @@ const TaxDropdownComponent: FC<Props> = ({ isOpen, data, onClose, onOpen, onClic
         open={isOpen}
         onClose={() => onClose?.()}
         onOpen={() => onOpen?.()}
+        ModalProps={{
+          sx: {
+            zIndex: theme => theme.zIndex.modal + 1
+          }
+        }}
         slotProps={{
           paper: {
             sx: {
@@ -128,6 +133,13 @@ const TaxDropdownComponent: FC<Props> = ({ isOpen, data, onClose, onOpen, onClic
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, md: 12 }}>
             <Autocomplete
+              slotProps={{
+                popper: {
+                  sx: {
+                    zIndex: theme => theme.zIndex.modal + 2
+                  }
+                }
+              }}
               fullWidth
               options={taxTypeOptions}
               getOptionLabel={option => option.label}

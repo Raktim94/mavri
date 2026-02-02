@@ -81,6 +81,11 @@ const DiscountDropdownComponent: FC<Props> = ({ isOpen, data, onClose, onOpen, o
         open={isOpen}
         onClose={() => onClose?.()}
         onOpen={() => onOpen?.()}
+        ModalProps={{
+          sx: {
+            zIndex: theme => theme.zIndex.modal + 1
+          }
+        }}
         slotProps={{
           paper: {
             sx: {
@@ -113,6 +118,13 @@ const DiscountDropdownComponent: FC<Props> = ({ isOpen, data, onClose, onOpen, o
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, md: 12 }}>
             <Autocomplete
+              slotProps={{
+                popper: {
+                  sx: {
+                    zIndex: theme => theme.zIndex.modal + 2
+                  }
+                }
+              }}
               fullWidth
               options={discountTypeOptions}
               getOptionLabel={option => option.label}

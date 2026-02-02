@@ -5,10 +5,19 @@ import { configDefaults } from 'vitest/config';
 
 export default defineConfig(({ mode }) => {
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
+  const apiOrigin = process.env.VITE_API_URL ?? '';
 
   return {
     base: './',
-    plugins: [react()],
+    plugins: [
+      react(),
+      {
+        name: 'html-transform',
+        transformIndexHtml(html) {
+          return html.replace(/%API_ORIGIN%/g, apiOrigin);
+        }
+      }
+    ],
     css: {
       preprocessorOptions: {
         scss: {
@@ -22,6 +31,7 @@ export default defineConfig(({ mode }) => {
       strictPort: true
     },
     build: {
+      outDir: path.resolve(__dirname, 'dist-fe'),
       chunkSizeWarningLimit: 1500
     },
     test: {

@@ -11,6 +11,7 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 import { Box, Card, CardContent, Grid, Typography, useTheme } from '@mui/material';
 import { useContext, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
+import { getApi, isWebMode } from '../../../shared/api/restApi';
 import { ThemeContext } from '../../../shared/components/layout/theme/ThemeProviderWrapper';
 import { MenuList } from '../../../shared/components/lists/menuList/MenuList';
 import { MenuItemSettings } from '../../../shared/enums/menuItemSettings';
@@ -136,7 +137,7 @@ export const Menu: FC<Props> = ({
       isSelected: false,
       isToggle: false,
       onClick: () => {
-        window.electronAPI.openUrl('https://github.com/piratuks/invoice-builder');
+        getApi().openUrl('https://github.com/piratuks/invoice-builder');
       }
     },
     {
@@ -146,7 +147,7 @@ export const Menu: FC<Props> = ({
       isSelected: false,
       isToggle: false,
       onClick: () => {
-        window.electronAPI.openUrl('https://github.com/piratuks/invoice-builder/issues');
+        getApi().openUrl('https://github.com/piratuks/invoice-builder/issues');
       }
     },
     {
@@ -156,7 +157,7 @@ export const Menu: FC<Props> = ({
       isSelected: false,
       isToggle: false,
       onClick: () => {
-        window.electronAPI.openUrl('https://github.com/piratuks/invoice-builder/blob/main/PRIVACY-POLICY.md');
+        getApi().openUrl('https://github.com/piratuks/invoice-builder/blob/main/PRIVACY-POLICY.md');
       }
     },
     {
@@ -166,7 +167,7 @@ export const Menu: FC<Props> = ({
       isSelected: false,
       isToggle: false,
       onClick: () => {
-        window.electronAPI.openUrl('https://github.com/piratuks/invoice-builder/blob/main/TUTORIAL.md');
+        getApi().openUrl('https://github.com/piratuks/invoice-builder/blob/main/TUTORIAL.md');
       }
     },
     {
@@ -176,20 +177,24 @@ export const Menu: FC<Props> = ({
       isToggle: false,
       isSelected: false,
       onClick: () => {
-        window.electronAPI.openUrl('https://github.com/piratuks/invoice-builder/blob/main/TERMS-OF-USE.md');
+        getApi().openUrl('https://github.com/piratuks/invoice-builder/blob/main/TERMS-OF-USE.md');
       }
     },
-    {
-      text: t('settingsMenuItems.titles.checkForUpdate'),
-      description: updateMessage,
-      icon: <AutorenewIcon />,
-      isToggle: false,
-      isSelected: false,
-      onClick: () => {
-        dispatch(setUpdateMessage(t('common.checking')));
-        window.electronAPI.checkForUpdates();
-      }
-    }
+    ...(!isWebMode()
+      ? [
+          {
+            text: t('settingsMenuItems.titles.checkForUpdate'),
+            description: updateMessage,
+            icon: <AutorenewIcon />,
+            isToggle: false,
+            isSelected: false,
+            onClick: () => {
+              dispatch(setUpdateMessage(t('common.checking')));
+              getApi().checkForUpdates();
+            }
+          }
+        ]
+      : [])
   ];
 
   return (

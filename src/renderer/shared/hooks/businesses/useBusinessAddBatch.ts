@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
-import type { BusinessAdd } from '../../types/business';
+import { getApi } from '../../api/restApi';
+import type { Business, BusinessAdd } from '../../types/business';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
 import { useAsyncAction } from '../useAsyncAction';
@@ -16,10 +17,10 @@ export const useBusinessAddBatch = ({
 }: UseBusinessAddParams) => {
   const asyncFn = useCallback(() => {
     if (!businesses) return Promise.resolve({ success: false });
-    return window.electronAPI.addBatchBusiness(businesses);
+    return getApi().addBatchBusiness(businesses);
   }, [businesses]);
 
-  const { data, loading, execute } = useAsyncAction<Response<BusinessAdd[]>>(asyncFn, {
+  const { data, loading, execute } = useAsyncAction<Response<Business[]>>(asyncFn, {
     immediate,
     showLoader,
     onDone

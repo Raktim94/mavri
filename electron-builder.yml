@@ -10,13 +10,13 @@ publish:
   repo: invoice-builder
 
 files:
-  - dist/**
-  - dist-electron/**
+  - dist-fe/**
+  - dist-be/**
   - node_modules/**
   - package.json
 
 extraMetadata:
-  main: dist-electron/main/main.cjs
+  main: dist-be/backend/main/main.cjs
 
 forceCodeSigning: false
 
@@ -37,13 +37,13 @@ linux:
     - deb
   category: Office
   maintainer: 'Piratuks <evaldiz@gmail.com>'
-  icon: 'src/main/assets/linux-icons'
+  icon: 'src/backend/main/assets/linux-icons'
 
 mac:
   target:
     - dmg
   category: public.app-category.productivity
-  icon: 'src/main/assets/icon.icns'
+  icon: 'src/backend/main/assets/icon.icns'
 
 dmg:
   contents:

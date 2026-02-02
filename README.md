@@ -107,6 +107,25 @@ If you value **privacy, portability, and control**, this app is built for you.
 - **Memory:** 2 GB RAM minimum (1 GB may work for very small datasets)
 - **Disk space:** ~150 MB for the installer; ~500mb for the app; additional space needed for database files
 
+## 🧑‍💻 Self-Hosting (Docker)
+
+Invoice Builder can also be self-hosted using Docker for users who prefer running it on their own server or NAS.
+
+This option is ideal if you want:
+
+- Centralized access from multiple machines
+- Easy backups via mounted volumes
+
+### Docker Image
+
+An official Docker image is available.
+
+```bash
+npm run docker:compose:up
+```
+
+Requirements [Environment Variables](#environment-variables) section.
+
 ## 📦 Installation
 
 Download the latest release from the **GitHub Releases** page:
@@ -198,6 +217,8 @@ You can:
 
 Clone the repository, install dependencies, and start the development server:
 
+#### 🖥️ Electron (Desktop App)
+
 ```bash
 git clone https://github.com/piratuks/invoice-builder.git
 cd invoice-builder
@@ -205,37 +226,70 @@ npm install
 npm run dev
 ```
 
+#### 🌐 Webserver / Browser
+
+```bash
+git clone https://github.com/piratuks/invoice-builder.git
+cd invoice-builder
+npm install
+npm run dev:react
+npm run dev:webserver
+```
+
 ### ⚙️ Environment Variables
 
 - .env.development
 
 ```env
-VITE_ENABLE_MOCKS={true|false} # Enables or disables mock data
+VITE_ENABLE_MOCKS={true|false} # Enables or disables mock data (Currently no mocked data is ready)
+VITE_API_URL={url} Backend webserver URL when running without Electron (Web/Docker mode)
+
 ```
 
 - .env.production
 
 ```env
-# Leave empty
+VITE_API_URL={url} Backend webserver URL when running without Electron (Web/Docker mode)
 ```
 
 - .env.test
 
 ```env
-# Leave empty
+VITE_API_URL={url} Backend webserver URL when running without Electron (Web/Docker mode)
 ```
+
+- .env.docker
+
+```env
+  PORT={port} Backend webserver port when running Docker mode
+  DEV_SERVER_URL={url} Backend webserver host when running Docker mode
+  FE_SERVER_URL={url} Fronend webserver URL when running Docker mode
+  MIGRATIONS_PATH={url} Path to migration files in docker volume when running Docker mode
+  VITE_API_URL={url} Backend full url when running Docker mode
+```
+
+- other (Some configuration values are not controlled through .env files and instead live directly in the codebase)
+  - Webserver configs (which are used only running locally not via docker) -> backend/webserver/config.ts
+  - Electron configs -> backend/main/config.ts
 
 ### 📁 Project Structure
 
 ```
 /src
-  /main             – Electron main process
-    /assets         - Static resources required by the main process
-    /enums          - Centralized TypeScript enums used by the main process
-    /ipc            - Your inter‑process communication layer
-    /migrations     - Folder is used to manage and version database schema changes.
-    /types          - TypeScript interfaces and type definitions used exclusively by the main process
-    /utils          - Utility functions that support the main process
+  /backend          – Electron + Webserver
+    /main           – Electron main process
+      /assets       - Static resources required by the main process
+      /ipc          - Your inter‑process communication layer
+    /webserver      - Web server (REST API)
+      /controllers  - HTTP request handlers (GET, POST, PUT, DELETE)
+      /utils        - Utility helpers used by the webserver
+    /shared         - Environment‑agnostic logic (used by both Electron and Webserver)
+      /db           - Database access layer shared across environments
+      /enums        - Centralized TypeScript enums used by the main process
+      /migrations   - Folder is used to manage and version database schema changes.
+      /services     - Business logic for each database entity
+      /types        - TypeScript interfaces and type definitions used exclusively by the Electron/Webserver
+      /utils        - Shared utility functions
   /preload          – Electron preload scripts
   /renderer         – UI code
     /__tests__      – UI unit tests
@@ -255,6 +309,7 @@ VITE_ENABLE_MOCKS={true|false} # Enables or disables mock data
 
 ### 🛠️ Core Stack
 
+- **Docker** — containerization for self‑hosting and reproducible deployments
 - **Electron** — cross-platform desktop framework
 - **SQLite** — lightweight, reliable embedded database
 - **TypeScript** — safer, maintainable code
