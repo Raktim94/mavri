@@ -120,12 +120,3 @@ export interface InvoiceItem {
   taxRate: number;
   taxType?: InvoiceItemTaxType;
 }
-export interface InvoiceInfo {
-  id?: number;
-  issuedAt?: string;
-  invoiceType?: InvoiceType;
-  invoiceNumber?: string;
-  dueDate?: string;
-  invoicePrefix?: string;
-  invoiceSuffix?: string;
-}

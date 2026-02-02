@@ -39,6 +39,11 @@ const BusinessesDropdownComponent: FC<Props> = ({ isOpen, onClose, onOpen, onCli
         open={isOpen}
         onClose={() => onClose?.()}
         onOpen={() => onOpen?.()}
+        ModalProps={{
+          sx: {
+            zIndex: theme => theme.zIndex.modal + 1
+          }
+        }}
         slotProps={{
           paper: {
             sx: {

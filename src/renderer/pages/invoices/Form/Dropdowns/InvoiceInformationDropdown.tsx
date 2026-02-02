@@ -1,11 +1,11 @@
 import { Box, Grid, SwipeableDrawer, TextField, useMediaQuery, useTheme } from '@mui/material';
 import { memo, useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { InvoiceInfo } from '../../../../../shared/types/invoice';
 import { Datepicker } from '../../../../shared/components/inputs/datepicker/Datepicker';
 import { PageHeader } from '../../../../shared/components/layout/pageHeader/PageHeader';
 import { InvoiceType } from '../../../../shared/enums/invoiceType';
 import { useForm } from '../../../../shared/hooks/useForm';
+import type { InvoiceInfo } from '../../../../shared/types/invoice';
 import { validators } from '../../../../shared/utils/validatorFunctions';
 import { useAppSelector } from '../../../../state/configureStore';
 import { selectSettings } from '../../../../state/pageSlice';
@@ -72,6 +72,11 @@ const InvoiceInformationDropdownComponent: FC<Props> = ({ isOpen, onClose, onOpe
         open={isOpen}
         onClose={() => onClose?.()}
         onOpen={() => onOpen?.()}
+        ModalProps={{
+          sx: {
+            zIndex: theme => theme.zIndex.modal + 1
+          }
+        }}
         slotProps={{
           paper: {
             sx: {

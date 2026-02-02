@@ -65,6 +65,11 @@ export const Datepicker: React.FC<Props> = ({
           setSelectedValue(utcValue);
         }}
         slotProps={{
+          popper: {
+            sx: {
+              zIndex: theme => theme.zIndex.modal + 2
+            }
+          },
           textField: {
             required: required,
             error: error,

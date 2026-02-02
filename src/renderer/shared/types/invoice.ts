@@ -415,3 +415,12 @@ export interface InvoiceFromData {
   styleProfilesId?: number;
   styleProfileNameSnapshot?: string;
 }
+export interface InvoiceInfo {
+  id?: number;
+  issuedAt?: string;
+  invoiceType?: InvoiceType;
+  invoiceNumber?: string;
+  dueDate?: string;
+  invoicePrefix?: string;
+  invoiceSuffix?: string;
+}

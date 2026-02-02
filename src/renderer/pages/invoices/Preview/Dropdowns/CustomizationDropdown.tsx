@@ -56,6 +56,9 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onSaveProfile
           anchor="bottom"
           open={isOpen}
           ModalProps={{
+            sx: {
+              zIndex: theme => theme.zIndex.modal + 1
+            },
             BackdropProps: { invisible: true }
           }}
           onClose={() => onClose?.()}
