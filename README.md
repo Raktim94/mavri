@@ -341,6 +341,7 @@ Please open an issue before starting major work to ensure alignment.
 
 | Version | Status                |
 | ------- | --------------------- |
+| v1.6.0  | ✅ Actively supported |
 | v1.5.0  | ✅ Actively supported |
 | v1.4.0  | ✅ Actively supported |
 | v1.3.0  | ✅ Actively supported |

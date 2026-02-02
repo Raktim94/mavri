@@ -1,5 +1,15 @@
 # Invoice Builder
 
+## [DATE], version 1.6.0
+
+New features & improvements
+
+- Added Docker support for seamless self‑hosting and deployment flexibility
+
+Bug Fixes
+
+- Resolved an issue where style profiles created from the PDF live preview were not being populated correctly
+
 ## 2026-01-29, version 1.5.0
 
 New features & improvements
