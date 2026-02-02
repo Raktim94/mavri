@@ -33,8 +33,8 @@
   },
   "license": "MIT",
   "scripts": {
-    "start:webserver": "set TS_NODE_PROJECT=tsconfig.webserver.json && npx tsx src/backend/webserver/main.ts",
     "dev": "concurrently \"npm:dev:react\" \"npm:dev:preload\" \"npm:dev:migrations\" \"npm:dev:electron\" \"npm:dev:electron:start:wait\"",
+    "dev:webserver": "set TS_NODE_PROJECT=tsconfig.webserver.json && npx tsx src/backend/webserver/main.ts",
     "dev:fe": "concurrently \"npm:dev:react\" \"npm:dev:preload\" \"npm:dev:migrations\"",
     "dev:preload": "vite build --config vite.preload.config.ts --watch",
     "dev:react": "vite",

@@ -41,12 +41,21 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onSaveProfile
           isOpen={isProfileModalOpen}
           onCancel={() => setIsProfileModalOpen(false)}
           onSave={name => {
-            onSaveProfile?.({
-              ...form,
-              name: name,
-              isArchived: false,
-              customizationLabelUpperCase: form.customizationLabelUpperCase ?? false
-            });
+            if (Object.keys(form).length === 0 && data) {
+              onSaveProfile?.({
+                ...data,
+                name: name,
+                isArchived: false,
+                customizationLabelUpperCase: data.customizationLabelUpperCase ?? false
+              });
+            } else {
+              onSaveProfile?.({
+                ...form,
+                name: name,
+                isArchived: false,
+                customizationLabelUpperCase: form.customizationLabelUpperCase ?? false
+              });
+            }
             setIsProfileModalOpen(false);
           }}
         />

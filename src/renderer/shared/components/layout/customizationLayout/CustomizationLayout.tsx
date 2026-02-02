@@ -130,6 +130,11 @@ export const CustomizationLayout: FC<Props> = ({
         {renderCustomTop()}
         <Grid size={{ xs: 12, md: 6 }}>
           <MuiColorInput
+            PopoverProps={{
+              sx: {
+                zIndex: theme => theme.zIndex.modal + 2
+              }
+            }}
             value={form.customizationColor ?? ''}
             label={t('common.color')}
             format="hex"
