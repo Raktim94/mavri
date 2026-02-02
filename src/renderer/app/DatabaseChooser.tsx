@@ -293,20 +293,22 @@ export const DatabaseChooser: FC<Props> = ({ onDatabaseRead }) => {
 
                   <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
 
-                  <Box sx={{ display: 'flex', gap: 0.5 }}>
-                    <Tooltip title={t('ariaLabel.remove')}>
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={e => {
-                          e.stopPropagation();
-                          handleForget(item);
-                        }}
-                      >
-                        <CloseIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
+                  {!isWebMode() && (
+                    <Box sx={{ display: 'flex', gap: 0.5 }}>
+                      <Tooltip title={t('ariaLabel.remove')}>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={e => {
+                            e.stopPropagation();
+                            handleForget(item);
+                          }}
+                        >
+                          <CloseIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  )}
                 </Box>
               </ListItemButton>
             </Paper>
