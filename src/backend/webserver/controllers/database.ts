@@ -10,7 +10,7 @@ import { runMigrations } from '../migration';
 import { listDbLimiter } from '../utils/functions';
 
 export let dbInstance: Database | null = null;
-export const dbDir = path.resolve(process.cwd(), process.env.dbDirectory || APP_CONFIG.dbDirectory);
+export const dbDir = path.resolve(process.cwd(), process.env.DB_DIRECTORY || APP_CONFIG.DB_DIRECTORY);
 
 const openDatabase = async (fullPath: string, createIfMissing: boolean): Promise<void> => {
   if (dbInstance) {

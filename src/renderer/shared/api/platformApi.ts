@@ -75,7 +75,7 @@ const baseUrl = (): string => {
 };
 
 const apiGet = async <T>(path: string, params?: Record<string, string>): Promise<T> => {
-  const url = new URL(path, baseUrl() || window.location.origin);
+  const url = new URL(path, baseUrl());
   if (params) {
     Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
   }
@@ -84,7 +84,7 @@ const apiGet = async <T>(path: string, params?: Record<string, string>): Promise
 };
 
 const apiPost = async <T>(path: string, body?: unknown): Promise<T> => {
-  const url = (baseUrl() || window.location.origin) + path;
+  const url = baseUrl() + path;
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -94,7 +94,7 @@ const apiPost = async <T>(path: string, body?: unknown): Promise<T> => {
 };
 
 const apiPut = async <T>(path: string, body?: unknown): Promise<T> => {
-  const url = (baseUrl() || window.location.origin) + path;
+  const url = baseUrl() + path;
   const res = await fetch(url, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
@@ -104,7 +104,7 @@ const apiPut = async <T>(path: string, body?: unknown): Promise<T> => {
 };
 
 const apiDelete = async <T>(path: string): Promise<T> => {
-  const url = (baseUrl() || window.location.origin) + path;
+  const url = baseUrl() + path;
   const res = await fetch(url, { method: 'DELETE' });
   return res.json() as Promise<T>;
 };

@@ -1,0 +1,30 @@
+services:
+  backend:
+    build: .
+    container_name: backend
+    ports:
+      - '3000:3000'
+    environment:
+      - PORT=${PORT}
+      - NODE_ENV=docker
+      - DB_DIRECTORY=/data
+      - DEV_SERVER_URL=${DEV_SERVER_URL}
+      - FE_SERVER_URL=${FE_SERVER_URL}
+      - MIGRATIONS_PATH=${MIGRATIONS_PATH}
+    volumes:
+      - app-data:/data
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL}
+    container_name: frontend
+    ports:
+      - '3001:3001'
+    depends_on:
+      - backend
+
+volumes:
+  app-data:

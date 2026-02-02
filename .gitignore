@@ -28,6 +28,7 @@ TODO.txt
 dist
 dist-be
 
+.env.docker
 .env
 .env.development
 .env.production

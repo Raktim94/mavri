@@ -1,7 +1,6 @@
 import fs from 'fs';
-import path, { join } from 'path';
+import path from 'path';
 import type { Database } from 'sqlite3';
-import { pathToFileURL } from 'url';
 import { getFirstRow, runAsync } from '../utils/dbFuntions';
 import { mapSqliteError } from '../utils/errorFunctions';
 
@@ -9,7 +8,7 @@ export const runMigrations = async (db: Database, migrationsPath: string) => {
   try {
     const files = fs
       .readdirSync(migrationsPath)
-      .filter(f => /^\d{8}-\d{2}-.*\.cjs$/.test(f))
+      .filter(f => /^\d{8}-\d{2}-.*\.(cjs|js|ts)$/.test(f))
       .sort();
 
     await runAsync(
@@ -28,9 +27,12 @@ export const runMigrations = async (db: Database, migrationsPath: string) => {
       const row = await getFirstRow(db, `SELECT 1 FROM migrations WHERE name = ?`, [name]);
 
       if (!row) {
-        const migrationFilePath = join(migrationsPath, file);
-        const migrationUrl = pathToFileURL(migrationFilePath).href;
-        const migration = await import(migrationUrl);
+        const migrationPath = path.resolve(migrationsPath, file);
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        const migration = require(migrationPath);
+        if (typeof migration.up !== 'function') {
+          throw new Error(`Migration ${file} does not export up()`);
+        }
         if (migration.up) {
           await migration.up(db);
           await runAsync(db, `INSERT INTO migrations(name) VALUES('${name}')`);
@@ -38,6 +40,7 @@ export const runMigrations = async (db: Database, migrationsPath: string) => {
       }
     }
   } catch (error) {
+    console.log(error);
     await runAsync(db, 'ROLLBACK;');
     return { success: false, ...mapSqliteError(error) };
   }
