@@ -2,13 +2,13 @@ import type { Database } from 'sqlite3';
 import type { FilterData } from '../types/invoiceFilter';
 import type { Unit } from '../types/unit';
 import { runDb } from '../utils/dbFuntions';
-import { getAllEntities2, handleEntity2 } from '../utils/entitiesFunctions';
+import { getAllEntities, handleEntity } from '../utils/entitiesFunctions';
 import { mapSqliteError } from '../utils/errorFunctions';
 
 const unitFields: (keyof Unit)[] = ['name', 'isArchived'];
 
 export const getAllUnits = async (db: Database, filter?: FilterData[]) => {
-  const getAll = getAllEntities2<Unit>(db, 'units', 'u', {
+  const getAll = getAllEntities<Unit>(db, 'units', 'u', {
     joins: `
       LEFT JOIN items it ON it.unitId = u.id
       LEFT JOIN invoice_items ii ON ii.itemId = it.id
@@ -27,7 +27,7 @@ export const getAllUnits = async (db: Database, filter?: FilterData[]) => {
 };
 
 export const addUnit = async (db: Database, data: Unit) => {
-  const handle = handleEntity2<Unit>(db, 'units', 'u', unitFields, {
+  const handle = handleEntity<Unit>(db, 'units', 'u', unitFields, {
     joins: `
         LEFT JOIN items it ON it.unitId = u.id
         LEFT JOIN invoice_items ii ON ii.itemId = it.id
@@ -46,7 +46,7 @@ export const addUnit = async (db: Database, data: Unit) => {
 };
 
 export const updateUnit = async (db: Database, data: Unit) => {
-  const handle = handleEntity2<Unit>(db, 'units', 'u', unitFields, {
+  const handle = handleEntity<Unit>(db, 'units', 'u', unitFields, {
     joins: `
         LEFT JOIN items it ON it.unitId = u.id
         LEFT JOIN invoice_items ii ON ii.itemId = it.id
@@ -74,7 +74,7 @@ export const deleteUnit = async (db: Database, id: number) => {
 };
 
 export const batchAddUnit = async (db: Database, data: Unit[]) => {
-  const handle = handleEntity2<Unit>(db, 'units', 'u', unitFields, {
+  const handle = handleEntity<Unit>(db, 'units', 'u', unitFields, {
     joins: `
         LEFT JOIN items it ON it.unitId = u.id
         LEFT JOIN invoice_items ii ON ii.itemId = it.id

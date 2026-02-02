@@ -1,6 +1,5 @@
 import type { Database } from 'sqlite3';
 import type { Response } from '../../shared/types/response';
-import type { EntityWithCounts } from '../types/entityWithCounts';
 import type { EntityWithId } from '../types/entityWithId';
 import type { Invoice, InvoiceAttachment, InvoiceItem, InvoicePayment } from '../types/invoice';
 import type { FilterData } from '../types/invoiceFilter';
@@ -16,16 +15,18 @@ type GetInvoicesOptions = {
 
 export const handleEntity =
   <T extends EntityWithId>(db: Database, table: string, fields: readonly (keyof T)[]) =>
-  async (data: T, isUpdate = false): Promise<Response<T & EntityWithCounts>> => {
+  async (data: T, isUpdate = false): Promise<Response<number>> => {
     const params = fields.map(key => (data[key] ?? null) as string | number | null);
 
     try {
+      let lastID = -1;
+
       if (isUpdate) {
         const setClause = fields.map(f => `${String(f)} = ?`).join(', ') + `, updatedAt = datetime('now')`;
 
-        await runDb(db, `UPDATE ${table} SET ${setClause} WHERE id = ?`, [...params, data.id ?? -1]);
+        lastID = await runDb(db, `UPDATE ${table} SET ${setClause} WHERE id = ?`, [...params, data.id ?? -1]);
       } else {
-        await runDb(
+        lastID = await runDb(
           db,
           `INSERT INTO ${table} (${fields.join(',')})
            VALUES (${fields.map(() => '?').join(',')})`,
@@ -33,7 +34,7 @@ export const handleEntity =
         );
       }
 
-      return { success: true, data: undefined };
+      return { success: true, data: lastID };
     } catch (error) {
       return { success: false, ...mapSqliteError(error) };
     }
@@ -205,14 +206,7 @@ export const addInvoice = async (db: Database, data: Invoice) => {
       return { success: false, key: result.key };
     }
 
-    const lastRow = result.data;
-
-    if (!lastRow) {
-      await runDb(db, 'ROLLBACK');
-      return { success: false };
-    }
-
-    const newId = lastRow.id as number;
+    const newId = result.data;
 
     let failure = undefined;
     for (const item of data.invoiceItems ?? []) {

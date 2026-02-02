@@ -4,7 +4,7 @@ import type { EntityWithCounts } from '../types/entityWithCounts';
 import type { FilterData } from '../types/invoiceFilter';
 import type { Response } from '../types/response';
 import { runDb } from '../utils/dbFuntions';
-import { getAllEntities2, handleEntity2 } from '../utils/entitiesFunctions';
+import { getAllEntities, handleEntity } from '../utils/entitiesFunctions';
 import { mapSqliteError } from '../utils/errorFunctions';
 
 const clientFields: (keyof Client)[] = [
@@ -23,7 +23,7 @@ export const getAllClients = async (
   db: Database,
   filter?: FilterData[]
 ): Promise<Response<(Client & EntityWithCounts)[]>> => {
-  const getAll = getAllEntities2<Client>(db, 'clients', 't', {
+  const getAll = getAllEntities<Client>(db, 'clients', 't', {
     joins: `
         LEFT JOIN invoices i ON i.clientId = t.id
       `,
@@ -40,7 +40,7 @@ export const getAllClients = async (
 };
 
 export const addClient = async (db: Database, data: Client): Promise<Response<Client & EntityWithCounts>> => {
-  const handle = handleEntity2<Client>(db, 'clients', 'c', clientFields, {
+  const handle = handleEntity<Client>(db, 'clients', 'c', clientFields, {
     joins: `LEFT JOIN invoices i ON i.clientId = c.id`,
     invoiceCountExpr: `
          COUNT(DISTINCT CASE WHEN i.invoiceType = 'invoice'
@@ -55,7 +55,7 @@ export const addClient = async (db: Database, data: Client): Promise<Response<Cl
 };
 
 export const updateClient = async (db: Database, data: Client): Promise<Response<Client & EntityWithCounts>> => {
-  const handle = handleEntity2<Client>(db, 'clients', 'c', clientFields, {
+  const handle = handleEntity<Client>(db, 'clients', 'c', clientFields, {
     joins: `LEFT JOIN invoices i ON i.clientId = c.id`,
     invoiceCountExpr: `
          COUNT(DISTINCT CASE WHEN i.invoiceType = 'invoice'
@@ -79,7 +79,7 @@ export const deleteClient = async (db: Database, id: number) => {
 };
 
 export const batchAddClient = async (db: Database, data: Client[]) => {
-  const handle = handleEntity2<Client>(db, 'clients', 'c', clientFields, {
+  const handle = handleEntity<Client>(db, 'clients', 'c', clientFields, {
     joins: `LEFT JOIN invoices i ON i.clientId = c.id`,
     invoiceCountExpr: `
          COUNT(DISTINCT CASE WHEN i.invoiceType = 'invoice'

@@ -4,7 +4,7 @@ import type { EntityWithCounts } from '../types/entityWithCounts';
 import type { FilterData } from '../types/invoiceFilter';
 import type { Response } from '../types/response';
 import { runDb } from '../utils/dbFuntions';
-import { getAllEntities2, handleEntity2 } from '../utils/entitiesFunctions';
+import { getAllEntities, handleEntity } from '../utils/entitiesFunctions';
 import { mapSqliteError } from '../utils/errorFunctions';
 
 const businessFields: (keyof Business)[] = [
@@ -29,7 +29,7 @@ export const getAllBusinesses = (
   db: Database,
   filter?: FilterData[]
 ): Promise<Response<(Business & EntityWithCounts)[]>> => {
-  const getAll = getAllEntities2<Business>(db, 'businesses', 't', {
+  const getAll = getAllEntities<Business>(db, 'businesses', 't', {
     joins: `
       LEFT JOIN invoices i ON i.businessId = t.id
     `,
@@ -46,7 +46,7 @@ export const getAllBusinesses = (
 };
 
 export const addBusiness = (db: Database, data: Business): Promise<Response<Business & EntityWithCounts>> => {
-  const handle = handleEntity2<Business>(db, 'businesses', 'b', businessFields, {
+  const handle = handleEntity<Business>(db, 'businesses', 'b', businessFields, {
     joins: `LEFT JOIN invoices i ON i.businessId = b.id`,
     invoiceCountExpr: `
         COUNT(DISTINCT CASE WHEN i.invoiceType = 'invoice'
@@ -61,7 +61,7 @@ export const addBusiness = (db: Database, data: Business): Promise<Response<Busi
 };
 
 export const updateBusiness = (db: Database, data: Business): Promise<Response<Business & EntityWithCounts>> => {
-  const handle = handleEntity2<Business>(db, 'businesses', 'b', businessFields, {
+  const handle = handleEntity<Business>(db, 'businesses', 'b', businessFields, {
     joins: `LEFT JOIN invoices i ON i.businessId = b.id`,
     invoiceCountExpr: `
         COUNT(DISTINCT CASE WHEN i.invoiceType = 'invoice'
@@ -85,7 +85,7 @@ export const deleteBusiness = async (db: Database, id: number) => {
 };
 
 export const batchAddBusiness = async (db: Database, data: Business[]) => {
-  const handle = handleEntity2<Business>(db, 'businesses', 'b', businessFields, {
+  const handle = handleEntity<Business>(db, 'businesses', 'b', businessFields, {
     joins: `LEFT JOIN invoices i ON i.businessId = b.id`,
     invoiceCountExpr: `
         COUNT(DISTINCT CASE WHEN i.invoiceType = 'invoice'

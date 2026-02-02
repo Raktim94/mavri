@@ -4,7 +4,7 @@ import type { FilterData } from '../types/invoiceFilter';
 import type { Response } from '../types/response';
 import type { StyleProfile } from '../types/styleProfiles';
 import { runDb } from '../utils/dbFuntions';
-import { getAllEntities2, handleEntity2 } from '../utils/entitiesFunctions';
+import { getAllEntities, handleEntity } from '../utils/entitiesFunctions';
 import { mapSqliteError } from '../utils/errorFunctions';
 
 const styleProfileFields: (keyof StyleProfile)[] = [
@@ -32,7 +32,7 @@ export const getAllStyleProfiles = async (
   db: Database,
   filter?: FilterData[]
 ): Promise<Response<(StyleProfile & EntityWithCounts)[]>> => {
-  const getAll = getAllEntities2<StyleProfile>(db, 'style_profiles', 't', {
+  const getAll = getAllEntities<StyleProfile>(db, 'style_profiles', 't', {
     joins: `
           LEFT JOIN invoices i ON i.styleProfilesId = t.id
         `,
@@ -53,7 +53,7 @@ export const addStyleProfile = async (
   db: Database,
   data: StyleProfile
 ): Promise<Response<StyleProfile & EntityWithCounts>> => {
-  const handle = handleEntity2<StyleProfile>(db, 'style_profiles', 'sp', styleProfileFields, {
+  const handle = handleEntity<StyleProfile>(db, 'style_profiles', 'sp', styleProfileFields, {
     joins: `LEFT JOIN invoices i ON i.styleProfilesId = sp.id`,
     invoiceCountExpr: `
           COUNT(DISTINCT CASE WHEN i.invoiceType = 'invoice'
@@ -71,7 +71,7 @@ export const updateStyleProfile = async (
   db: Database,
   data: StyleProfile
 ): Promise<Response<StyleProfile & EntityWithCounts>> => {
-  const handle = handleEntity2<StyleProfile>(db, 'style_profiles', 'sp', styleProfileFields, {
+  const handle = handleEntity<StyleProfile>(db, 'style_profiles', 'sp', styleProfileFields, {
     joins: `LEFT JOIN invoices i ON i.styleProfilesId = sp.id`,
     invoiceCountExpr: `
           COUNT(DISTINCT CASE WHEN i.invoiceType = 'invoice'
@@ -95,7 +95,7 @@ export const deleteStyleProfile = async (db: Database, id: number) => {
 };
 
 export const batchAddStyleProfile = async (db: Database, data: StyleProfile[]) => {
-  const handle = handleEntity2<StyleProfile>(db, 'style_profiles', 'sp', styleProfileFields, {
+  const handle = handleEntity<StyleProfile>(db, 'style_profiles', 'sp', styleProfileFields, {
     joins: `LEFT JOIN invoices i ON i.styleProfilesId = sp.id`,
     invoiceCountExpr: `
           COUNT(DISTINCT CASE WHEN i.invoiceType = 'invoice'

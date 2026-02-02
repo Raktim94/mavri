@@ -2,13 +2,13 @@ import type { Database } from 'sqlite3';
 import type { Category } from '../types/category';
 import type { FilterData } from '../types/invoiceFilter';
 import { runDb } from '../utils/dbFuntions';
-import { getAllEntities2, handleEntity2 } from '../utils/entitiesFunctions';
+import { getAllEntities, handleEntity } from '../utils/entitiesFunctions';
 import { mapSqliteError } from '../utils/errorFunctions';
 
 const categoryFields: (keyof Category)[] = ['name', 'isArchived'];
 
 export const getAllCategories = async (db: Database, filter?: FilterData[]) => {
-  const getAll = getAllEntities2<Category>(db, 'categories', 'c', {
+  const getAll = getAllEntities<Category>(db, 'categories', 'c', {
     joins: `
         LEFT JOIN items it ON it.categoryId = c.id
         LEFT JOIN invoice_items ii ON ii.itemId = it.id
@@ -27,7 +27,7 @@ export const getAllCategories = async (db: Database, filter?: FilterData[]) => {
 };
 
 export const addCategory = async (db: Database, data: Category) => {
-  const handle = handleEntity2<Category>(db, 'categories', 'c', categoryFields, {
+  const handle = handleEntity<Category>(db, 'categories', 'c', categoryFields, {
     joins: `
           LEFT JOIN items it ON it.categoryId = c.id
           LEFT JOIN invoice_items ii ON ii.itemId = it.id
@@ -46,7 +46,7 @@ export const addCategory = async (db: Database, data: Category) => {
 };
 
 export const updateCategory = async (db: Database, data: Category) => {
-  const handle = handleEntity2<Category>(db, 'categories', 'c', categoryFields, {
+  const handle = handleEntity<Category>(db, 'categories', 'c', categoryFields, {
     joins: `
           LEFT JOIN items it ON it.categoryId = c.id
           LEFT JOIN invoice_items ii ON ii.itemId = it.id
@@ -74,7 +74,7 @@ export const deleteCategory = async (db: Database, id: number) => {
 };
 
 export const batchAddCategory = async (db: Database, data: Category[]) => {
-  const handle = handleEntity2<Category>(db, 'categories', 'c', categoryFields, {
+  const handle = handleEntity<Category>(db, 'categories', 'c', categoryFields, {
     joins: `
           LEFT JOIN items it ON it.categoryId = c.id
           LEFT JOIN invoice_items ii ON ii.itemId = it.id

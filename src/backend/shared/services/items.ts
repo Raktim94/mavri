@@ -44,8 +44,8 @@ export const handleItemEntity =
         LEFT JOIN categories c ON it.categoryId = c.id
         LEFT JOIN invoice_items ii ON ii.itemId = it.id
         LEFT JOIN invoices inv ON ii.parentInvoiceId = inv.id
+        WHERE it.id = ?
         GROUP BY it.id
-          WHERE it.id = ?
         ORDER BY it.createdAt DESC
       `;
 

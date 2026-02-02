@@ -8,7 +8,7 @@ import { getAllRows, getFirstRow, runDb } from './dbFuntions';
 import { mapSqliteError } from './errorFunctions';
 import { getHavingClauseFromFilters } from './filterFunctions';
 
-export const getAllEntities2 =
+export const getAllEntities =
   <T extends object>(
     db: Database,
     table: string,
@@ -40,7 +40,7 @@ export const getAllEntities2 =
     return { success: true, data };
   };
 
-export const handleEntity2 =
+export const handleEntity =
   <T extends EntityWithId>(
     db: Database,
     table: string,
