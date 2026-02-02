@@ -17,4 +17,6 @@ export interface Business {
   description?: string;
   createdAt: string;
   updatedAt: string;
+  invoiceCount: number;
+  quotesCount: number;
 }

@@ -1,55 +1,46 @@
 import type { Database } from 'sqlite3';
 
+import type { Business } from '../types/business';
+import type { Category } from '../types/category';
+import type { Client } from '../types/client';
+import type { Currency } from '../types/currency';
+import type { Invoice, InvoiceAttachment, InvoiceItem, InvoicePayment } from '../types/invoice';
+import type { Item } from '../types/item';
 import type { SqliteValue } from '../types/sqliteValue';
+import type { StyleProfile } from '../types/styleProfiles';
+import type { Unit } from '../types/unit';
+import {
+  decodeInvoiceAttachment,
+  decodeInvoiceWithouthAttachments,
+  decodeLogo,
+  decodeStyleProfile,
+  encodeInvoiceAttachment,
+  encodeInvoiceWithouthAttachments,
+  encodeLogo,
+  encodeStyleProfile
+} from '../utils/dataUrlFunctions';
 import { getAllRows, getFirstRow, runDb, toSqliteValue } from '../utils/dbFuntions';
 import { mapSqliteError } from '../utils/errorFunctions';
-import { fromBase64 } from '../utils/generalFunctions';
 
 export const exportAllData = async (db: Database) => {
   try {
-    const styleProfiles = await getAllRows(db, 'SELECT * FROM style_profiles');
+    const styleProfiles = await getAllRows<StyleProfile>(db, 'SELECT * FROM style_profiles');
     const settingsRow = await getFirstRow(db, 'SELECT * FROM settings LIMIT 1');
-    const businesses = await getAllRows(db, 'SELECT * FROM businesses');
-    const clients = await getAllRows(db, 'SELECT * FROM clients');
-    const items = await getAllRows(db, 'SELECT * FROM items');
-    const units = await getAllRows(db, 'SELECT * FROM units');
-    const categories = await getAllRows(db, 'SELECT * FROM categories');
-    const currencies = await getAllRows(db, 'SELECT * FROM currencies');
-    const invoices = await getAllRows(db, 'SELECT * FROM invoices');
-    const invoiceItems = await getAllRows(db, 'SELECT * FROM invoice_items');
-    const invoicePayments = await getAllRows(db, 'SELECT * FROM invoice_payments');
-    const attachments = await getAllRows(db, 'SELECT * FROM attachments');
+    const businesses = await getAllRows<Business>(db, 'SELECT * FROM businesses');
+    const clients = await getAllRows<Client>(db, 'SELECT * FROM clients');
+    const items = await getAllRows<Item>(db, 'SELECT * FROM items');
+    const units = await getAllRows<Unit>(db, 'SELECT * FROM units');
+    const categories = await getAllRows<Category>(db, 'SELECT * FROM categories');
+    const currencies = await getAllRows<Currency>(db, 'SELECT * FROM currencies');
+    const invoices = await getAllRows<Invoice>(db, 'SELECT * FROM invoices');
+    const invoiceItems = await getAllRows<InvoiceItem>(db, 'SELECT * FROM invoice_items');
+    const invoicePayments = await getAllRows<InvoicePayment>(db, 'SELECT * FROM invoice_payments');
+    const attachments = await getAllRows<InvoiceAttachment>(db, 'SELECT * FROM attachments');
 
-    const attachmentsModified = attachments.map((a: Record<string, unknown>) => {
-      const buf = a.data as Buffer | null;
-      return { ...a, data: buf ? buf.toString('base64') : null };
-    });
-    const businessesModified = businesses.map((b: Record<string, unknown>) => {
-      const buf = b.logo as Buffer | null;
-      return { ...b, logo: buf ? buf.toString('base64') : null };
-    });
-    const styleProfilesModified = styleProfiles.map((sp: Record<string, unknown>) => {
-      const bufWatermarPaid = sp.customizationPaidWatermarkFileData as Buffer | null;
-      const bufWatermark = sp.customizationWatermarkFileData as Buffer | null;
-      return {
-        ...sp,
-        customizationPaidWatermarkFileData: bufWatermarPaid ? bufWatermarPaid.toString('base64') : null,
-        customizationWatermarkFileData: bufWatermark ? bufWatermark.toString('base64') : null
-      };
-    });
-    const invoicesModified = invoices.map((i: Record<string, unknown>) => {
-      const bufLogo = i.businessLogoSnapshot as Buffer | null;
-      const bufWatermarPaid = i.customizationPaidWatermarkFileData as Buffer | null;
-      const bufWatermark = i.customizationWatermarkFileData as Buffer | null;
-      const bufSignature = i.signatureData as Buffer | null;
-      return {
-        ...i,
-        signatureData: bufSignature ? bufSignature.toString('base64') : null,
-        businessLogoSnapshot: bufLogo ? bufLogo.toString('base64') : null,
-        customizationPaidWatermarkFileData: bufWatermarPaid ? bufWatermarPaid.toString('base64') : null,
-        customizationWatermarkFileData: bufWatermark ? bufWatermark.toString('base64') : null
-      };
-    });
+    const attachmentsModified = attachments.map(encodeInvoiceAttachment);
+    const businessesModified = businesses.map(encodeLogo);
+    const styleProfilesModified = styleProfiles.map(encodeStyleProfile);
+    const invoicesModified = invoices.map(encodeInvoiceWithouthAttachments);
 
     const payload = {
       settings: settingsRow ?? null,
@@ -152,32 +143,16 @@ export const importAllData = async (db: Database, parsed: Record<string, unknown
       const parsedMut = { ...parsed };
 
       if (Array.isArray(parsedMut.attachments)) {
-        parsedMut.attachments = parsedMut.attachments.map((a: Record<string, unknown>) => ({
-          ...a,
-          data: fromBase64(a.data)
-        }));
+        parsedMut.attachments = parsedMut.attachments.map(decodeInvoiceAttachment);
       }
       if (Array.isArray(parsedMut.styleProfiles)) {
-        parsedMut.styleProfiles = parsedMut.styleProfiles.map((sp: Record<string, unknown>) => ({
-          ...sp,
-          customizationPaidWatermarkFileData: fromBase64(sp.customizationPaidWatermarkFileData),
-          customizationWatermarkFileData: fromBase64(sp.customizationWatermarkFileData)
-        }));
+        parsedMut.styleProfiles = parsedMut.styleProfiles.map(decodeStyleProfile);
       }
       if (Array.isArray(parsedMut.businesses)) {
-        parsedMut.businesses = parsedMut.businesses.map((b: Record<string, unknown>) => ({
-          ...b,
-          logo: fromBase64(b.logo)
-        }));
+        parsedMut.businesses = parsedMut.businesses.map(decodeLogo);
       }
       if (Array.isArray(parsedMut.invoices)) {
-        parsedMut.invoices = parsedMut.invoices.map((i: Record<string, unknown>) => ({
-          ...i,
-          signatureData: fromBase64(i.signatureData),
-          businessLogoSnapshot: fromBase64(i.businessLogoSnapshot),
-          customizationPaidWatermarkFileData: fromBase64(i.customizationPaidWatermarkFileData),
-          customizationWatermarkFileData: fromBase64(i.customizationWatermarkFileData)
-        }));
+        parsedMut.invoices = parsedMut.invoices.map(decodeInvoiceWithouthAttachments);
       }
 
       for (const [table, key] of Object.entries(tableDataMap)) {

@@ -37,3 +37,7 @@ dist-be
 release
 
 dbDirectory/*.db
+
+dist-fe
+dist-be
+dist-electron

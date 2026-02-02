@@ -144,7 +144,7 @@ export interface InvoiceAttachment extends InvoiceAttachmentMeta {
 }
 
 export interface InvoiceAttachmentWeb extends InvoiceAttachmentMeta {
-  data: string | null;
+  data: string;
 }
 
 export interface InvoiceItem {

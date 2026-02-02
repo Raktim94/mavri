@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { getApi } from '../../api/restApi';
-import type { ClientAdd } from '../../types/client';
+import type { Client, ClientAdd } from '../../types/client';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
 import { useAsyncAction } from '../useAsyncAction';
@@ -15,7 +15,7 @@ export const useClientAddBatch = ({ clients, immediate = true, showLoader = true
     return getApi().addBatchClient(clients);
   }, [clients]);
 
-  const { data, loading, execute } = useAsyncAction<Response<ClientAdd[]>>(asyncFn, {
+  const { data, loading, execute } = useAsyncAction<Response<Client[]>>(asyncFn, {
     immediate,
     showLoader,
     onDone

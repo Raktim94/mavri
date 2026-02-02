@@ -1,45 +1,59 @@
 import type { Database } from 'sqlite3';
 import type { EntityWithId } from '../../shared/types/entityWithId';
 import type { FilterData } from '../../shared/types/invoiceFilter';
+import type { Response } from '../../shared/types/response';
+import type { EntityWithCounts } from '../types/entityWithCounts';
+import type { InvoiceAggregation } from '../types/InvoiceAggregation';
 import { getAllRows, getFirstRow, runDb } from './dbFuntions';
 import { mapSqliteError } from './errorFunctions';
 import { getHavingClauseFromFilters } from './filterFunctions';
 
-export const getAllEntities =
-  <T extends Record<string, unknown>>(db: Database, table: string, keyFieldName: string) =>
+export const getAllEntities2 =
+  <T extends object>(
+    db: Database,
+    table: string,
+    alias: string,
+    aggregation: InvoiceAggregation
+  ): ((filter: FilterData[]) => Promise<Response<(T & EntityWithCounts)[]>>) =>
   async (filter: FilterData[]) => {
     const havingClause = getHavingClauseFromFilters({
       filters: filter,
-      invoiceUpdatedAtColumn: 'i.updatedAt',
-      invoiceIdColumn: 'i.id',
-      archivedColumn: 't.isArchived'
+      invoiceUpdatedAtColumn: 'inv.updatedAt',
+      invoiceIdColumn: 'inv.id',
+      archivedColumn: `${alias}.isArchived`
     });
+
     const sql = `
-      SELECT 
-        t.*,
-        COUNT(DISTINCT CASE WHEN i.invoiceType = 'invoice' THEN i.id END) AS invoiceCount,
-        COUNT(DISTINCT CASE WHEN i.invoiceType = 'quotation' THEN i.id END) AS quotesCount
-      FROM ${table} t
-      LEFT JOIN invoices i ON i.${keyFieldName} = t.id
-      GROUP BY t.id
-      ${havingClause ? havingClause : ''}
-      ORDER BY t.createdAt DESC
+      SELECT
+        ${alias}.*,
+        ${aggregation.invoiceCountExpr} AS invoiceCount,
+        ${aggregation.quotesCountExpr} AS quotesCount
+      FROM ${table} ${alias}
+      ${aggregation.joins}
+      GROUP BY ${alias}.id
+      ${havingClause || ''}
+      ORDER BY ${alias}.createdAt DESC
     `;
 
-    const data = await getAllRows<T & { invoiceCount: number; quotesCount: number }>(db, sql);
+    const data = await getAllRows<T & EntityWithCounts>(db, sql);
 
-    return {
-      success: true,
-      data: data
-    };
+    return { success: true, data };
   };
 
-export const handleEntity =
-  <T extends EntityWithId>(db: Database, table: string, fields: readonly (keyof T)[]) =>
-  async (data: T, isUpdate = false) => {
+export const handleEntity2 =
+  <T extends EntityWithId>(
+    db: Database,
+    table: string,
+    alias: string,
+    fields: readonly (keyof T)[],
+    aggregation: InvoiceAggregation
+  ) =>
+  async (data: T, isUpdate = false): Promise<Response<T & EntityWithCounts>> => {
     const params = fields.map(key => (data[key] ?? null) as string | number | null);
-    let lastID = -1;
+
     try {
+      let lastID = -1;
+
       if (isUpdate) {
         const setClause = fields.map(f => `${String(f)} = ?`).join(', ') + `, updatedAt = datetime('now')`;
 
@@ -47,15 +61,27 @@ export const handleEntity =
       } else {
         lastID = await runDb(
           db,
-          `INSERT INTO ${table} (${fields.map(f => String(f)).join(',')}) VALUES (${fields.map(() => '?').join(',')})`,
+          `INSERT INTO ${table} (${fields.join(',')})
+           VALUES (${fields.map(() => '?').join(',')})`,
           params
         );
       }
 
-      const row = await getFirstRow(db, `SELECT * FROM ${table} WHERE id = ?;`, [lastID]);
+      const sql = `
+        SELECT
+          ${alias}.*,
+          ${aggregation.invoiceCountExpr} AS invoiceCount,
+          ${aggregation.quotesCountExpr} AS quotesCount
+        FROM ${table} ${alias}
+        ${aggregation.joins}
+        WHERE ${alias}.id = ?
+        GROUP BY ${alias}.id
+      `;
 
-      return { success: true, data: row, message: undefined, key: undefined };
+      const row = await getFirstRow<T & EntityWithCounts>(db, sql, [lastID]);
+
+      return { success: true, data: row ?? undefined };
     } catch (error) {
-      return { success: false, ...mapSqliteError(error), data: undefined };
+      return { success: false, ...mapSqliteError(error) };
     }
   };

@@ -1,45 +1,66 @@
 import type { Database } from 'sqlite3';
 import type { FilterData } from '../types/invoiceFilter';
 import type { Unit } from '../types/unit';
-import { getAllRows, runDb } from '../utils/dbFuntions';
-import { handleEntity } from '../utils/entitiesFunctions';
+import { runDb } from '../utils/dbFuntions';
+import { getAllEntities2, handleEntity2 } from '../utils/entitiesFunctions';
 import { mapSqliteError } from '../utils/errorFunctions';
-import { getHavingClauseFromFilters } from '../utils/filterFunctions';
 
 const unitFields: (keyof Unit)[] = ['name', 'isArchived'];
 
 export const getAllUnits = async (db: Database, filter?: FilterData[]) => {
-  const havingClause = getHavingClauseFromFilters({
-    filters: filter ?? [],
-    invoiceUpdatedAtColumn: 'inv.updatedAt',
-    invoiceIdColumn: 'inv.id',
-    archivedColumn: 'u.isArchived'
+  const getAll = getAllEntities2<Unit>(db, 'units', 'u', {
+    joins: `
+      LEFT JOIN items it ON it.unitId = u.id
+      LEFT JOIN invoice_items ii ON ii.itemId = it.id
+      LEFT JOIN invoices inv ON ii.parentInvoiceId = inv.id
+    `,
+    invoiceCountExpr: `
+      COUNT(DISTINCT CASE WHEN inv.invoiceType = 'invoice'
+        THEN ii.parentInvoiceId END)
+    `,
+    quotesCountExpr: `
+      COUNT(DISTINCT CASE WHEN inv.invoiceType = 'quotation'
+        THEN ii.parentInvoiceId END)
+    `
   });
-
-  const sql = `
-       SELECT
-           u.*,
-           COUNT(DISTINCT CASE WHEN inv.invoiceType = 'invoice' THEN ii.parentInvoiceId END) AS invoiceCount,
-           COUNT(DISTINCT CASE WHEN inv.invoiceType = 'quotation' THEN ii.parentInvoiceId END) AS quotesCount
-       FROM units u
-       LEFT JOIN items it ON it.unitId = u.id
-       LEFT JOIN invoice_items ii ON ii.itemId = it.id
-       LEFT JOIN invoices inv ON ii.parentInvoiceId = inv.id
-       GROUP BY u.id
-       ${havingClause ? havingClause : ''}
-       ORDER BY u.createdAt DESC
-     `;
-  const data = await getAllRows(db, sql);
-  return { success: true, data };
+  return getAll(filter ?? []);
 };
 
 export const addUnit = async (db: Database, data: Unit) => {
-  const handle = handleEntity<Unit>(db, 'units', unitFields);
+  const handle = handleEntity2<Unit>(db, 'units', 'u', unitFields, {
+    joins: `
+        LEFT JOIN items it ON it.unitId = u.id
+        LEFT JOIN invoice_items ii ON ii.itemId = it.id
+        LEFT JOIN invoices inv ON ii.parentInvoiceId = inv.id
+      `,
+    invoiceCountExpr: `
+        COUNT(DISTINCT CASE WHEN inv.invoiceType = 'invoice'
+          THEN ii.parentInvoiceId END)
+      `,
+    quotesCountExpr: `
+        COUNT(DISTINCT CASE WHEN inv.invoiceType = 'quotation'
+          THEN ii.parentInvoiceId END)
+      `
+  });
   return handle(data);
 };
 
 export const updateUnit = async (db: Database, data: Unit) => {
-  const handle = handleEntity<Unit>(db, 'units', unitFields);
+  const handle = handleEntity2<Unit>(db, 'units', 'u', unitFields, {
+    joins: `
+        LEFT JOIN items it ON it.unitId = u.id
+        LEFT JOIN invoice_items ii ON ii.itemId = it.id
+        LEFT JOIN invoices inv ON ii.parentInvoiceId = inv.id
+      `,
+    invoiceCountExpr: `
+        COUNT(DISTINCT CASE WHEN inv.invoiceType = 'invoice'
+          THEN ii.parentInvoiceId END)
+      `,
+    quotesCountExpr: `
+        COUNT(DISTINCT CASE WHEN inv.invoiceType = 'quotation'
+          THEN ii.parentInvoiceId END)
+      `
+  });
   return handle(data, true);
 };
 
@@ -53,7 +74,21 @@ export const deleteUnit = async (db: Database, id: number) => {
 };
 
 export const batchAddUnit = async (db: Database, data: Unit[]) => {
-  const handle = handleEntity<Unit>(db, 'units', unitFields);
+  const handle = handleEntity2<Unit>(db, 'units', 'u', unitFields, {
+    joins: `
+        LEFT JOIN items it ON it.unitId = u.id
+        LEFT JOIN invoice_items ii ON ii.itemId = it.id
+        LEFT JOIN invoices inv ON ii.parentInvoiceId = inv.id
+      `,
+    invoiceCountExpr: `
+        COUNT(DISTINCT CASE WHEN inv.invoiceType = 'invoice'
+          THEN ii.parentInvoiceId END)
+      `,
+    quotesCountExpr: `
+        COUNT(DISTINCT CASE WHEN inv.invoiceType = 'quotation'
+          THEN ii.parentInvoiceId END)
+      `
+  });
   try {
     await runDb(db, 'BEGIN TRANSACTION');
     for (const row of data) {

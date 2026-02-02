@@ -67,7 +67,6 @@ export const initDatabaseController = (app: Express) => {
       await openDatabase(fullPath, createIfMissing);
       res.json({ success: true });
     } catch (err) {
-      console.log(err);
       res.status(500).json({ success: false, message: (err as Error).message });
     }
   });

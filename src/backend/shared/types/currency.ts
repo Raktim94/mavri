@@ -8,4 +8,6 @@ export interface Currency {
   isArchived: boolean;
   createdAt: string;
   updatedAt: string;
+  invoiceCount: number;
+  quotesCount: number;
 }

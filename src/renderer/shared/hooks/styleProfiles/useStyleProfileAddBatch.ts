@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { getApi } from '../../api/restApi';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
-import type { StyleProfileAdd } from '../../types/styleProfiles';
+import type { StyleProfile, StyleProfileAdd } from '../../types/styleProfiles';
 import { useAsyncAction } from '../useAsyncAction';
 
 interface UseStyleProfileParams extends RequestHook<Response<StyleProfileAdd[]>> {
@@ -20,7 +20,7 @@ export const useStyleProfileAddBatch = ({
     return getApi().addBatchStyleProfile(styleProfiles);
   }, [styleProfiles]);
 
-  const { data, loading, execute } = useAsyncAction<Response<StyleProfileAdd[]>>(asyncFn, {
+  const { data, loading, execute } = useAsyncAction<Response<StyleProfile[]>>(asyncFn, {
     immediate,
     showLoader,
     onDone

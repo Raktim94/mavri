@@ -141,10 +141,13 @@ export const selectState = (state: RootState) => state.pageSlice;
 export const selectIsLoading = createSelector(selectState, state => state.isLoading);
 export const selectToasts = createSelector(selectState, state => state.toasts);
 export const selectSettings = createSelector(selectState, state => state.settings);
-export const selectCategoriesOptions = createSelector(selectState, state => state.categoryOptions);
-export const selectUnitsOptions = createSelector(selectState, state => state.unitOptions);
-export const selectClientsSnapshotsOptions = createSelector(selectState, state => state.clientSnapshotOptions);
-export const selectBusinessesSnapshotsOptions = createSelector(selectState, state => state.businessSnapshotOptions);
+export const selectCategoriesOptions = createSelector(selectState, state => state.categoryOptions ?? []);
+export const selectUnitsOptions = createSelector(selectState, state => state.unitOptions ?? []);
+export const selectClientsSnapshotsOptions = createSelector(selectState, state => state.clientSnapshotOptions ?? []);
+export const selectBusinessesSnapshotsOptions = createSelector(
+  selectState,
+  state => state.businessSnapshotOptions ?? []
+);
 export const selectVersion = createSelector(selectState, state => state.version);
 export const selectNewVersion = createSelector(selectState, state => state.newVersion);
 export const selectUpdateMessage = createSelector(selectState, state => state.updateMessage);

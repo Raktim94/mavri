@@ -11,4 +11,6 @@ export interface Client {
   isArchived: boolean;
   createdAt: string;
   updatedAt: string;
+  invoiceCount: number;
+  quotesCount: number;
 }

@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { getApi } from '../../api/restApi';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
-import type { UnitAdd } from '../../types/unit';
+import type { Unit, UnitAdd } from '../../types/unit';
 import { useAsyncAction } from '../useAsyncAction';
 
 interface UseUnitAddParams extends RequestHook<Response<UnitAdd[]>> {
@@ -15,7 +15,7 @@ export const useUnitAddBatch = ({ units, immediate = true, showLoader = true, on
     return getApi().addBatchUnit(units);
   }, [units]);
 
-  const { data, loading, execute } = useAsyncAction<Response<UnitAdd[]>>(asyncFn, {
+  const { data, loading, execute } = useAsyncAction<Response<Unit[]>>(asyncFn, {
     immediate,
     showLoader,
     onDone

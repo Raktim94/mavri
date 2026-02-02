@@ -4,4 +4,6 @@ export interface Unit {
   isArchived: boolean;
   createdAt: string;
   updatedAt: string;
+  invoiceCount: number;
+  quotesCount: number;
 }

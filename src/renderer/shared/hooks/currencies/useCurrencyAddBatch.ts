@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { getApi } from '../../api/restApi';
-import type { CurrencyAdd } from '../../types/currency';
+import type { Currency, CurrencyAdd } from '../../types/currency';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
 import { useAsyncAction } from '../useAsyncAction';
@@ -20,7 +20,7 @@ export const useCurrencyAddBatch = ({
     return getApi().addBatchCurrency(currencies);
   }, [currencies]);
 
-  const { data, loading, execute } = useAsyncAction<Response<CurrencyAdd[]>>(asyncFn, {
+  const { data, loading, execute } = useAsyncAction<Response<Currency[]>>(asyncFn, {
     immediate,
     showLoader,
     onDone

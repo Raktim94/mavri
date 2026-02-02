@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { getApi } from '../../api/restApi';
-import type { CategoryUpdate } from '../../types/category';
+import type { Category, CategoryUpdate } from '../../types/category';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
 import { useAsyncAction } from '../useAsyncAction';
@@ -15,12 +15,12 @@ export const useCategoryUpdate = ({
   showLoader = true,
   onDone
 }: UseCategoryUpdateParams) => {
-  const asyncFn = useCallback(async (): Promise<Response<CategoryUpdate>> => {
+  const asyncFn = useCallback(async (): Promise<Response<Category>> => {
     if (!category) return Promise.resolve({ success: false });
     return getApi().updateCategory(category);
   }, [category]);
 
-  const { data, loading, execute } = useAsyncAction<Response<CategoryUpdate>>(asyncFn, {
+  const { data, loading, execute } = useAsyncAction<Response<Category>>(asyncFn, {
     immediate,
     showLoader,
     onDone

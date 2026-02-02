@@ -1,8 +1,10 @@
 import type { Database } from 'sqlite3';
+import type { Response } from '../../shared/types/response';
+import type { EntityWithCounts } from '../types/entityWithCounts';
+import type { EntityWithId } from '../types/entityWithId';
 import type { Invoice, InvoiceAttachment, InvoiceItem, InvoicePayment } from '../types/invoice';
 import type { FilterData } from '../types/invoiceFilter';
 import { getAllRows, getFirstRow, runDb } from '../utils/dbFuntions';
-import { handleEntity } from '../utils/entitiesFunctions';
 import { mapSqliteError } from '../utils/errorFunctions';
 import { getWhereClauseFromFilters } from '../utils/filterFunctions';
 
@@ -11,6 +13,31 @@ type GetInvoicesOptions = {
   type?: 'invoice' | 'quotation';
   filter?: FilterData[];
 };
+
+export const handleEntity =
+  <T extends EntityWithId>(db: Database, table: string, fields: readonly (keyof T)[]) =>
+  async (data: T, isUpdate = false): Promise<Response<T & EntityWithCounts>> => {
+    const params = fields.map(key => (data[key] ?? null) as string | number | null);
+
+    try {
+      if (isUpdate) {
+        const setClause = fields.map(f => `${String(f)} = ?`).join(', ') + `, updatedAt = datetime('now')`;
+
+        await runDb(db, `UPDATE ${table} SET ${setClause} WHERE id = ?`, [...params, data.id ?? -1]);
+      } else {
+        await runDb(
+          db,
+          `INSERT INTO ${table} (${fields.join(',')})
+           VALUES (${fields.map(() => '?').join(',')})`,
+          params
+        );
+      }
+
+      return { success: true, data: undefined };
+    } catch (error) {
+      return { success: false, ...mapSqliteError(error) };
+    }
+  };
 
 const invoiceFields: (keyof Invoice)[] = [
   'invoiceType',
@@ -120,21 +147,21 @@ const getInvoices = async (db: Database, options: GetInvoicesOptions) => {
         ${whereSql}
         ORDER BY i.createdAt DESC
       `;
-  const invoices = await getAllRows(db, invoicesSql);
+  const invoices = await getAllRows<Invoice>(db, invoicesSql);
 
   const invoiceIds = invoices.map(i => i.id) as number[];
   const placeholders = invoiceIds.map(() => '?').join(', ');
-  const invoicePayments = await getAllRows(
+  const invoicePayments = await getAllRows<InvoicePayment>(
     db,
     `SELECT ip.* FROM invoice_payments as ip WHERE parentInvoiceId IN (${placeholders})`,
     invoiceIds
   );
-  const invoiceItems = await getAllRows(
+  const invoiceItems = await getAllRows<InvoiceItem>(
     db,
     `SELECT ii.* FROM invoice_items as ii WHERE parentInvoiceId IN (${placeholders})`,
     invoiceIds
   );
-  const invoiceAttachments = await getAllRows(
+  const invoiceAttachments = await getAllRows<InvoiceAttachment>(
     db,
     `SELECT ia.* FROM attachments as ia WHERE parentInvoiceId IN (${placeholders})`,
     invoiceIds
@@ -172,6 +199,7 @@ export const addInvoice = async (db: Database, data: Invoice) => {
     await runDb(db, 'BEGIN TRANSACTION');
 
     const result = await handleInvoice(data);
+
     if (!result.success || !result.data) {
       await runDb(db, 'ROLLBACK');
       return { success: false, key: result.key };
@@ -186,30 +214,50 @@ export const addInvoice = async (db: Database, data: Invoice) => {
 
     const newId = lastRow.id as number;
 
+    let failure = undefined;
     for (const item of data.invoiceItems ?? []) {
       const r = await handleInvoiceItems({ ...item, parentInvoiceId: newId });
       if (!r.success) {
         await runDb(db, 'ROLLBACK');
-        return r;
+        failure = r;
+        break;
       }
     }
+
+    if (failure) {
+      return { success: false, key: failure.key, message: failure.message };
+    }
+
     for (const payment of data.invoicePayments ?? []) {
       const r = await handleInvoicePayments({ ...payment, parentInvoiceId: newId });
       if (!r.success) {
         await runDb(db, 'ROLLBACK');
-        return r;
+        failure = r;
+        break;
       }
     }
+
+    if (failure) {
+      return { success: false, key: failure.key, message: failure.message };
+    }
+
     for (const attachment of data.invoiceAttachments ?? []) {
       const r = await handleAttachments({ ...attachment, parentInvoiceId: newId });
       if (!r.success) {
         await runDb(db, 'ROLLBACK');
-        return r;
+        failure = r;
+        break;
       }
     }
 
+    if (failure) {
+      return { success: false, key: failure.key, message: failure.message };
+    }
+
+    const newResult = await getInvoices(db, { id: newId });
+
     await runDb(db, 'COMMIT');
-    return { success: true, data: result.data };
+    return { success: true, data: newResult.length > 0 ? newResult[0] : newResult };
   } catch (error) {
     await runDb(db, 'ROLLBACK');
     return { success: false, ...mapSqliteError(error) };
@@ -227,7 +275,6 @@ export const updateInvoice = async (db: Database, data: Invoice) => {
     const result = await handleInvoice(data, true);
     if (!result.success || !data.id) {
       await runDb(db, 'ROLLBACK');
-      console.log(result);
       return { success: false, key: result.key };
     }
 
@@ -261,6 +308,8 @@ export const updateInvoice = async (db: Database, data: Invoice) => {
       await runDb(db, `DELETE FROM invoice_payments WHERE parentInvoiceId = ?`, [data.id]);
     }
 
+    let failure = undefined;
+
     for (const payment of data.invoicePayments ?? []) {
       if (payment.id) {
         const existing = await getFirstRow(db, `SELECT id FROM invoice_payments WHERE id = ?`, [payment.id]);
@@ -268,7 +317,8 @@ export const updateInvoice = async (db: Database, data: Invoice) => {
           const r = await handleInvoicePayments({ ...payment, parentInvoiceId: data.id }, true);
           if (!r.success) {
             await runDb(db, 'ROLLBACK');
-            return r;
+            failure = r;
+            break;
           }
           continue;
         }
@@ -277,8 +327,13 @@ export const updateInvoice = async (db: Database, data: Invoice) => {
       const r = await handleInvoicePayments({ ...payment, parentInvoiceId: data.id });
       if (!r.success) {
         await runDb(db, 'ROLLBACK');
-        return r;
+        failure = r;
+        break;
       }
+    }
+
+    if (failure) {
+      return { success: false, key: failure.key, message: failure.message };
     }
 
     await runDb(db, 'DELETE FROM attachments WHERE parentInvoiceId = ?;', [data.id]);
@@ -286,14 +341,20 @@ export const updateInvoice = async (db: Database, data: Invoice) => {
       const r = await handleAttachments({ ...attachment, parentInvoiceId: data.id });
       if (!r.success) {
         await runDb(db, 'ROLLBACK');
-        return r;
+        failure = r;
+        break;
       }
     }
 
+    if (failure) {
+      return { success: false, key: failure.key, message: failure.message };
+    }
+
+    const newResult = await getInvoices(db, { id: data.id });
+
     await runDb(db, 'COMMIT');
-    return { success: true };
+    return { success: true, data: newResult.length > 0 ? newResult[0] : newResult };
   } catch (error) {
-    console.log(error);
     await runDb(db, 'ROLLBACK');
     return { success: false, ...mapSqliteError(error) };
   }
@@ -387,7 +448,7 @@ export const duplicateInvoice = async (db: Database, invoiceId: number, invoiceT
     );
 
     const duplicated = await getInvoices(db, { id: duplicatedRowID });
-    return { success: true, data: duplicated[0] };
+    return { success: true, data: duplicated.length > 0 ? duplicated[0] : duplicated };
   } catch (error) {
     return { success: false, ...mapSqliteError(error) };
   }

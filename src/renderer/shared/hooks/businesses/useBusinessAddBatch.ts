@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { getApi } from '../../api/restApi';
-import type { BusinessAdd } from '../../types/business';
+import type { Business, BusinessAdd } from '../../types/business';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
 import { useAsyncAction } from '../useAsyncAction';
@@ -20,7 +20,7 @@ export const useBusinessAddBatch = ({
     return getApi().addBatchBusiness(businesses);
   }, [businesses]);
 
-  const { data, loading, execute } = useAsyncAction<Response<BusinessAdd[]>>(asyncFn, {
+  const { data, loading, execute } = useAsyncAction<Response<Business[]>>(asyncFn, {
     immediate,
     showLoader,
     onDone

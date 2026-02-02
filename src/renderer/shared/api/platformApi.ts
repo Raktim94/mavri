@@ -1,13 +1,13 @@
 import type { DBInitType } from '../enums/dbInitType';
 import type { InvoiceType } from '../enums/invoiceType';
-import type { BusinessAdd, BusinessUpdate, BusinessUpdateWeb, BusinessWeb } from '../types/business';
+import type { BusinessAdd, BusinessUpdate, BusinessWeb } from '../types/business';
 import type { Category, CategoryAdd, CategoryUpdate } from '../types/category';
 import type { Client, ClientAdd, ClientUpdate } from '../types/client';
 import type { Currency, CurrencyAdd, CurrencyUpdate } from '../types/currency';
 import type { DBSelector } from '../types/dbSelector';
 import type { ExportMeta } from '../types/exportMeta';
 import type { FilterData } from '../types/filter';
-import type { InvoiceAdd, InvoiceAddWeb, InvoiceUpdate, InvoiceUpdateWeb, InvoiceWeb } from '../types/invoice';
+import type { InvoiceAdd, InvoiceAttachment, InvoiceAttachmentWeb, InvoiceUpdate, InvoiceWeb } from '../types/invoice';
 import type { Item, ItemAdd, ItemUpdate } from '../types/item';
 import type { Response } from '../types/response';
 import type { Settings, SettingsUpdate } from '../types/settings';
@@ -20,6 +20,54 @@ import type {
 import type { Unit, UnitAdd, UnitUpdate } from '../types/unit';
 import type { ProgressInfo } from '../types/updater';
 import { base64ToBytes, toDataUrl } from '../utils/dataUrlFunctions';
+
+const fileToBase64 = async (file?: Uint8Array | null) => {
+  if (!file) return null;
+  const dataUrl = await toDataUrl(file);
+  return dataUrl.split(',')[1] ?? null;
+};
+
+const base64ToBytesOrUndef = (b64?: string | null) => (b64 ? base64ToBytes(b64) : undefined);
+
+const mapStyleProfileFromWeb = <T extends StyleProfileWeb | StyleProfileUpdateWeb>(sp: T) => ({
+  ...sp,
+  customizationPaidWatermarkFileData: base64ToBytesOrUndef(sp.customizationPaidWatermarkFileData),
+  customizationWatermarkFileData: base64ToBytesOrUndef(sp.customizationWatermarkFileData)
+});
+
+const mapStyleProfileToWeb = async <T extends StyleProfileUpdate | StyleProfileAdd>(data: T) => ({
+  ...data,
+  customizationPaidWatermarkFileData: await fileToBase64(data.customizationPaidWatermarkFileData),
+  customizationWatermarkFileData: await fileToBase64(data.customizationWatermarkFileData)
+});
+
+const mapAttachmentFromWeb = (ia: InvoiceAttachmentWeb) => ({
+  ...ia,
+  data: base64ToBytes(ia.data)
+});
+
+const mapAttachmentToWeb = async (ia: InvoiceAttachment) => ({
+  ...ia,
+  data: await fileToBase64(ia.data)
+});
+
+const mapInvoiceFromWeb = (i: InvoiceWeb) => ({
+  ...i,
+  signatureData: base64ToBytesOrUndef(i.signatureData),
+  businessLogoSnapshot: base64ToBytesOrUndef(i.businessLogoSnapshot),
+  customizationPaidWatermarkFileData: base64ToBytesOrUndef(i.customizationPaidWatermarkFileData),
+  customizationWatermarkFileData: base64ToBytesOrUndef(i.customizationWatermarkFileData),
+  invoiceAttachments: (i.invoiceAttachments ?? []).map(mapAttachmentFromWeb)
+});
+
+const mapInvoiceToWeb = async (data: InvoiceUpdate | InvoiceAdd) => ({
+  ...data,
+  signatureData: await fileToBase64(data.signatureData),
+  businessLogoSnapshot: await fileToBase64(data.businessLogoSnapshot),
+  customizationPaidWatermarkFileData: await fileToBase64(data.customizationPaidWatermarkFileData),
+  customizationWatermarkFileData: await fileToBase64(data.customizationWatermarkFileData),
+  invoiceAttachments: await Promise.all((data.invoiceAttachments ?? []).map(mapAttachmentToWeb))
+});
 
 const baseUrl = (): string => {
   if (typeof window === 'undefined') return '';
@@ -108,130 +156,74 @@ export const webApi = () => {
       );
       return {
         ...response,
-        data: response?.data?.map(b => ({
-          ...b,
-          logo: b.logo ? base64ToBytes(b.logo) : null
-        }))
+        data: response.data
+          ? response.data.map(b => ({
+              ...b,
+              logo: base64ToBytesOrUndef(b.logo)
+            }))
+          : response.data
       };
     },
     updateBusiness: async (data: BusinessUpdate) => {
-      const dataUrl = data.logo ? await toDataUrl(data.logo) : null;
-      const base64 = dataUrl ? dataUrl.split(',')[1] : null;
-
-      const dataModified = {
+      const response = await apiPut<Response<BusinessWeb>>('/api/businesses', {
         ...data,
-        logo: base64 ? base64 : null
-      };
-
-      const response = await apiPut<Response<BusinessUpdateWeb>>('/api/businesses', dataModified);
+        logo: await fileToBase64(data.logo)
+      });
 
       return {
         ...response,
-        data: {
-          ...response?.data,
-          logo: response?.data?.logo ? base64ToBytes(response.data.logo) : null
-        }
+        data: response.data
+          ? {
+              ...response.data,
+              logo: base64ToBytesOrUndef(response.data.logo)
+            }
+          : response.data
       };
     },
     addBusiness: async (data: BusinessAdd) => {
-      const dataUrl = data.logo ? await toDataUrl(data.logo) : null;
-      const base64 = dataUrl ? dataUrl.split(',')[1] : null;
-
-      const dataModified = {
+      const response = await apiPost<Response<BusinessWeb>>('/api/businesses', {
         ...data,
-        logo: base64 ? base64 : null
-      };
-      const response = await apiPost<Response<BusinessWeb>>('/api/businesses', dataModified);
+        logo: await fileToBase64(data.logo)
+      });
 
       return {
         ...response,
-        data: {
-          ...response?.data,
-          logo: response?.data?.logo ? base64ToBytes(response.data.logo) : null
-        }
+        data: response.data
+          ? {
+              ...response.data,
+              logo: base64ToBytesOrUndef(response.data.logo)
+            }
+          : response.data
       };
     },
     deleteBusiness: (id: number) => apiDelete<Response<unknown>>(`/api/businesses/${id}`),
-    addBatchBusiness: (data: BusinessAdd[]) => apiPost<Response<BusinessAdd[]>>('/api/businesses/batch', data),
+    addBatchBusiness: (data: BusinessAdd[]) => apiPost<Response<BusinessWeb[]>>('/api/businesses/batch', data),
 
     getAllStyleProfiles: async (filter?: FilterData[]) => {
       const response = await apiGet<Response<StyleProfileWeb[]>>(
         '/api/styleProfiles',
         filter?.length ? { filter: JSON.stringify(filter) } : undefined
       );
+
       return {
         ...response,
-        data: response?.data?.map(sp => ({
-          ...sp,
-          customizationPaidWatermarkFileData: sp.customizationPaidWatermarkFileData
-            ? base64ToBytes(sp.customizationPaidWatermarkFileData)
-            : null,
-          customizationWatermarkFileData: sp.customizationWatermarkFileData
-            ? base64ToBytes(sp.customizationWatermarkFileData)
-            : null
-        }))
+        data: response.data?.map(mapStyleProfileFromWeb) ?? []
       };
     },
     updateStyleProfile: async (data: StyleProfileUpdate) => {
-      const dataUrlPaidWatermark = data.customizationPaidWatermarkFileData
-        ? await toDataUrl(data.customizationPaidWatermarkFileData)
-        : null;
-      const dataUrlWatermark = data.customizationWatermarkFileData
-        ? await toDataUrl(data.customizationWatermarkFileData)
-        : null;
-      const base64PaidWatermark = dataUrlPaidWatermark ? dataUrlPaidWatermark.split(',')[1] : null;
-      const base64Watermark = dataUrlWatermark ? dataUrlWatermark.split(',')[1] : null;
-
-      const dataModified = {
-        ...data,
-        customizationPaidWatermarkFileData: base64PaidWatermark ? base64PaidWatermark : null,
-        customizationWatermarkFileData: base64Watermark ? base64Watermark : null
-      };
-
-      const response = await apiPut<Response<StyleProfileUpdateWeb>>('/api/styleProfiles', dataModified);
+      const response = await apiPut<Response<StyleProfileWeb>>('/api/styleProfiles', await mapStyleProfileToWeb(data));
 
       return {
         ...response,
-        data: {
-          ...response?.data,
-          customizationPaidWatermarkFileData: response?.data?.customizationPaidWatermarkFileData
-            ? base64ToBytes(response.data.customizationPaidWatermarkFileData)
-            : null,
-          customizationWatermarkFileData: response?.data?.customizationWatermarkFileData
-            ? base64ToBytes(response.data.customizationWatermarkFileData)
-            : null
-        }
+        data: response.data && mapStyleProfileFromWeb(response.data)
       };
     },
     addStyleProfile: async (data: StyleProfileAdd) => {
-      const dataUrlPaidWatermark = data.customizationPaidWatermarkFileData
-        ? await toDataUrl(data.customizationPaidWatermarkFileData)
-        : null;
-      const dataUrlWatermark = data.customizationWatermarkFileData
-        ? await toDataUrl(data.customizationWatermarkFileData)
-        : null;
-      const base64PaidWatermark = dataUrlPaidWatermark ? dataUrlPaidWatermark.split(',')[1] : null;
-      const base64Watermark = dataUrlWatermark ? dataUrlWatermark.split(',')[1] : null;
-
-      const dataModified = {
-        ...data,
-        customizationPaidWatermarkFileData: base64PaidWatermark ? base64PaidWatermark : null,
-        customizationWatermarkFileData: base64Watermark ? base64Watermark : null
-      };
-
-      const response = await apiPost<Response<StyleProfileWeb>>('/api/styleProfiles', dataModified);
+      const response = await apiPost<Response<StyleProfileWeb>>('/api/styleProfiles', await mapStyleProfileToWeb(data));
 
       return {
         ...response,
-        data: {
-          ...response?.data,
-          customizationPaidWatermarkFileData: response?.data?.customizationPaidWatermarkFileData
-            ? base64ToBytes(response.data.customizationPaidWatermarkFileData)
-            : null,
-          customizationWatermarkFileData: response?.data?.customizationWatermarkFileData
-            ? base64ToBytes(response.data.customizationWatermarkFileData)
-            : null
-        }
+        data: response.data && mapStyleProfileFromWeb(response.data)
       };
     },
     deleteStyleProfile: (id: number) => apiDelete<Response<unknown>>(`/api/styleProfiles/${id}`),
@@ -241,37 +233,37 @@ export const webApi = () => {
     getAllClients: (filter?: FilterData[]) =>
       apiGet<Response<Client[]>>('/api/clients', filter?.length ? { filter: JSON.stringify(filter) } : undefined),
     addClient: (data: ClientAdd) => apiPost<Response<Client>>('/api/clients', data),
-    updateClient: (data: ClientUpdate) => apiPut<Response<ClientUpdate>>('/api/clients', data),
+    updateClient: (data: ClientUpdate) => apiPut<Response<Client>>('/api/clients', data),
     deleteClient: (id: number) => apiDelete<Response<unknown>>(`/api/clients/${id}`),
-    addBatchClient: (data: ClientAdd[]) => apiPost<Response<ClientAdd[]>>('/api/clients/batch', data),
+    addBatchClient: (data: ClientAdd[]) => apiPost<Response<Client[]>>('/api/clients/batch', data),
 
     getAllItems: (filter?: FilterData[]) =>
       apiGet<Response<Item[]>>('/api/items', filter?.length ? { filter: JSON.stringify(filter) } : undefined),
     addItem: (data: ItemAdd) => apiPost<Response<Item>>('/api/items', data),
-    updateItem: (data: ItemUpdate) => apiPut<Response<ItemUpdate>>('/api/items', data),
+    updateItem: (data: ItemUpdate) => apiPut<Response<Item>>('/api/items', data),
     deleteItem: (id: number) => apiDelete<Response<unknown>>(`/api/items/${id}`),
-    addBatchItem: (data: ItemAdd[]) => apiPost<Response<ItemAdd[]>>('/api/items/batch', data),
+    addBatchItem: (data: ItemAdd[]) => apiPost<Response<Item[]>>('/api/items/batch', data),
 
     getAllUnits: (filter?: FilterData[]) =>
       apiGet<Response<Unit[]>>('/api/units', filter?.length ? { filter: JSON.stringify(filter) } : undefined),
     addUnit: (data: UnitAdd) => apiPost<Response<Unit>>('/api/units', data),
-    updateUnit: (data: UnitUpdate) => apiPut<Response<UnitUpdate>>('/api/units', data),
+    updateUnit: (data: UnitUpdate) => apiPut<Response<Unit>>('/api/units', data),
     deleteUnit: (id: number) => apiDelete<Response<unknown>>(`/api/units/${id}`),
-    addBatchUnit: (data: UnitAdd[]) => apiPost<Response<UnitAdd[]>>('/api/units/batch', data),
+    addBatchUnit: (data: UnitAdd[]) => apiPost<Response<Unit[]>>('/api/units/batch', data),
 
     getAllCategories: (filter?: FilterData[]) =>
       apiGet<Response<Category[]>>('/api/categories', filter?.length ? { filter: JSON.stringify(filter) } : undefined),
     addCategory: (data: CategoryAdd) => apiPost<Response<Category>>('/api/categories', data),
-    updateCategory: (data: CategoryUpdate) => apiPut<Response<CategoryUpdate>>('/api/categories', data),
+    updateCategory: (data: CategoryUpdate) => apiPut<Response<Category>>('/api/categories', data),
     deleteCategory: (id: number) => apiDelete<Response<unknown>>(`/api/categories/${id}`),
-    addBatchCategory: (data: CategoryAdd[]) => apiPost<Response<CategoryAdd[]>>('/api/categories/batch', data),
+    addBatchCategory: (data: CategoryAdd[]) => apiPost<Response<Category[]>>('/api/categories/batch', data),
 
     getAllCurrencies: (filter?: FilterData[]) =>
       apiGet<Response<Currency[]>>('/api/currencies', filter?.length ? { filter: JSON.stringify(filter) } : undefined),
     addCurrency: (data: CurrencyAdd) => apiPost<Response<Currency>>('/api/currencies', data),
-    updateCurrency: (data: CurrencyUpdate) => apiPut<Response<CurrencyUpdate>>('/api/currencies', data),
+    updateCurrency: (data: CurrencyUpdate) => apiPut<Response<Currency>>('/api/currencies', data),
     deleteCurrency: (id: number) => apiDelete<Response<unknown>>(`/api/currencies/${id}`),
-    addBatchCurrency: (data: CurrencyAdd[]) => apiPost<Response<CurrencyAdd[]>>('/api/currencies/batch', data),
+    addBatchCurrency: (data: CurrencyAdd[]) => apiPost<Response<Currency[]>>('/api/currencies/batch', data),
 
     getAllInvoices: async (type?: InvoiceType, filter?: FilterData[]) => {
       const params: Record<string, string> = {};
@@ -282,171 +274,37 @@ export const webApi = () => {
         '/api/invoices',
         Object.keys(params).length ? params : undefined
       );
+
       return {
         ...response,
-        data: response?.data?.map(i => ({
-          ...i,
-          signatureData: i.signatureData ? base64ToBytes(i.signatureData) : null,
-          businessLogoSnapshot: i.businessLogoSnapshot ? base64ToBytes(i.businessLogoSnapshot) : null,
-          customizationPaidWatermarkFileData: i.customizationPaidWatermarkFileData
-            ? base64ToBytes(i.customizationPaidWatermarkFileData)
-            : null,
-          customizationWatermarkFileData: i.customizationWatermarkFileData
-            ? base64ToBytes(i.customizationWatermarkFileData)
-            : null,
-          invoiceAttachments: i.invoiceAttachments.map(ia => ({
-            ...ia,
-            data: ia.data ? base64ToBytes(ia.data) : null
-          }))
-        }))
+        data: response.data?.map(mapInvoiceFromWeb)
       };
     },
     updateInvoice: async (data: InvoiceUpdate) => {
-      const dataUrlPaidWatermark = data.customizationPaidWatermarkFileData
-        ? await toDataUrl(data.customizationPaidWatermarkFileData)
-        : null;
-      const dataUrlWatermark = data.customizationWatermarkFileData
-        ? await toDataUrl(data.customizationWatermarkFileData)
-        : null;
-      const dataUrlSignature = data.signatureData ? await toDataUrl(data.signatureData) : null;
-      const dataUrlBusinessLogoSnapshot = data.businessLogoSnapshot ? await toDataUrl(data.businessLogoSnapshot) : null;
-      const base64PaidWatermark = dataUrlPaidWatermark ? dataUrlPaidWatermark.split(',')[1] : null;
-      const base64Watermark = dataUrlWatermark ? dataUrlWatermark.split(',')[1] : null;
-      const base64Signature = dataUrlSignature ? dataUrlSignature.split(',')[1] : null;
-      const base64BusinessLogoSnapshot = dataUrlBusinessLogoSnapshot ? dataUrlBusinessLogoSnapshot.split(',')[1] : null;
-
-      const attachmentsModified = [];
-      for (const ia of data.invoiceAttachments ?? []) {
-        const dataUrl = ia.data ? await toDataUrl(ia.data) : null;
-        const base64Data = dataUrl ? dataUrl.split(',')[1] : null;
-
-        attachmentsModified.push({
-          ...ia,
-          data: base64Data
-        });
-      }
-
-      const dataModified = {
-        ...data,
-        signatureData: base64Signature ? base64Signature : null,
-        businessLogoSnapshot: base64BusinessLogoSnapshot ? base64BusinessLogoSnapshot : null,
-        customizationPaidWatermarkFileData: base64PaidWatermark ? base64PaidWatermark : null,
-        customizationWatermarkFileData: base64Watermark ? base64Watermark : null,
-        invoiceAttachments: attachmentsModified
-      };
-
-      const response = await apiPut<Response<InvoiceUpdateWeb>>('/api/invoices', dataModified);
+      const response = await apiPut<Response<InvoiceWeb>>('/api/invoices', await mapInvoiceToWeb(data));
 
       return {
         ...response,
-        data: {
-          ...response?.data,
-          customizationPaidWatermarkFileData: response?.data?.customizationPaidWatermarkFileData
-            ? base64ToBytes(response.data.customizationPaidWatermarkFileData)
-            : null,
-          customizationWatermarkFileData: response?.data?.customizationWatermarkFileData
-            ? base64ToBytes(response.data.customizationWatermarkFileData)
-            : null,
-          signatureData: response?.data?.signatureData ? base64ToBytes(response.data.signatureData) : null,
-          businessLogoSnapshot: response?.data?.businessLogoSnapshot
-            ? base64ToBytes(response.data.businessLogoSnapshot)
-            : null,
-          invoiceAttachments: response?.data?.invoiceAttachments?.map(ia => {
-            return {
-              ...ia,
-              data: ia.data ? base64ToBytes(ia.data) : null
-            };
-          })
-        }
+        data: response.data && mapInvoiceFromWeb(response.data)
       };
     },
     addInvoice: async (data: InvoiceAdd) => {
-      const dataUrlPaidWatermark = data.customizationPaidWatermarkFileData
-        ? await toDataUrl(data.customizationPaidWatermarkFileData)
-        : null;
-      const dataUrlWatermark = data.customizationWatermarkFileData
-        ? await toDataUrl(data.customizationWatermarkFileData)
-        : null;
-      const dataUrlSignature = data.signatureData ? await toDataUrl(data.signatureData) : null;
-      const dataUrlBusinessLogoSnapshot = data.businessLogoSnapshot ? await toDataUrl(data.businessLogoSnapshot) : null;
-      const base64PaidWatermark = dataUrlPaidWatermark ? dataUrlPaidWatermark.split(',')[1] : null;
-      const base64Watermark = dataUrlWatermark ? dataUrlWatermark.split(',')[1] : null;
-      const base64Signature = dataUrlSignature ? dataUrlSignature.split(',')[1] : null;
-      const base64BusinessLogoSnapshot = dataUrlBusinessLogoSnapshot ? dataUrlBusinessLogoSnapshot.split(',')[1] : null;
-
-      const attachmentsModified = [];
-      for (const ia of data.invoiceAttachments ?? []) {
-        const dataUrl = ia.data ? await toDataUrl(ia.data) : null;
-        const base64Data = dataUrl ? dataUrl.split(',')[1] : null;
-
-        attachmentsModified.push({
-          ...ia,
-          data: base64Data
-        });
-      }
-
-      const dataModified = {
-        ...data,
-        signatureData: base64Signature ? base64Signature : null,
-        businessLogoSnapshot: base64BusinessLogoSnapshot ? base64BusinessLogoSnapshot : null,
-        customizationPaidWatermarkFileData: base64PaidWatermark ? base64PaidWatermark : null,
-        customizationWatermarkFileData: base64Watermark ? base64Watermark : null,
-        invoiceAttachments: attachmentsModified
-      };
-
-      const response = await apiPost<Response<InvoiceAddWeb>>('/api/invoices', dataModified);
+      const response = await apiPost<Response<InvoiceWeb>>('/api/invoices', await mapInvoiceToWeb(data));
 
       return {
         ...response,
-        data: {
-          ...response?.data,
-          customizationPaidWatermarkFileData: response?.data?.customizationPaidWatermarkFileData
-            ? base64ToBytes(response.data.customizationPaidWatermarkFileData)
-            : null,
-          customizationWatermarkFileData: response?.data?.customizationWatermarkFileData
-            ? base64ToBytes(response.data.customizationWatermarkFileData)
-            : null,
-          signatureData: response?.data?.signatureData ? base64ToBytes(response.data.signatureData) : null,
-          businessLogoSnapshot: response?.data?.businessLogoSnapshot
-            ? base64ToBytes(response.data.businessLogoSnapshot)
-            : null,
-          invoiceAttachments: response?.data?.invoiceAttachments?.map(ia => {
-            return {
-              ...ia,
-              data: ia.data ? base64ToBytes(ia.data) : null
-            };
-          })
-        }
+        data: response.data && mapInvoiceFromWeb(response.data)
       };
     },
     duplicateInvoice: async (id: number, invoiceType: InvoiceType) => {
-      const response = await apiPost<Response<InvoiceAddWeb>>('/api/invoices/duplicate', {
+      const response = await apiPost<Response<InvoiceWeb>>('/api/invoices/duplicate', {
         invoiceId: id,
         invoiceType
       });
-      const attachments = response?.data?.invoiceAttachments ?? [];
 
       return {
         ...response,
-        data: {
-          ...response?.data,
-          customizationPaidWatermarkFileData: response?.data?.customizationPaidWatermarkFileData
-            ? base64ToBytes(response.data.customizationPaidWatermarkFileData)
-            : null,
-          customizationWatermarkFileData: response?.data?.customizationWatermarkFileData
-            ? base64ToBytes(response.data.customizationWatermarkFileData)
-            : null,
-          signatureData: response?.data?.signatureData ? base64ToBytes(response.data.signatureData) : null,
-          businessLogoSnapshot: response?.data?.businessLogoSnapshot
-            ? base64ToBytes(response.data.businessLogoSnapshot)
-            : null,
-          invoiceAttachments: attachments.map(ia => {
-            return {
-              ...ia,
-              data: ia.data ? base64ToBytes(ia.data) : null
-            };
-          })
-        }
+        data: response.data && mapInvoiceFromWeb(response.data)
       };
     },
     deleteInvoice: (id: number) => apiDelete<Response<unknown>>(`/api/invoices/${id}`),

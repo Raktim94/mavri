@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { getApi } from '../../api/restApi';
-import type { CategoryAdd } from '../../types/category';
+import type { Category, CategoryAdd } from '../../types/category';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
 import { useAsyncAction } from '../useAsyncAction';
@@ -20,7 +20,7 @@ export const useCategoryAddBatch = ({
     return getApi().addBatchCategory(categories);
   }, [categories]);
 
-  const { data, loading, execute } = useAsyncAction<Response<CategoryAdd[]>>(asyncFn, {
+  const { data, loading, execute } = useAsyncAction<Response<Category[]>>(asyncFn, {
     immediate,
     showLoader,
     onDone

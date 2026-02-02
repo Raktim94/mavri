@@ -1,24 +1,61 @@
 import type { Database } from 'sqlite3';
 import type { Currency } from '../types/currency';
+import type { EntityWithCounts } from '../types/entityWithCounts';
 import type { FilterData } from '../types/invoiceFilter';
+import type { Response } from '../types/response';
 import { runDb } from '../utils/dbFuntions';
-import { getAllEntities, handleEntity } from '../utils/entitiesFunctions';
+import { getAllEntities2, handleEntity2 } from '../utils/entitiesFunctions';
 import { mapSqliteError } from '../utils/errorFunctions';
 
 const currencyFields: (keyof Currency)[] = ['code', 'symbol', 'text', 'format', 'isArchived', 'subunit'];
 
-export const getAllCurrencies = async (db: Database, filter?: FilterData[]) => {
-  const getAll = getAllEntities(db, 'currencies', 'currencyId');
+export const getAllCurrencies = async (
+  db: Database,
+  filter?: FilterData[]
+): Promise<Response<(Currency & EntityWithCounts)[]>> => {
+  const getAll = getAllEntities2<Currency>(db, 'currencies', 't', {
+    joins: `
+        LEFT JOIN invoices i ON i.currencyId = t.id
+      `,
+    invoiceCountExpr: `
+        COUNT(DISTINCT CASE WHEN i.invoiceType = 'invoice'
+          THEN i.id END)
+      `,
+    quotesCountExpr: `
+        COUNT(DISTINCT CASE WHEN i.invoiceType = 'quotation'
+          THEN i.id END)
+      `
+  });
   return getAll(filter ?? []);
 };
 
-export const addCurrency = async (db: Database, data: Currency) => {
-  const handle = handleEntity<Currency>(db, 'currencies', currencyFields);
+export const addCurrency = async (db: Database, data: Currency): Promise<Response<Currency & EntityWithCounts>> => {
+  const handle = handleEntity2<Currency>(db, 'currencies', 'c', currencyFields, {
+    joins: `LEFT JOIN invoices i ON i.currencyId = c.id`,
+    invoiceCountExpr: `
+         COUNT(DISTINCT CASE WHEN i.invoiceType = 'invoice'
+           THEN i.id END)
+       `,
+    quotesCountExpr: `
+         COUNT(DISTINCT CASE WHEN i.invoiceType = 'quotation'
+           THEN i.id END)
+       `
+  });
   return handle(data);
 };
 
-export const updateCurrency = async (db: Database, data: Currency) => {
-  const handle = handleEntity<Currency>(db, 'currencies', currencyFields);
+export const updateCurrency = async (db: Database, data: Currency): Promise<Response<Currency & EntityWithCounts>> => {
+  const handle = handleEntity2<Currency>(db, 'currencies', 'c', currencyFields, {
+    joins: `LEFT JOIN invoices i ON i.currencyId = c.id`,
+    invoiceCountExpr: `
+         COUNT(DISTINCT CASE WHEN i.invoiceType = 'invoice'
+           THEN i.id END)
+       `,
+    quotesCountExpr: `
+         COUNT(DISTINCT CASE WHEN i.invoiceType = 'quotation'
+           THEN i.id END)
+       `
+  });
   return handle(data, true);
 };
 
@@ -32,7 +69,17 @@ export const deleteCurrency = async (db: Database, id: number) => {
 };
 
 export const batchAddCurrency = async (db: Database, data: Currency[]) => {
-  const handle = handleEntity<Currency>(db, 'currencies', currencyFields);
+  const handle = handleEntity2<Currency>(db, 'currencies', 'c', currencyFields, {
+    joins: `LEFT JOIN invoices i ON i.currencyId = c.id`,
+    invoiceCountExpr: `
+         COUNT(DISTINCT CASE WHEN i.invoiceType = 'invoice'
+           THEN i.id END)
+       `,
+    quotesCountExpr: `
+         COUNT(DISTINCT CASE WHEN i.invoiceType = 'quotation'
+           THEN i.id END)
+       `
+  });
   try {
     await runDb(db, 'BEGIN TRANSACTION');
     for (const row of data) {

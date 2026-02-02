@@ -43,7 +43,7 @@ export const getFirstRow = <T extends Record<string, unknown>>(
   });
 };
 
-export const getAllRows = <T extends Record<string, unknown>>(
+export const getAllRows = <T extends object>(
   db: sqlite3.Database,
   sql: string,
   params: SqliteValue[] = []
@@ -55,16 +55,16 @@ export const getAllRows = <T extends Record<string, unknown>>(
       if (err) return reject(err);
 
       const transformedRows = (rows as Record<string, unknown>[]).map(row => {
-        const convertedRow = { ...row };
+        const convertedRow: Record<string, unknown> = { ...row };
         BOOLEAN_FIELDS.forEach(key => {
           if (key in convertedRow) {
             convertedRow[key] = Boolean(convertedRow[key]);
           }
         });
-        return convertedRow as unknown as T;
+        return convertedRow as T;
       });
 
-      resolve(transformedRows as T[]);
+      resolve(transformedRows);
     });
   });
 };

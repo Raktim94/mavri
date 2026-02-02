@@ -1,11 +1,11 @@
 import { Autocomplete, FormControlLabel, Grid, Switch, TextField } from '@mui/material';
 import { useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Category } from '../../../shared/types/category';
 import { AmountInput } from '../../shared/components/inputs/amountInput/AmountInput';
 import { useCategoriesRetrieve } from '../../shared/hooks/categories/useCategoriesRetrieve';
 import { useUnitsRetrieve } from '../../shared/hooks/units/useUnitsRetrieve';
 import { useForm } from '../../shared/hooks/useForm';
+import type { Category } from '../../shared/types/category';
 import type { Item, ItemFromData } from '../../shared/types/item';
 import type { Response } from '../../shared/types/response';
 import type { Unit } from '../../shared/types/unit';

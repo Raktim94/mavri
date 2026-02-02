@@ -45,7 +45,7 @@ export interface BusinessAddMeta {
   isArchived: boolean;
 }
 
-export interface BusinessAdd extends BusinessMeta {
+export interface BusinessAdd extends BusinessAddMeta {
   logo?: Uint8Array | null;
 }
 
@@ -53,7 +53,7 @@ export interface BusinessUpdate extends BusinessAdd {
   id: number;
 }
 
-export interface BusinessAddWeb extends BusinessMeta {
+export interface BusinessAddWeb extends BusinessAddMeta {
   logo?: string | null;
 }
 
