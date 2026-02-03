@@ -1,3 +1,4 @@
+import pako from 'pako';
 import type { DBInitType } from '../enums/dbInitType';
 import type { InvoiceType } from '../enums/invoiceType';
 import type { BusinessAdd, BusinessUpdate, BusinessWeb } from '../types/business';
@@ -106,11 +107,17 @@ const apiGet = async <T>(path: string, params?: Record<string, string>): Promise
 
 const apiPost = async <T>(path: string, body?: unknown): Promise<T> => {
   const url = baseUrl() + path;
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: body !== undefined ? JSON.stringify(body) : undefined
-  });
+
+  const options: RequestInit = { method: 'POST' };
+
+  if (body instanceof FormData) {
+    options.body = body;
+  } else if (body !== undefined) {
+    options.headers = { 'Content-Type': 'application/json' };
+    options.body = JSON.stringify(body);
+  }
+
+  const res = await fetch(url, options);
   return res.json() as Promise<T>;
 };
 
@@ -296,7 +303,6 @@ export const webApi = () => {
         Object.keys(params).length ? params : undefined
       );
 
-      console.log(response);
       return {
         ...response,
         data: response.data?.map(mapInvoiceFromWeb)
@@ -362,7 +368,15 @@ export const webApi = () => {
             resolve({ success: false, key: 'error.invalidFile' });
             return;
           }
-          const result = await apiPost<Response<unknown>>('/api/import', parsed);
+
+          const jsonString = JSON.stringify(parsed);
+          const compressed = pako.gzip(jsonString);
+
+          const blob = new Blob([compressed], { type: 'application/gzip' });
+          const formData = new FormData();
+          formData.append('file', blob, file.name + '.gz');
+
+          const result = await apiPost<Response<unknown>>('/api/import', formData);
           resolve(result);
         };
         input.click();
