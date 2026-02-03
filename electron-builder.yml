@@ -20,7 +20,7 @@ extraMetadata:
 
 forceCodeSigning: false
 
-afterPack: scripts/afterPack.cjs
+afterPack: scripts/after-pack.cjs
 
 win:
   target:
