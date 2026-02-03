@@ -6,6 +6,8 @@ New features & improvements
 
 - Added Docker support for seamless self‑hosting and deployment flexibility
 - Separated snapshot data into dedicated tables to reduce invoice‑table complexity and improve maintainability
+- Added the ability to show quantity, unit, and row number in the PDF item table
+- Added support for custom header sections and custom values in the PDF item table
 
 Bug Fixes
 
