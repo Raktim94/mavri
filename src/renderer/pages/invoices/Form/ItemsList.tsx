@@ -94,7 +94,7 @@ const ItemsListComponent: FC<Props> = ({ invoiceForm, setInvoiceForm, onEdit = (
         strategy={verticalListSortingStrategy}
       >
         {invoiceForm?.invoiceItems?.map((invoiceItem, index) => {
-          const { quantity, taxType, taxRate, invoiceItemSnapshot } = invoiceItem;
+          const { quantity, taxType, taxRate, invoiceItemSnapshot, customField } = invoiceItem;
           const { unitPriceCents = 0, itemName } = invoiceItemSnapshot;
 
           const { formattedUnitPrice, formattedTotal, formattedTax } = getItemFinancialData({
@@ -179,9 +179,22 @@ const ItemsListComponent: FC<Props> = ({ invoiceForm, setInvoiceForm, onEdit = (
                     </Typography>
                   }
                   secondary={
-                    <Typography variant="body2" sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {formattedUnitPrice} {' X '} {quantity}
-                    </Typography>
+                    <>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}
+                      >
+                        {formattedUnitPrice} {' X '} {quantity}
+                      </Typography>
+                      {customField && (
+                        <Typography
+                          variant="body2"
+                          sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}
+                        >
+                          {customField.header}: {customField.value}
+                        </Typography>
+                      )}
+                    </>
                   }
                   disableTypography
                   sx={{ m: 0 }}

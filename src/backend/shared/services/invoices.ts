@@ -139,7 +139,14 @@ const invoiceFields: (keyof Invoice)[] = [
 ];
 const attachmentFields: (keyof InvoiceAttachment)[] = ['parentInvoiceId', 'fileSize', 'fileType', 'fileName', 'data'];
 const paymentsFields: (keyof InvoicePayment)[] = ['parentInvoiceId', 'amountCents', 'paidAt', 'paymentMethod', 'notes'];
-const itemsFields: (keyof InvoiceItem)[] = ['parentInvoiceId', 'itemId', 'quantity', 'taxRate', 'taxType'];
+const itemsFields: (keyof InvoiceItem)[] = [
+  'parentInvoiceId',
+  'itemId',
+  'quantity',
+  'taxRate',
+  'taxType',
+  'customField'
+];
 const itemsSnapshotFields: (keyof InvoiceItemSnapshots)[] = [
   'parentInvoiceItemId',
   'itemName',
@@ -244,7 +251,8 @@ const getInvoices = async (db: Database, options: GetInvoicesOptions) => {
       .map(p => {
         return {
           ...p,
-          invoiceItemSnapshot: invoiceItemSnapshots.find(iis => iis.parentInvoiceItemId === p.id)
+          invoiceItemSnapshot: invoiceItemSnapshots.find(iis => iis.parentInvoiceItemId === p.id),
+          customField: p.customField && typeof p.customField === 'string' ? JSON.parse(p.customField) : p.customField
         };
       }),
     invoiceAttachments: invoiceAttachments.filter(p => p.parentInvoiceId === invoice.id),
@@ -540,8 +548,15 @@ export const updateInvoice = async (db: Database, data: Invoice) => {
     for (const item of data.invoiceItems ?? []) {
       const newItemID = await runDb(
         db,
-        `INSERT INTO invoice_items (parentInvoiceId, itemId, quantity, taxRate, taxType) VALUES (?, ?, ?, ?, ?)`,
-        [data.id, item.itemId, item.quantity, item.taxRate, item.taxType ?? null]
+        `INSERT INTO invoice_items (parentInvoiceId, itemId, quantity, taxRate, taxType, customField) VALUES (?, ?, ?, ?, ?, ?)`,
+        [
+          data.id,
+          item.itemId,
+          item.quantity,
+          item.taxRate,
+          item.taxType ?? null,
+          item.customField ? JSON.stringify(item.customField) : null
+        ]
       );
       await runDb(
         db,
@@ -720,8 +735,8 @@ export const duplicateInvoice = async (db: Database, invoiceId: number, invoiceT
 
     await runDb(
       db,
-      `INSERT INTO invoice_items (parentInvoiceId, itemId, quantity, taxRate, taxType)
-       SELECT ?, itemId,quantity, taxRate, taxType
+      `INSERT INTO invoice_items (parentInvoiceId, itemId, quantity, taxRate, taxType, customField)
+       SELECT ?, itemId,quantity, taxRate, taxType, customField
        FROM invoice_items WHERE parentInvoiceId = ?;`,
       [duplicatedRowID, invoiceId]
     );

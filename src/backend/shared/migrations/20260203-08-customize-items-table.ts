@@ -21,44 +21,51 @@ export const up = async (db: sqlite3.Database) => {
     await runAsync(
       db,
       `
-      ALTER TABLE style_profiles
-      ADD COLUMN showQuantity INTEGER NOT NULL DEFAULT 1 CHECK (showQuantity IN (0,1))
-    `
+        ALTER TABLE style_profiles
+        ADD COLUMN showQuantity INTEGER NOT NULL DEFAULT 1 CHECK (showQuantity IN (0,1))
+      `
     );
     await runAsync(
       db,
       `
-      ALTER TABLE style_profiles
-      ADD COLUMN showUnit INTEGER NOT NULL DEFAULT 1 CHECK (showUnit IN (0,1))
-    `
+        ALTER TABLE style_profiles
+        ADD COLUMN showUnit INTEGER NOT NULL DEFAULT 1 CHECK (showUnit IN (0,1))
+      `
     );
     await runAsync(
       db,
       `
-      ALTER TABLE style_profiles
-      ADD COLUMN showRowNo INTEGER NOT NULL DEFAULT 1 CHECK (showRowNo IN (0,1))
-    `
+        ALTER TABLE style_profiles
+        ADD COLUMN showRowNo INTEGER NOT NULL DEFAULT 1 CHECK (showRowNo IN (0,1))
+      `
     );
     await runAsync(
       db,
       `
-      ALTER TABLE invoice_customizations
-      ADD COLUMN showQuantity INTEGER NOT NULL DEFAULT 1 CHECK (showQuantity IN (0,1))
-    `
+        ALTER TABLE invoice_customizations
+        ADD COLUMN showQuantity INTEGER NOT NULL DEFAULT 1 CHECK (showQuantity IN (0,1))
+      `
     );
     await runAsync(
       db,
       `
-      ALTER TABLE invoice_customizations
-      ADD COLUMN showUnit INTEGER NOT NULL DEFAULT 1 CHECK (showUnit IN (0,1))
-    `
+        ALTER TABLE invoice_customizations
+        ADD COLUMN showUnit INTEGER NOT NULL DEFAULT 1 CHECK (showUnit IN (0,1))
+      `
     );
     await runAsync(
       db,
       `
-      ALTER TABLE invoice_customizations
-      ADD COLUMN showRowNo INTEGER NOT NULL DEFAULT 1 CHECK (showRowNo IN (0,1))
-    `
+        ALTER TABLE invoice_customizations
+        ADD COLUMN showRowNo INTEGER NOT NULL DEFAULT 1 CHECK (showRowNo IN (0,1))
+      `
+    );
+    await runAsync(
+      db,
+      `
+        ALTER TABLE invoice_items
+        ADD COLUMN customField TEXT;
+      `
     );
 
     await runAsync(db, 'COMMIT;');

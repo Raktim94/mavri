@@ -1,3 +1,4 @@
+import type { Alignment } from '../enums/alignment';
 import type { DiscountType } from '../enums/discountType';
 import type { InvoiceStatus } from '../enums/invoiceStatus';
 import type { InvoiceType } from '../enums/invoiceType';
@@ -148,12 +149,18 @@ export interface InvoicePayment {
   updatedAt: string;
 }
 
+export interface CustomField {
+  header: string;
+  value: string;
+  alignment: Alignment;
+}
 export interface InvoiceItem {
   id: number;
   parentInvoiceId: number;
   itemId: number;
   invoiceItemSnapshot: InvoiceItemSnapshots;
   quantity: string;
+  customField?: CustomField | string;
   createdAt: string;
   updatedAt: string;
   taxRate: number;

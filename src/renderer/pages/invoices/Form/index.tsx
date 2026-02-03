@@ -15,6 +15,7 @@ import type {
   InvoiceFromData,
   InvoiceInfo,
   InvoiceItem,
+  ItemForm,
   PaymentForm,
   SignatureForm,
   TaxForm
@@ -41,7 +42,7 @@ import { StyleProfilesDropdown } from './Dropdowns/StyleProfilesDropdown';
 import { FinancialInfo } from './FinancialInfo';
 import { ItemSelector } from './ItemSelector';
 import { ItemsList } from './ItemsList';
-import { ItemQuantitySetter } from './Modals/ItemQuantitySetter';
+import { ItemMetadataSetter } from './Modals/ItemMetadataSetter';
 import { SignatureSelector } from './SignatureSelector';
 
 interface Props {
@@ -71,7 +72,7 @@ const InvoiceFormComponent: FC<Props> = ({
   const [isDropdownOpenInvoiceInfo, setIsDropdownOpenInvoiceInfo] = useState<boolean>(false);
   const [isDropdownOpenMoreAction, setMoreActionDropdown] = useState<boolean>(false);
   const [isDropdownOpenItems, setIsDropdownOpenItems] = useState<boolean>(false);
-  const [isModalQuantityOpen, setModalQuantityOpen] = useState<boolean>(false);
+  const [isModalItemMetadataOpen, setIsModalItemMetadataOpen] = useState<boolean>(false);
   const [, startTransition] = useTransition();
 
   const [selectedInvoiceItem, setSelectedInvoiceItem] = useState<InvoiceItem | undefined>(undefined);
@@ -96,6 +97,15 @@ const InvoiceFormComponent: FC<Props> = ({
       invoiceForm?.invoiceSuffix
     ]
   );
+
+  const customFieldHeaders = useMemo(() => {
+    const headers =
+      invoiceForm?.invoiceItems
+        ?.map(item => item.customField?.header)
+        .filter((item): item is string => typeof item === 'string' && item != null) ?? [];
+
+    return [...new Set(headers)];
+  }, [invoiceForm?.invoiceItems]);
 
   const onEdit = (setter: React.Dispatch<React.SetStateAction<boolean>>) => {
     setter(true);
@@ -281,12 +291,14 @@ const InvoiceFormComponent: FC<Props> = ({
   );
 
   const handleClickItems = useCallback(
-    (data: Item, quantity: string) => {
+    (item: Item, data: ItemForm) => {
       handleOnClose(setIsDropdownOpenItems);
 
       if (!invoiceForm) return;
 
-      const amount = Number(data.amount ?? 0);
+      const { quantity, header, value, alignment } = data;
+
+      const amount = Number(item.amount ?? 0);
       const unitPrice = invoiceForm.invoiceCurrencySnapshot?.currencySubunit
         ? amount * invoiceForm.invoiceCurrencySnapshot?.currencySubunit
         : amount;
@@ -294,14 +306,22 @@ const InvoiceFormComponent: FC<Props> = ({
       const newItemID = Date.now();
       const newItem = {
         id: newItemID,
-        itemId: data.id,
+        itemId: item.id,
         invoiceItemSnapshot: {
           parentInvoiceItemId: newItemID,
-          itemName: data.name,
-          unitName: data.unitName,
+          itemName: item.name,
+          unitName: item.unitName,
           unitPriceCents: unitPrice
         },
-        quantity: quantity,
+        customField:
+          header && value && alignment
+            ? {
+                header: header,
+                value: value,
+                alignment: alignment
+              }
+            : undefined,
+        quantity: quantity?.toString() ?? '0',
         taxName: undefined,
         taxRate: 0,
         taxType: undefined
@@ -310,9 +330,27 @@ const InvoiceFormComponent: FC<Props> = ({
       startTransition(() => {
         setInvoiceForm(prev => {
           if (!prev) return prev;
+
+          const updatedItems = [...(prev.invoiceItems ?? []), newItem];
+
+          if (header && alignment) {
+            for (let i = 0; i < updatedItems.length; i++) {
+              const cf = updatedItems[i].customField;
+              if (cf?.header === header) {
+                updatedItems[i] = {
+                  ...updatedItems[i],
+                  customField: {
+                    ...cf,
+                    alignment
+                  }
+                };
+              }
+            }
+          }
+
           return {
             ...prev,
-            invoiceItems: [...(prev.invoiceItems ?? []), newItem]
+            invoiceItems: updatedItems
           };
         });
       });
@@ -342,29 +380,52 @@ const InvoiceFormComponent: FC<Props> = ({
       if (!invoiceForm) return;
 
       setSelectedInvoiceItem(itemToEdit);
-      handleOnOpen(setModalQuantityOpen);
+      handleOnOpen(setIsModalItemMetadataOpen);
     },
     [invoiceForm, handleOnOpen]
   );
 
-  const handleEditQuantity = useCallback(
-    (quantity: string) => {
+  const handleEditMetadataItem = useCallback(
+    (data: ItemForm) => {
       if (!selectedInvoiceItem || !invoiceForm) return;
+
+      const { quantity, header, value, alignment } = data;
+
       startTransition(() => {
         setInvoiceForm(prev => {
           if (!prev) return prev;
 
           return {
             ...prev,
-            invoiceItems: (prev.invoiceItems ?? []).map(item =>
-              item.id === selectedInvoiceItem.id ? { ...item, quantity: quantity } : item
-            )
+            invoiceItems: (prev.invoiceItems ?? []).map(item => {
+              const isSelected = item.id === selectedInvoiceItem.id;
+              const hasSameHeader = item.customField?.header === header;
+
+              if (isSelected) {
+                return {
+                  ...item,
+                  ...(quantity !== undefined && { quantity: quantity.toString() }),
+                  customField: header && value && alignment ? { header, value, alignment } : item.customField
+                };
+              }
+              if (hasSameHeader && alignment) {
+                return {
+                  ...item,
+                  customField: {
+                    ...item.customField!,
+                    alignment
+                  }
+                };
+              }
+
+              return item;
+            })
           };
         });
       });
 
       setSelectedInvoiceItem(undefined);
-      handleOnClose(setModalQuantityOpen);
+      handleOnClose(setIsModalItemMetadataOpen);
     },
     [invoiceForm, selectedInvoiceItem, setInvoiceForm, handleOnClose, setSelectedInvoiceItem]
   );
@@ -722,6 +783,7 @@ const InvoiceFormComponent: FC<Props> = ({
       />
       <ItemsDropdown
         isOpen={isDropdownOpenItems}
+        headerOptions={customFieldHeaders}
         onClose={() => handleOnClose(setIsDropdownOpenItems)}
         onOpen={() => handleOnOpen(setIsDropdownOpenItems)}
         onClick={handleClickItems}
@@ -761,11 +823,13 @@ const InvoiceFormComponent: FC<Props> = ({
         showMakeInvoice={invoiceForm?.id !== undefined && invoiceForm.invoiceType === InvoiceType.quotation}
       />
 
-      <ItemQuantitySetter
-        isOpen={isModalQuantityOpen}
-        onCancel={() => handleOnClose(setModalQuantityOpen)}
+      <ItemMetadataSetter
+        isOpen={isModalItemMetadataOpen}
+        onCancel={() => handleOnClose(setIsModalItemMetadataOpen)}
         currQuantity={selectedInvoiceItem?.quantity}
-        onSave={handleEditQuantity}
+        customField={selectedInvoiceItem?.customField}
+        headerOptions={customFieldHeaders}
+        onSave={handleEditMetadataItem}
       />
 
       <Tooltip title={t('ariaLabel.moreActions')}>
