@@ -366,8 +366,8 @@ export const addInvoice = async (db: Database, data: Invoice) => {
         failure = r;
         break;
       }
-      const newItemId = result.data;
-      if (item.itemId && item.invoiceItemSnapshot) {
+      const newItemId = r.data;
+      if (newItemId && item.invoiceItemSnapshot) {
         const ibs = await handleInvoiceItemSnapshots({
           ...item.invoiceItemSnapshot,
           parentInvoiceItemId: newItemId

@@ -249,6 +249,7 @@ export interface InvoiceMeta {
   id: number;
   invoiceType: InvoiceType;
   convertedFromQuotationId?: number;
+  invoiceFullNumber: string;
   businessId: number;
   clientId: number;
   currencyId: number;

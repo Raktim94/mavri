@@ -12,7 +12,7 @@ import { useInvoicesRetrieve } from '../../shared/hooks/invoices/useInvoicesRetr
 import { useInvoiceUpdate } from '../../shared/hooks/invoices/useInvoiceUpdate';
 import type { Row } from '../../shared/types/excel';
 import type { Filter, FilterData } from '../../shared/types/filter';
-import type { Invoice, InvoiceAdd, InvoiceUpdate } from '../../shared/types/invoice';
+import type { Invoice, InvoiceAdd, InvoiceItem, InvoiceUpdate } from '../../shared/types/invoice';
 import type { Response } from '../../shared/types/response';
 import { exportExcel } from '../../shared/utils/fileFunctions';
 import { createCommonFilters } from '../../shared/utils/filterSortFunctions';
@@ -120,6 +120,9 @@ export const InvoicesPage: FC<Props> = ({ type }) => {
 
         return rest;
       };
+      const mapItemSnapshot = (inv: Invoice) =>
+        (inv.invoiceItems ?? []).map(it => it.invoiceItemSnapshot).filter(Boolean);
+
       const mapCustomization = (inv: Invoice) => {
         if (!inv.invoiceCustomization) return;
 
@@ -130,11 +133,22 @@ export const InvoicesPage: FC<Props> = ({ type }) => {
 
         return rest;
       };
+      const mapProfileSnapshot = (inv: Invoice) => inv.invoiceStyleProfileSnapshot;
       const mapCurrencySnapshot = (inv: Invoice) => inv.invoiceCurrencySnapshot;
       const mapClientSnapshot = (inv: Invoice) => inv.invoiceClientSnapshot;
       const mapPayment = (inv: Invoice) => (inv.invoicePayments ?? []).map(p => p);
-      const mapItem = (inv: Invoice) => (inv.invoiceItems ?? []).map(it => it);
-      const toRow = (obj: unknown): Row => Object.fromEntries(Object.entries(obj as Record<string, unknown>)) as Row;
+      const mapItem = (inv: Invoice) => (inv.invoiceItems ?? []).map(cleanItem);
+      const isRow = (v: unknown): v is Row => typeof v === 'object' && v !== null && !Array.isArray(v);
+      const toRow = (obj: unknown): Row | undefined =>
+        obj ? (Object.fromEntries(Object.entries(obj as Record<string, unknown>)) as Row) : undefined;
+
+      const cleanItem = (item: InvoiceItem) => {
+        const { invoiceItemSnapshot, ...rest } = item;
+
+        void invoiceItemSnapshot;
+
+        return rest;
+      };
 
       const cleanInvoice = (invoice: Invoice) => {
         const {
@@ -147,9 +161,13 @@ export const InvoicesPage: FC<Props> = ({ type }) => {
           invoiceBusinessSnapshot,
           invoiceClientSnapshot,
           invoiceCurrencySnapshot,
+          invoiceStyleProfileSnapshot,
+          invoiceFullNumber,
           ...rest
         } = invoice;
 
+        void invoiceFullNumber;
+        void invoiceStyleProfileSnapshot;
         void invoiceCustomization;
         void invoiceCurrencySnapshot;
         void invoicePayments;
@@ -165,22 +183,32 @@ export const InvoicesPage: FC<Props> = ({ type }) => {
 
       const invoicesData = invoices;
       const invoicesSheet = invoicesData.map(cleanInvoice);
+      const invoiceStyleProfileSnapshotSheet = invoicesData.flatMap(mapProfileSnapshot);
       const invoiceClientSnapshotsSheet = invoicesData.flatMap(mapClientSnapshot);
       const invoiceBusinessSnapshotSheet = invoicesData.flatMap(mapBusinessSnapshot);
       const invoiceCustomization = invoicesData.flatMap(mapCustomization);
       const invoiceCurrencySnapshotsSheet = invoicesData.flatMap(mapCurrencySnapshot);
       const itemsSheet = invoicesData.flatMap(mapItem);
       const paymentsSheet = invoicesData.flatMap(mapPayment);
+      const itemSnapshotSheet = invoicesData.flatMap(mapItemSnapshot);
 
       await exportExcel(
         [
-          { name: type === InvoiceType.quotation ? 'Quotes' : 'Invoices', rows: invoicesSheet.map(toRow) },
-          { name: 'Business Snapshots', rows: invoiceBusinessSnapshotSheet.map(toRow) },
-          { name: 'Client Snapshots', rows: invoiceClientSnapshotsSheet.map(toRow) },
-          { name: 'Currency Snapshots', rows: invoiceCurrencySnapshotsSheet.map(toRow) },
-          { name: 'Customizations', rows: invoiceCustomization.map(toRow) },
-          { name: 'Payments', rows: paymentsSheet.map(toRow) },
-          { name: 'Items', rows: itemsSheet.map(toRow) }
+          {
+            name: type === InvoiceType.quotation ? 'Quotes' : 'Invoices',
+            rows: invoicesSheet.map(toRow).filter(isRow)
+          },
+          { name: 'Business Snapshots', rows: invoiceBusinessSnapshotSheet.map(toRow).filter(isRow) },
+          { name: 'Client Snapshots', rows: invoiceClientSnapshotsSheet.map(toRow).filter(isRow) },
+          { name: 'Currency Snapshots', rows: invoiceCurrencySnapshotsSheet.map(toRow).filter(isRow) },
+          { name: 'Style Profile Snapshots', rows: invoiceStyleProfileSnapshotSheet.map(toRow).filter(isRow) },
+          { name: 'Customizations', rows: invoiceCustomization.map(toRow).filter(isRow) },
+          { name: 'Payments', rows: paymentsSheet.map(toRow).filter(isRow) },
+          { name: 'Items', rows: itemsSheet.map(toRow).filter(isRow) },
+          {
+            name: 'Item Snapshots',
+            rows: itemSnapshotSheet.map(toRow).filter(isRow)
+          }
         ],
         type === InvoiceType.quotation ? 'quotations.xlsx' : 'invoices.xlsx'
       );

@@ -32,7 +32,7 @@ export const getAllStyleProfiles = async (
   db: Database,
   filter?: FilterData[]
 ): Promise<Response<(StyleProfile & EntityWithCounts)[]>> => {
-  const getAll = getAllEntities<StyleProfile>(db, 'style_profiles', 't', {
+  const getAll = getAllEntities<StyleProfile>(db, 'style_profiles', 't', 'i', {
     joins: `
           LEFT JOIN invoices i ON i.styleProfilesId = t.id
         `,
