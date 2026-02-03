@@ -5,6 +5,7 @@
 New features & improvements
 
 - Added Docker support for seamless self‑hosting and deployment flexibility
+- Separated snapshot data into dedicated tables to reduce invoice‑table complexity and improve maintainability
 
 Bug Fixes
 

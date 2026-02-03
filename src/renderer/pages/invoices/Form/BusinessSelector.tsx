@@ -17,8 +17,11 @@ const BusinessSelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
   useEffect(() => {
     (async () => {
       const url =
-        invoiceForm && invoiceForm.businessLogoSnapshot
-          ? await toDataUrl(invoiceForm.businessLogoSnapshot, invoiceForm.businessFileTypeSnapshot)
+        invoiceForm && invoiceForm?.invoiceBusinessSnapshot?.businessLogo
+          ? await toDataUrl(
+              invoiceForm?.invoiceBusinessSnapshot?.businessLogo,
+              invoiceForm.invoiceBusinessSnapshot?.businessFileType
+            )
           : null;
       setLogoUrl(url);
     })();
@@ -66,7 +69,7 @@ const BusinessSelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
               variant="body2"
               sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}
             >
-              {invoiceForm?.businessNameSnapshot}
+              {invoiceForm?.invoiceBusinessSnapshot?.businessName}
             </Typography>
           }
           disableTypography
@@ -93,7 +96,7 @@ const BusinessSelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
               overflow: 'hidden'
             }}
           >
-            {invoiceForm?.businessShortNameSnapshot}
+            {invoiceForm?.invoiceBusinessSnapshot?.businessShortName}
           </Box>
         )}
       </Box>

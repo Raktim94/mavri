@@ -4,18 +4,33 @@ import type { Business } from '../types/business';
 import type { Category } from '../types/category';
 import type { Client } from '../types/client';
 import type { Currency } from '../types/currency';
-import type { Invoice, InvoiceAttachment, InvoiceItem, InvoicePayment } from '../types/invoice';
+import type {
+  Invoice,
+  InvoiceAttachment,
+  InvoiceBusinessSnapshots,
+  InvoiceClientSnapshots,
+  InvoiceCurrencySnapshots,
+  InvoiceCustomization,
+  InvoiceItem,
+  InvoiceItemSnapshots,
+  InvoicePayment,
+  InvoiceStyleProfileSnapshots
+} from '../types/invoice';
 import type { Item } from '../types/item';
 import type { SqliteValue } from '../types/sqliteValue';
 import type { StyleProfile } from '../types/styleProfiles';
 import type { Unit } from '../types/unit';
 import {
   decodeInvoiceAttachment,
-  decodeInvoiceWithouthAttachments,
+  decodeInvoiceBusinessSnapshotImport,
+  decodeInvoiceCustomizationImport,
+  decodeInvoiceImport,
   decodeLogo,
   decodeStyleProfile,
   encodeInvoiceAttachment,
-  encodeInvoiceWithouthAttachments,
+  encodeInvoiceBusinessSnapshotExport,
+  encodeInvoiceCustomizationExport,
+  encodeInvoiceExport,
   encodeLogo,
   encodeStyleProfile
 } from '../utils/dataUrlFunctions';
@@ -33,6 +48,24 @@ export const exportAllData = async (db: Database) => {
     const categories = await getAllRows<Category>(db, 'SELECT * FROM categories');
     const currencies = await getAllRows<Currency>(db, 'SELECT * FROM currencies');
     const invoices = await getAllRows<Invoice>(db, 'SELECT * FROM invoices');
+    const invoiceBusinessSnapshots = await getAllRows<InvoiceBusinessSnapshots>(
+      db,
+      'SELECT * FROM invoice_business_snapshots'
+    );
+    const invoiceClientSnapshots = await getAllRows<InvoiceClientSnapshots>(
+      db,
+      'SELECT * FROM invoice_client_snapshots'
+    );
+    const invoiceCurrencySnapshots = await getAllRows<InvoiceCurrencySnapshots>(
+      db,
+      'SELECT * FROM invoice_currency_snapshots'
+    );
+    const invoiceStyleProfileSnapshots = await getAllRows<InvoiceStyleProfileSnapshots>(
+      db,
+      'SELECT * FROM invoice_style_profile_snapshots'
+    );
+    const invoiceItemSnapshots = await getAllRows<InvoiceItemSnapshots>(db, 'SELECT * FROM invoice_item_snaphots');
+    const invoiceCustomizations = await getAllRows<InvoiceCustomization>(db, 'SELECT * FROM invoice_customizations');
     const invoiceItems = await getAllRows<InvoiceItem>(db, 'SELECT * FROM invoice_items');
     const invoicePayments = await getAllRows<InvoicePayment>(db, 'SELECT * FROM invoice_payments');
     const attachments = await getAllRows<InvoiceAttachment>(db, 'SELECT * FROM attachments');
@@ -40,7 +73,9 @@ export const exportAllData = async (db: Database) => {
     const attachmentsModified = attachments.map(encodeInvoiceAttachment);
     const businessesModified = businesses.map(encodeLogo);
     const styleProfilesModified = styleProfiles.map(encodeStyleProfile);
-    const invoicesModified = invoices.map(encodeInvoiceWithouthAttachments);
+    const invoicesModified = invoices.map(encodeInvoiceExport);
+    const invoiceBusinessSnapshotsModified = invoiceBusinessSnapshots.map(encodeInvoiceBusinessSnapshotExport);
+    const invoiceCustomizationsModified = invoiceCustomizations.map(encodeInvoiceCustomizationExport);
 
     const payload = {
       settings: settingsRow ?? null,
@@ -51,8 +86,14 @@ export const exportAllData = async (db: Database) => {
       categories,
       currencies,
       invoices: invoicesModified,
+      invoiceBusinessSnapshots: invoiceBusinessSnapshotsModified,
+      invoiceCustomizations: invoiceCustomizationsModified,
+      invoiceClientSnapshots,
+      invoiceCurrencySnapshots,
+      invoiceStyleProfileSnapshots,
       styleProfiles: styleProfilesModified,
       invoiceItems,
+      invoiceItemSnapshots,
       invoicePayments,
       attachments: attachmentsModified
     };
@@ -109,7 +150,13 @@ export const importAllData = async (db: Database, parsed: Record<string, unknown
 
     await runInTransaction(async () => {
       const deleteOrder = [
+        'invoice_style_profile_snapshots',
+        'invoice_customizations',
+        'invoice_currency_snapshots',
+        'invoice_client_snapshots',
+        'invoice_business_snapshots',
         'invoice_items',
+        'invoice_item_snaphots',
         'invoice_payments',
         'attachments',
         'invoices',
@@ -135,7 +182,13 @@ export const importAllData = async (db: Database, parsed: Record<string, unknown
         clients: 'clients',
         items: 'items',
         invoices: 'invoices',
+        invoice_style_profile_snapshots: 'invoiceStyleProfileSnapshots',
+        invoice_business_snapshots: 'invoiceBusinessSnapshots',
+        invoice_customizations: 'invoiceCustomizations',
+        invoice_client_snapshots: 'invoiceClientSnapshots',
+        invoice_currency_snapshots: 'invoiceCurrencySnapshots',
         invoice_items: 'invoiceItems',
+        invoice_item_snaphots: 'invoiceItemSnapshots',
         invoice_payments: 'invoicePayments',
         attachments: 'attachments'
       };
@@ -152,7 +205,15 @@ export const importAllData = async (db: Database, parsed: Record<string, unknown
         parsedMut.businesses = parsedMut.businesses.map(decodeLogo);
       }
       if (Array.isArray(parsedMut.invoices)) {
-        parsedMut.invoices = parsedMut.invoices.map(decodeInvoiceWithouthAttachments);
+        parsedMut.invoices = parsedMut.invoices.map(decodeInvoiceImport);
+      }
+      if (Array.isArray(parsedMut.invoiceBusinessSnapshots)) {
+        parsedMut.invoiceBusinessSnapshots = parsedMut.invoiceBusinessSnapshots.map(
+          decodeInvoiceBusinessSnapshotImport
+        );
+      }
+      if (Array.isArray(parsedMut.invoiceCustomizations)) {
+        parsedMut.invoiceCustomizations = parsedMut.invoiceCustomizations.map(decodeInvoiceCustomizationImport);
       }
 
       for (const [table, key] of Object.entries(tableDataMap)) {

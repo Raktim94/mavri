@@ -36,7 +36,10 @@ const InvoicesPreviewComponent: FC<Props> = ({ onSaveProfile = () => {}, setInvo
     (data: CustomizationForm) => {
       setInvoiceForm({
         ...invoiceForm,
-        ...data
+        invoiceCustomization: {
+          ...invoiceForm?.invoiceCustomization,
+          ...data
+        }
       });
     },
     [setInvoiceForm, invoiceForm]
@@ -44,24 +47,24 @@ const InvoicesPreviewComponent: FC<Props> = ({ onSaveProfile = () => {}, setInvo
 
   const customizationData = useMemo(() => {
     return {
-      customizationColor: invoiceForm?.customizationColor,
-      customizationLogoSize: invoiceForm?.customizationLogoSize,
-      customizationFontSizeSize: invoiceForm?.customizationFontSizeSize,
-      customizationLayout: invoiceForm?.customizationLayout,
-      customizationTableHeaderStyle: invoiceForm?.customizationTableHeaderStyle,
-      customizationTableRowStyle: invoiceForm?.customizationTableRowStyle,
-      customizationPageFormat: invoiceForm?.customizationPageFormat,
-      customizationLabelUpperCase: invoiceForm?.customizationLabelUpperCase,
-      customizationWatermarkFileName: invoiceForm?.customizationWatermarkFileName,
-      customizationWatermarkFileType: invoiceForm?.customizationWatermarkFileType,
-      customizationWatermarkFileSize: invoiceForm?.customizationWatermarkFileSize,
-      customizationWatermarkFileData: invoiceForm?.customizationWatermarkFileData,
-      customizationPaidWatermarkFileName: invoiceForm?.customizationPaidWatermarkFileName,
-      customizationPaidWatermarkFileType: invoiceForm?.customizationPaidWatermarkFileType,
-      customizationPaidWatermarkFileSize: invoiceForm?.customizationPaidWatermarkFileSize,
-      customizationPaidWatermarkFileData: invoiceForm?.customizationPaidWatermarkFileData
+      color: invoiceForm?.invoiceCustomization?.color,
+      logoSize: invoiceForm?.invoiceCustomization?.logoSize,
+      fontSize: invoiceForm?.invoiceCustomization?.fontSize,
+      layout: invoiceForm?.invoiceCustomization?.layout,
+      tableHeaderStyle: invoiceForm?.invoiceCustomization?.tableHeaderStyle,
+      tableRowStyle: invoiceForm?.invoiceCustomization?.tableRowStyle,
+      pageFormat: invoiceForm?.invoiceCustomization?.pageFormat,
+      labelUpperCase: invoiceForm?.invoiceCustomization?.labelUpperCase,
+      watermarkFileName: invoiceForm?.invoiceCustomization?.watermarkFileName,
+      watermarkFileType: invoiceForm?.invoiceCustomization?.watermarkFileType,
+      watermarkFileSize: invoiceForm?.invoiceCustomization?.watermarkFileSize,
+      watermarkFileData: invoiceForm?.invoiceCustomization?.watermarkFileData,
+      paidWatermarkFileName: invoiceForm?.invoiceCustomization?.paidWatermarkFileName,
+      paidWatermarkFileType: invoiceForm?.invoiceCustomization?.paidWatermarkFileType,
+      paidWatermarkFileSize: invoiceForm?.invoiceCustomization?.paidWatermarkFileSize,
+      paidWatermarkFileData: invoiceForm?.invoiceCustomization?.paidWatermarkFileData
     };
-  }, [invoiceForm]);
+  }, [invoiceForm?.invoiceCustomization]);
 
   return (
     <Box sx={{ height: '100%' }}>

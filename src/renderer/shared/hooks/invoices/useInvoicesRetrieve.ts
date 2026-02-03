@@ -30,7 +30,9 @@ export const useInvoicesRetrieve = ({
   useEffect(() => {
     if (!invoices || !invoices.data) return;
 
-    const uniqueBusinessSnapshots = [...new Set(invoices.data.map(c => c.businessNameSnapshot))];
+    const uniqueBusinessSnapshots = [
+      ...new Set(invoices.data.map(c => c.invoiceBusinessSnapshot?.businessName ?? 'N/A'))
+    ];
     dispatch(
       setBusinessSnapshotOptions(
         uniqueBusinessSnapshots.map(c => {
@@ -39,7 +41,7 @@ export const useInvoicesRetrieve = ({
       )
     );
 
-    const uniqueClientsSnapshots = [...new Set(invoices.data.map(c => c.clientNameSnapshot))];
+    const uniqueClientsSnapshots = [...new Set(invoices.data.map(c => c.invoiceClientSnapshot?.clientName ?? 'N/A'))];
     dispatch(
       setClientSnapshotOptions(
         uniqueClientsSnapshots.map(c => {

@@ -93,23 +93,58 @@ export interface AttachmentForm {
   data: Uint8Array;
 }
 
+export interface InvoiceStyleProfileSnapshots {
+  parentInvoiceId?: number;
+  id?: number;
+  styleProfileName?: string;
+}
+
+export interface InvoiceCustomizationMeta {
+  parentInvoiceId?: number;
+  id?: number;
+  color?: string;
+  logoSize?: SizeType;
+  fontSize?: SizeType;
+  layout?: LayoutType;
+  tableHeaderStyle?: TableHeaderStyle;
+  tableRowStyle?: TableRowStyle;
+  pageFormat?: PageFormat;
+  labelUpperCase?: boolean;
+  watermarkFileName?: string;
+  watermarkFileType?: string;
+  watermarkFileSize?: number;
+  paidWatermarkFileName?: string;
+  paidWatermarkFileType?: string;
+  paidWatermarkFileSize?: number;
+}
+
+export interface InvoiceCustomization extends InvoiceCustomizationMeta {
+  watermarkFileData?: Uint8Array;
+  paidWatermarkFileData?: Uint8Array;
+}
+
+export interface InvoiceCustomizationWeb extends InvoiceCustomizationMeta {
+  watermarkFileData?: string;
+  paidWatermarkFileData?: string;
+}
+
 export interface CustomizationForm {
-  customizationColor?: string;
-  customizationLogoSize?: SizeType;
-  customizationFontSizeSize?: SizeType;
-  customizationLayout?: LayoutType;
-  customizationTableHeaderStyle?: TableHeaderStyle;
-  customizationTableRowStyle?: TableRowStyle;
-  customizationPageFormat?: PageFormat;
-  customizationLabelUpperCase?: boolean;
-  customizationWatermarkFileName?: string;
-  customizationWatermarkFileType?: string;
-  customizationWatermarkFileSize?: number;
-  customizationWatermarkFileData?: Uint8Array;
-  customizationPaidWatermarkFileName?: string;
-  customizationPaidWatermarkFileType?: string;
-  customizationPaidWatermarkFileSize?: number;
-  customizationPaidWatermarkFileData?: Uint8Array;
+  color?: string;
+  logoSize?: SizeType;
+  fontSize?: SizeType;
+  layout?: LayoutType;
+  tableHeaderStyle?: TableHeaderStyle;
+  tableRowStyle?: TableRowStyle;
+  pageFormat?: PageFormat;
+  labelUpperCase?: boolean;
+  watermarkFileName?: string;
+  watermarkFileType?: string;
+  watermarkFileSize?: number;
+  watermarkFileData?: Uint8Array;
+  paidWatermarkFileName?: string;
+  paidWatermarkFileType?: string;
+  paidWatermarkFileSize?: number;
+  paidWatermarkFileData?: Uint8Array;
 }
 
 export interface DiscountForm {
@@ -147,13 +182,19 @@ export interface InvoiceAttachmentWeb extends InvoiceAttachmentMeta {
   data: string;
 }
 
+export interface InvoiceItemSnapshots {
+  parentInvoiceItemId: number;
+  id?: number;
+  itemName: string;
+  unitPriceCents: number;
+  unitName?: string;
+}
+
 export interface InvoiceItem {
   id?: number;
   parentInvoiceId?: number;
   itemId: number;
-  itemNameSnapshot: string;
-  unitPriceCentsSnapshot: number;
-  unitNameSnapshot?: string;
+  invoiceItemSnapshot: InvoiceItemSnapshots;
   quantity: string;
   createdAt?: string;
   updatedAt?: string;
@@ -161,10 +202,54 @@ export interface InvoiceItem {
   taxType?: InvoiceItemTaxType;
 }
 
+export interface InvoiceCurrencySnapshots {
+  parentInvoiceId: number;
+  id?: number;
+  currencyCode: string;
+  currencySymbol: string;
+  currencySubunit: number;
+}
+
+export interface InvoiceClientSnapshots {
+  parentInvoiceId?: number;
+  id?: number;
+  clientName?: string;
+  clientAddress?: string;
+  clientEmail?: string;
+  clientPhone?: string;
+  clientCode?: string;
+  clientAdditional?: string;
+}
+
+export interface InvoiceBusinessSnapshotsMeta {
+  parentInvoiceId?: number;
+  id?: number;
+  businessName: string;
+  businessAddress?: string;
+  businessRole?: string;
+  businessShortName: string;
+  businessEmail?: string;
+  businessPhone?: string;
+  businessAdditional?: string;
+  businessPaymentInformation?: string;
+  businessFileSize?: number;
+  businessFileType?: string;
+  businessFileName?: string;
+}
+
+export interface InvoiceBusinessSnapshots extends InvoiceBusinessSnapshotsMeta {
+  businessLogo?: Uint8Array;
+}
+
+export interface InvoiceBusinessSnapshotsWeb extends InvoiceBusinessSnapshotsMeta {
+  businessLogo?: string;
+}
+
 export interface InvoiceMeta {
   id: number;
   invoiceType: InvoiceType;
   convertedFromQuotationId?: number;
+  invoiceFullNumber: string;
   businessId: number;
   clientId: number;
   currencyId: number;
@@ -179,28 +264,8 @@ export interface InvoiceMeta {
   thanksNotes?: string;
   termsConditionNotes?: string;
   discountName?: string;
-  businessNameSnapshot: string;
-  businessAddressSnapshot?: string;
-  businessRoleSnapshot?: string;
   invoicePrefix?: string;
   invoiceSuffix?: string;
-  businessShortNameSnapshot: string;
-  businessEmailSnapshot?: string;
-  businessPhoneSnapshot?: string;
-  businessAdditionalSnapshot?: string;
-  businessPaymentInformationSnapshot?: string;
-  businessFileSizeSnapshot?: number;
-  businessFileTypeSnapshot?: string;
-  businessFileNameSnapshot?: string;
-  clientNameSnapshot: string;
-  clientAddressSnapshot?: string;
-  clientEmailSnapshot?: string;
-  clientPhoneSnapshot?: string;
-  clientCodeSnapshot?: string;
-  clientAdditionalSnapshot?: string;
-  currencyCodeSnapshot: string;
-  currencySymbolSnapshot: string;
-  currencySubunitSnapshot: number;
   discountType?: DiscountType;
   discountAmountCents: number;
   discountPercent: number;
@@ -211,42 +276,28 @@ export interface InvoiceMeta {
   invoicePayments: InvoicePayment[];
   invoiceItems: InvoiceItem[];
   currencyFormat: string;
-  customizationColor: string;
-  customizationLogoSize: SizeType;
-  customizationFontSizeSize: SizeType;
-  customizationLayout: LayoutType;
-  customizationTableHeaderStyle: TableHeaderStyle;
-  customizationTableRowStyle: TableRowStyle;
-  customizationPageFormat: PageFormat;
-  customizationLabelUpperCase: boolean;
-  customizationWatermarkFileName?: string;
-  customizationWatermarkFileType?: string;
-  customizationWatermarkFileSize?: number;
-  customizationPaidWatermarkFileName?: string;
-  customizationPaidWatermarkFileType?: string;
-  customizationPaidWatermarkFileSize?: number;
   language: Language;
   signatureSize?: number;
   signatureType?: string;
   signatureName?: string;
   styleProfilesId?: number;
-  styleProfileNameSnapshot?: string;
+  invoiceStyleProfileSnapshot?: InvoiceStyleProfileSnapshots;
+  invoiceClientSnapshot?: InvoiceClientSnapshots;
+  invoiceCurrencySnapshot?: InvoiceCurrencySnapshots;
 }
 
 export interface Invoice extends InvoiceMeta {
-  businessLogoSnapshot?: Uint8Array;
-  customizationWatermarkFileData?: Uint8Array;
-  customizationPaidWatermarkFileData?: Uint8Array;
   signatureData?: Uint8Array;
   invoiceAttachments: InvoiceAttachment[];
+  invoiceBusinessSnapshot?: InvoiceBusinessSnapshots;
+  invoiceCustomization?: InvoiceCustomization;
 }
 
 export interface InvoiceWeb extends InvoiceMeta {
-  businessLogoSnapshot?: string | null;
-  customizationWatermarkFileData?: string | null;
-  customizationPaidWatermarkFileData?: string | null;
   signatureData?: string | null;
   invoiceAttachments: InvoiceAttachmentWeb[];
+  invoiceBusinessSnapshot?: InvoiceBusinessSnapshotsWeb;
+  invoiceCustomization?: InvoiceCustomizationWeb;
 }
 export interface InvoiceAddMeta {
   invoiceType?: InvoiceType;
@@ -265,26 +316,6 @@ export interface InvoiceAddMeta {
   invoiceSuffix?: string;
   termsConditionNotes?: string;
   discountName?: string;
-  businessNameSnapshot?: string;
-  businessAddressSnapshot?: string;
-  businessRoleSnapshot?: string;
-  businessShortNameSnapshot?: string;
-  businessEmailSnapshot?: string;
-  businessPhoneSnapshot?: string;
-  businessAdditionalSnapshot?: string;
-  businessPaymentInformationSnapshot?: string;
-  businessFileSizeSnapshot?: number;
-  businessFileTypeSnapshot?: string;
-  businessFileNameSnapshot?: string;
-  clientNameSnapshot?: string;
-  clientAddressSnapshot?: string;
-  clientEmailSnapshot?: string;
-  clientPhoneSnapshot?: string;
-  clientCodeSnapshot?: string;
-  clientAdditionalSnapshot?: string;
-  currencyCodeSnapshot?: string;
-  currencySymbolSnapshot?: string;
-  currencySubunitSnapshot?: number;
   discountType?: DiscountType;
   discountAmountCents?: number;
   discountPercent?: number;
@@ -295,34 +326,21 @@ export interface InvoiceAddMeta {
   invoicePayments?: InvoicePayment[];
   invoiceItems?: InvoiceItem[];
   currencyFormat?: string;
-  customizationColor?: string;
-  customizationLogoSize?: SizeType;
-  customizationFontSizeSize?: SizeType;
-  customizationLayout?: LayoutType;
-  customizationTableHeaderStyle?: TableHeaderStyle;
-  customizationTableRowStyle?: TableRowStyle;
-  customizationPageFormat?: PageFormat;
-  customizationLabelUpperCase?: boolean;
-  customizationWatermarkFileName?: string;
-  customizationWatermarkFileType?: string;
-  customizationWatermarkFileSize?: number;
-  customizationPaidWatermarkFileName?: string;
-  customizationPaidWatermarkFileType?: string;
-  customizationPaidWatermarkFileSize?: number;
   language?: Language;
   signatureSize?: number;
   signatureType?: string;
   signatureName?: string;
   styleProfilesId?: number;
-  styleProfileNameSnapshot?: string;
+  invoiceStyleProfileSnapshot?: InvoiceStyleProfileSnapshots;
+  invoiceClientSnapshot?: InvoiceClientSnapshots;
+  invoiceCurrencySnapshot?: InvoiceCurrencySnapshots;
 }
 
 export interface InvoiceAdd extends InvoiceAddMeta {
-  businessLogoSnapshot?: Uint8Array;
-  customizationWatermarkFileData?: Uint8Array;
-  customizationPaidWatermarkFileData?: Uint8Array;
   signatureData?: Uint8Array;
   invoiceAttachments?: InvoiceAttachment[];
+  invoiceBusinessSnapshot?: InvoiceBusinessSnapshots;
+  invoiceCustomization?: InvoiceCustomization;
 }
 
 export interface InvoiceUpdate extends InvoiceAdd {
@@ -330,11 +348,10 @@ export interface InvoiceUpdate extends InvoiceAdd {
 }
 
 export interface InvoiceAddWeb extends InvoiceAddMeta {
-  businessLogoSnapshot?: string | null;
-  customizationWatermarkFileData?: string | null;
-  customizationPaidWatermarkFileData?: string | null;
   signatureData?: string | null;
   invoiceAttachments?: InvoiceAttachmentWeb[];
+  invoiceBusinessSnapshot?: InvoiceBusinessSnapshotsWeb;
+  invoiceCustomization?: InvoiceCustomizationWeb;
 }
 
 export interface InvoiceUpdateWeb extends InvoiceAddWeb {
@@ -359,27 +376,6 @@ export interface InvoiceFromData {
   invoiceSuffix?: string;
   termsConditionNotes?: string;
   discountName?: string;
-  businessNameSnapshot?: string;
-  businessAddressSnapshot?: string;
-  businessRoleSnapshot?: string;
-  businessShortNameSnapshot?: string;
-  businessEmailSnapshot?: string;
-  businessPhoneSnapshot?: string;
-  businessAdditionalSnapshot?: string;
-  businessPaymentInformationSnapshot?: string;
-  businessLogoSnapshot?: Uint8Array;
-  businessFileSizeSnapshot?: number;
-  businessFileTypeSnapshot?: string;
-  businessFileNameSnapshot?: string;
-  clientNameSnapshot?: string;
-  clientAddressSnapshot?: string;
-  clientEmailSnapshot?: string;
-  clientPhoneSnapshot?: string;
-  clientCodeSnapshot?: string;
-  clientAdditionalSnapshot?: string;
-  currencyCodeSnapshot?: string;
-  currencySymbolSnapshot?: string;
-  currencySubunitSnapshot?: number;
   discountType?: DiscountType;
   discountAmountCents?: number;
   discountPercent?: number;
@@ -390,30 +386,18 @@ export interface InvoiceFromData {
   invoicePayments?: InvoicePayment[];
   invoiceItems?: InvoiceItem[];
   invoiceAttachments?: InvoiceAttachment[];
+  invoiceBusinessSnapshot?: InvoiceBusinessSnapshots;
+  invoiceClientSnapshot?: InvoiceClientSnapshots;
+  invoiceCurrencySnapshot?: InvoiceCurrencySnapshots;
+  invoiceCustomization?: InvoiceCustomization;
+  invoiceStyleProfileSnapshot?: InvoiceStyleProfileSnapshots;
   currencyFormat?: string;
-  customizationColor?: string;
-  customizationLogoSize?: SizeType;
-  customizationFontSizeSize?: SizeType;
-  customizationLayout?: LayoutType;
-  customizationTableHeaderStyle?: TableHeaderStyle;
-  customizationTableRowStyle?: TableRowStyle;
-  customizationPageFormat?: PageFormat;
-  customizationLabelUpperCase?: boolean;
-  customizationWatermarkFileName?: string;
-  customizationWatermarkFileType?: string;
-  customizationWatermarkFileSize?: number;
-  customizationWatermarkFileData?: Uint8Array;
-  customizationPaidWatermarkFileName?: string;
-  customizationPaidWatermarkFileType?: string;
-  customizationPaidWatermarkFileSize?: number;
-  customizationPaidWatermarkFileData?: Uint8Array;
   language?: Language;
   signatureData?: Uint8Array;
   signatureSize?: number;
   signatureType?: string;
   signatureName?: string;
   styleProfilesId?: number;
-  styleProfileNameSnapshot?: string;
 }
 export interface InvoiceInfo {
   id?: number;

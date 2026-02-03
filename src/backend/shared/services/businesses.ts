@@ -29,7 +29,7 @@ export const getAllBusinesses = (
   db: Database,
   filter?: FilterData[]
 ): Promise<Response<(Business & EntityWithCounts)[]>> => {
-  const getAll = getAllEntities<Business>(db, 'businesses', 't', {
+  const getAll = getAllEntities<Business>(db, 'businesses', 't', 'i', {
     joins: `
       LEFT JOIN invoices i ON i.businessId = t.id
     `,

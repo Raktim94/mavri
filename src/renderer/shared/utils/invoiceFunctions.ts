@@ -22,19 +22,19 @@ export const aggregateInvoicesByCurrency = (invoices: Invoice[], from: string, t
     const totalAmountCents = getTotalAmountCents(invoice);
 
     if (invoice.status === InvoiceStatus.paid && amountPaidCents <= totalAmountCents) {
-      return totalAmountCents / invoice.currencySubunitSnapshot;
+      return totalAmountCents / invoice.invoiceCurrencySnapshot!.currencySubunit;
     }
 
-    return amountPaidCents / invoice.currencySubunitSnapshot;
+    return amountPaidCents / invoice.invoiceCurrencySnapshot!.currencySubunit;
   };
 
   for (const invoice of filtered) {
-    const code = invoice.currencyCodeSnapshot;
+    const code = invoice.invoiceCurrencySnapshot!.currencyCode;
 
     if (!result[code]) {
       result[code] = {
-        currencyCode: invoice.currencyCodeSnapshot,
-        currencySymbol: invoice.currencySymbolSnapshot,
+        currencyCode: invoice.invoiceCurrencySnapshot!.currencyCode,
+        currencySymbol: invoice.invoiceCurrencySnapshot!.currencySymbol,
         totalAmount: 0,
         totalAmountPaid: 0,
         balanceDue: 0,
@@ -51,7 +51,7 @@ export const aggregateInvoicesByCurrency = (invoices: Invoice[], from: string, t
     const totalAmountPaid = getInvoicePaidAmount(invoice);
 
     const totalAmountCents = getTotalAmountCents(invoice);
-    const totalAmount = totalAmountCents / invoice.currencySubunitSnapshot;
+    const totalAmount = totalAmountCents / invoice.invoiceCurrencySnapshot!.currencySubunit;
     const remaining = totalAmount - totalAmountPaid;
 
     result[code].totalAmount += totalAmount;
@@ -111,7 +111,10 @@ export const getSubTotalAmountCents = (invoiceItems: InvoiceItem[], includeTax: 
 };
 
 export const getInvoiceItemAmountCents = (invoiceItem: InvoiceItem): number => {
-  return getTotalUnitPrice({ unitPrice: invoiceItem.unitPriceCentsSnapshot, quantity: invoiceItem.quantity });
+  return getTotalUnitPrice({
+    unitPrice: invoiceItem.invoiceItemSnapshot.unitPriceCents,
+    quantity: invoiceItem.quantity
+  });
 };
 
 export const getTotalUnitPrice = (data: { unitPrice: number; quantity: string }): number => {
@@ -220,7 +223,7 @@ export const getItemFinancialData = (data: {
   const unitPrice = getUnitPrice({
     supportsSubunit: supportsSubunit,
     amountCents: unitPriceCents,
-    subunit: invoiceForm.currencySubunitSnapshot
+    subunit: invoiceForm.invoiceCurrencySnapshot?.currencySubunit
   });
   const totalUnitPrice = getTotalUnitPrice({ unitPrice, quantity });
   const invoiceTaxAmount = getUnitTax({
@@ -253,7 +256,7 @@ export const getPaidData = (data: {
   const amountPaid = getUnitPrice({
     supportsSubunit,
     amountCents: invoicePayment?.amountCents ?? 0,
-    subunit: invoiceForm?.currencySubunitSnapshot
+    subunit: invoiceForm?.invoiceCurrencySnapshot?.currencySubunit
   });
 
   return {
@@ -275,7 +278,7 @@ export const getTotalPaidData = (data: {
   const totalAmountPaid = getUnitPrice({
     supportsSubunit,
     amountCents: getTotalAmountPaidCents(invoiceForm?.invoicePayments ?? []),
-    subunit: invoiceForm?.currencySubunitSnapshot
+    subunit: invoiceForm?.invoiceCurrencySnapshot?.currencySubunit
   });
 
   return {
@@ -298,7 +301,7 @@ export const getFinancialData = (data: { storeSettings?: Settings; invoiceForm?:
     const { totalUnitPrice, invoiceTaxAmount } = getItemFinancialData({
       storeSettings,
       invoiceForm,
-      unitPriceCents: item.unitPriceCentsSnapshot,
+      unitPriceCents: item.invoiceItemSnapshot.unitPriceCents,
       quantity: item.quantity,
       taxType: item.taxType,
       taxRate: item.taxRate,
@@ -323,7 +326,7 @@ export const getFinancialData = (data: { storeSettings?: Settings; invoiceForm?:
     discountAmount = getUnitPrice({
       supportsSubunit,
       amountCents: discountBaseCents,
-      subunit: invoiceForm?.currencySubunitSnapshot
+      subunit: invoiceForm?.invoiceCurrencySnapshot?.currencySubunit
     });
   } else if (invoiceForm?.discountType === DiscountType.percentage) {
     discountBaseCents = (subTotalAmount * (invoiceForm?.discountPercent ?? 0)) / 100;
@@ -333,7 +336,7 @@ export const getFinancialData = (data: { storeSettings?: Settings; invoiceForm?:
   const shippingAmount = getUnitPrice({
     supportsSubunit,
     amountCents: invoiceForm?.shippingFeeCents ?? 0,
-    subunit: invoiceForm?.currencySubunitSnapshot
+    subunit: invoiceForm?.invoiceCurrencySnapshot?.currencySubunit
   });
 
   const totalAmountAfterDiscount = subTotalAmount - discountAmount;

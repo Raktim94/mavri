@@ -9,22 +9,22 @@ import { mapSqliteError } from '../utils/errorFunctions';
 
 const styleProfileFields: (keyof StyleProfile)[] = [
   'name',
-  'customizationColor',
-  'customizationLogoSize',
-  'customizationFontSizeSize',
-  'customizationLayout',
-  'customizationTableHeaderStyle',
-  'customizationTableRowStyle',
-  'customizationPageFormat',
-  'customizationLabelUpperCase',
-  'customizationWatermarkFileName',
-  'customizationWatermarkFileType',
-  'customizationWatermarkFileSize',
-  'customizationWatermarkFileData',
-  'customizationPaidWatermarkFileName',
-  'customizationPaidWatermarkFileType',
-  'customizationPaidWatermarkFileSize',
-  'customizationPaidWatermarkFileData',
+  'color',
+  'logoSize',
+  'fontSize',
+  'layout',
+  'tableHeaderStyle',
+  'tableRowStyle',
+  'pageFormat',
+  'labelUpperCase',
+  'watermarkFileName',
+  'watermarkFileType',
+  'watermarkFileSize',
+  'watermarkFileData',
+  'paidWatermarkFileName',
+  'paidWatermarkFileType',
+  'paidWatermarkFileSize',
+  'paidWatermarkFileData',
   'isArchived'
 ];
 
@@ -32,7 +32,7 @@ export const getAllStyleProfiles = async (
   db: Database,
   filter?: FilterData[]
 ): Promise<Response<(StyleProfile & EntityWithCounts)[]>> => {
-  const getAll = getAllEntities<StyleProfile>(db, 'style_profiles', 't', {
+  const getAll = getAllEntities<StyleProfile>(db, 'style_profiles', 't', 'i', {
     joins: `
           LEFT JOIN invoices i ON i.styleProfilesId = t.id
         `,

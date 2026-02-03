@@ -28,7 +28,8 @@ COPY --from=builder /app/node_modules /app/node_modules
 EXPOSE 3000 3001
 
 COPY scripts/docker-start.sh /app/scripts/docker-start.sh
-RUN chmod +x /app/scripts/docker-start.sh
+RUN sed -i 's/\r$//' /app/scripts/docker-start.sh \
+    && chmod +x /app/scripts/docker-start.sh
 
 VOLUME ["/data"]
 

@@ -236,7 +236,7 @@ const TaxDropdownComponent: FC<Props> = ({ isOpen, data, onClose, onOpen, onClic
                         flexDirection: 'row'
                       }}
                     >
-                      {invoiceItem.itemNameSnapshot}
+                      {invoiceItem.invoiceItemSnapshot.itemName}
                     </Typography>
                     <Box sx={{ flexGrow: 1 }} />
                     <Box

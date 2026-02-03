@@ -44,7 +44,7 @@ const ClientSelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
               variant="body2"
               sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}
             >
-              {invoiceForm?.clientNameSnapshot}
+              {invoiceForm?.invoiceClientSnapshot?.clientName}
             </Typography>
           }
           disableTypography

@@ -13,7 +13,7 @@ export const getAllCurrencies = async (
   db: Database,
   filter?: FilterData[]
 ): Promise<Response<(Currency & EntityWithCounts)[]>> => {
-  const getAll = getAllEntities<Currency>(db, 'currencies', 't', {
+  const getAll = getAllEntities<Currency>(db, 'currencies', 't', 'i', {
     joins: `
         LEFT JOIN invoices i ON i.currencyId = t.id
       `,

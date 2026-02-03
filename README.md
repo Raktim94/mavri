@@ -300,6 +300,7 @@ VITE_API_URL={url} Backend webserver URL when running without Electron (Web/Dock
     /pages          – React components related to routing
     /state          – Redux-related code
     /shared
+      /api          – A neutral layer for Electron preload, IPC handlers, or a lightweight web server
       /hooks        – Reusable React hooks
       /components   – Shared UI components
       /enums        – TypeScript enums

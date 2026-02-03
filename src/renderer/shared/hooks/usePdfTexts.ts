@@ -3,7 +3,7 @@ import type { InvoiceFromData, PdfTexts } from '../types/invoice';
 import { useUppercaseTranslation } from './useUppercaseTranslation';
 
 export const usePdfTexts = (invoiceForm?: InvoiceFromData): PdfTexts => {
-  const { tt } = useUppercaseTranslation(invoiceForm?.customizationLabelUpperCase, invoiceForm?.language);
+  const { tt } = useUppercaseTranslation(invoiceForm?.invoiceCustomization?.labelUpperCase, invoiceForm?.language);
 
   return useMemo(() => {
     return {

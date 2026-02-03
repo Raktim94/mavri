@@ -13,13 +13,14 @@ export const getAllEntities =
     db: Database,
     table: string,
     alias: string,
+    invoiceAlias: string,
     aggregation: InvoiceAggregation
   ): ((filter: FilterData[]) => Promise<Response<(T & EntityWithCounts)[]>>) =>
   async (filter: FilterData[]) => {
     const havingClause = getHavingClauseFromFilters({
       filters: filter,
-      invoiceUpdatedAtColumn: 'inv.updatedAt',
-      invoiceIdColumn: 'inv.id',
+      invoiceUpdatedAtColumn: `${invoiceAlias}.updatedAt`,
+      invoiceIdColumn: `${invoiceAlias}.id`,
       archivedColumn: `${alias}.isArchived`
     });
 

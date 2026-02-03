@@ -23,7 +23,7 @@ export const getAllClients = async (
   db: Database,
   filter?: FilterData[]
 ): Promise<Response<(Client & EntityWithCounts)[]>> => {
-  const getAll = getAllEntities<Client>(db, 'clients', 't', {
+  const getAll = getAllEntities<Client>(db, 'clients', 't', 'i', {
     joins: `
         LEFT JOIN invoices i ON i.clientId = t.id
       `,

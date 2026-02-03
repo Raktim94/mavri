@@ -46,14 +46,43 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onSaveProfile
                 ...data,
                 name: name,
                 isArchived: false,
-                customizationLabelUpperCase: data.customizationLabelUpperCase ?? false
+                color: data?.color,
+                logoSize: data?.logoSize,
+                fontSize: data?.fontSize,
+                layout: data?.layout,
+                tableHeaderStyle: data?.tableHeaderStyle,
+                tableRowStyle: data?.tableRowStyle,
+                pageFormat: data?.pageFormat,
+                labelUpperCase: data?.labelUpperCase ?? false,
+                watermarkFileName: data?.watermarkFileName ?? undefined,
+                watermarkFileType: data?.watermarkFileType ?? undefined,
+                watermarkFileSize: data?.watermarkFileSize ?? undefined,
+                watermarkFileData: data?.watermarkFileData ?? undefined,
+                paidWatermarkFileName: data?.paidWatermarkFileName ?? undefined,
+                paidWatermarkFileType: data?.paidWatermarkFileType ?? undefined,
+                paidWatermarkFileSize: data?.paidWatermarkFileSize ?? undefined,
+                paidWatermarkFileData: data?.paidWatermarkFileData ?? undefined
               });
             } else {
               onSaveProfile?.({
-                ...form,
                 name: name,
                 isArchived: false,
-                customizationLabelUpperCase: form.customizationLabelUpperCase ?? false
+                color: form?.color,
+                logoSize: form?.logoSize,
+                fontSize: form?.fontSize,
+                layout: form?.layout,
+                tableHeaderStyle: form?.tableHeaderStyle,
+                tableRowStyle: form?.tableRowStyle,
+                pageFormat: form?.pageFormat,
+                labelUpperCase: form?.labelUpperCase ?? false,
+                watermarkFileName: form?.watermarkFileName ?? undefined,
+                watermarkFileType: form?.watermarkFileType ?? undefined,
+                watermarkFileSize: form?.watermarkFileSize ?? undefined,
+                watermarkFileData: form?.watermarkFileData ?? undefined,
+                paidWatermarkFileName: form?.paidWatermarkFileName ?? undefined,
+                paidWatermarkFileType: form?.paidWatermarkFileType ?? undefined,
+                paidWatermarkFileSize: form?.paidWatermarkFileSize ?? undefined,
+                paidWatermarkFileData: form?.paidWatermarkFileData ?? undefined
               });
             }
             setIsProfileModalOpen(false);

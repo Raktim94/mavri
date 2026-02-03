@@ -8,7 +8,7 @@ import { mapSqliteError } from '../utils/errorFunctions';
 const unitFields: (keyof Unit)[] = ['name', 'isArchived'];
 
 export const getAllUnits = async (db: Database, filter?: FilterData[]) => {
-  const getAll = getAllEntities<Unit>(db, 'units', 'u', {
+  const getAll = getAllEntities<Unit>(db, 'units', 'u', 'inv', {
     joins: `
       LEFT JOIN items it ON it.unitId = u.id
       LEFT JOIN invoice_items ii ON ii.itemId = it.id

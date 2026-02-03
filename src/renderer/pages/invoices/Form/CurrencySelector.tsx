@@ -26,14 +26,15 @@ const CurrencySelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
             </Typography>
           }
           secondary={
-            invoiceForm?.currencyCodeSnapshot &&
-            invoiceForm?.currencySymbolSnapshot && (
+            invoiceForm?.invoiceCurrencySnapshot?.currencyCode &&
+            invoiceForm?.invoiceCurrencySnapshot?.currencySymbol && (
               <Typography
                 component="div"
                 variant="body2"
                 sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}
               >
-                {invoiceForm.currencyCodeSnapshot} / {invoiceForm.currencySymbolSnapshot}
+                {invoiceForm.invoiceCurrencySnapshot?.currencyCode}&nbsp;/&nbsp;
+                {invoiceForm.invoiceCurrencySnapshot?.currencySymbol}
               </Typography>
             )
           }

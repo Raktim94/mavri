@@ -21,7 +21,7 @@ const NotesInfoComponent: FC<Props> = ({ invoiceForm, labels }) => {
           style={[
             PDF_STYLES.regular,
             PDF_STYLES.italic,
-            { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regular }
+            { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regular }
           ]}
         >
           <Text>{invoiceForm?.thanksNotes}</Text>
@@ -32,7 +32,7 @@ const NotesInfoComponent: FC<Props> = ({ invoiceForm, labels }) => {
           <View
             style={[
               PDF_STYLES.regularBold,
-              { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
+              { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regularBold }
             ]}
           >
             <Text>{customerNoteLabel}</Text>
@@ -40,7 +40,7 @@ const NotesInfoComponent: FC<Props> = ({ invoiceForm, labels }) => {
           <View
             style={[
               PDF_STYLES.regular,
-              { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regular }
+              { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regular }
             ]}
           >
             <Text>{invoiceForm?.customerNotes}</Text>
@@ -52,7 +52,7 @@ const NotesInfoComponent: FC<Props> = ({ invoiceForm, labels }) => {
           <View
             style={[
               PDF_STYLES.regularBold,
-              { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regularBold }
+              { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regularBold }
             ]}
           >
             <Text>{termsConditionsLabel}</Text>
@@ -60,7 +60,7 @@ const NotesInfoComponent: FC<Props> = ({ invoiceForm, labels }) => {
           <View
             style={[
               PDF_STYLES.regular,
-              { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].regular }
+              { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regular }
             ]}
           >
             <Text>{invoiceForm?.termsConditionNotes}</Text>

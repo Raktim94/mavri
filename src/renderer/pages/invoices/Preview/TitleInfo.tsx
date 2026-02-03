@@ -20,8 +20,8 @@ const TitleInfoComponent: FC<Props> = ({ invoiceForm, labels }) => {
       style={[
         PDF_STYLES.title,
         {
-          color: invoiceForm?.customizationColor,
-          fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].title
+          color: invoiceForm?.invoiceCustomization?.color,
+          fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].title
         }
       ]}
     >

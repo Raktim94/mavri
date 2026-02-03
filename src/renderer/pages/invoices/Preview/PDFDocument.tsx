@@ -58,10 +58,12 @@ const PDFDocumentComponent: FC<Props> = ({
   return (
     <Document>
       <Page
-        size={invoiceForm?.customizationPageFormat}
+        size={invoiceForm?.invoiceCustomization?.pageFormat}
         style={[
           PDF_STYLES.page,
-          { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].page }
+          {
+            fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].page
+          }
         ]}
       >
         {invoiceForm?.status === InvoiceStatus.paid && (
@@ -87,10 +89,10 @@ const PDFDocumentComponent: FC<Props> = ({
           style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart, PDF_STYLES.pt10]}
           minPresenceAhead={20}
         >
-          {invoiceForm?.customizationLayout === LayoutType.compact && (
+          {invoiceForm?.invoiceCustomization?.layout === LayoutType.compact && (
             <PaymentInfo invoiceForm={invoiceForm} paymentInfoLabel={pdfTexts.paymentInfo} />
           )}
-          {invoiceForm?.customizationLayout !== LayoutType.compact && <View style={PDF_STYLES.flexGrow} />}
+          {invoiceForm?.invoiceCustomization?.layout !== LayoutType.compact && <View style={PDF_STYLES.flexGrow} />}
           <FinancialInfo
             invoiceForm={invoiceForm}
             storeSettings={storeSettings}
@@ -130,10 +132,10 @@ const PDFDocumentComponent: FC<Props> = ({
       {attachmentUrls.map(item => (
         <Page
           key={item.id}
-          size={invoiceForm?.customizationPageFormat}
+          size={invoiceForm?.invoiceCustomization?.pageFormat}
           style={[
             PDF_STYLES.page,
-            { fontSize: FONT_SIZES[invoiceForm?.customizationFontSizeSize ?? DEFAULT_FONT_SIZES].page }
+            { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].page }
           ]}
         >
           <WatermarkInfo invoiceForm={invoiceForm} watermarkUrl={watermarkUrl} />

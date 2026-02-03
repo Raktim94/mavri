@@ -8,7 +8,7 @@ import { mapSqliteError } from '../utils/errorFunctions';
 const categoryFields: (keyof Category)[] = ['name', 'isArchived'];
 
 export const getAllCategories = async (db: Database, filter?: FilterData[]) => {
-  const getAll = getAllEntities<Category>(db, 'categories', 'c', {
+  const getAll = getAllEntities<Category>(db, 'categories', 'c', 'inv', {
     joins: `
         LEFT JOIN items it ON it.categoryId = c.id
         LEFT JOIN invoice_items ii ON ii.itemId = it.id
