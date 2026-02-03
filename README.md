@@ -76,6 +76,8 @@ If you value **privacy, portability, and control**, this app is built for you.
 - Attachments: include images in PDFs
 - Signature support: upload or hand-draw signatures and apply them to PDFs
 - Style profiles are now available for invoices and quotes, enabling quick, consistent theming
+- Show quantity, unit, and row number in the PDF item table
+- Custom header sections and custom values in the PDF item table
 
 ### Reports
 
