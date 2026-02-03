@@ -116,6 +116,9 @@ export interface InvoiceCustomizationMeta {
   paidWatermarkFileName?: string;
   paidWatermarkFileType?: string;
   paidWatermarkFileSize?: number;
+  showQuantity?: boolean;
+  showUnit?: boolean;
+  showRowNo?: boolean;
 }
 
 export interface InvoiceCustomization extends InvoiceCustomizationMeta {
@@ -145,6 +148,9 @@ export interface CustomizationForm {
   paidWatermarkFileType?: string;
   paidWatermarkFileSize?: number;
   paidWatermarkFileData?: Uint8Array;
+  showQuantity?: boolean;
+  showUnit?: boolean;
+  showRowNo?: boolean;
 }
 
 export interface DiscountForm {

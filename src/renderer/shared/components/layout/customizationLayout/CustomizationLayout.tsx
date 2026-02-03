@@ -238,7 +238,7 @@ export const CustomizationLayout: FC<Props> = ({
             </RadioGroup>
           </FormControl>
         </Grid>
-        <Grid size={{ xs: 12, md: 12 }}>
+        <Grid size={{ xs: 12, md: 3 }}>
           <FormControlLabel
             control={
               <Switch
@@ -249,6 +249,45 @@ export const CustomizationLayout: FC<Props> = ({
               />
             }
             label={t('common.labelsUpperCase')}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, md: 3 }}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={form.showQuantity ?? false}
+                onChange={(_e, newValue) => {
+                  update('showQuantity', newValue);
+                }}
+              />
+            }
+            label={t('common.showQuantity')}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, md: 3 }}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={form.showRowNo ?? false}
+                onChange={(_e, newValue) => {
+                  update('showRowNo', newValue);
+                }}
+              />
+            }
+            label={t('common.showRowNo')}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, md: 3 }}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={form.showUnit ?? false}
+                onChange={(_e, newValue) => {
+                  update('showUnit', newValue);
+                }}
+              />
+            }
+            label={t('common.showUnit')}
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>

@@ -101,7 +101,10 @@ const invoiceCustomizationFields: (keyof InvoiceCustomization)[] = [
   'paidWatermarkFileName',
   'paidWatermarkFileType',
   'paidWatermarkFileSize',
-  'paidWatermarkFileData'
+  'paidWatermarkFileData',
+  'showQuantity',
+  'showUnit',
+  'showRowNo'
 ];
 const invoiceFields: (keyof Invoice)[] = [
   'invoiceType',
@@ -708,7 +711,10 @@ export const duplicateInvoice = async (db: Database, invoiceId: number, invoiceT
       'paidWatermarkFileName',
       'paidWatermarkFileType',
       'paidWatermarkFileSize',
-      'paidWatermarkFileData'
+      'paidWatermarkFileData',
+      'showQuantity',
+      'showUnit',
+      'showRowNo'
     ]);
     await duplicateSnapshot('invoice_style_profile_snapshots', ['styleProfileName']);
 

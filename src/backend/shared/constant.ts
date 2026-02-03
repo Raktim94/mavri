@@ -7,5 +7,8 @@ export const BOOLEAN_FIELDS = [
   'reportsON',
   'styleProfilesON',
   'isArchived',
-  'labelUpperCase'
+  'labelUpperCase',
+  'showQuantity',
+  'showUnit',
+  'showRowNo'
 ] as const;

@@ -78,6 +78,9 @@ export interface InvoiceCustomization {
   paidWatermarkFileType?: string;
   paidWatermarkFileSize?: number;
   paidWatermarkFileData?: Uint8Array;
+  showQuantity: boolean;
+  showUnit: boolean;
+  showRowNo: boolean;
 }
 
 export interface Invoice {

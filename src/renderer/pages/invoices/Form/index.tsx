@@ -176,7 +176,11 @@ const InvoiceFormComponent: FC<Props> = ({
               data.paidWatermarkFileType ?? invoiceForm.invoiceCustomization?.paidWatermarkFileType,
             paidWatermarkFileSize:
               data.paidWatermarkFileSize ?? invoiceForm.invoiceCustomization?.paidWatermarkFileSize,
-            paidWatermarkFileData: data.paidWatermarkFileData ?? invoiceForm.invoiceCustomization?.paidWatermarkFileData
+            paidWatermarkFileData:
+              data.paidWatermarkFileData ?? invoiceForm.invoiceCustomization?.paidWatermarkFileData,
+            showQuantity: data.showQuantity,
+            showUnit: data.showUnit,
+            showRowNo: data.showRowNo
           }
         });
       });

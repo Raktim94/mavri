@@ -105,7 +105,10 @@ const InvoiceFormComponent: FC<Props> = ({
             tableHeaderStyle: TableHeaderStyle.light,
             tableRowStyle: TableRowStyle.classic,
             pageFormat: PageFormat.a4,
-            labelUpperCase: false
+            labelUpperCase: false,
+            showQuantity: true,
+            showUnit: true,
+            showRowNo: true
           }
         });
       }

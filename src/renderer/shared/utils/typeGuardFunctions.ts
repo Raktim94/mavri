@@ -35,6 +35,18 @@ export const isStyleProfileFromData = (data: unknown): data is StyleProfileFromD
   )
     return false;
 
+  if (
+    d.showQuantity !== undefined &&
+    d.showQuantity !== null &&
+    d.showQuantity !== '' &&
+    typeof d.showQuantity !== 'boolean'
+  )
+    return false;
+  if (d.showUnit !== undefined && d.showUnit !== null && d.showUnit !== '' && typeof d.showUnit !== 'boolean')
+    return false;
+  if (d.showRowNo !== undefined && d.showRowNo !== null && d.showRowNo !== '' && typeof d.showRowNo !== 'boolean')
+    return false;
+
   if (d.watermarkFileData !== undefined && d.watermarkFileData !== '' && d.watermarkFileData != null) {
     const isBlob = d.watermarkFileData instanceof Uint8Array;
     if (!isBlob) return false;
@@ -444,6 +456,17 @@ export const isInvoiceCustomizationFromData = (data: unknown): data is InvoiceCu
     d.labelUpperCase !== '' &&
     typeof d.labelUpperCase !== 'boolean'
   )
+    return false;
+  if (
+    d.showQuantity !== undefined &&
+    d.showQuantity !== null &&
+    d.showQuantity !== '' &&
+    typeof d.showQuantity !== 'boolean'
+  )
+    return false;
+  if (d.showUnit !== undefined && d.showUnit !== null && d.showUnit !== '' && typeof d.showUnit !== 'boolean')
+    return false;
+  if (d.showRowNo !== undefined && d.showRowNo !== null && d.showRowNo !== '' && typeof d.showRowNo !== 'boolean')
     return false;
 
   const stringFields = ['watermarkFileName', 'watermarkFileType', 'paidWatermarkFileName', 'paidWatermarkFileType'];

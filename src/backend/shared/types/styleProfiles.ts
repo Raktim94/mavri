@@ -28,4 +28,7 @@ export interface StyleProfile {
   quotesCount: number;
   createdAt: string;
   updatedAt: string;
+  showQuantity: boolean;
+  showUnit: boolean;
+  showRowNo: boolean;
 }

@@ -62,7 +62,10 @@ const InvoicesPreviewComponent: FC<Props> = ({ onSaveProfile = () => {}, setInvo
       paidWatermarkFileName: invoiceForm?.invoiceCustomization?.paidWatermarkFileName,
       paidWatermarkFileType: invoiceForm?.invoiceCustomization?.paidWatermarkFileType,
       paidWatermarkFileSize: invoiceForm?.invoiceCustomization?.paidWatermarkFileSize,
-      paidWatermarkFileData: invoiceForm?.invoiceCustomization?.paidWatermarkFileData
+      paidWatermarkFileData: invoiceForm?.invoiceCustomization?.paidWatermarkFileData,
+      showQuantity: invoiceForm?.invoiceCustomization?.showQuantity,
+      showUnit: invoiceForm?.invoiceCustomization?.showUnit,
+      showRowNo: invoiceForm?.invoiceCustomization?.showRowNo
     };
   }, [invoiceForm?.invoiceCustomization]);
 
