@@ -32,7 +32,10 @@ export const Form: FC<Props> = ({ handleChange = () => {}, styleProfile }) => {
     paidWatermarkFileType: styleProfile?.paidWatermarkFileType ?? undefined,
     paidWatermarkFileSize: styleProfile?.paidWatermarkFileSize ?? undefined,
     paidWatermarkFileData: styleProfile?.paidWatermarkFileData ?? undefined,
-    isArchived: styleProfile?.isArchived ?? false
+    isArchived: styleProfile?.isArchived ?? false,
+    showQuantity: styleProfile?.showQuantity ?? true,
+    showUnit: styleProfile?.showUnit ?? true,
+    showRowNo: styleProfile?.showRowNo ?? true
   });
 
   const [errors, setErrors] = useState({
@@ -60,7 +63,10 @@ export const Form: FC<Props> = ({ handleChange = () => {}, styleProfile }) => {
         paidWatermarkFileData: newData?.paidWatermarkFileData ?? undefined,
         id: styleProfile?.id,
         name: form?.name,
-        isArchived: form?.isArchived
+        isArchived: form?.isArchived,
+        showQuantity: newData?.showQuantity ?? true,
+        showUnit: newData?.showUnit ?? true,
+        showRowNo: newData?.showRowNo ?? true
       });
     },
     [setForm, form, styleProfile]
@@ -91,7 +97,10 @@ export const Form: FC<Props> = ({ handleChange = () => {}, styleProfile }) => {
       paidWatermarkFileName: styleProfile?.paidWatermarkFileName ?? undefined,
       paidWatermarkFileType: styleProfile?.paidWatermarkFileType ?? undefined,
       paidWatermarkFileSize: styleProfile?.paidWatermarkFileSize ?? undefined,
-      paidWatermarkFileData: styleProfile?.paidWatermarkFileData ?? undefined
+      paidWatermarkFileData: styleProfile?.paidWatermarkFileData ?? undefined,
+      showQuantity: styleProfile?.showQuantity ?? true,
+      showUnit: styleProfile?.showUnit ?? true,
+      showRowNo: styleProfile?.showRowNo ?? true
     };
   }, [styleProfile]);
 
@@ -115,7 +124,10 @@ export const Form: FC<Props> = ({ handleChange = () => {}, styleProfile }) => {
       paidWatermarkFileType: styleProfile?.paidWatermarkFileType ?? undefined,
       paidWatermarkFileSize: styleProfile?.paidWatermarkFileSize ?? undefined,
       paidWatermarkFileData: styleProfile?.paidWatermarkFileData ?? undefined,
-      isArchived: styleProfile?.isArchived ?? false
+      isArchived: styleProfile?.isArchived ?? false,
+      showQuantity: styleProfile?.showQuantity ?? true,
+      showUnit: styleProfile?.showUnit ?? true,
+      showRowNo: styleProfile?.showRowNo ?? true
     });
   }, [styleProfile, setForm]);
 

@@ -37,7 +37,7 @@ dist-be
 
 release
 
-dbDirectory/*.db
+data/*.db
 
 dist-fe
 dist-be

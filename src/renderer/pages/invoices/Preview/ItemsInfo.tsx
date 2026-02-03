@@ -2,11 +2,11 @@ import { Text, View } from '@react-pdf/renderer';
 import { memo, useMemo, type FC } from 'react';
 import { TableHeaderStyle } from '../../../shared/enums/tableHeaderStyle';
 import { TableRowStyle } from '../../../shared/enums/tableRowStyle';
-import type { InvoiceFromData } from '../../../shared/types/invoice';
+import type { CustomField, InvoiceFromData } from '../../../shared/types/invoice';
 import type { Settings } from '../../../shared/types/settings';
 import { createCurrencyFormatter } from '../../../shared/utils/formatFunctions';
 import { getItemFinancialData } from '../../../shared/utils/invoiceFunctions';
-import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './constant';
+import { COLUMN_WEIGHTS, DEFAULT_FONT_SIZES, DEFAULT_USER_COLUMN_WEIGHT, FONT_SIZES, PDF_STYLES } from './constant';
 
 interface PropsLabels {
   itemLabel: string;
@@ -28,6 +28,43 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
     () => (invoiceForm ? createCurrencyFormatter(storeSettings!, invoiceForm) : (n: number) => String(n)),
     [storeSettings, invoiceForm]
   );
+
+  const customFields = useMemo(() => {
+    const fields =
+      invoiceForm?.invoiceItems
+        ?.map(item => item.customField)
+        .filter((item): item is CustomField => typeof item?.header === 'string') ?? [];
+
+    const map = new Map<string, CustomField>();
+
+    fields.forEach(field => {
+      map.set(field.header, field);
+    });
+
+    console.log(map.values());
+    return [...map.values()];
+  }, [invoiceForm?.invoiceItems]);
+
+  const sizes = useMemo(() => {
+    const weights = { ...COLUMN_WEIGHTS };
+    customFields.forEach(col => {
+      weights[col.header] = DEFAULT_USER_COLUMN_WEIGHT;
+    });
+    if (!invoiceForm?.invoiceCustomization?.showRowNo) {
+      delete weights['rowNo'];
+    }
+    if (!invoiceForm?.invoiceCustomization?.showQuantity) {
+      delete weights['quantity'];
+    }
+    if (!invoiceForm?.invoiceCustomization?.showUnit) {
+      delete weights['unit'];
+    }
+    const totalWeight = Object.values(weights).reduce((a, b) => (a ?? 0) + (b ?? 0), 0);
+    const sizes = Object.fromEntries(
+      Object.entries(weights).map(([key, weight]) => [key, { width: `${((weight ?? 0) / (totalWeight ?? 0)) * 100}%` }])
+    );
+    return sizes;
+  }, [customFields, invoiceForm?.invoiceCustomization]);
 
   const lightenHex = (data: { hex?: string; amount: number }) => {
     const { hex, amount } = data;
@@ -110,19 +147,22 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
           }
         ]}
       >
-        <View style={[PDF_STYLES.tableCol, PDF_STYLES.w5, { borderLeft: rowStyle.borderCell }]}>
-          <Text
-            style={[
-              PDF_STYLES.tableCellHeader,
-              {
-                fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCellHeader
-              }
-            ]}
-          >
-            #
-          </Text>
-        </View>
-        <View style={[PDF_STYLES.tableCol, PDF_STYLES.w35, { borderLeft: rowStyle.borderCell }]}>
+        {invoiceForm?.invoiceCustomization?.showRowNo && (
+          <View style={[PDF_STYLES.tableCol, sizes['rowNo'], { borderLeft: rowStyle.borderCell }]}>
+            <Text
+              style={[
+                PDF_STYLES.tableCellHeader,
+                {
+                  fontSize:
+                    FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCellHeader
+                }
+              ]}
+            >
+              #
+            </Text>
+          </View>
+        )}
+        <View style={[PDF_STYLES.tableCol, sizes['item'], { borderLeft: rowStyle.borderCell }]}>
           <Text
             style={[
               PDF_STYLES.tableCellHeader,
@@ -134,31 +174,64 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
             {itemLabel}
           </Text>
         </View>
-        <View style={[PDF_STYLES.tableCol, PDF_STYLES.w15, PDF_STYLES.textEnd, { borderLeft: rowStyle.borderCell }]}>
-          <Text
-            style={[
-              PDF_STYLES.tableCellHeader,
-              {
-                fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCellHeader
-              }
-            ]}
+        {customFields.map(field => {
+          return (
+            <View
+              key={field.header}
+              style={[
+                PDF_STYLES.tableCol,
+                sizes[field.header],
+                { textAlign: field.alignment },
+                { borderLeft: rowStyle.borderCell }
+              ]}
+            >
+              <Text
+                style={[
+                  PDF_STYLES.tableCellHeader,
+                  {
+                    fontSize:
+                      FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCellHeader
+                  }
+                ]}
+              >
+                {field.header}
+              </Text>
+            </View>
+          );
+        })}
+        {invoiceForm?.invoiceCustomization?.showUnit && (
+          <View style={[PDF_STYLES.tableCol, sizes['unit'], PDF_STYLES.textEnd, { borderLeft: rowStyle.borderCell }]}>
+            <Text
+              style={[
+                PDF_STYLES.tableCellHeader,
+                {
+                  fontSize:
+                    FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCellHeader
+                }
+              ]}
+            >
+              {unitLabel}
+            </Text>
+          </View>
+        )}
+        {invoiceForm?.invoiceCustomization?.showQuantity && (
+          <View
+            style={[PDF_STYLES.tableCol, sizes['quantity'], PDF_STYLES.textEnd, { borderLeft: rowStyle.borderCell }]}
           >
-            {unitLabel}
-          </Text>
-        </View>
-        <View style={[PDF_STYLES.tableCol, PDF_STYLES.w15, PDF_STYLES.textEnd, { borderLeft: rowStyle.borderCell }]}>
-          <Text
-            style={[
-              PDF_STYLES.tableCellHeader,
-              {
-                fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCellHeader
-              }
-            ]}
-          >
-            {qtyLabel}
-          </Text>
-        </View>
-        <View style={[PDF_STYLES.tableCol, PDF_STYLES.w15, PDF_STYLES.textEnd, { borderLeft: rowStyle.borderCell }]}>
+            <Text
+              style={[
+                PDF_STYLES.tableCellHeader,
+                {
+                  fontSize:
+                    FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCellHeader
+                }
+              ]}
+            >
+              {qtyLabel}
+            </Text>
+          </View>
+        )}
+        <View style={[PDF_STYLES.tableCol, sizes['unitCost'], PDF_STYLES.textEnd, { borderLeft: rowStyle.borderCell }]}>
           <Text
             style={[
               PDF_STYLES.tableCellHeader,
@@ -173,7 +246,7 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
         <View
           style={[
             PDF_STYLES.tableCol,
-            PDF_STYLES.w15,
+            sizes['total'],
             PDF_STYLES.textEnd,
             { borderLeft: rowStyle.borderCell, borderRight: rowStyle.borderCell }
           ]}
@@ -191,7 +264,7 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
         </View>
       </View>
       {invoiceForm?.invoiceItems?.map((item, index) => {
-        const { quantity, taxType, taxRate, invoiceItemSnapshot } = item;
+        const { quantity, taxType, taxRate, invoiceItemSnapshot, customField } = item;
         const { unitPriceCents = 0, itemName, unitName } = invoiceItemSnapshot;
 
         const { formattedUnitPrice, formattedTotal, formattedTax } = getItemFinancialData({
@@ -215,16 +288,20 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
               }
             ]}
           >
-            <View style={[PDF_STYLES.tableCol, PDF_STYLES.w5, { borderLeft: rowStyle.borderCell }]}>
-              <Text
-                style={[
-                  { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCell }
-                ]}
-              >
-                {index + 1}
-              </Text>
-            </View>
-            <View style={[PDF_STYLES.tableCol, PDF_STYLES.w35, { borderLeft: rowStyle.borderCell }]}>
+            {invoiceForm?.invoiceCustomization?.showRowNo && (
+              <View style={[PDF_STYLES.tableCol, sizes['rowNo'], { borderLeft: rowStyle.borderCell }]}>
+                <Text
+                  style={[
+                    {
+                      fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCell
+                    }
+                  ]}
+                >
+                  {index + 1}
+                </Text>
+              </View>
+            )}
+            <View style={[PDF_STYLES.tableCol, sizes['item'], { borderLeft: rowStyle.borderCell }]}>
               <Text
                 style={[
                   { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCell }
@@ -246,30 +323,68 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
                 </Text>
               )}
             </View>
-            <View
-              style={[PDF_STYLES.tableCol, PDF_STYLES.w15, PDF_STYLES.textEnd, { borderLeft: rowStyle.borderCell }]}
-            >
-              <Text
+            {customFields.map(field => {
+              return (
+                <View
+                  key={field.header}
+                  style={[
+                    PDF_STYLES.tableCol,
+                    sizes[field.header],
+                    { textAlign: field.alignment },
+                    { borderLeft: rowStyle.borderCell }
+                  ]}
+                >
+                  <Text
+                    style={[
+                      PDF_STYLES.tableCellHeader,
+                      {
+                        fontSize:
+                          FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCellHeader
+                      }
+                    ]}
+                  >
+                    {customField?.header === field.header && customField.value ? customField.value : ' '}
+                  </Text>
+                </View>
+              );
+            })}
+            {invoiceForm?.invoiceCustomization?.showUnit && (
+              <View
+                style={[PDF_STYLES.tableCol, sizes['unit'], PDF_STYLES.textEnd, { borderLeft: rowStyle.borderCell }]}
+              >
+                <Text
+                  style={[
+                    {
+                      fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCell
+                    }
+                  ]}
+                >
+                  {unitName}
+                </Text>
+              </View>
+            )}
+            {invoiceForm?.invoiceCustomization?.showQuantity && (
+              <View
                 style={[
-                  { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCell }
+                  PDF_STYLES.tableCol,
+                  sizes['quantity'],
+                  PDF_STYLES.textEnd,
+                  { borderLeft: rowStyle.borderCell }
                 ]}
               >
-                {unitName}
-              </Text>
-            </View>
+                <Text
+                  style={[
+                    {
+                      fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCell
+                    }
+                  ]}
+                >
+                  {quantity}
+                </Text>
+              </View>
+            )}
             <View
-              style={[PDF_STYLES.tableCol, PDF_STYLES.w15, PDF_STYLES.textEnd, { borderLeft: rowStyle.borderCell }]}
-            >
-              <Text
-                style={[
-                  { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCell }
-                ]}
-              >
-                {quantity}
-              </Text>
-            </View>
-            <View
-              style={[PDF_STYLES.tableCol, PDF_STYLES.w15, PDF_STYLES.textEnd, { borderLeft: rowStyle.borderCell }]}
+              style={[PDF_STYLES.tableCol, sizes['unitCost'], PDF_STYLES.textEnd, { borderLeft: rowStyle.borderCell }]}
             >
               <Text
                 style={[
@@ -282,7 +397,7 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
             <View
               style={[
                 PDF_STYLES.tableCol,
-                PDF_STYLES.w15,
+                sizes['total'],
                 PDF_STYLES.textEnd,
                 { borderLeft: rowStyle.borderCell, borderRight: rowStyle.borderCell }
               ]}

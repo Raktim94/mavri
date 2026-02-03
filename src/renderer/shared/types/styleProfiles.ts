@@ -26,6 +26,9 @@ export interface StyleProfileMeta {
   quotesCount: number;
   createdAt: string;
   updatedAt: string;
+  showQuantity: boolean;
+  showUnit: boolean;
+  showRowNo: boolean;
 }
 
 export interface StyleProfile extends StyleProfileMeta {
@@ -55,6 +58,9 @@ export interface StyleProfileAddMeta {
   paidWatermarkFileType?: string;
   paidWatermarkFileSize?: number;
   isArchived: boolean;
+  showQuantity: boolean;
+  showUnit: boolean;
+  showRowNo: boolean;
 }
 
 export interface StyleProfileAdd extends StyleProfileAddMeta {
@@ -95,4 +101,7 @@ export interface StyleProfileFromData {
   paidWatermarkFileSize?: number;
   paidWatermarkFileData?: Uint8Array;
   isArchived: boolean;
+  showQuantity: boolean;
+  showUnit: boolean;
+  showRowNo: boolean;
 }

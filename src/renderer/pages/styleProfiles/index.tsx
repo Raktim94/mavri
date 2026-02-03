@@ -33,7 +33,10 @@ export const StyleProfilesPage = () => {
     'paidWatermarkFileName',
     'paidWatermarkFileType',
     'paidWatermarkFileSize',
-    'isArchived'
+    'isArchived',
+    'showQuantity',
+    'showUnit',
+    'showRowNo'
   ];
   const excelFileName = 'style_profiles';
   const excelTemplateData: Rows = [
@@ -47,7 +50,10 @@ export const StyleProfilesPage = () => {
       tableRowStyle: 'classic',
       pageFormat: 'A4',
       labelUpperCase: true,
-      isArchived: false
+      isArchived: false,
+      showQuantity: true,
+      showUnit: true,
+      showRowNo: true
     }
   ];
   const filters: Filter[] = [

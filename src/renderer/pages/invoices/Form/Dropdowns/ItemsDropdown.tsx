@@ -5,20 +5,22 @@ import { CRUDPage } from '../../../../shared/components/layout/crudPage/CRUDPage
 import { FilterType } from '../../../../shared/enums/filterType';
 import { useItemsRetrieve } from '../../../../shared/hooks/items/useItemsRetrieve';
 import type { Filter, FilterData } from '../../../../shared/types/filter';
+import type { ItemForm } from '../../../../shared/types/invoice';
 import type { Item, ItemAdd, ItemUpdate } from '../../../../shared/types/item';
 import type { Response } from '../../../../shared/types/response';
 import { createCommonFilters, createInvoiceFilters } from '../../../../shared/utils/filterSortFunctions';
 import { List as ItemsList } from '../../../items/List';
-import { ItemQuantitySetter } from '../Modals/ItemQuantitySetter';
+import { ItemMetadataSetter } from '../Modals/ItemMetadataSetter';
 
 interface Props {
   isOpen: boolean;
+  headerOptions: string[];
   onClose?: () => void;
   onOpen?: () => void;
-  onClick?: (data: Item, quantity: string) => void;
+  onClick?: (item: Item, data: ItemForm) => void;
 }
 
-const ItemsDropdownComponent: FC<Props> = ({ isOpen, onClose, onOpen, onClick }) => {
+const ItemsDropdownComponent: FC<Props> = ({ isOpen, headerOptions, onClose, onOpen, onClick }) => {
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
 
@@ -36,11 +38,12 @@ const ItemsDropdownComponent: FC<Props> = ({ isOpen, onClose, onOpen, onClick })
   return (
     <>
       {isOpen && (
-        <ItemQuantitySetter
+        <ItemMetadataSetter
+          headerOptions={headerOptions}
           isOpen={selectedItem !== undefined}
           onCancel={() => setSelectedItem(undefined)}
-          onSave={quantity => {
-            if (selectedItem) onClick?.(selectedItem, quantity);
+          onSave={data => {
+            if (selectedItem) onClick?.(selectedItem, data);
             setSelectedItem(undefined);
           }}
         />

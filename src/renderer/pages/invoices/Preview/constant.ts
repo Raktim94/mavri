@@ -1,13 +1,24 @@
 import { StyleSheet } from '@react-pdf/renderer';
 import { SizeType } from '../../../shared/enums/sizeType';
+import type { ColumnWeights } from '../../../shared/types/columnsWeights';
 
 export const DEFAULT_FONT_SIZES = SizeType.medium;
 export const DEFAULT_LOGO_SIZES = SizeType.medium;
+export const DEFAULT_USER_COLUMN_WEIGHT = 10;
 
 export const LOGO_SIZES = {
   small: { width: 48, height: 48 },
   medium: { width: 64, height: 64 },
   large: { width: 80, height: 80 }
+};
+
+export const COLUMN_WEIGHTS: ColumnWeights = {
+  rowNo: 5,
+  item: 35,
+  quantity: 15,
+  unit: 15,
+  unitCost: 15,
+  total: 15
 };
 
 export const FONT_SIZES = {

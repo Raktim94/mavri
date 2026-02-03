@@ -61,7 +61,10 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onSaveProfile
                 paidWatermarkFileName: data?.paidWatermarkFileName ?? undefined,
                 paidWatermarkFileType: data?.paidWatermarkFileType ?? undefined,
                 paidWatermarkFileSize: data?.paidWatermarkFileSize ?? undefined,
-                paidWatermarkFileData: data?.paidWatermarkFileData ?? undefined
+                paidWatermarkFileData: data?.paidWatermarkFileData ?? undefined,
+                showQuantity: data?.showQuantity ?? true,
+                showUnit: data?.showUnit ?? true,
+                showRowNo: data?.showRowNo ?? true
               });
             } else {
               onSaveProfile?.({
@@ -82,7 +85,10 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onSaveProfile
                 paidWatermarkFileName: form?.paidWatermarkFileName ?? undefined,
                 paidWatermarkFileType: form?.paidWatermarkFileType ?? undefined,
                 paidWatermarkFileSize: form?.paidWatermarkFileSize ?? undefined,
-                paidWatermarkFileData: form?.paidWatermarkFileData ?? undefined
+                paidWatermarkFileData: form?.paidWatermarkFileData ?? undefined,
+                showQuantity: form?.showQuantity ?? true,
+                showUnit: form?.showUnit ?? true,
+                showRowNo: form?.showRowNo ?? true
               });
             }
             setIsProfileModalOpen(false);

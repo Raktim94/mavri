@@ -1,3 +1,4 @@
+import type { Alignment } from '../enums/alignment';
 import type { DiscountType } from '../enums/discountType';
 import type { InvoiceStatus } from '../enums/invoiceStatus';
 import type { InvoiceType } from '../enums/invoiceType';
@@ -10,6 +11,11 @@ import type { TableHeaderStyle } from '../enums/tableHeaderStyle';
 import type { TableRowStyle } from '../enums/tableRowStyle';
 import type { InvoiceItemTaxType, InvoiceTaxType } from '../enums/taxType';
 
+export interface CustomField {
+  header: string;
+  value: string;
+  alignment: Alignment;
+}
 export interface PdfTexts {
   billTo: string;
   invoiceNo: string;
@@ -66,6 +72,13 @@ export interface InvoicesByCurrency {
   [currencyCode: string]: InvoicesByCurrencyMeta;
 }
 
+export interface ItemForm {
+  quantity: number | undefined;
+  header?: string;
+  value?: string;
+  alignment?: Alignment;
+}
+
 export interface SignatureForm {
   data?: Uint8Array;
   size?: number;
@@ -116,6 +129,9 @@ export interface InvoiceCustomizationMeta {
   paidWatermarkFileName?: string;
   paidWatermarkFileType?: string;
   paidWatermarkFileSize?: number;
+  showQuantity?: boolean;
+  showUnit?: boolean;
+  showRowNo?: boolean;
 }
 
 export interface InvoiceCustomization extends InvoiceCustomizationMeta {
@@ -145,6 +161,9 @@ export interface CustomizationForm {
   paidWatermarkFileType?: string;
   paidWatermarkFileSize?: number;
   paidWatermarkFileData?: Uint8Array;
+  showQuantity?: boolean;
+  showUnit?: boolean;
+  showRowNo?: boolean;
 }
 
 export interface DiscountForm {
@@ -196,6 +215,7 @@ export interface InvoiceItem {
   itemId: number;
   invoiceItemSnapshot: InvoiceItemSnapshots;
   quantity: string;
+  customField?: CustomField;
   createdAt?: string;
   updatedAt?: string;
   taxRate: number;

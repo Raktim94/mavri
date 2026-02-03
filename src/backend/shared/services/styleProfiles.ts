@@ -25,7 +25,10 @@ const styleProfileFields: (keyof StyleProfile)[] = [
   'paidWatermarkFileType',
   'paidWatermarkFileSize',
   'paidWatermarkFileData',
-  'isArchived'
+  'isArchived',
+  'showQuantity',
+  'showUnit',
+  'showRowNo'
 ];
 
 export const getAllStyleProfiles = async (
