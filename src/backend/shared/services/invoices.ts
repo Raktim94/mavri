@@ -24,7 +24,7 @@ type GetInvoicesOptions = {
   filter?: FilterData[];
 };
 
-export const handleEntity =
+const handleEntity =
   <T extends EntityWithId>(db: Database, table: string, fields: readonly (keyof T)[]) =>
   async (data: T, isUpdate = false): Promise<Response<number>> => {
     const params = fields.map(key => (data[key] ?? null) as string | number | null);
@@ -176,46 +176,54 @@ const getInvoices = async (db: Database, options: GetInvoicesOptions) => {
 
   const invoiceIds = invoices.map(i => i.id) as number[];
   const placeholders = invoiceIds.map(() => '?').join(', ');
-  const invoicePayments = await getAllRows<InvoicePayment>(
-    db,
-    `SELECT ip.* FROM invoice_payments as ip WHERE parentInvoiceId IN (${placeholders})`,
-    invoiceIds
-  );
-  const invoiceItems = await getAllRows<InvoiceItem>(
-    db,
-    `SELECT ii.* FROM invoice_items as ii WHERE parentInvoiceId IN (${placeholders})`,
-    invoiceIds
-  );
-  const invoiceAttachments = await getAllRows<InvoiceAttachment>(
-    db,
-    `SELECT ia.* FROM attachments as ia WHERE parentInvoiceId IN (${placeholders})`,
-    invoiceIds
-  );
-  const invoiceBusinessSnapshots = await getAllRows<InvoiceBusinessSnapshots>(
-    db,
-    `SELECT ibs.* FROM invoice_business_snapshots as ibs WHERE parentInvoiceId IN (${placeholders})`,
-    invoiceIds
-  );
-  const invoiceClientSnapshots = await getAllRows<InvoiceClientSnapshots>(
-    db,
-    `SELECT ics.* FROM invoice_client_snapshots as ics WHERE parentInvoiceId IN (${placeholders})`,
-    invoiceIds
-  );
-  const invoiceCurrencySnapshots = await getAllRows<InvoiceClientSnapshots>(
-    db,
-    `SELECT cs.* FROM invoice_currency_snapshots as cs WHERE parentInvoiceId IN (${placeholders})`,
-    invoiceIds
-  );
-  const invoiceCustomization = await getAllRows<InvoiceCustomization>(
-    db,
-    `SELECT c.* FROM invoice_customizations as c WHERE parentInvoiceId IN (${placeholders})`,
-    invoiceIds
-  );
-  const invoiceStyleProfileSnapshots = await getAllRows<InvoiceStyleProfileSnapshots>(
-    db,
-    `SELECT sps.* FROM invoice_style_profile_snapshots as sps WHERE parentInvoiceId IN (${placeholders})`,
-    invoiceIds
-  );
+
+  const [
+    invoicePayments,
+    invoiceItems,
+    invoiceAttachments,
+    invoiceBusinessSnapshots,
+    invoiceClientSnapshots,
+    invoiceCurrencySnapshots,
+    invoiceCustomization,
+    invoiceStyleProfileSnapshots
+  ] = await Promise.all([
+    getAllRows<InvoicePayment>(
+      db,
+      `SELECT * FROM invoice_payments WHERE parentInvoiceId IN (${placeholders})`,
+      invoiceIds
+    ),
+    getAllRows<InvoiceItem>(db, `SELECT * FROM invoice_items WHERE parentInvoiceId IN (${placeholders})`, invoiceIds),
+    getAllRows<InvoiceAttachment>(
+      db,
+      `SELECT * FROM attachments WHERE parentInvoiceId IN (${placeholders})`,
+      invoiceIds
+    ),
+    getAllRows<InvoiceBusinessSnapshots>(
+      db,
+      `SELECT * FROM invoice_business_snapshots WHERE parentInvoiceId IN (${placeholders})`,
+      invoiceIds
+    ),
+    getAllRows<InvoiceClientSnapshots>(
+      db,
+      `SELECT * FROM invoice_client_snapshots WHERE parentInvoiceId IN (${placeholders})`,
+      invoiceIds
+    ),
+    getAllRows<InvoiceCurrencySnapshots>(
+      db,
+      `SELECT * FROM invoice_currency_snapshots WHERE parentInvoiceId IN (${placeholders})`,
+      invoiceIds
+    ),
+    getAllRows<InvoiceCustomization>(
+      db,
+      `SELECT * FROM invoice_customizations WHERE parentInvoiceId IN (${placeholders})`,
+      invoiceIds
+    ),
+    getAllRows<InvoiceStyleProfileSnapshots>(
+      db,
+      `SELECT * FROM invoice_style_profile_snapshots WHERE parentInvoiceId IN (${placeholders})`,
+      invoiceIds
+    )
+  ]);
 
   const invoiceItemIds = invoiceItems.map(i => i.id) as number[];
   const placeholdersItems = invoiceItemIds.map(() => '?').join(', ');
@@ -651,141 +659,58 @@ export const duplicateInvoice = async (db: Database, invoiceId: number, invoiceT
       invoiceId
     ]);
 
-    await runDb(
-      db,
-      `INSERT INTO invoice_business_snapshots (
-          parentInvoiceId,
-          businessName,
-          businessShortName,
-          businessAddress,
-          businessRole,
-          businessEmail,
-          businessPhone,
-          businessAdditional,
-          businessPaymentInformation,
-          businessLogo,
-          businessFileSize,
-          businessFileType,
-          businessFileName
-      )
-      SELECT
-          ?,
-          businessName,
-          businessShortName,
-          businessAddress,
-          businessRole,
-          businessEmail,
-          businessPhone,
-          businessAdditional,
-          businessPaymentInformation,
-          businessLogo,
-          businessFileSize,
-          businessFileType,
-          businessFileName
-      FROM invoice_business_snapshots
-      WHERE parentInvoiceId = ?;`,
-      [duplicatedRowID, invoiceId]
-    );
+    const duplicateSnapshot = async (table: string, columns: string[]) => {
+      const columnList = columns.join(', ');
+      await runDb(
+        db,
+        `INSERT INTO ${table} (parentInvoiceId, ${columnList})
+         SELECT ?, ${columnList} FROM ${table} WHERE parentInvoiceId = ?;`,
+        [duplicatedRowID, invoiceId]
+      );
+    };
 
-    await runDb(
-      db,
-      `INSERT INTO invoice_client_snapshots (
-          parentInvoiceId,
-          clientName,
-          clientAddress,
-          clientEmail,
-          clientPhone,
-          clientCode,
-          clientAdditional
-      )
-      SELECT
-          ?,
-          clientName,
-          clientAddress,
-          clientEmail,
-          clientPhone,
-          clientCode,
-          clientAdditional
-      FROM invoice_client_snapshots
-      WHERE parentInvoiceId = ?;`,
-      [duplicatedRowID, invoiceId]
-    );
-
-    await runDb(
-      db,
-      `INSERT INTO invoice_currency_snapshots (
-          parentInvoiceId,
-          currencyCode,
-          currencySymbol,
-          currencySubunit
-      )
-      SELECT
-          ?,
-          currencyCode,
-          currencySymbol,
-          currencySubunit
-      FROM invoice_currency_snapshots
-      WHERE parentInvoiceId = ?;`,
-      [duplicatedRowID, invoiceId]
-    );
-
-    await runDb(
-      db,
-      `INSERT INTO invoice_customizations (
-          parentInvoiceId,
-          color,
-          logoSize,
-          fontSize,
-          layout,
-          tableHeaderStyle,
-          tableRowStyle,
-          pageFormat,
-          labelUpperCase,
-          watermarkFileName,
-          watermarkFileType,
-          watermarkFileSize,
-          watermarkFileData,
-          paidWatermarkFileName,
-          paidWatermarkFileType,
-          paidWatermarkFileSize,
-          paidWatermarkFileData
-      )
-      SELECT
-          ?,
-          color,
-          logoSize,
-          fontSize,
-          layout,
-          tableHeaderStyle,
-          tableRowStyle,
-          pageFormat,
-          labelUpperCase,
-          watermarkFileName,
-          watermarkFileType,
-          watermarkFileSize,
-          watermarkFileData,
-          paidWatermarkFileName,
-          paidWatermarkFileType,
-          paidWatermarkFileSize,
-          paidWatermarkFileData
-      FROM invoice_customizations
-      WHERE parentInvoiceId = ?;`,
-      [duplicatedRowID, invoiceId]
-    );
-
-    await runDb(
-      db,
-      `INSERT INTO invoice_style_profile_snapshots (
-          parentInvoiceId,
-          styleProfileName
-      )
-      SELECT
-          ?,
-          styleProfileName
-      FROM invoice_style_profile_snapshots
-      WHERE parentInvoiceId = ?;`,
-      [duplicatedRowID, invoiceId]
-    );
+    await duplicateSnapshot('invoice_business_snapshots', [
+      'businessName',
+      'businessShortName',
+      'businessAddress',
+      'businessRole',
+      'businessEmail',
+      'businessPhone',
+      'businessAdditional',
+      'businessPaymentInformation',
+      'businessLogo',
+      'businessFileSize',
+      'businessFileType',
+      'businessFileName'
+    ]);
+    await duplicateSnapshot('invoice_client_snapshots', [
+      'clientName',
+      'clientAddress',
+      'clientEmail',
+      'clientPhone',
+      'clientCode',
+      'clientAdditional'
+    ]);
+    await duplicateSnapshot('invoice_currency_snapshots', ['currencyCode', 'currencySymbol', 'currencySubunit']);
+    await duplicateSnapshot('invoice_customizations', [
+      'color',
+      'logoSize',
+      'fontSize',
+      'layout',
+      'tableHeaderStyle',
+      'tableRowStyle',
+      'pageFormat',
+      'labelUpperCase',
+      'watermarkFileName',
+      'watermarkFileType',
+      'watermarkFileSize',
+      'watermarkFileData',
+      'paidWatermarkFileName',
+      'paidWatermarkFileType',
+      'paidWatermarkFileSize',
+      'paidWatermarkFileData'
+    ]);
+    await duplicateSnapshot('invoice_style_profile_snapshots', ['styleProfileName']);
 
     await runDb(
       db,

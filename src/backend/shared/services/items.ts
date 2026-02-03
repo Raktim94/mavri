@@ -11,7 +11,7 @@ import { resolveItemRelations } from '../utils/relationsFunctions';
 
 const itemFields: (keyof Item)[] = ['name', 'amount', 'unitId', 'categoryId', 'description', 'isArchived'];
 
-export const handleItemEntity =
+const handleItemEntity =
   <T extends EntityWithId>(db: Database, table: string, fields: readonly (keyof T)[]) =>
   async (data: T, isUpdate = false): Promise<Response<T & EntityWithCounts>> => {
     const params = fields.map(key => (data[key] ?? null) as string | number | null);
