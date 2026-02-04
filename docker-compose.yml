@@ -5,6 +5,7 @@ services:
     ports:
       - '3000:3000'
     environment:
+      - SERVICE=backend
       - PORT=${PORT}
       - NODE_ENV=docker
       - DB_DIRECTORY=/data
@@ -23,6 +24,8 @@ services:
     container_name: frontend
     ports:
       - '3001:3001'
+    environment:
+      - SERVICE=frontend
     depends_on:
       - backend
 

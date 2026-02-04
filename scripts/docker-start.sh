@@ -1,18 +1,21 @@
 set -e
 
-mkdir -p /data
+echo "Starting container with SERVICE=${SERVICE}"
 
-echo "Starting backend webserver..."
-node /app/dist-be/backend/server/webserver/main.js &
-PID_BACKEND=$!
+case "$SERVICE" in
+  backend)
+    mkdir -p /data
+    echo "Starting backend webserver..."
+    exec node /app/dist-be/backend/server/webserver/main.js
+    ;;
 
-echo "Serving frontend on :3001..."
-serve -s /app/dist-fe -l 3001 &
-PID_FRONTEND=$!
+  frontend)
+    echo "Starting frontend server..."
+    exec serve -s /app/dist-fe -l 3001
+    ;;
 
-wait -n $PID_BACKEND $PID_FRONTEND
-
-echo "One process exited, shutting down..."
-kill $PID_BACKEND 2>/dev/null || true
-kill $PID_FRONTEND 2>/dev/null || true
-wait
+  *)
+    echo "ERROR: SERVICE must be 'backend' or 'frontend'"
+    exit 1
+    ;;
+esac

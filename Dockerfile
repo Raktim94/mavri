@@ -15,8 +15,6 @@ RUN npm run build:webserver
 
 FROM node:20-alpine AS runner
 WORKDIR /app
-ENV NODE_ENV=production
-
 
 RUN npm install -g serve@14
 
