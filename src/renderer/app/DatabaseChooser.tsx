@@ -177,10 +177,12 @@ export const DatabaseChooser: FC<Props> = ({ onDatabaseRead }) => {
       )}
 
       <Typography variant="h5" noWrap component="div" sx={{ color: theme.palette.secondary.main }}>
-        {t('databaseChooser.title')}
+        {!isWebMode() && <>{t('databaseChooser.title')}</>}
+        {isWebMode() && <>{t('databaseChooser.titleWeb')}</>}
       </Typography>
       <Typography variant="body1" noWrap component="div" sx={{ whiteSpace: 'pre-wrap' }}>
-        {t('databaseChooser.description')}
+        {!isWebMode() && <>{t('databaseChooser.description')}</>}
+        {isWebMode() && <>{t('databaseChooser.descriptionWeb')}</>}
       </Typography>
 
       <Box

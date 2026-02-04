@@ -235,9 +235,11 @@
   },
   "databaseChooser": {
     "createNew": "Créer une nouvelle base de données",
-    "description": "Choisissez une base existante ou créez‑en une nouvelle. Vous pouvez mémoriser les bases fréquemment utilisées pour un accès rapide.",
+    "description": "Choisissez une base existante ou créez-en une nouvelle. Vous pouvez mémoriser les bases fréquemment utilisées pour un accès rapide.",
+    "descriptionWeb": "Créez une nouvelle base de données ou ouvrez-en une depuis votre liste récemment utilisée pour un accès rapide.",
     "openExisting": "Ouvrir une base existante",
-    "title": "Ouvrir ou créer une base de données"
+    "title": "Ouvrir ou créer une base de données",
+    "titleWeb": "Créer une base de données"
   },
   "error": {
     "databaseCorrupt": "Le fichier de base de données est corrompu.",

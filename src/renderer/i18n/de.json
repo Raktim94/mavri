@@ -236,8 +236,10 @@
   "databaseChooser": {
     "createNew": "Neue Datenbank erstellen",
     "description": "Wählen Sie eine vorhandene Datenbank oder erstellen Sie eine neue. Sie können häufig verwendete Datenbanken für schnellen Zugriff speichern.",
+    "descriptionWeb": "Erstellen Sie eine neue Datenbank oder öffnen Sie eine aus Ihrer Liste der zuletzt verwendeten für einen schnellen Zugriff.",
     "openExisting": "Vorhandene Datenbank öffnen",
-    "title": "Datenbank öffnen oder erstellen"
+    "title": "Datenbank öffnen oder erstellen",
+    "titleWeb": "Datenbank erstellen"
   },
   "error": {
     "databaseCorrupt": "Datenbankdatei ist beschädigt.",

@@ -41,7 +41,6 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
       map.set(field.header, field);
     });
 
-    console.log(map.values());
     return [...map.values()];
   }, [invoiceForm?.invoiceItems]);
 
