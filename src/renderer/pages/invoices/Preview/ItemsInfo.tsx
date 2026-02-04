@@ -335,10 +335,9 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
                 >
                   <Text
                     style={[
-                      PDF_STYLES.tableCellHeader,
                       {
                         fontSize:
-                          FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCellHeader
+                          FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCell
                       }
                     ]}
                   >
