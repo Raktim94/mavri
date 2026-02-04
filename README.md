@@ -265,7 +265,7 @@ VITE_API_URL={url} Backend webserver URL when running without Electron (Web/Dock
 ```env
   PORT={port} Backend webserver port when running Docker mode
   DEV_SERVER_URL={url} Backend webserver host when running Docker mode
-  FE_SERVER_URL={url} Fronend webserver URL when running Docker mode
+  FE_SERVER_URL={url} Frontend webserver URL when running Docker mode
   MIGRATIONS_PATH={url} Path to migration files in docker volume when running Docker mode
   VITE_API_URL={url} Backend full url when running Docker mode
 ```
