@@ -120,7 +120,7 @@ This option is ideal if you want:
 
 ### Docker Image
 
-An official Docker image is available.
+You can create a Docker image with the following commands.
 
 ```bash
 npm run docker:compose:up
