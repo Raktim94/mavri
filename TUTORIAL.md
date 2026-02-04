@@ -477,7 +477,7 @@ You can:
 
 The **Quotes** screen allows you to **create, read, update, and delete (CRUD)** quote records.
 
-> 💡 **Note:** Amounts and dates are formatted based on the configuration in the [Settings screen](#settings-screen) and the currency format defined in the [Currency screen](#currency-screen).
+> 💡 **Note:** Amounts and dates are formatted based on the configuration in the [Settings screen](#settings-screen) and the currency format defined in the [Currency screen](#currencies-screen).
 
 You can also:
 
@@ -701,7 +701,7 @@ Quotes can be exported **only to XLSX** format.
 
 The **Invoices** screen allows you to **create, read, update, and delete (CRUD)** invoice records.
 
-> 💡 **Note:** Amounts and dates are formatted based on the configuration in the [Settings screen](#settings-screen) and the currency format defined in the [Currency screen](#currency-screen).
+> 💡 **Note:** Amounts and dates are formatted based on the configuration in the [Settings screen](#settings-screen) and the currency format defined in the [Currency screen](#currencies-screen).
 
 You can also:
 
