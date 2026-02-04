@@ -1,5 +1,11 @@
 # Invoice Builder
 
+## [Date], version [Version]
+
+Bug Fixes
+
+- Fixed custom field value styling to be consistent with other fields. Previously it was using table header styling.
+
 ## 2026-02-04, version 1.6.0
 
 New features & improvements
