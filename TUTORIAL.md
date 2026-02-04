@@ -10,6 +10,13 @@ Recently opened databases are displayed in a **quick access list** for faster re
 
 ![First screen](tutorial/initial_screen.jpg)
 
+When the application is used via Docker or the web version (rather than as native software), databases are created in a configured folder and automatically listed for quick access.
+To remove a database from the quick access list, it must no longer be present in that configured folder.
+The database name is specified during creation.
+
+![First screen](tutorial/initial_screen_web.jpg)
+![First screen](tutorial/initial_screen_naming_web.jpg)
+
 ## Settings screen
 
 The **Settings** screen allows you to configure application behavior, manage data, and customize document output.
@@ -18,7 +25,7 @@ The **Settings** screen allows you to configure application behavior, manage dat
 
 From this screen you can:
 
-- Enable or disable optional layouts (**Quotes** and **Reports**)
+- Enable or disable optional layouts (**Style profiles**, **Quotes** and **Reports**)
 - Export all application data to **JSON**
 - Import previously exported data
 - Access project resources:
@@ -28,7 +35,7 @@ From this screen you can:
   - Project homepage
   - Privacy Policy
   - Terms of Use
-- Check for application updates via GitHub Releases
+- Check for application updates via GitHub Releases (Available only for native software version)
 
 ![Look and feel](tutorial/settings_page_3.jpg)
 
@@ -410,6 +417,62 @@ You can:
 
 ![Items import/export](tutorial/items_page_5.jpg)
 
+## Style profiles screen
+
+The **Style profiles** screen allows you to **create, read, update, and delete (CRUD)** style profiles data, which can be later used in **Invoice** | **Quote**. You can also **filter**, **import**, and **export** style profiles via XLSX.
+
+### Adding a Style profile
+
+Click the **Add** button at the bottom to open a modal where you can:
+
+- Enter style profile information
+  > 💡 **Name:** must be unique. You cannot create two style profiles with the same name.
+
+![Style profile creation](tutorial/style_profiles_page_1.jpg)
+
+### Editing/Deleting a Style profile
+
+Once style profiles are added, select one from the list to edit it on the right side. Each style profile item also shows:
+
+- Number of invoices created
+- Number of quotes created (hidden if the layout is disabled in settings)
+
+You can also:
+
+- **Search style profiles by name**
+- **Delete a style profile** by clicking the red trash icon
+
+![Style profiles list](tutorial/style_profiles_page_3.jpg)
+
+### Filters
+
+Style profiles have filters to control what is displayed. By default:
+
+- **Active**: shows all style profiles except archived
+
+The **archived flag** can be toggled during creation or editing. This flag only affects filtering and does not delete the style profile.
+
+![Style profiles filters](tutorial/style_profiles_page_2.jpg)
+
+### Sorting
+
+Style profiles can be sorted by:
+
+- Name
+- Last updated date
+
+![Style profiles sort](tutorial/style_profiles_page_4.jpg)
+
+### Import & Export
+
+You can:
+
+- Export style profiles to XLSX
+- Import style profiles from XLSX
+- Download a XLSX template for currency import
+
+![Style profiles import/export](tutorial/style_profiles_page_5.jpg)
+
 ## Quotes screen
 
 The **Quotes** screen allows you to **create, read, update, and delete (CRUD)** quote records.
@@ -433,6 +496,7 @@ Click the **Add** button at the bottom to open the right-hand pane, where you ca
 
 - **Required information:**
   - Currency
+  - Language (Quote language for PDF labels which is independant from global application settings)
   - Business
   - Client (“Bill To”)
   - Quote information
@@ -458,6 +522,22 @@ Select a client from the dropdown. The dropdown supports **search, filter, and s
 
 ![Quote client creation](tutorial/quote_page_4.jpg)
 
+Select a style profile from the dropdown. The dropdown supports **search, filter, and sort** (see [Style profiles screen](#style-profiles-screen) for details).
+
+> 💡 **Note:** The selected style profile is saved as a snapshot. The snapshot is updated only when editing the quote and changing the style profile.
+>
+> 💡 This section can be hidden if the feature is turned off in the settings. Customization can still be adjusted in preview mode.
+>
+> 💡 Selecting a style profile only applies preset values. You can continue customizing everything afterward.
+
+![Quote style profile creation](tutorial/quote_page_profile.jpg)
+
+Select a language from the dropdown. The dropdown supports **search**.
+
+> 💡 **Note:** The selected language applies only to the generated PDF and is independent of the application's global language setting.
+
+![Quote style profile creation](tutorial/quote_page_language.jpg)
+
 Enter the quote details, including:
 
 - Quote number prefix
@@ -477,9 +557,12 @@ Enter the quote details, including:
 Select a item from the dropdown and set quantity. The dropdown supports **search, filter, and sort** (see [Items screen](#items-screen) for details).
 
 > 💡 **Note:** The selected item is saved as a snapshot. The snapshot is updated only when editing the quote and changing the item.
+>
+> 💡 When adding or editing an item in a quotation, a modal will appear requiring you to set the quantity. You can also define custom field data for the item, including a header, value, and alignment. Each unique custom header is added as a column in the PDF’s item table, and the corresponding value is placed in that column for the item. Alignment is configured per unique header. A header can be selected from the existing list or typed in as a new one (pressing Enter is required to register a new header). Both fields header and value must either be fully selected / entered or empty; otherwise, the Save button will remain disabled.
 
 ![Quote item creation](tutorial/quote_page_6.jpg)
 ![Quote item quantity](tutorial/quote_page_7.jpg)
+![Quote item quantity](tutorial/quote_page_7.1.jpg)
 
 > 💡 **Note:** The items order can be changed by drag and drop.
 
@@ -527,6 +610,13 @@ Additionally, you can set a **notes** (customer notes, thank you note, terms & c
 ![Quote thank you notes](tutorial/quote_page_29.jpg)
 ![Quote customer notes](tutorial/quote_page_30.jpg)
 ![Quote terms & conditions notes](tutorial/quote_page_31.jpg)
+
+Additionally, you can set a **signature** which can be set via hand/cursor or uploaded as image.
+
+> ⚠️ Maximum file size: 2 MB
+
+![Quote signature](tutorial/quote_page_signature1.jpg)
+![Quote signature](tutorial/quote_page_signature2.jpg)
 
 Additionally, you can attach **images**, which will be embedded into the PDF.
 
@@ -598,6 +688,7 @@ Quotes can be exported **only to XLSX** format.
 - **Page numbers** are shown **only when the document has more than one page**.
 - **Attachments** are embedded into the PDF when present.
 - Sections with zero values (**Discount**, **Tax**, **Shipping fees**) are **hidden** in the PDF.
+- **Save as Profile** button will create style profile item with these customization presets for futher usage on other quotes.
 
 ![Quotes customized option 1](tutorial/quote_page_40.jpg)
 ![Quotes customized option 2](tutorial/quote_page_39.jpg)
@@ -628,6 +719,7 @@ Click the **Add** button at the bottom to open the right-hand pane, where you ca
 
 - **Required information:**
   - Currency
+  - Language (Quote language for PDF labels which is independant from global application settings)
   - Business
   - Client (“Bill To”)
   - Invoice information
@@ -653,6 +745,22 @@ Select a client from the dropdown. The dropdown supports **search, filter, and s
 
 ![Invoice client creation](tutorial/invoice_page_4.jpg)
 
+Select a style profile from the dropdown. The dropdown supports **search, filter, and sort** (see [Style profiles screen](#style-profiles-screen) for details).
+
+> 💡 **Note:** The selected style profile is saved as a snapshot. The snapshot is updated only when editing the quote and changing the style profile.
+>
+> 💡 This section can be hidden if the feature is turned off in the settings. Customization can still be adjusted in preview mode.
+>
+> 💡 Selecting a style profile only applies preset values. You can continue customizing everything afterward.
+
+![Invoice style profile creation](tutorial/invoice_page_profile.jpg)
+
+Select a language from the dropdown. The dropdown supports **search**.
+
+> 💡 **Note:** The selected language applies only to the generated PDF and is independent of the application's global language setting.
+
+![Invoice style profile creation](tutorial/invoice_page_language.jpg)
+
 Enter the invoice details, including:
 
 - Invoice number prefix
@@ -672,6 +780,8 @@ Enter the invoice details, including:
 Select a item from the dropdown and set quantity. The dropdown supports **search, filter, and sort** (see [Items screen](#items-screen) for details).
 
 > 💡 **Note:** The selected item is saved as a snapshot. The snapshot is updated only when editing the invoice and changing the item.
+>
+> 💡 When adding or editing an item in a invoice, a modal will appear requiring you to set the quantity. You can also define custom field data for the item, including a header, value, and alignment. Each unique custom header is added as a column in the PDF’s item table, and the corresponding value is placed in that column for the item. Alignment is configured per unique header. A header can be selected from the existing list or typed in as a new one (pressing Enter is required to register a new header). Both fields header and value must either be fully selected / entered or empty; otherwise, the Save button will remain disabled.
 
 ![Invoice item creation](tutorial/invoice_page_6.jpg)
 ![Invoice item quantity](tutorial/invoice_page_7.jpg)
@@ -726,6 +836,13 @@ Additionally, you can set a **notes** (customer notes, thank you note, terms & c
 ![Invoice thank you notes](tutorial/invoice_page_29.jpg)
 ![Invoice customer notes](tutorial/invoice_page_30.jpg)
 ![Invoice terms & conditions notes](tutorial/invoice_page_31.jpg)
+
+Additionally, you can set a **signature** which can be set via hand/cursor or uploaded as image.
+
+> ⚠️ Maximum file size: 2 MB
+
+![Invoice signature](tutorial/invoice_page_signature1.jpg)
+![Invoice signature](tutorial/invoice_page_signature2.jpg)
 
 Additionally, you can attach **images**, which will be embedded into the PDF.
 
@@ -795,6 +912,7 @@ Invoices can be exported **only to XLSX** format.
 - **Page numbers** are shown **only when the document has more than one page**.
 - **Attachments** are embedded into the PDF when present.
 - Sections with zero values (**Discount**, **Tax**, **Shipping fees**) are **hidden** in the PDF.
+- **Save as Profile** button will create style profile item with these customization presets for futher usage on other quotes.
 
 ![Invoices customized option 1](tutorial/invoice_page_40.jpg)
 ![Invoices customized option 2](tutorial/invoice_page_39.jpg)

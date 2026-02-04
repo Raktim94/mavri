@@ -236,8 +236,10 @@
   "databaseChooser": {
     "createNew": "Sukurti duomenų bazę",
     "description": "Pasirinkite esamą duomenų bazę arba sukurkite naują. Galite išsaugoti dažnai naudojamas duomenų bazes greitam priėjimui.",
+    "descriptionWeb": "Sukurkite naują duomenų bazę arba greitai atverkite jau naudotą iš neseniai naudotų sąrašo.",
     "openExisting": "Atidaryti duomenų bazę",
-    "title": "Atidaryti arba sukurti duomenų bazę"
+    "title": "Atidaryti arba sukurti duomenų bazę",
+    "titleWeb": "Sukurti duomenų bazę"
   },
   "error": {
     "databaseCorrupt": "Duomenų bazės failas sugadintas.",

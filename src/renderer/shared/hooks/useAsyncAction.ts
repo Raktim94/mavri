@@ -31,7 +31,6 @@ export const useAsyncAction = <T>(
 
   const handleError = useCallback(
     (err: Error) => {
-      console.log(err);
       dispatch(addToast({ message: err.message, severity: 'error' }));
     },
     [dispatch]

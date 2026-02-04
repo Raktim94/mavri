@@ -236,8 +236,10 @@
   "databaseChooser": {
     "createNew": "Create new database",
     "description": "Choose an existing database or create a new one. You can remember frequently used databases for quick access.",
+    "descriptionWeb": "Create a new database, or open an existing one from your recently used list for quick access.",
     "openExisting": "Open existing database",
-    "title": "Open or create a database"
+    "title": "Open or create a database",
+    "titleWeb": "Create a database"
   },
   "error": {
     "databaseCorrupt": "Database file is corrupt.",
