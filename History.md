@@ -2,6 +2,10 @@
 
 ## [Date], version [Version]
 
+New features & improvements
+
+- PostgreSQL support added. Users can now choose between a local SQLite database file or connecting to a PostgreSQL server.
+
 Bug Fixes
 
 - Fixed custom field value styling to be consistent with other fields. Previously it was using table header styling.

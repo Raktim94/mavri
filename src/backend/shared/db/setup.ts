@@ -8,12 +8,28 @@ import type { PostgresConfig } from '../types/postgresConfig';
 import { getColumnType, getDefaultValue, insertOrIgnore } from '../utils/dbHelper';
 import { createPostgresAdapter, createSqliteAdapter } from './client';
 
+const sanitizeDatabaseName = (database: string): string => {
+  if (typeof database !== 'string' || database.trim().length === 0) {
+    throw new Error('Invalid database name');
+  }
+  const trimmed = database.trim();
+  const maxLength = 63;
+  if (trimmed.length > maxLength) {
+    throw new Error('Database name is too long');
+  }
+  if (!/^[A-Za-z0-9_]+$/.test(trimmed)) {
+    throw new Error('Database name contains invalid characters');
+  }
+  return trimmed;
+};
+
 export const openPostgreSql = async (data: PostgresConfig): Promise<{ db: DatabaseAdapter }> => {
   const { host, port, user, password, database, ssl } = data;
+  const safeDatabase = sanitizeDatabaseName(database);
 
   const authPart = password ? `${encodeURIComponent(user)}:${encodeURIComponent(password)}` : encodeURIComponent(user);
   const sslPart = ssl ? '?sslmode=require' : '';
-  const connectionString = `postgresql://${authPart}@${host}:${port}/${database}${sslPart}`;
+  const connectionString = `postgresql://${authPart}@${host}:${port}/${safeDatabase}${sslPart}`;
 
   const tempClient = new Client({
     host,
@@ -24,9 +40,9 @@ export const openPostgreSql = async (data: PostgresConfig): Promise<{ db: Databa
     ssl
   });
   await tempClient.connect();
-  const res = await tempClient.query('SELECT 1 FROM pg_database WHERE datname = $1', [database]);
+  const res = await tempClient.query('SELECT 1 FROM pg_database WHERE datname = $1', [safeDatabase]);
   if (res.rowCount === 0) {
-    await tempClient.query(`CREATE DATABASE "${database}"`);
+    await tempClient.query(`CREATE DATABASE "${safeDatabase}"`);
   }
   await tempClient.end();
 
