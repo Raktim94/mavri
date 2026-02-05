@@ -437,6 +437,7 @@
   "settingsMenuItems": {
     "descriptions": {
       "about": "Learn more about this app, its features.",
+      "buyMeCoffee": "If you find this project helpful, consider supporting it",
       "customizeInvoice": "Invoice number prefix e.g.: INV, suffix.",
       "darkMode": "Switch between light and dark themes.",
       "export": "Export your data for backup or to use in other applications.",
@@ -453,6 +454,7 @@
     "importConfirmText": "Are you sure you want to import this JSON file? This action will erase your current database and replace it with the data from the backup. This cannot be undone.",
     "titles": {
       "about": "About",
+      "buyMeCoffee": "Buy me coffee",
       "checkForUpdate": "Check for update",
       "customizeInvoice": "Customize invoice",
       "darkMode": "Dark Mode",

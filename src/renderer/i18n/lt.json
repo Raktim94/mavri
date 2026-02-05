@@ -437,6 +437,7 @@
   "settingsMenuItems": {
     "descriptions": {
       "about": "Sužinokite daugiau apie šią programą, jos funkcijas.",
+      "buyMeCoffee": "Jei šis projektas jums naudingas, apsvarstykite galimybę jį paremti",
       "customizeInvoice": "Sąskaitos numerio priešdėlis (pvz.: INV), priesagas.",
       "darkMode": "Perjunkite tarp šviesios ir tamsios temų.",
       "export": "Eksportuokite savo duomenis atsarginei kopijai arba naudoti kitose programose.",
@@ -453,6 +454,7 @@
     "importConfirmText": "Ar tikrai norite importuoti šį JSON failą? Šis veiksmas ištrins dabartinę duomenų bazę ir ją pakeis duomenimis iš atsarginės kopijos. Šio veiksmo atšaukti nebus galima.",
     "titles": {
       "about": "Apie",
+      "buyMeCoffee": "Nupirk man kavos",
       "checkForUpdate": "Tikrinti atnaujinimus",
       "customizeInvoice": "Valdykite sąskaitą",
       "darkMode": "Tamsus režimas",

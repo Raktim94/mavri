@@ -6,6 +6,8 @@
 ![Windows](https://img.shields.io/badge/Windows-10%2B-blue?logo=windows)
 ![Linux](https://img.shields.io/badge/Linux-DEB-blue?logo=linux)
 ![macOS](https://img.shields.io/badge/macOS-DMG-lightgrey?logo=apple&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-blue?style=flat-square&logo=docker&logoColor=white)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FF813F?style=flat&logo=buy-me-a-coffee&logoColor=white)](https://www.buymeacoffee.com/evaldizi)
 
 **Offline invoicing with full data ownership.**
 
@@ -364,3 +366,8 @@ Details about supported versions and update policy will be documented here.
 
 This project is licensed under the **MIT License**.  
 See the [LICENSE](LICENSE) file for details.
+
+## ☕ Support
+
+If you find this project helpful, consider supporting it on [Buy Me a Coffee](https://www.buymeacoffee.com/evaldizi)!  
+Your support helps maintain and improve the project.

@@ -437,6 +437,7 @@
   "settingsMenuItems": {
     "descriptions": {
       "about": "En savoir plus sur cette application et ses fonctionnalités.",
+      "buyMeCoffee": "Si vous trouvez ce projet utile, pensez à le soutenir",
       "customizeInvoice": "Préfixe de numéro de facture (ex. : INV), suffixe.",
       "darkMode": "Basculer entre les thèmes clair et sombre.",
       "export": "Exportez vos données pour sauvegarde ou utilisation ailleurs.",
@@ -450,9 +451,10 @@
       "turnStyleProfiles": "Activer ou désactiver la fonction des profils de style",
       "tutorial": "Consultez le guide d’utilisation"
     },
-    "importConfirmText": "Êtes‑vous sûr de vouloir importer ce fichier JSON ? Cette action effacera votre base actuelle et la remplacera par les données de la sauvegarde. Cette action est irréversible.",
+    "importConfirmText": "Êtes-vous sûr de vouloir importer ce fichier JSON ? Cette action effacera votre base actuelle et la remplacera par les données de la sauvegarde. Cette action est irréversible.",
     "titles": {
       "about": "À propos",
+      "buyMeCoffee": "Offrez-moi un café",
       "checkForUpdate": "Vérifier les mises à jour",
       "customizeInvoice": "Personnaliser la facture",
       "darkMode": "Mode sombre",
