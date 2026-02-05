@@ -14,7 +14,7 @@ export const up = async (db: DatabaseAdapter) => {
     if (db.type === DatabaseType.sqlite) {
       await db.run('PRAGMA foreign_keys = OFF;');
     }
-    await db.run('BEGIN');
+
     await db.run('DROP TABLE IF EXISTS invoice_items_new;');
 
     await db.run(
@@ -56,17 +56,10 @@ export const up = async (db: DatabaseAdapter) => {
     await db.run(`CREATE INDEX IF NOT EXISTS idx_invoice_items_invoiceId ON invoice_items("parentInvoiceId")`);
     await db.run(`CREATE INDEX IF NOT EXISTS idx_invoice_items_itemId ON invoice_items("itemId")`);
 
-    await db.run('COMMIT');
-
     if (db.type === DatabaseType.sqlite) {
       await db.run('PRAGMA foreign_keys = ON;');
     }
   } catch (error) {
-    try {
-      await db.run('ROLLBACK');
-    } catch {
-      throw new Error(`ROLLBACK failed`);
-    }
     if (db.type === DatabaseType.sqlite) {
       await db.run('PRAGMA foreign_keys = ON;');
     }

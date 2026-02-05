@@ -15,6 +15,7 @@ import { useCallback, useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n';
 import { isWebMode } from '../shared/api/restApi';
+import { DatabaseType } from '../shared/enums/databaseType';
 import { DBInitType } from '../shared/enums/dbInitType';
 import { useDBInit } from '../shared/hooks/dbSelector/useDBInit';
 import { useDBListSelector } from '../shared/hooks/dbSelector/useDBListSelector';
@@ -71,6 +72,8 @@ export const DatabaseChooser: FC<Props> = ({ onDatabaseRead }) => {
   const { execute: initDB } = useDBInit({
     fullPath: selectedPath ?? '',
     mode: selectionMode,
+    postgresConfig: undefined,
+    dbType: DatabaseType.sqlite,
     immediate: false,
     onDone: (data: Response<unknown>) => {
       if (!data.success) {

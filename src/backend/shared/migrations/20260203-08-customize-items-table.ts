@@ -12,7 +12,6 @@ export const up = async (db: DatabaseAdapter) => {
     if (db.type === DatabaseType.sqlite) {
       await db.run('PRAGMA foreign_keys = OFF;');
     }
-    await db.run('BEGIN');
 
     await db.run(
       `
@@ -57,16 +56,10 @@ export const up = async (db: DatabaseAdapter) => {
       `
     );
 
-    await db.run('COMMIT');
     if (db.type === DatabaseType.sqlite) {
       await db.run('PRAGMA foreign_keys = ON;');
     }
   } catch (error) {
-    try {
-      await db.run('ROLLBACK');
-    } catch {
-      throw new Error(`ROLLBACK failed`);
-    }
     if (db.type === DatabaseType.sqlite) {
       await db.run('PRAGMA foreign_keys = ON;');
     }

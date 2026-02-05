@@ -1,4 +1,5 @@
 import pako from 'pako';
+import type { DatabaseType } from '../enums/databaseType';
 import type { DBInitType } from '../enums/dbInitType';
 import type { InvoiceType } from '../enums/invoiceType';
 import type { BusinessAdd, BusinessUpdate, BusinessWeb } from '../types/business';
@@ -10,6 +11,7 @@ import type { ExportMeta } from '../types/exportMeta';
 import type { FilterData } from '../types/filter';
 import type { InvoiceAdd, InvoiceAttachment, InvoiceAttachmentWeb, InvoiceUpdate, InvoiceWeb } from '../types/invoice';
 import type { Item, ItemAdd, ItemUpdate } from '../types/item';
+import type { PostgresConfig } from '../types/postgresConfig';
 import type { Response } from '../types/response';
 import type { Settings, SettingsUpdate } from '../types/settings';
 import type {
@@ -170,8 +172,12 @@ export const webApi = () => {
       Promise.resolve({ success: true, data: { canceled: true, filePath: '' } } as Response<DBSelector>),
     openDatabase: () =>
       Promise.resolve({ success: true, data: { canceled: true, filePath: '' } } as Response<DBSelector>),
-    initializeDatabase: (data: { fullPath: string; mode?: DBInitType }) =>
-      apiPost<{ success: boolean; message?: string }>('/api/databases', data),
+    initializeDatabase: (data: {
+      postgresConfig?: PostgresConfig;
+      dbType: DatabaseType;
+      fullPath?: string;
+      mode?: DBInitType;
+    }) => apiPost<{ success: boolean; message?: string }>('/api/databases', data),
     getDatabaseList: () => apiGet<Response<string[]>>('/api/databases'),
 
     getAllSettings: () => apiGet<Response<Settings>>('/api/settings'),

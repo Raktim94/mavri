@@ -14,7 +14,6 @@ export const up = async (db: DatabaseAdapter) => {
     if (db.type === DatabaseType.sqlite) {
       await db.run('PRAGMA foreign_keys = OFF;');
     }
-    await db.run('BEGIN');
 
     await db.run(`ALTER TABLE style_profiles RENAME COLUMN "customizationLayout" TO "layout";`);
     await db.run(`ALTER TABLE style_profiles RENAME COLUMN "customizationColor" TO "color";`);
@@ -41,16 +40,10 @@ export const up = async (db: DatabaseAdapter) => {
       `ALTER TABLE style_profiles RENAME COLUMN "customizationPaidWatermarkFileData" TO "paidWatermarkFileData";`
     );
 
-    await db.run('COMMIT');
     if (db.type === DatabaseType.sqlite) {
       await db.run('PRAGMA foreign_keys = ON;');
     }
   } catch (error) {
-    try {
-      await db.run('ROLLBACK');
-    } catch {
-      throw new Error(`ROLLBACK failed`);
-    }
     if (db.type === DatabaseType.sqlite) {
       await db.run('PRAGMA foreign_keys = ON;');
     }
