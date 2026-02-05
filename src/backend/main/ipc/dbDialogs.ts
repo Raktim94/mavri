@@ -112,11 +112,6 @@ export const initDBDialogsHandlers = (dbName: string, mainWindow: BrowserWindow)
           createIfMissing,
           mainWindow,
           postgresConfig: opts.postgresConfig
-            ? {
-                ...opts.postgresConfig,
-                database: dbName
-              }
-            : opts.postgresConfig
         });
         return { success: true };
       } catch (error) {

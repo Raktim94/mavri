@@ -72,7 +72,6 @@ export const LocalDatabase: FC<Props> = ({ onDatabaseRead }) => {
   const { execute: initDB } = useDBInit({
     fullPath: selectedPath ?? '',
     mode: selectionMode,
-    postgresConfig: undefined,
     dbType: DatabaseType.sqlite,
     immediate: false,
     onDone: (data: Response<unknown>) => {

@@ -51,11 +51,6 @@ export const initDatabaseController = (app: Express) => {
         dbType: dbType,
         createIfMissing,
         postgresConfig: postgresConfig
-          ? {
-              ...postgresConfig,
-              database: name
-            }
-          : postgresConfig
       });
       res.json({ success: true });
     } catch (err) {
