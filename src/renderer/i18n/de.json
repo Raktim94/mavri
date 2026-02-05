@@ -247,6 +247,7 @@
     "databaseIsBusy": "Datenbankdatei kann nicht neu erstellt werden, da sie derzeit verwendet wird",
     "databaseLocked": "Datenbank ist gesperrt.",
     "datatypeMismatch": "Datensatz hat einen Datentyp-Konflikt.",
+    "dbNotInitialized": "Datenbank ist nicht initialisiert",
     "diskIOError": "Festplatten-E/A-Fehler aufgetreten.",
     "failedNormalizeImportedRows": "Folgende Zeilen konnten nicht verarbeitet werden: {{rowNumber}}. Bitte überprüfen Sie das Datenformat.",
     "failedToLoad": "Gespeicherte DB-Liste konnte nicht geladen werden",
@@ -261,6 +262,7 @@
     "invalidFile": "Ausgewählte Datei ist ungültig",
     "invalidLogo": "Ungültige Logo-Zeichenkette",
     "noWorksheetFound": "Kein Arbeitsblatt gefunden",
+    "rateLimiter": "Zu viele Anfragen. Bitte verlangsamen Sie Ihr Tempo",
     "sqlSyntaxError": "SQL-Syntaxfehler.",
     "unknownError": "Unbekannter Datenbankfehler",
     "unsupportedImage": "Nicht unterstützter Bildtyp"

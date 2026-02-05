@@ -1,7 +1,7 @@
 import { type Express, type Request, type Response } from 'express';
 import * as settingsService from '../../shared/services/settings';
+import { dbInstance } from '../database';
 import { requireDB } from '../utils/functions';
-import { dbInstance } from './database';
 
 export const initSettingsController = (app: Express) => {
   app.get('/api/settings', requireDB, async (_req: Request, res: Response) => {

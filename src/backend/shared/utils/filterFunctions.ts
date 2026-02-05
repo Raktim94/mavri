@@ -1,5 +1,7 @@
 import { FilterType } from '../../shared/enums/filterType';
 import type { FilterData } from '../../shared/types/invoiceFilter';
+import type { DatabaseType } from '../enums/databaseType';
+import { getDefaultValue } from './dbHelper';
 
 export const getWhereClauseFromFilters = (data: {
   filters: FilterData[];
@@ -55,6 +57,7 @@ export const getWhereClauseFromFilters = (data: {
 };
 
 export const getHavingClauseFromFilters = (data: {
+  dbType: DatabaseType;
   filters: FilterData[];
   invoiceUpdatedAtColumn?: string;
   invoiceIdColumn?: string;
@@ -66,6 +69,7 @@ export const getHavingClauseFromFilters = (data: {
 }): string => {
   const {
     filters,
+    dbType,
     invoiceUpdatedAtColumn,
     issuedAtColumn,
     invoiceIdColumn,
@@ -84,19 +88,19 @@ export const getHavingClauseFromFilters = (data: {
       case FilterType.noInvoices30:
         if (invoiceUpdatedAtColumn)
           clauses.push(
-            `(MAX(${invoiceUpdatedAtColumn}) IS NULL OR MAX(${invoiceUpdatedAtColumn}) < datetime('now', '-30 days'))`
+            `(MAX(${invoiceUpdatedAtColumn}) IS NULL OR MAX(${invoiceUpdatedAtColumn}) < ${getDefaultValue("datetime('now', '-30 days')", dbType)})`
           );
         break;
       case FilterType.noInvoices60:
         if (invoiceUpdatedAtColumn)
           clauses.push(
-            `(MAX(${invoiceUpdatedAtColumn}) IS NULL OR MAX(${invoiceUpdatedAtColumn}) < datetime('now', '-60 days'))`
+            `(MAX(${invoiceUpdatedAtColumn}) IS NULL OR MAX(${invoiceUpdatedAtColumn}) < ${getDefaultValue("datetime('now', '-60 days')", dbType)})`
           );
         break;
       case FilterType.noInvoices90:
         if (invoiceUpdatedAtColumn)
           clauses.push(
-            `(MAX(${invoiceUpdatedAtColumn}) IS NULL OR MAX(${invoiceUpdatedAtColumn}) < datetime('now', '-90 days'))`
+            `(MAX(${invoiceUpdatedAtColumn}) IS NULL OR MAX(${invoiceUpdatedAtColumn}) < ${getDefaultValue("datetime('now', '-90 days')", dbType)})`
           );
         break;
       case FilterType.noInvoices:

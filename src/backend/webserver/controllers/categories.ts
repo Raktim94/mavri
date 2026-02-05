@@ -1,7 +1,7 @@
 import { type Express, type Request, type Response } from 'express';
 import * as categoriesService from '../../shared/services/categories';
+import { dbInstance } from '../database';
 import { parseFilter, requireDB } from '../utils/functions';
-import { dbInstance } from './database';
 
 export const initCategoriesController = (app: Express) => {
   app.get('/api/categories', requireDB, async (req: Request, res: Response) => {

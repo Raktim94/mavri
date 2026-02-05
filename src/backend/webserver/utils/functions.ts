@@ -3,7 +3,7 @@ import { type Request, type Response } from 'express';
 import rateLimit from 'express-rate-limit';
 import { FilterType } from '../../shared/enums/filterType';
 import type { FilterData } from '../../shared/types/invoiceFilter';
-import { dbInstance } from '../controllers/database';
+import { dbInstance } from '../database';
 
 export const parseFilter = (query: string | undefined): FilterData[] | undefined => {
   if (!query) return undefined;
@@ -39,7 +39,8 @@ export const requireDB = (_req: Request, res: Response, next: NextFunction) => {
   if (!dbInstance) {
     return res.status(400).json({
       success: false,
-      message: 'Database is not initialized'
+      message: undefined,
+      key: 'error.dbNotInitialized'
     });
   }
   next();
@@ -52,6 +53,7 @@ export const listDbLimiter = rateLimit({
   legacyHeaders: false,
   message: {
     success: false,
-    message: 'Too many requests. Please slow down.'
+    message: undefined,
+    key: 'error.rateLimiter'
   }
 });

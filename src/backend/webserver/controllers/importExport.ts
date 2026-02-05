@@ -2,8 +2,8 @@ import { type Express, type Request, type Response } from 'express';
 import multer from 'multer';
 import pako from 'pako';
 import * as importExportService from '../../shared/services/importExport';
+import { dbInstance } from '../database';
 import { requireDB } from '../utils/functions';
-import { dbInstance } from './database';
 
 const upload = multer();
 

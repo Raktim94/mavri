@@ -1,7 +1,7 @@
 import { type Express, type Request, type Response } from 'express';
 import * as clientsService from '../../shared/services/clients';
+import { dbInstance } from '../database';
 import { parseFilter, requireDB } from '../utils/functions';
-import { dbInstance } from './database';
 
 export const initClientsController = (app: Express) => {
   app.get('/api/clients', requireDB, async (req: Request, res: Response) => {

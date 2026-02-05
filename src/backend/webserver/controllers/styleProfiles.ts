@@ -1,8 +1,8 @@
 import { type Express, type Request, type Response as ResponseExpress } from 'express';
 import * as styleProfilesService from '../../shared/services/styleProfiles';
 import { decodeStyleProfile, encodeResultStyleProfile } from '../../shared/utils/dataUrlFunctions';
+import { dbInstance } from '../database';
 import { parseFilter, requireDB } from '../utils/functions';
-import { dbInstance } from './database';
 
 export const initStyleProfilesController = (app: Express) => {
   app.get('/api/styleProfiles', requireDB, async (req: Request, res: ResponseExpress) => {

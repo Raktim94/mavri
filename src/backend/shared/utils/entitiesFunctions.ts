@@ -1,16 +1,17 @@
-import type { Database } from 'sqlite3';
 import type { EntityWithId } from '../../shared/types/entityWithId';
 import type { FilterData } from '../../shared/types/invoiceFilter';
 import type { Response } from '../../shared/types/response';
+import type { DatabaseAdapter } from '../types/DatabaseAdapter';
 import type { EntityWithCounts } from '../types/entityWithCounts';
 import type { InvoiceAggregation } from '../types/InvoiceAggregation';
-import { getAllRows, getFirstRow, runDb } from './dbFuntions';
-import { mapSqliteError } from './errorFunctions';
+import { getDefaultValue } from './dbHelper';
+import { mapDatabaseError } from './errorFunctions';
+
 import { getHavingClauseFromFilters } from './filterFunctions';
 
 export const getAllEntities =
   <T extends object>(
-    db: Database,
+    db: DatabaseAdapter,
     table: string,
     alias: string,
     invoiceAlias: string,
@@ -18,32 +19,33 @@ export const getAllEntities =
   ): ((filter: FilterData[]) => Promise<Response<(T & EntityWithCounts)[]>>) =>
   async (filter: FilterData[]) => {
     const havingClause = getHavingClauseFromFilters({
+      dbType: db.type,
       filters: filter,
-      invoiceUpdatedAtColumn: `${invoiceAlias}.updatedAt`,
-      invoiceIdColumn: `${invoiceAlias}.id`,
-      archivedColumn: `${alias}.isArchived`
+      invoiceUpdatedAtColumn: `${invoiceAlias}."updatedAt"`,
+      invoiceIdColumn: `${invoiceAlias}."id"`,
+      archivedColumn: `${alias}."isArchived"`
     });
 
     const sql = `
       SELECT
         ${alias}.*,
-        ${aggregation.invoiceCountExpr} AS invoiceCount,
-        ${aggregation.quotesCountExpr} AS quotesCount
+        ${aggregation.invoiceCountExpr} AS "invoiceCount",
+        ${aggregation.quotesCountExpr} AS "quotesCount"
       FROM ${table} ${alias}
       ${aggregation.joins}
-      GROUP BY ${alias}.id
+      GROUP BY ${alias}."id"
       ${havingClause || ''}
-      ORDER BY ${alias}.createdAt DESC
+      ORDER BY ${alias}."createdAt" DESC
     `;
 
-    const data = await getAllRows<T & EntityWithCounts>(db, sql);
+    const data = await db.all<T & EntityWithCounts>(sql);
 
     return { success: true, data };
   };
 
 export const handleEntity =
   <T extends EntityWithId>(
-    db: Database,
+    db: DatabaseAdapter,
     table: string,
     alias: string,
     fields: readonly (keyof T)[],
@@ -53,16 +55,16 @@ export const handleEntity =
     const params = fields.map(key => (data[key] ?? null) as string | number | null);
 
     try {
-      let lastID = -1;
+      let lastID: number = -1;
 
       if (isUpdate) {
-        const setClause = fields.map(f => `${String(f)} = ?`).join(', ') + `, updatedAt = datetime('now')`;
-
-        lastID = await runDb(db, `UPDATE ${table} SET ${setClause} WHERE id = ?`, [...params, data.id ?? -1]);
+        const setClause =
+          fields.map(f => `"${String(f)}" = ?`).join(', ') +
+          `, "updatedAt" = ${getDefaultValue("(datetime('now'))", db.type)}`;
+        lastID = await db.run(`UPDATE ${table} SET ${setClause} WHERE "id" = ?`, [...params, data.id ?? -1]);
       } else {
-        lastID = await runDb(
-          db,
-          `INSERT INTO ${table} (${fields.join(',')})
+        lastID = await db.run(
+          `INSERT INTO ${table} (${fields.map(f => `"${String(f)}"`).join(',')})
            VALUES (${fields.map(() => '?').join(',')})`,
           params
         );
@@ -71,18 +73,18 @@ export const handleEntity =
       const sql = `
         SELECT
           ${alias}.*,
-          ${aggregation.invoiceCountExpr} AS invoiceCount,
-          ${aggregation.quotesCountExpr} AS quotesCount
+          ${aggregation.invoiceCountExpr} AS "invoiceCount",
+          ${aggregation.quotesCountExpr} AS "quotesCount"
         FROM ${table} ${alias}
         ${aggregation.joins}
-        WHERE ${alias}.id = ?
-        GROUP BY ${alias}.id
+        WHERE ${alias}."id" = ?
+        GROUP BY ${alias}."id"
       `;
 
-      const row = await getFirstRow<T & EntityWithCounts>(db, sql, [lastID]);
+      const row = await await db.get<T & EntityWithCounts>(sql, [lastID]);
 
       return { success: true, data: row ?? undefined };
     } catch (error) {
-      return { success: false, ...mapSqliteError(error) };
+      return { success: false, ...mapDatabaseError(error, db.type) };
     }
   };

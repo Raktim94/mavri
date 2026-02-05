@@ -247,6 +247,7 @@
     "databaseIsBusy": "Negalima sukurti duomenų bazės failo iš naujo – jis šiuo metu naudojamas",
     "databaseLocked": "Duomenų bazė užrakinta.",
     "datatypeMismatch": "Įrašo duomenų tipas neatitinka reikalavimų.",
+    "dbNotInitialized": "Duomenų bazė nėra inicijuota",
     "diskIOError": "Įvyko disko įvesties/išvesties klaida.",
     "failedNormalizeImportedRows": "Nepavyko apdoroti šių eilučių: {{rowNumber}}. Patikrinkite duomenų formatą.",
     "failedToLoad": "Nepavyko įkelti išsaugoto DB sąrašo",
@@ -261,6 +262,7 @@
     "invalidFile": "Pasirinktas failas yra netinkamas",
     "invalidLogo": "Neteisingas logotipo tekstas",
     "noWorksheetFound": "Darbalapis nerastas",
+    "rateLimiter": "Per daug užklausų. Prašome sulėtinti",
     "sqlSyntaxError": "SQL sintaksės klaida.",
     "unknownError": "Nežinoma duomenų bazės klaida",
     "unsupportedImage": "Nepalaikomas paveikslėlio tipas"

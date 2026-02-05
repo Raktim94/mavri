@@ -1,9 +1,12 @@
-import type { Database } from 'sqlite3';
+// db may be sqlite3 Database or a Postgres adapter — typed as `any` at runtime
 
+import { DatabaseType } from '../enums/databaseType';
 import type { Business } from '../types/business';
 import type { Category } from '../types/category';
 import type { Client } from '../types/client';
 import type { Currency } from '../types/currency';
+import type { DatabaseAdapter } from '../types/DatabaseAdapter';
+import type { DbValue } from '../types/dbValue';
 import type {
   Invoice,
   InvoiceAttachment,
@@ -17,7 +20,6 @@ import type {
   InvoiceStyleProfileSnapshots
 } from '../types/invoice';
 import type { Item } from '../types/item';
-import type { SqliteValue } from '../types/sqliteValue';
 import type { StyleProfile } from '../types/styleProfiles';
 import type { Unit } from '../types/unit';
 import {
@@ -34,41 +36,31 @@ import {
   encodeLogo,
   encodeStyleProfile
 } from '../utils/dataUrlFunctions';
-import { getAllRows, getFirstRow, runDb, toSqliteValue } from '../utils/dbFuntions';
-import { mapSqliteError } from '../utils/errorFunctions';
+import { toDbValue } from '../utils/dbHelper';
+import { mapDatabaseError } from '../utils/errorFunctions';
 
-export const exportAllData = async (db: Database) => {
+export const exportAllData = async (db: DatabaseAdapter) => {
   try {
-    const styleProfiles = await getAllRows<StyleProfile>(db, 'SELECT * FROM style_profiles');
-    const settingsRow = await getFirstRow(db, 'SELECT * FROM settings LIMIT 1');
-    const businesses = await getAllRows<Business>(db, 'SELECT * FROM businesses');
-    const clients = await getAllRows<Client>(db, 'SELECT * FROM clients');
-    const items = await getAllRows<Item>(db, 'SELECT * FROM items');
-    const units = await getAllRows<Unit>(db, 'SELECT * FROM units');
-    const categories = await getAllRows<Category>(db, 'SELECT * FROM categories');
-    const currencies = await getAllRows<Currency>(db, 'SELECT * FROM currencies');
-    const invoices = await getAllRows<Invoice>(db, 'SELECT * FROM invoices');
-    const invoiceBusinessSnapshots = await getAllRows<InvoiceBusinessSnapshots>(
-      db,
-      'SELECT * FROM invoice_business_snapshots'
-    );
-    const invoiceClientSnapshots = await getAllRows<InvoiceClientSnapshots>(
-      db,
-      'SELECT * FROM invoice_client_snapshots'
-    );
-    const invoiceCurrencySnapshots = await getAllRows<InvoiceCurrencySnapshots>(
-      db,
-      'SELECT * FROM invoice_currency_snapshots'
-    );
-    const invoiceStyleProfileSnapshots = await getAllRows<InvoiceStyleProfileSnapshots>(
-      db,
+    const styleProfiles = await db.all<StyleProfile>('SELECT * FROM style_profiles');
+    const settingsRow = await db.get('SELECT * FROM settings LIMIT 1');
+    const businesses = await db.all<Business>('SELECT * FROM businesses');
+    const clients = await db.all<Client>('SELECT * FROM clients');
+    const items = await db.all<Item>('SELECT * FROM items');
+    const units = await db.all<Unit>('SELECT * FROM units');
+    const categories = await db.all<Category>('SELECT * FROM categories');
+    const currencies = await db.all<Currency>('SELECT * FROM currencies');
+    const invoices = await db.all<Invoice>('SELECT * FROM invoices');
+    const invoiceBusinessSnapshots = await db.all<InvoiceBusinessSnapshots>('SELECT * FROM invoice_business_snapshots');
+    const invoiceClientSnapshots = await db.all<InvoiceClientSnapshots>('SELECT * FROM invoice_client_snapshots');
+    const invoiceCurrencySnapshots = await db.all<InvoiceCurrencySnapshots>('SELECT * FROM invoice_currency_snapshots');
+    const invoiceStyleProfileSnapshots = await db.all<InvoiceStyleProfileSnapshots>(
       'SELECT * FROM invoice_style_profile_snapshots'
     );
-    const invoiceItemSnapshots = await getAllRows<InvoiceItemSnapshots>(db, 'SELECT * FROM invoice_item_snaphots');
-    const invoiceCustomizations = await getAllRows<InvoiceCustomization>(db, 'SELECT * FROM invoice_customizations');
-    const invoiceItems = await getAllRows<InvoiceItem>(db, 'SELECT * FROM invoice_items');
-    const invoicePayments = await getAllRows<InvoicePayment>(db, 'SELECT * FROM invoice_payments');
-    const attachments = await getAllRows<InvoiceAttachment>(db, 'SELECT * FROM attachments');
+    const invoiceItemSnapshots = await db.all<InvoiceItemSnapshots>('SELECT * FROM invoice_item_snapshots');
+    const invoiceCustomizations = await db.all<InvoiceCustomization>('SELECT * FROM invoice_customizations');
+    const invoiceItems = await db.all<InvoiceItem>('SELECT * FROM invoice_items');
+    const invoicePayments = await db.all<InvoicePayment>('SELECT * FROM invoice_payments');
+    const attachments = await db.all<InvoiceAttachment>('SELECT * FROM attachments');
 
     const attachmentsModified = attachments.map(encodeInvoiceAttachment);
     const businessesModified = businesses.map(encodeLogo);
@@ -100,22 +92,30 @@ export const exportAllData = async (db: Database) => {
 
     return { success: true, data: payload };
   } catch (error) {
-    return { success: false, ...mapSqliteError(error) };
+    return { success: false, ...mapDatabaseError(error, db.type) };
   }
 };
 
-export const importAllData = async (db: Database, parsed: Record<string, unknown>) => {
+export const importAllData = async (db: DatabaseAdapter, parsed: Record<string, unknown>) => {
   const runInTransaction = async (fn: () => Promise<void>) => {
     try {
-      await runDb(db, 'PRAGMA foreign_keys = OFF');
-      await runDb(db, 'BEGIN TRANSACTION');
+      if (db.type === DatabaseType.sqlite) {
+        await db.run('PRAGMA foreign_keys = OFF;');
+      }
+      await db.run('BEGIN');
       await fn();
-      await runDb(db, 'COMMIT');
+      await db.run('COMMIT');
     } catch (err) {
-      await runDb(db, 'ROLLBACK');
+      try {
+        await db.run('ROLLBACK');
+      } catch {
+        throw new Error(`ROLLBACK failed`);
+      }
       throw err;
     } finally {
-      await runDb(db, 'PRAGMA foreign_keys = ON');
+      if (db.type === DatabaseType.sqlite) {
+        await db.run('PRAGMA foreign_keys = ON;');
+      }
     }
   };
 
@@ -123,25 +123,25 @@ export const importAllData = async (db: Database, parsed: Record<string, unknown
     for (const row of rows) {
       const keys = Object.keys(row).filter(k => k !== 'invoiceFullNumber');
       if (!keys.length) continue;
-      const cols = keys.join(',');
+      const cols = keys.map(k => `"${k}"`).join(',');
       const placeholders = keys.map(() => '?').join(',');
-      const params = keys.map(k => toSqliteValue(row[k]));
-      await runDb(db, `INSERT INTO ${table} (${cols}) VALUES (${placeholders})`, params);
+      const params = keys.map(k => toDbValue(row[k]));
+      await db.run(`INSERT INTO ${table} (${cols}) VALUES (${placeholders})`, params);
     }
   };
 
   const updateSettings = async (settings: Record<string, unknown>) => {
     const fields: string[] = [];
-    const params: SqliteValue[] = [];
+    const params: DbValue[] = [];
 
     Object.entries(settings).forEach(([k, v]) => {
       if (k === 'id') return;
-      fields.push(`${k} = ?`);
-      params.push(toSqliteValue(v));
+      fields.push(`"${k}" = ?`);
+      params.push(toDbValue(v));
     });
 
     if (fields.length) {
-      await runDb(db, `UPDATE settings SET ${fields.join(', ')} WHERE id = (SELECT id FROM settings LIMIT 1)`, params);
+      await db.run(`UPDATE settings SET ${fields.join(', ')} WHERE "id" = (SELECT "id" FROM settings LIMIT 1)`, params);
     }
   };
 
@@ -156,7 +156,7 @@ export const importAllData = async (db: Database, parsed: Record<string, unknown
         'invoice_client_snapshots',
         'invoice_business_snapshots',
         'invoice_items',
-        'invoice_item_snaphots',
+        'invoice_item_snapshots',
         'invoice_payments',
         'attachments',
         'invoices',
@@ -170,7 +170,7 @@ export const importAllData = async (db: Database, parsed: Record<string, unknown
       ];
 
       for (const table of deleteOrder) {
-        await runDb(db, `DELETE FROM ${table}`);
+        await db.run(`DELETE FROM ${table}`);
       }
 
       const tableDataMap: Record<string, string> = {
@@ -188,7 +188,7 @@ export const importAllData = async (db: Database, parsed: Record<string, unknown
         invoice_client_snapshots: 'invoiceClientSnapshots',
         invoice_currency_snapshots: 'invoiceCurrencySnapshots',
         invoice_items: 'invoiceItems',
-        invoice_item_snaphots: 'invoiceItemSnapshots',
+        invoice_item_snapshots: 'invoiceItemSnapshots',
         invoice_payments: 'invoicePayments',
         attachments: 'attachments'
       };
@@ -227,6 +227,6 @@ export const importAllData = async (db: Database, parsed: Record<string, unknown
 
     return { success: true };
   } catch (error) {
-    return { success: false, ...mapSqliteError(error) };
+    return { success: false, ...mapDatabaseError(error, db.type) };
   }
 };

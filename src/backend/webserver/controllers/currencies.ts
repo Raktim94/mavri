@@ -1,7 +1,7 @@
 import { type Express, type Request, type Response } from 'express';
 import * as currenciesService from '../../shared/services/currencies';
+import { dbInstance } from '../database';
 import { parseFilter, requireDB } from '../utils/functions';
-import { dbInstance } from './database';
 
 export const initCurrenciesController = (app: Express) => {
   app.get('/api/currencies', requireDB, async (req: Request, res: Response) => {

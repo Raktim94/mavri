@@ -1,57 +1,59 @@
-import sqlite3 from 'sqlite3';
-import { getFirstRow, runAsync } from '../utils/dbFuntions';
-import { mapSqliteError } from '../utils/errorFunctions';
+import { DatabaseType } from '../enums/databaseType';
+import type { DatabaseAdapter } from '../types/DatabaseAdapter';
+import { getTableColumns } from '../utils/dbHelper';
+import { mapDatabaseError } from '../utils/errorFunctions';
 
-export const up = async (db: sqlite3.Database) => {
+export const up = async (db: DatabaseAdapter) => {
   try {
-    const colInfo = await getFirstRow(
-      db,
-      `
-        SELECT *
-        FROM pragma_table_info('style_profiles')
-        WHERE name = 'fontSize'
-      `
+    const cols = await getTableColumns(db, 'style_profiles');
+    const colInfo = cols.find(c => c.name === 'fontSize');
+
+    if (colInfo) {
+      return;
+    }
+    if (db.type === DatabaseType.sqlite) {
+      await db.run('PRAGMA foreign_keys = OFF;');
+    }
+    await db.run('BEGIN');
+
+    await db.run(`ALTER TABLE style_profiles RENAME COLUMN "customizationLayout" TO "layout";`);
+    await db.run(`ALTER TABLE style_profiles RENAME COLUMN "customizationColor" TO "color";`);
+    await db.run(`ALTER TABLE style_profiles RENAME COLUMN "customizationLogoSize" TO "logoSize";`);
+    await db.run(`ALTER TABLE style_profiles RENAME COLUMN "customizationFontSizeSize" TO "fontSize";`);
+    await db.run(`ALTER TABLE style_profiles RENAME COLUMN "customizationTableHeaderStyle" TO "tableHeaderStyle";`);
+    await db.run(`ALTER TABLE style_profiles RENAME COLUMN "customizationTableRowStyle" TO "tableRowStyle";`);
+    await db.run(`ALTER TABLE style_profiles RENAME COLUMN "customizationPageFormat" TO "pageFormat";`);
+    await db.run(`ALTER TABLE style_profiles RENAME COLUMN "customizationLabelUpperCase" TO "labelUpperCase";`);
+    await db.run(`ALTER TABLE style_profiles RENAME COLUMN "customizationWatermarkFileName" TO "watermarkFileName";`);
+    await db.run(`ALTER TABLE style_profiles RENAME COLUMN "customizationWatermarkFileType" TO "watermarkFileType";`);
+    await db.run(`ALTER TABLE style_profiles RENAME COLUMN "customizationWatermarkFileSize" TO "watermarkFileSize";`);
+    await db.run(`ALTER TABLE style_profiles RENAME COLUMN "customizationWatermarkFileData" TO "watermarkFileData";`);
+    await db.run(
+      `ALTER TABLE style_profiles RENAME COLUMN "customizationPaidWatermarkFileName" TO "paidWatermarkFileName";`
+    );
+    await db.run(
+      `ALTER TABLE style_profiles RENAME COLUMN "customizationPaidWatermarkFileType" TO "paidWatermarkFileType";`
+    );
+    await db.run(
+      `ALTER TABLE style_profiles RENAME COLUMN "customizationPaidWatermarkFileSize" TO "paidWatermarkFileSize";`
+    );
+    await db.run(
+      `ALTER TABLE style_profiles RENAME COLUMN "customizationPaidWatermarkFileData" TO "paidWatermarkFileData";`
     );
 
-    if (colInfo) return;
-
-    await runAsync(db, 'PRAGMA foreign_keys = OFF;');
-    await runAsync(db, 'BEGIN TRANSACTION;');
-
-    await runAsync(db, `ALTER TABLE style_profiles RENAME COLUMN customizationLayout TO layout;`);
-    await runAsync(db, `ALTER TABLE style_profiles RENAME COLUMN customizationColor TO color;`);
-    await runAsync(db, `ALTER TABLE style_profiles RENAME COLUMN customizationLogoSize TO logoSize;`);
-    await runAsync(db, `ALTER TABLE style_profiles RENAME COLUMN customizationFontSizeSize TO fontSize;`);
-    await runAsync(db, `ALTER TABLE style_profiles RENAME COLUMN customizationTableHeaderStyle TO tableHeaderStyle;`);
-    await runAsync(db, `ALTER TABLE style_profiles RENAME COLUMN customizationTableRowStyle TO tableRowStyle;`);
-    await runAsync(db, `ALTER TABLE style_profiles RENAME COLUMN customizationPageFormat TO pageFormat;`);
-    await runAsync(db, `ALTER TABLE style_profiles RENAME COLUMN customizationLabelUpperCase TO labelUpperCase;`);
-    await runAsync(db, `ALTER TABLE style_profiles RENAME COLUMN customizationWatermarkFileName TO watermarkFileName;`);
-    await runAsync(db, `ALTER TABLE style_profiles RENAME COLUMN customizationWatermarkFileType TO watermarkFileType;`);
-    await runAsync(db, `ALTER TABLE style_profiles RENAME COLUMN customizationWatermarkFileSize TO watermarkFileSize;`);
-    await runAsync(db, `ALTER TABLE style_profiles RENAME COLUMN customizationWatermarkFileData TO watermarkFileData;`);
-    await runAsync(
-      db,
-      `ALTER TABLE style_profiles RENAME COLUMN customizationPaidWatermarkFileName TO paidWatermarkFileName;`
-    );
-    await runAsync(
-      db,
-      `ALTER TABLE style_profiles RENAME COLUMN customizationPaidWatermarkFileType TO paidWatermarkFileType;`
-    );
-    await runAsync(
-      db,
-      `ALTER TABLE style_profiles RENAME COLUMN customizationPaidWatermarkFileSize TO paidWatermarkFileSize;`
-    );
-    await runAsync(
-      db,
-      `ALTER TABLE style_profiles RENAME COLUMN customizationPaidWatermarkFileData TO paidWatermarkFileData;`
-    );
-
-    await runAsync(db, 'COMMIT;');
-    await runAsync(db, 'PRAGMA foreign_keys = ON;');
+    await db.run('COMMIT');
+    if (db.type === DatabaseType.sqlite) {
+      await db.run('PRAGMA foreign_keys = ON;');
+    }
   } catch (error) {
-    await runAsync(db, 'ROLLBACK;');
-    await runAsync(db, 'PRAGMA foreign_keys = ON;');
-    return { success: false, ...mapSqliteError(error) };
+    try {
+      await db.run('ROLLBACK');
+    } catch {
+      throw new Error(`ROLLBACK failed`);
+    }
+    if (db.type === DatabaseType.sqlite) {
+      await db.run('PRAGMA foreign_keys = ON;');
+    }
+    return { success: false, ...mapDatabaseError(error, db.type) };
   }
 };

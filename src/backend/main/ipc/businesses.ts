@@ -1,9 +1,9 @@
 import { ipcMain } from 'electron';
-import type { Database } from 'sqlite3';
 import * as businessesService from '../../shared/services/businesses';
 import type { Business } from '../../shared/types/business';
+import type { DatabaseAdapter } from '../../shared/types/DatabaseAdapter';
 
-export const initBusinessesHandlers = (db: Database) => {
+export const initBusinessesHandlers = (db: DatabaseAdapter) => {
   ipcMain.handle('add-business', async (_event, data: Business) => businessesService.addBusiness(db, data));
   ipcMain.handle('update-business', async (_event, data: Business) => businessesService.updateBusiness(db, data));
   ipcMain.handle('delete-business', async (_event, id: number) => businessesService.deleteBusiness(db, id));

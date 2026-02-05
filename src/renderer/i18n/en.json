@@ -247,6 +247,7 @@
     "databaseIsBusy": "Cannot recreate database file because it is currently in use",
     "databaseLocked": "Database is locked.",
     "datatypeMismatch": "Record has a datatype mismatch.",
+    "dbNotInitialized": "Database is not initialized",
     "diskIOError": "Disk I/O error occurred.",
     "failedNormalizeImportedRows": "Failed to process the following rows: {{rowNumber}}. Please check the data format.",
     "failedToLoad": "Failed to load saved DB list",
@@ -261,6 +262,7 @@
     "invalidFile": "Selected file is invalid",
     "invalidLogo": "Invalid logo string",
     "noWorksheetFound": "No worksheet found",
+    "rateLimiter": "Too many requests. Please slow down",
     "sqlSyntaxError": "SQL syntax error.",
     "unknownError": "Unknown database error",
     "unsupportedImage": "Unsupported image type"

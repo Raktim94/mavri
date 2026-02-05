@@ -1,8 +1,8 @@
 import { ipcMain } from 'electron';
-import type { Database } from 'sqlite3';
 import * as settingsService from '../../shared/services/settings';
+import type { DatabaseAdapter } from '../../shared/types/DatabaseAdapter';
 
-export const initSettingsHandlers = (db: Database) => {
+export const initSettingsHandlers = (db: DatabaseAdapter) => {
   ipcMain.handle('get-all-settings', async () => settingsService.getAllSettings(db));
   ipcMain.handle(
     'update-settings',

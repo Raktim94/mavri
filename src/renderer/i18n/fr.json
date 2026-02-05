@@ -247,6 +247,7 @@
     "databaseIsBusy": "Impossible de recréer le fichier car il est actuellement utilisé.",
     "databaseLocked": "La base de données est verrouillée.",
     "datatypeMismatch": "Le type de données de l’enregistrement ne correspond pas.",
+    "dbNotInitialized": "La base de données n'est pas initialisée",
     "diskIOError": "Erreur d’E/S disque.",
     "failedNormalizeImportedRows": "Échec du traitement des lignes suivantes : {{rowNumber}}. Veuillez vérifier le format des données.",
     "failedToLoad": "Échec du chargement de la liste des bases.",
@@ -261,6 +262,7 @@
     "invalidFile": "Fichier sélectionné invalide",
     "invalidLogo": "Chaîne de logo invalide",
     "noWorksheetFound": "Aucune feuille trouvée",
+    "rateLimiter": "Trop de requêtes. Veuillez ralentir",
     "sqlSyntaxError": "Erreur de syntaxe SQL.",
     "unknownError": "Erreur de base de données inconnue",
     "unsupportedImage": "Type d’image non pris en charge"

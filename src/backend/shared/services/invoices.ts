@@ -1,5 +1,5 @@
-import type { Database } from 'sqlite3';
 import type { Response } from '../../shared/types/response';
+import type { DatabaseAdapter } from '../types/DatabaseAdapter';
 import type { EntityWithId } from '../types/entityWithId';
 import type {
   Invoice,
@@ -14,8 +14,8 @@ import type {
   InvoiceStyleProfileSnapshots
 } from '../types/invoice';
 import type { FilterData } from '../types/invoiceFilter';
-import { getAllRows, getFirstRow, runDb } from '../utils/dbFuntions';
-import { mapSqliteError } from '../utils/errorFunctions';
+import { getDefaultValue } from '../utils/dbHelper';
+import { mapDatabaseError } from '../utils/errorFunctions';
 import { getWhereClauseFromFilters } from '../utils/filterFunctions';
 
 type GetInvoicesOptions = {
@@ -25,21 +25,22 @@ type GetInvoicesOptions = {
 };
 
 const handleEntity =
-  <T extends EntityWithId>(db: Database, table: string, fields: readonly (keyof T)[]) =>
+  <T extends EntityWithId>(db: DatabaseAdapter, table: string, fields: readonly (keyof T)[]) =>
   async (data: T, isUpdate = false): Promise<Response<number>> => {
     const params = fields.map(key => (data[key] ?? null) as string | number | null);
 
     try {
-      let lastID = -1;
+      let lastID: number = -1;
 
       if (isUpdate) {
-        const setClause = fields.map(f => `${String(f)} = ?`).join(', ') + `, updatedAt = datetime('now')`;
+        const setClause =
+          fields.map(f => `"${String(f)}" = ?`).join(', ') +
+          `, "updatedAt" = ${getDefaultValue("(datetime('now'))", db.type)}`;
 
-        lastID = await runDb(db, `UPDATE ${table} SET ${setClause} WHERE id = ?`, [...params, data.id ?? -1]);
+        lastID = await db.run(`UPDATE ${table} SET ${setClause} WHERE "id" = ?`, [...params, data.id ?? -1]);
       } else {
-        lastID = await runDb(
-          db,
-          `INSERT INTO ${table} (${fields.join(',')})
+        lastID = await db.run(
+          `INSERT INTO ${table} (${fields.map(f => `"${String(f)}"`).join(',')})
            VALUES (${fields.map(() => '?').join(',')})`,
           params
         );
@@ -47,7 +48,7 @@ const handleEntity =
 
       return { success: true, data: lastID };
     } catch (error) {
-      return { success: false, ...mapSqliteError(error) };
+      return { success: false, ...mapDatabaseError(error, db.type) };
     }
   };
 const invoiceCurrencySnapshotsFields: (keyof InvoiceCurrencySnapshots)[] = [
@@ -154,35 +155,35 @@ const itemsSnapshotFields: (keyof InvoiceItemSnapshots)[] = [
   'unitName'
 ];
 
-const getInvoices = async (db: Database, options: GetInvoicesOptions) => {
+const getInvoices = async (db: DatabaseAdapter, options: GetInvoicesOptions) => {
   const { id, type, filter } = options;
 
   const whereClause = filter
     ? getWhereClauseFromFilters({
         filters: filter,
-        businessNameSnapshotColumn: 'ibs.businessName',
-        clientNameSnapshotColumn: 'ics.clientName',
-        archivedColumn: 'i.isArchived',
-        issuedAtColumn: 'i.issuedAt',
-        statusColumn: 'i.status'
+        businessNameSnapshotColumn: 'ibs."businessName"',
+        clientNameSnapshotColumn: 'ics."clientName"',
+        archivedColumn: 'i."isArchived"',
+        issuedAtColumn: 'i."issuedAt"',
+        statusColumn: 'i."status"'
       })
     : '';
 
   const conditions: string[] = [];
-  if (id) conditions.push(`i.id = ${id}`);
-  if (type) conditions.push(`i.invoiceType = '${type}'`);
+  if (id) conditions.push(`i."id" = ${id}`);
+  if (type) conditions.push(`i."invoiceType" = '${type}'`);
   if (whereClause) conditions.push(whereClause);
   const whereSql = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
   const invoicesSql = `
-        SELECT i.*, c.format as currencyFormat
+        SELECT i.*, c."format" as "currencyFormat"
         FROM invoices i
-        INNER JOIN currencies as c on c.id = i.currencyId
-        INNER JOIN invoice_business_snapshots as ibs on ibs.parentInvoiceId = i.id
-        INNER JOIN invoice_client_snapshots as ics on ics.parentInvoiceId = i.id
+        INNER JOIN currencies as c on c."id" = i."currencyId"
+        INNER JOIN invoice_business_snapshots as ibs on ibs."parentInvoiceId" = i."id"
+        INNER JOIN invoice_client_snapshots as ics on ics."parentInvoiceId" = i."id"
         ${whereSql}
         ORDER BY i.createdAt DESC
       `;
-  const invoices = await getAllRows<Invoice>(db, invoicesSql);
+  const invoices = await db.all<Invoice>(invoicesSql);
 
   const invoiceIds = invoices.map(i => i.id) as number[];
   const placeholders = invoiceIds.map(() => '?').join(', ');
@@ -197,49 +198,35 @@ const getInvoices = async (db: Database, options: GetInvoicesOptions) => {
     invoiceCustomization,
     invoiceStyleProfileSnapshots
   ] = await Promise.all([
-    getAllRows<InvoicePayment>(
-      db,
-      `SELECT * FROM invoice_payments WHERE parentInvoiceId IN (${placeholders})`,
+    db.all<InvoicePayment>(`SELECT * FROM invoice_payments WHERE "parentInvoiceId" IN (${placeholders})`, invoiceIds),
+    db.all<InvoiceItem>(`SELECT * FROM invoice_items WHERE "parentInvoiceId" IN (${placeholders})`, invoiceIds),
+    db.all<InvoiceAttachment>(`SELECT * FROM attachments WHERE "parentInvoiceId" IN (${placeholders})`, invoiceIds),
+    db.all<InvoiceBusinessSnapshots>(
+      `SELECT * FROM invoice_business_snapshots WHERE "parentInvoiceId" IN (${placeholders})`,
       invoiceIds
     ),
-    getAllRows<InvoiceItem>(db, `SELECT * FROM invoice_items WHERE parentInvoiceId IN (${placeholders})`, invoiceIds),
-    getAllRows<InvoiceAttachment>(
-      db,
-      `SELECT * FROM attachments WHERE parentInvoiceId IN (${placeholders})`,
+    db.all<InvoiceClientSnapshots>(
+      `SELECT * FROM invoice_client_snapshots WHERE "parentInvoiceId" IN (${placeholders})`,
       invoiceIds
     ),
-    getAllRows<InvoiceBusinessSnapshots>(
-      db,
-      `SELECT * FROM invoice_business_snapshots WHERE parentInvoiceId IN (${placeholders})`,
+    db.all<InvoiceCurrencySnapshots>(
+      `SELECT * FROM invoice_currency_snapshots WHERE "parentInvoiceId" IN (${placeholders})`,
       invoiceIds
     ),
-    getAllRows<InvoiceClientSnapshots>(
-      db,
-      `SELECT * FROM invoice_client_snapshots WHERE parentInvoiceId IN (${placeholders})`,
+    db.all<InvoiceCustomization>(
+      `SELECT * FROM invoice_customizations WHERE "parentInvoiceId" IN (${placeholders})`,
       invoiceIds
     ),
-    getAllRows<InvoiceCurrencySnapshots>(
-      db,
-      `SELECT * FROM invoice_currency_snapshots WHERE parentInvoiceId IN (${placeholders})`,
-      invoiceIds
-    ),
-    getAllRows<InvoiceCustomization>(
-      db,
-      `SELECT * FROM invoice_customizations WHERE parentInvoiceId IN (${placeholders})`,
-      invoiceIds
-    ),
-    getAllRows<InvoiceStyleProfileSnapshots>(
-      db,
-      `SELECT * FROM invoice_style_profile_snapshots WHERE parentInvoiceId IN (${placeholders})`,
+    db.all<InvoiceStyleProfileSnapshots>(
+      `SELECT * FROM invoice_style_profile_snapshots WHERE "parentInvoiceId" IN (${placeholders})`,
       invoiceIds
     )
   ]);
 
   const invoiceItemIds = invoiceItems.map(i => i.id) as number[];
   const placeholdersItems = invoiceItemIds.map(() => '?').join(', ');
-  const invoiceItemSnapshots = await getAllRows<InvoiceItemSnapshots>(
-    db,
-    `SELECT sps.* FROM invoice_item_snaphots as sps WHERE parentInvoiceItemId IN (${placeholdersItems})`,
+  const invoiceItemSnapshots = await db.all<InvoiceItemSnapshots>(
+    `SELECT sps.* FROM invoice_item_snapshots as sps WHERE "parentInvoiceItemId" IN (${placeholdersItems})`,
     invoiceItemIds
   );
 
@@ -264,21 +251,21 @@ const getInvoices = async (db: Database, options: GetInvoicesOptions) => {
   }));
 };
 
-export const getAllInvoices = async (db: Database, type?: 'invoice' | 'quotation', filter?: FilterData[]) => {
+export const getAllInvoices = async (db: DatabaseAdapter, type?: 'invoice' | 'quotation', filter?: FilterData[]) => {
   const finalInvoices = await getInvoices(db, { type, filter });
   return { success: true, data: finalInvoices };
 };
 
-export const deleteInvoice = async (db: Database, id: number) => {
+export const deleteInvoice = async (db: DatabaseAdapter, id: number) => {
   try {
-    await runDb(db, 'DELETE FROM invoices WHERE id = ?;', [id]);
+    await db.run('DELETE FROM invoices WHERE "id" = ?;', [id]);
     return { success: true };
   } catch (error) {
-    return { success: false, ...mapSqliteError(error) };
+    return { success: false, ...mapDatabaseError(error, db.type) };
   }
 };
 
-export const addInvoice = async (db: Database, data: Invoice) => {
+export const addInvoice = async (db: DatabaseAdapter, data: Invoice) => {
   const handleInvoice = handleEntity<Invoice>(db, 'invoices', invoiceFields);
   const handleInvoiceBusinessSnapshots = handleEntity<InvoiceBusinessSnapshots>(
     db,
@@ -307,7 +294,7 @@ export const addInvoice = async (db: Database, data: Invoice) => {
   );
   const handleInvoiceItemSnapshots = handleEntity<InvoiceItemSnapshots>(
     db,
-    'invoice_item_snaphots',
+    'invoice_item_snapshots',
     itemsSnapshotFields
   );
   const handleInvoicePayments = handleEntity<InvoicePayment>(db, 'invoice_payments', paymentsFields);
@@ -315,12 +302,16 @@ export const addInvoice = async (db: Database, data: Invoice) => {
   const handleAttachments = handleEntity<InvoiceAttachment>(db, 'attachments', attachmentFields);
 
   try {
-    await runDb(db, 'BEGIN TRANSACTION');
+    await db.run('BEGIN');
 
     const result = await handleInvoice(data);
 
     if (!result.success || !result.data) {
-      await runDb(db, 'ROLLBACK');
+      try {
+        await db.run('ROLLBACK');
+      } catch {
+        throw new Error(`ROLLBACK failed`);
+      }
       return { success: false, key: result.key };
     }
 
@@ -331,7 +322,11 @@ export const addInvoice = async (db: Database, data: Invoice) => {
         parentInvoiceId: newId
       });
       if (!ibs.success) {
-        await runDb(db, 'ROLLBACK');
+        try {
+          await db.run('ROLLBACK');
+        } catch {
+          throw new Error(`ROLLBACK failed`);
+        }
         return { success: false, key: ibs.key, message: ibs.message };
       }
     }
@@ -341,7 +336,11 @@ export const addInvoice = async (db: Database, data: Invoice) => {
         parentInvoiceId: newId
       });
       if (!ibs.success) {
-        await runDb(db, 'ROLLBACK');
+        try {
+          await db.run('ROLLBACK');
+        } catch {
+          throw new Error(`ROLLBACK failed`);
+        }
         return { success: false, key: ibs.key, message: ibs.message };
       }
     }
@@ -351,7 +350,11 @@ export const addInvoice = async (db: Database, data: Invoice) => {
         parentInvoiceId: newId
       });
       if (!ibs.success) {
-        await runDb(db, 'ROLLBACK');
+        try {
+          await db.run('ROLLBACK');
+        } catch {
+          throw new Error(`ROLLBACK failed`);
+        }
         return { success: false, key: ibs.key, message: ibs.message };
       }
     }
@@ -361,7 +364,11 @@ export const addInvoice = async (db: Database, data: Invoice) => {
         parentInvoiceId: newId
       });
       if (!ibs.success) {
-        await runDb(db, 'ROLLBACK');
+        try {
+          await db.run('ROLLBACK');
+        } catch {
+          throw new Error(`ROLLBACK failed`);
+        }
         return { success: false, key: ibs.key, message: ibs.message };
       }
     }
@@ -371,7 +378,11 @@ export const addInvoice = async (db: Database, data: Invoice) => {
         parentInvoiceId: newId
       });
       if (!ibs.success) {
-        await runDb(db, 'ROLLBACK');
+        try {
+          await db.run('ROLLBACK');
+        } catch {
+          throw new Error(`ROLLBACK failed`);
+        }
         return { success: false, key: ibs.key, message: ibs.message };
       }
     }
@@ -381,7 +392,11 @@ export const addInvoice = async (db: Database, data: Invoice) => {
     for (const item of data.invoiceItems ?? []) {
       const r = await handleInvoiceItems({ ...item, parentInvoiceId: newId });
       if (!r.success || !result.data) {
-        await runDb(db, 'ROLLBACK');
+        try {
+          await db.run('ROLLBACK');
+        } catch {
+          throw new Error(`ROLLBACK failed`);
+        }
         failure = r;
         break;
       }
@@ -392,7 +407,11 @@ export const addInvoice = async (db: Database, data: Invoice) => {
           parentInvoiceItemId: newItemId
         });
         if (!ibs.success) {
-          await runDb(db, 'ROLLBACK');
+          try {
+            await db.run('ROLLBACK');
+          } catch {
+            throw new Error(`ROLLBACK failed`);
+          }
           return { success: false, key: ibs.key, message: ibs.message };
         }
       }
@@ -405,7 +424,11 @@ export const addInvoice = async (db: Database, data: Invoice) => {
     for (const payment of data.invoicePayments ?? []) {
       const r = await handleInvoicePayments({ ...payment, parentInvoiceId: newId });
       if (!r.success) {
-        await runDb(db, 'ROLLBACK');
+        try {
+          await db.run('ROLLBACK');
+        } catch {
+          throw new Error(`ROLLBACK failed`);
+        }
         failure = r;
         break;
       }
@@ -418,7 +441,11 @@ export const addInvoice = async (db: Database, data: Invoice) => {
     for (const attachment of data.invoiceAttachments ?? []) {
       const r = await handleAttachments({ ...attachment, parentInvoiceId: newId });
       if (!r.success) {
-        await runDb(db, 'ROLLBACK');
+        try {
+          await db.run('ROLLBACK');
+        } catch {
+          throw new Error(`ROLLBACK failed`);
+        }
         failure = r;
         break;
       }
@@ -430,15 +457,19 @@ export const addInvoice = async (db: Database, data: Invoice) => {
 
     const newResult = await getInvoices(db, { id: newId });
 
-    await runDb(db, 'COMMIT');
+    await db.run('COMMIT');
     return { success: true, data: newResult.length > 0 ? newResult[0] : newResult };
   } catch (error) {
-    await runDb(db, 'ROLLBACK');
-    return { success: false, ...mapSqliteError(error) };
+    try {
+      await db.run('ROLLBACK');
+    } catch {
+      throw new Error(`ROLLBACK failed`);
+    }
+    return { success: false, ...mapDatabaseError(error, db.type) };
   }
 };
 
-export const updateInvoice = async (db: Database, data: Invoice) => {
+export const updateInvoice = async (db: DatabaseAdapter, data: Invoice) => {
   const handleInvoice = handleEntity<Invoice>(db, 'invoices', invoiceFields);
   const handleInvoicePayments = handleEntity<InvoicePayment>(db, 'invoice_payments', paymentsFields);
   const handleAttachments = handleEntity<InvoiceAttachment>(db, 'attachments', attachmentFields);
@@ -469,11 +500,15 @@ export const updateInvoice = async (db: Database, data: Invoice) => {
   );
 
   try {
-    await runDb(db, 'BEGIN TRANSACTION');
+    await db.run('BEGIN');
 
     const result = await handleInvoice(data, true);
     if (!result.success || !data.id) {
-      await runDb(db, 'ROLLBACK');
+      try {
+        await db.run('ROLLBACK');
+      } catch {
+        throw new Error(`ROLLBACK failed`);
+      }
       return { success: false, key: result.key };
     }
 
@@ -486,7 +521,11 @@ export const updateInvoice = async (db: Database, data: Invoice) => {
         true
       );
       if (!ibs.success) {
-        await runDb(db, 'ROLLBACK');
+        try {
+          await db.run('ROLLBACK');
+        } catch {
+          throw new Error(`ROLLBACK failed`);
+        }
         return { success: false, key: ibs.key, message: ibs.message };
       }
     }
@@ -499,7 +538,11 @@ export const updateInvoice = async (db: Database, data: Invoice) => {
         true
       );
       if (!ibs.success) {
-        await runDb(db, 'ROLLBACK');
+        try {
+          await db.run('ROLLBACK');
+        } catch {
+          throw new Error(`ROLLBACK failed`);
+        }
         return { success: false, key: ibs.key, message: ibs.message };
       }
     }
@@ -512,7 +555,11 @@ export const updateInvoice = async (db: Database, data: Invoice) => {
         true
       );
       if (!ibs.success) {
-        await runDb(db, 'ROLLBACK');
+        try {
+          await db.run('ROLLBACK');
+        } catch {
+          throw new Error(`ROLLBACK failed`);
+        }
         return { success: false, key: ibs.key, message: ibs.message };
       }
     }
@@ -525,7 +572,11 @@ export const updateInvoice = async (db: Database, data: Invoice) => {
         true
       );
       if (!ibs.success) {
-        await runDb(db, 'ROLLBACK');
+        try {
+          await db.run('ROLLBACK');
+        } catch {
+          throw new Error(`ROLLBACK failed`);
+        }
         return { success: false, key: ibs.key, message: ibs.message };
       }
     }
@@ -538,17 +589,20 @@ export const updateInvoice = async (db: Database, data: Invoice) => {
         true
       );
       if (!ibs.success) {
-        await runDb(db, 'ROLLBACK');
+        try {
+          await db.run('ROLLBACK');
+        } catch {
+          throw new Error(`ROLLBACK failed`);
+        }
         return { success: false, key: ibs.key, message: ibs.message };
       }
     }
 
-    await runDb(db, 'DELETE FROM invoice_items WHERE parentInvoiceId = ?;', [data.id]);
+    await db.run('DELETE FROM invoice_items WHERE "parentInvoiceId" = ?;', [data.id]);
 
     for (const item of data.invoiceItems ?? []) {
-      const newItemID = await runDb(
-        db,
-        `INSERT INTO invoice_items (parentInvoiceId, itemId, quantity, taxRate, taxType, customField) VALUES (?, ?, ?, ?, ?, ?)`,
+      const newItemID: number = await db.run(
+        `INSERT INTO invoice_items ("parentInvoiceId", "itemId", "quantity", "taxRate", "taxType", "customField") VALUES (?, ?, ?, ?, ?, ?)`,
         [
           data.id,
           item.itemId,
@@ -558,9 +612,9 @@ export const updateInvoice = async (db: Database, data: Invoice) => {
           item.customField ? JSON.stringify(item.customField) : null
         ]
       );
-      await runDb(
-        db,
-        `INSERT INTO invoice_item_snaphots (parentInvoiceItemId, itemName, unitPriceCents, unitName) VALUES (?, ?, ?, ?)`,
+
+      await db.run(
+        `INSERT INTO invoice_item_snapshots ("parentInvoiceItemId", "itemName", "unitPriceCents", "unitName") VALUES (?, ?, ?, ?)`,
         [
           newItemID,
           item.invoiceItemSnapshot.itemName,
@@ -572,24 +626,27 @@ export const updateInvoice = async (db: Database, data: Invoice) => {
 
     const ids = (data.invoicePayments ?? []).map(p => p.id).filter(Boolean);
     if (ids.length > 0) {
-      await runDb(
-        db,
-        `DELETE FROM invoice_payments WHERE parentInvoiceId = ? AND id NOT IN (${ids.map(() => '?').join(',')})`,
+      await db.run(
+        `DELETE FROM invoice_payments WHERE "parentInvoiceId" = ? AND "id" NOT IN (${ids.map(() => '?').join(',')})`,
         [data.id, ...ids]
       );
     } else {
-      await runDb(db, `DELETE FROM invoice_payments WHERE parentInvoiceId = ?`, [data.id]);
+      await db.run(`DELETE FROM invoice_payments WHERE "parentInvoiceId" = ?`, [data.id]);
     }
 
     let failure = undefined;
 
     for (const payment of data.invoicePayments ?? []) {
       if (payment.id) {
-        const existing = await getFirstRow(db, `SELECT id FROM invoice_payments WHERE id = ?`, [payment.id]);
+        const existing = await db.get(`SELECT "id" FROM invoice_payments WHERE "id" = ?`, [payment.id]);
         if (existing) {
           const r = await handleInvoicePayments({ ...payment, parentInvoiceId: data.id }, true);
           if (!r.success) {
-            await runDb(db, 'ROLLBACK');
+            try {
+              await db.run('ROLLBACK');
+            } catch {
+              throw new Error(`ROLLBACK failed`);
+            }
             failure = r;
             break;
           }
@@ -599,7 +656,11 @@ export const updateInvoice = async (db: Database, data: Invoice) => {
 
       const r = await handleInvoicePayments({ ...payment, parentInvoiceId: data.id });
       if (!r.success) {
-        await runDb(db, 'ROLLBACK');
+        try {
+          await db.run('ROLLBACK');
+        } catch {
+          throw new Error(`ROLLBACK failed`);
+        }
         failure = r;
         break;
       }
@@ -609,11 +670,15 @@ export const updateInvoice = async (db: Database, data: Invoice) => {
       return { success: false, key: failure.key, message: failure.message };
     }
 
-    await runDb(db, 'DELETE FROM attachments WHERE parentInvoiceId = ?;', [data.id]);
+    await db.run('DELETE FROM attachments WHERE "parentInvoiceId" = ?;', [data.id]);
     for (const attachment of data.invoiceAttachments ?? []) {
       const r = await handleAttachments({ ...attachment, parentInvoiceId: data.id });
       if (!r.success) {
-        await runDb(db, 'ROLLBACK');
+        try {
+          await db.run('ROLLBACK');
+        } catch {
+          throw new Error(`ROLLBACK failed`);
+        }
         failure = r;
         break;
       }
@@ -625,18 +690,28 @@ export const updateInvoice = async (db: Database, data: Invoice) => {
 
     const newResult = await getInvoices(db, { id: data.id });
 
-    await runDb(db, 'COMMIT');
+    await db.run('COMMIT');
     return { success: true, data: newResult.length > 0 ? newResult[0] : newResult };
   } catch (error) {
-    await runDb(db, 'ROLLBACK');
-    return { success: false, ...mapSqliteError(error) };
+    try {
+      await db.run('ROLLBACK');
+    } catch {
+      throw new Error(`ROLLBACK failed`);
+    }
+    return { success: false, ...mapDatabaseError(error, db.type) };
   }
 };
 
-export const duplicateInvoice = async (db: Database, invoiceId: number, invoiceType: 'quotation' | 'invoice') => {
+export const duplicateInvoice = async (
+  db: DatabaseAdapter,
+  invoiceId: number,
+  invoiceType: 'quotation' | 'invoice'
+) => {
   try {
-    const original = await getFirstRow(db, 'SELECT * FROM invoices WHERE id = ?;', [invoiceId]);
-    const lastRow = await getFirstRow(db, 'SELECT MAX(id) AS id FROM invoices;');
+    await db.run('BEGIN');
+
+    const original = await db.get('SELECT * FROM invoices WHERE "id" = ?;', [invoiceId]);
+    const lastRow = await db.get('SELECT MAX("id") AS "id" FROM invoices;');
 
     if (!original || !lastRow) return { success: false };
 
@@ -646,43 +721,43 @@ export const duplicateInvoice = async (db: Database, invoiceId: number, invoiceT
     if (original.invoiceType === 'quotation' && invoiceType === 'invoice') {
       convertedFromQuotationId = original.id as number;
       status = 'unpaid';
-      await runDb(db, `UPDATE invoices SET status = 'closed' WHERE id = ?;`, [original.id as number]);
+      await db.run(`UPDATE invoices SET "status" = 'closed' WHERE "id" = ?;`, [original.id as number]);
     }
 
     const newInvoiceNumber = original.invoiceNumber + `-COPY${maxIDRow}`;
     const insertInvoiceSQL = `
         INSERT INTO invoices (
-          invoiceType, convertedFromQuotationId, businessId, clientId, currencyId,
-          issuedAt, dueDate, invoiceNumber, isArchived, status, customerNotes,
-          thanksNotes, termsConditionNotes, discountName, language, 
-          discountType, discountAmountCents, discountPercent, shippingFeeCents,
-          invoicePrefix, invoiceSuffix, taxName, taxRate, taxType, signatureData,
-          signatureSize, signatureType, signatureName, styleProfilesId
+          "invoiceType", "convertedFromQuotationId", "businessId", "clientId", "currencyId",
+          "issuedAt", "dueDate", "invoiceNumber", "isArchived", "status", "customerNotes",
+          "thanksNotes", "termsConditionNotes", "discountName", "language", 
+          "discountType", "discountAmountCents", "discountPercent", "shippingFeeCents",
+          "invoicePrefix", "invoiceSuffix", "taxName", "taxRate", "taxType", "signatureData",
+          "signatureSize", "signatureType", "signatureName", "styleProfilesId"
         )
         SELECT
-          ?, ?, businessId, clientId, currencyId,
-          issuedAt, dueDate, ?, isArchived, ?, customerNotes,
-          thanksNotes, termsConditionNotes, discountName, language, 
-          discountType, discountAmountCents, discountPercent, shippingFeeCents,
-          invoicePrefix, invoiceSuffix, taxName, taxRate, taxType, signatureData,
-          signatureSize, signatureType, signatureName, styleProfilesId
-        FROM invoices WHERE id = ?;
+          ?, ?, "businessId", "clientId", "currencyId",
+          "issuedAt", "dueDate", ?, "isArchived", ?, customerNotes,
+          "thanksNotes", "termsConditionNotes", "discountName", "language", 
+          "discountType", "discountAmountCents", "discountPercent", "shippingFeeCents",
+          "invoicePrefix", "invoiceSuffix", "taxName", "taxRate", "taxType", "signatureData",
+          "signatureSize", "signatureType", "signatureName", "styleProfilesId"
+        FROM invoices WHERE "id" = ?;
       `;
 
-    const duplicatedRowID = await runDb(db, insertInvoiceSQL, [
+    let duplicatedRowID: number | void = await db.run(insertInvoiceSQL, [
       invoiceType,
       convertedFromQuotationId,
       newInvoiceNumber,
       status,
       invoiceId
     ]);
+    duplicatedRowID = typeof duplicatedRowID === 'number' ? duplicatedRowID : -1;
 
     const duplicateSnapshot = async (table: string, columns: string[]) => {
-      const columnList = columns.join(', ');
-      await runDb(
-        db,
-        `INSERT INTO ${table} (parentInvoiceId, ${columnList})
-         SELECT ?, ${columnList} FROM ${table} WHERE parentInvoiceId = ?;`,
+      const columnList = columns.map(f => `"${String(f)}" = ?`).join(', ');
+      await db.run(
+        `INSERT INTO ${table} ("parentInvoiceId", ${columnList})
+         SELECT ?, ${columnList} FROM ${table} WHERE "parentInvoiceId" = ?;`,
         [duplicatedRowID, invoiceId]
       );
     };
@@ -733,47 +808,50 @@ export const duplicateInvoice = async (db: Database, invoiceId: number, invoiceT
     ]);
     await duplicateSnapshot('invoice_style_profile_snapshots', ['styleProfileName']);
 
-    await runDb(
-      db,
-      `INSERT INTO invoice_items (parentInvoiceId, itemId, quantity, taxRate, taxType, customField)
-       SELECT ?, itemId,quantity, taxRate, taxType, customField
-       FROM invoice_items WHERE parentInvoiceId = ?;`,
+    await db.run(
+      `INSERT INTO invoice_items ("parentInvoiceId", "itemId", "quantity", "taxRate", "taxType", "customField")
+       SELECT ?, "itemId", "quantity", "taxRate", "taxType", "customField"
+       FROM invoice_items WHERE "parentInvoiceId" = ?;`,
       [duplicatedRowID, invoiceId]
     );
 
-    await runDb(
-      db,
-      `INSERT INTO invoice_item_snaphots (
-        parentInvoiceItemId,
-        itemName,
-        unitPriceCents,
-        unitName
+    await db.run(
+      `INSERT INTO invoice_item_snapshots (
+        "parentInvoiceItemId",
+        "itemName",
+        "unitPriceCents",
+        "unitName"
       )
       SELECT
-        newItems.id,
-        snap.itemName,
-        snap.unitPriceCents,
-        snap.unitName
-      FROM invoice_item_snaphots AS snap
-      JOIN invoice_items AS oldItems
-        ON snap.parentInvoiceItemId = oldItems.id
-      JOIN invoice_items AS newItems
-       ON newItems.itemId = oldItems.itemId
-       AND newItems.parentInvoiceId = ?
-      WHERE oldItems.parentInvoiceId = ?;`,
+        "newItems"."id",
+        snap."itemName",
+        snap."unitPriceCents",
+        snap."unitName"
+      FROM invoice_item_snapshots AS snap
+      JOIN invoice_items AS "oldItems"
+        ON snap.parentInvoiceItemId = "oldItems"."id"
+      JOIN invoice_items AS "newItems"
+       ON "newItems"."itemId" = "oldItems"."itemId"
+       AND "newItems"."parentInvoiceId" = ?
+      WHERE "oldItems"."parentInvoiceId" = ?;`,
       [duplicatedRowID, invoiceId]
     );
 
-    await runDb(
-      db,
-      `INSERT INTO attachments (parentInvoiceId, fileName, fileType, fileSize, data)
-       SELECT ?, fileName, fileType, fileSize, data FROM attachments WHERE parentInvoiceId = ?;`,
+    await db.run(
+      `INSERT INTO attachments ("parentInvoiceId", "fileName", "fileType", "fileSize", "data")
+       SELECT ?, "fileName", "fileType", "fileSize", "data" FROM attachments WHERE "parentInvoiceId" = ?;`,
       [duplicatedRowID, invoiceId]
     );
 
     const duplicated = await getInvoices(db, { id: duplicatedRowID });
+    await db.run('COMMIT');
     return { success: true, data: duplicated.length > 0 ? duplicated[0] : duplicated };
   } catch (error) {
-    return { success: false, ...mapSqliteError(error) };
+    try {
+      await db.run('ROLLBACK');
+    } catch {
+      throw new Error(`ROLLBACK failed`);
+    }
+    return { success: false, ...mapDatabaseError(error, db.type) };
   }
 };
