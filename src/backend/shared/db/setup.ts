@@ -23,6 +23,30 @@ const sanitizeDatabaseName = (database: string): string => {
   return trimmed;
 };
 
+export const testPostgresConnection = async (data?: PostgresConfig): Promise<void> => {
+  if (!data) throw new Error('Connection failed');
+
+  const { host, port, user, password, ssl } = data;
+
+  const client = new Client({
+    host,
+    port,
+    user,
+    password,
+    database: 'postgres',
+    ssl
+  });
+
+  try {
+    await client.connect();
+    await client.query('SELECT 1');
+  } catch {
+    throw new Error('Connection failed');
+  } finally {
+    await client.end().catch(() => {});
+  }
+};
+
 export const openPostgreSql = async (data: PostgresConfig): Promise<{ db: DatabaseAdapter }> => {
   const { host, port, user, password, database, ssl } = data;
   const safeDatabase = sanitizeDatabaseName(database);
@@ -47,7 +71,7 @@ export const openPostgreSql = async (data: PostgresConfig): Promise<{ db: Databa
     }
     await tempClient.end();
   } catch {
-    throw new Error('Database creation failed');
+    throw new Error('Database creation/connection failed');
   }
 
   const adapter = await createPostgresAdapter(connectionString);

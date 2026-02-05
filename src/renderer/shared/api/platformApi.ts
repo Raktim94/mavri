@@ -179,6 +179,7 @@ export const webApi = () => {
       mode?: DBInitType;
     }) => apiPost<{ success: boolean; message?: string }>('/api/databases', data),
     getDatabaseList: () => apiGet<Response<string[]>>('/api/databases'),
+    testConnection: (data: PostgresConfig) => apiPost<Response<unknown>>('/api/databases/test', data),
 
     getAllSettings: () => apiGet<Response<Settings>>('/api/settings'),
     updateSettings: (data: SettingsUpdate) => apiPut<Response<SettingsUpdate>>('/api/settings', data),

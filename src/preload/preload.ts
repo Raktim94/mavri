@@ -8,6 +8,7 @@ import type { CurrencyAdd, CurrencyUpdate } from '../renderer/shared/types/curre
 import type { FilterData } from '../renderer/shared/types/filter';
 import type { InvoiceAdd, InvoiceUpdate } from '../renderer/shared/types/invoice';
 import type { ItemAdd, ItemUpdate } from '../renderer/shared/types/item';
+import type { PostgresConfig } from '../renderer/shared/types/postgresConfig';
 import type { SettingsUpdate } from '../renderer/shared/types/settings';
 import type { StyleProfile, StyleProfileAdd, StyleProfileUpdate } from '../renderer/shared/types/styleProfiles';
 import type { UnitAdd, UnitUpdate } from '../renderer/shared/types/unit';
@@ -41,6 +42,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     return () => ipcRenderer.removeListener('update-downloaded', listener);
   },
 
+  testConnection: (data: PostgresConfig) => ipcRenderer.invoke('test-connection', data),
   selectDatabase: () => ipcRenderer.invoke('show-save-db-dialog'),
   openDatabase: () => ipcRenderer.invoke('show-open-db-dialog'),
   initializeDatabase: (data: { fullPath: string; mode?: DBInitType }) => ipcRenderer.invoke('initialize-db', data),

@@ -1,33 +1,33 @@
 import { Dialog, DialogContent, TextField } from '@mui/material';
 import { useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ModalAppBar } from '../shared/components/layout/modalAppBar/ModalAppBar';
-import { validators } from '../shared/utils/validatorFunctions';
+import { ModalAppBar } from '../../../shared/components/layout/modalAppBar/ModalAppBar';
+import { validators } from '../../../shared/utils/validatorFunctions';
 
 interface Props {
   isOpen: boolean;
   onCancel?: () => void;
   onSave?: (name: string) => void;
 }
-export const DBSetterComponent: FC<Props> = ({ isOpen, onCancel = () => {}, onSave = () => {} }) => {
+export const PasswordSetter: FC<Props> = ({ isOpen, onCancel = () => {}, onSave = () => {} }) => {
   const { t } = useTranslation();
   const [isFormValid, setIsFormValid] = useState(true);
-  const [name, setName] = useState<string>('');
-  const [nameError, setNameErrors] = useState(false);
+  const [password, setPassword] = useState<string>('');
+  const [passwordError, setPasswordErrors] = useState(false);
 
   useEffect(() => {
-    const valid = name.trim() !== '' && !nameError;
+    const valid = password.trim() !== '' && !passwordError;
 
     setIsFormValid(valid);
-  }, [name, nameError]);
+  }, [password, passwordError]);
 
   return (
     <Dialog open={isOpen} onClose={onCancel}>
       <ModalAppBar
-        title={t('common.addDB')}
+        title={t('common.setPassword')}
         description={t('common.fieldRequired')}
         isFormValid={isFormValid}
-        formData={name}
+        formData={password}
         onClose={onCancel}
         onSave={data => {
           onSave(data as string);
@@ -36,16 +36,17 @@ export const DBSetterComponent: FC<Props> = ({ isOpen, onCancel = () => {}, onSa
       <DialogContent sx={{ minWidth: '300px' }}>
         <TextField
           required={true}
-          label={t('common.name')}
-          value={name}
-          error={nameError}
-          helperText={nameError ? t('common.fieldRequired') : ''}
+          label={t('common.password')}
+          type="password"
+          value={password}
+          error={passwordError}
+          helperText={passwordError ? t('common.fieldRequired') : ''}
           onChange={e => {
-            setName(e.target.value);
+            setPassword(e.target.value);
             if (!validators.required((e ?? '').toString())) {
-              setNameErrors(true);
+              setPasswordErrors(true);
             } else {
-              setNameErrors(false);
+              setPasswordErrors(false);
             }
           }}
         />

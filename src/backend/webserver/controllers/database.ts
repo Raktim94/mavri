@@ -1,6 +1,7 @@
 import { type Express, type Request, type Response } from 'express';
 import fsPromise from 'fs/promises';
 import path from 'path';
+import { testPostgresConnection } from '../../shared/db/setup';
 import { DatabaseType } from '../../shared/enums/databaseType';
 import { DBInitType } from '../../shared/enums/dbInitType';
 import { APP_CONFIG } from '../config';
@@ -24,6 +25,16 @@ export const initDatabaseController = (app: Express) => {
         success: false,
         message: (err as Error).message
       });
+    }
+  });
+  app.post('/api/databases/test', async (req: Request, res: Response) => {
+    try {
+      const postgresConfig = req.body?.postgresConfig;
+
+      await testPostgresConnection(postgresConfig);
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ success: false, message: (err as Error).message });
     }
   });
   app.post('/api/databases', async (req: Request, res: Response) => {

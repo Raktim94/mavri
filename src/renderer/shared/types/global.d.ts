@@ -41,6 +41,7 @@ declare global {
         mode?: DBInitType;
       }) => Promise<Response<unknown>>;
       getDatabaseList: () => Promise<Response<string[]>>;
+      testConnection: (data: PostgresConfig) => Promise<Response<unknown>>;
 
       getAllSettings: () => Promise<Response<Settings>>;
       updateSettings: (data: SettingsUpdate) => Promise<Response<SettingsUpdate>>;

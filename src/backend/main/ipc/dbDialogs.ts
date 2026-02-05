@@ -1,5 +1,6 @@
 import { BrowserWindow, dialog, ipcMain } from 'electron';
 import { join } from 'path';
+import { testPostgresConnection } from '../../shared/db/setup';
 import { DatabaseType } from '../../shared/enums/databaseType';
 import { DBInitType } from '../../shared/enums/dbInitType';
 import type { PostgresConfig } from '../../shared/types/postgresConfig';
@@ -86,6 +87,14 @@ export const initDBDialogsHandlers = (dbName: string, mainWindow: BrowserWindow)
         filePath: Array.isArray(result.filePaths) && result.filePaths.length ? result.filePaths[0] : undefined
       }
     };
+  });
+  ipcMain.handle('test-connection', async (_event, postgresConfig?: PostgresConfig) => {
+    try {
+      await testPostgresConnection(postgresConfig);
+      return { success: true };
+    } catch (error) {
+      return { success: false, ...mapDatabaseError(error, DatabaseType.postgre) };
+    }
   });
   ipcMain.handle(
     'initialize-db',

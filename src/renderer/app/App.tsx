@@ -9,7 +9,7 @@ import type { Settings } from '../shared/types/settings';
 import { useAppDispatch, useAppSelector } from '../state/configureStore';
 import { addToast, removeToast, selectIsLoading, selectToasts, setSettings } from '../state/pageSlice';
 import { AppLayout } from './AppLayout';
-import { DatabaseChooser } from './DatabaseChooser';
+import { DatabaseChooser } from './DatabaseChooser/DatabaseChooser';
 
 export const App: FC = () => {
   const [dbReady, setDbReady] = useState<boolean>(false);
