@@ -13,12 +13,11 @@ export const up = async (db: DatabaseAdapter) => {
     }
     if (db.type === DatabaseType.sqlite) {
       await db.run('PRAGMA foreign_keys = OFF;');
-    }
 
-    await db.run('DROP TABLE IF EXISTS invoice_items_new;');
+      await db.run('DROP TABLE IF EXISTS invoice_items_new;');
 
-    await db.run(
-      `
+      await db.run(
+        `
       CREATE TABLE invoice_items_new (
         "id" ${getColumnType('INTEGER PRIMARY KEY AUTOINCREMENT', db.type)},
         "parentInvoiceId" INTEGER NOT NULL,
@@ -35,10 +34,10 @@ export const up = async (db: DatabaseAdapter) => {
         FOREIGN KEY ("itemId") REFERENCES items("id")
       );
     `
-    );
+      );
 
-    await db.run(
-      `
+      await db.run(
+        `
       INSERT INTO invoice_items_new (
         "id", "parentInvoiceId", "itemId", "itemNameSnapshot", "unitPriceCentsSnapshot", 
         "unitNameSnapshot", "quantity", "taxRate", "taxType", "createdAt", "updatedAt"
@@ -48,16 +47,21 @@ export const up = async (db: DatabaseAdapter) => {
         "unitNameSnapshot", CAST("quantity" AS TEXT), "taxRate", "taxType", "createdAt", "updatedAt"
       FROM invoice_items;
     `
-    );
+      );
 
-    await db.run('DROP TABLE invoice_items;');
-    await db.run('ALTER TABLE invoice_items_new RENAME TO invoice_items;');
+      await db.run('DROP TABLE invoice_items;');
+      await db.run('ALTER TABLE invoice_items_new RENAME TO invoice_items;');
 
-    await db.run(`CREATE INDEX IF NOT EXISTS idx_invoice_items_invoiceId ON invoice_items("parentInvoiceId")`);
-    await db.run(`CREATE INDEX IF NOT EXISTS idx_invoice_items_itemId ON invoice_items("itemId")`);
+      await db.run(`CREATE INDEX IF NOT EXISTS idx_invoice_items_invoiceId ON invoice_items("parentInvoiceId")`);
+      await db.run(`CREATE INDEX IF NOT EXISTS idx_invoice_items_itemId ON invoice_items("itemId")`);
 
-    if (db.type === DatabaseType.sqlite) {
       await db.run('PRAGMA foreign_keys = ON;');
+    }
+    if (db.type === DatabaseType.postgre) {
+      await db.run(`
+        ALTER TABLE invoice_items
+        ALTER COLUMN quantity TYPE TEXT USING quantity::text;
+      `);
     }
   } catch (error) {
     if (db.type === DatabaseType.sqlite) {

@@ -16,8 +16,6 @@ export const up = async (db: DatabaseAdapter) => {
       await db.run('PRAGMA foreign_keys = OFF;');
     }
 
-    await db.run('DROP TABLE IF EXISTS invoices_new;');
-
     await db.run(
       `
       ALTER TABLE settings
@@ -55,8 +53,11 @@ export const up = async (db: DatabaseAdapter) => {
 
     await db.run(`CREATE INDEX IF NOT EXISTS idx_style_profiles_id ON style_profiles("id")`);
 
-    await db.run(
-      `
+    if (db.type === DatabaseType.sqlite) {
+      await db.run('DROP TABLE IF EXISTS invoices_new;');
+
+      await db.run(
+        `
       CREATE TABLE IF NOT EXISTS invoices_new (
         "id" ${getColumnType('INTEGER PRIMARY KEY AUTOINCREMENT', db.type)},
         "invoiceType" TEXT NOT NULL CHECK("invoiceType" IN ('quotation','invoice')),
@@ -146,10 +147,10 @@ export const up = async (db: DatabaseAdapter) => {
         CHECK("convertedFromQuotationId" IS NULL OR "convertedFromQuotationId" != "id")
       );
     `
-    );
+      );
 
-    await db.run(
-      `
+      await db.run(
+        `
       INSERT INTO invoices_new (
         "id",
         "invoiceType",
@@ -291,24 +292,31 @@ export const up = async (db: DatabaseAdapter) => {
         "signatureSize"
       FROM invoices;
     `
-    );
+      );
 
-    await db.run('DROP TABLE invoices;');
-    await db.run('ALTER TABLE invoices_new RENAME TO invoices;');
-    await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_clientId ON invoices("clientId")`);
-    await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_businessId ON invoices("businessId")`);
-    await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_business_client ON invoices("businessId", "clientId")`);
-    await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_type ON invoices("invoiceType")`);
-    await db.run(
-      `CREATE INDEX IF NOT EXISTS idx_invoices_convertedFromQuotationId ON invoices("convertedFromQuotationId")`
-    );
-    await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_invoiceNumber ON invoices("invoiceNumber")`);
-    await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_status ON invoices("status")`);
-    await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_issuedAt ON invoices("issuedAt")`);
-    await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_styleProfilesId ON invoices("styleProfilesId")`);
+      await db.run('DROP TABLE invoices;');
+      await db.run('ALTER TABLE invoices_new RENAME TO invoices;');
+      await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_clientId ON invoices("clientId")`);
+      await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_businessId ON invoices("businessId")`);
+      await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_business_client ON invoices("businessId", "clientId")`);
+      await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_type ON invoices("invoiceType")`);
+      await db.run(
+        `CREATE INDEX IF NOT EXISTS idx_invoices_convertedFromQuotationId ON invoices("convertedFromQuotationId")`
+      );
+      await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_invoiceNumber ON invoices("invoiceNumber")`);
+      await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_status ON invoices("status")`);
+      await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_issuedAt ON invoices("issuedAt")`);
+      await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_styleProfilesId ON invoices("styleProfilesId")`);
 
-    if (db.type === DatabaseType.sqlite) {
       await db.run('PRAGMA foreign_keys = ON;');
+    }
+
+    if (db.type === DatabaseType.postgre) {
+      await db.run(`
+        ALTER TABLE invoices
+        ADD COLUMN IF NOT EXISTS "styleProfilesId" INTEGER,
+        ADD COLUMN IF NOT EXISTS "styleProfileNameSnapshot" TEXT;
+      `);
     }
   } catch (error) {
     if (db.type === DatabaseType.sqlite) {

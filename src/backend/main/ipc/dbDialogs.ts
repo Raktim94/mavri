@@ -1,6 +1,6 @@
 import { BrowserWindow, dialog, ipcMain } from 'electron';
 import { join } from 'path';
-import type { DatabaseType } from '../../shared/enums/databaseType';
+import { DatabaseType } from '../../shared/enums/databaseType';
 import { DBInitType } from '../../shared/enums/dbInitType';
 import type { PostgresConfig } from '../../shared/types/postgresConfig';
 import { mapDatabaseError } from '../../shared/utils/errorFunctions';

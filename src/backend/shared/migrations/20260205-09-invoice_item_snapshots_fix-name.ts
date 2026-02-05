@@ -10,12 +10,11 @@ export const up = async (db: DatabaseAdapter) => {
 
     if (db.type === DatabaseType.sqlite) {
       await db.run('PRAGMA foreign_keys = OFF;');
-    }
 
-    await db.run('DROP TABLE IF EXISTS invoice_item_snapshots;');
+      await db.run('DROP TABLE IF EXISTS invoice_item_snapshots;');
 
-    await db.run(
-      `
+      await db.run(
+        `
           CREATE TABLE IF NOT EXISTS invoice_item_snapshots (
             "id" ${getColumnType('INTEGER PRIMARY KEY AUTOINCREMENT', db.type)},
             "parentInvoiceItemId" INTEGER NOT NULL,
@@ -27,40 +26,43 @@ export const up = async (db: DatabaseAdapter) => {
             FOREIGN KEY("parentInvoiceItemId") REFERENCES invoice_items("id") ON DELETE CASCADE
           );
         `
-    );
+      );
 
-    await db.run(`
-      INSERT INTO invoice_item_snapshots (
-          "id",
-          "parentInvoiceItemId",
-          "itemName",
-          "unitPriceCents",
-          "unitName",
-          "createdAt",
-          "updatedAt"
-      )
-      SELECT
-          "id",
-          "parentInvoiceItemId",
-          "itemName",
-          "unitPriceCents",
-          "unitName",
-          "createdAt",
-          "updatedAt"
-      FROM invoice_item_snaphots;
-    `);
+      await db.run(`
+        INSERT INTO invoice_item_snapshots (
+            "id",
+            "parentInvoiceItemId",
+            "itemName",
+            "unitPriceCents",
+            "unitName",
+            "createdAt",
+            "updatedAt"
+        )
+        SELECT
+            "id",
+            "parentInvoiceItemId",
+            "itemName",
+            "unitPriceCents",
+            "unitName",
+            "createdAt",
+            "updatedAt"
+        FROM invoice_item_snaphots;
+      `);
 
-    await db.run('DROP TABLE invoice_item_snaphots;');
+      await db.run('DROP TABLE invoice_item_snaphots;');
 
-    await db.run(
-      `CREATE INDEX IF NOT EXISTS idx_invoice_item_snapshots_parentInvoiceItemId ON invoice_item_snapshots("parentInvoiceItemId")`
-    );
-    await db.run(
-      `CREATE INDEX IF NOT EXISTS idx_invoice_item_snapshots_itemName ON invoice_item_snapshots("itemName")`
-    );
+      await db.run(
+        `CREATE INDEX IF NOT EXISTS idx_invoice_item_snapshots_parentInvoiceItemId ON invoice_item_snapshots("parentInvoiceItemId")`
+      );
+      await db.run(
+        `CREATE INDEX IF NOT EXISTS idx_invoice_item_snapshots_itemName ON invoice_item_snapshots("itemName")`
+      );
 
-    if (db.type === DatabaseType.sqlite) {
       await db.run('PRAGMA foreign_keys = ON;');
+    }
+    if (db.type === DatabaseType.postgre) {
+      await db.run(`ALTER TABLE invoice_item_snaphots RENAME TO invoice_item_snapshots;`);
+      await db.run(`ALTER INDEX invoice_item_snaphots_pkey RENAME TO invoice_item_snapshots_new_pkey;`);
     }
   } catch (error) {
     if (db.type === DatabaseType.sqlite) {

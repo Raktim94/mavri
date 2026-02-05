@@ -12,12 +12,11 @@ export const up = async (db: DatabaseAdapter) => {
     }
     if (db.type === DatabaseType.sqlite) {
       await db.run('PRAGMA foreign_keys = OFF;');
-    }
 
-    await db.run('DROP TABLE IF EXISTS invoices_new;');
+      await db.run('DROP TABLE IF EXISTS invoices_new;');
 
-    await db.run(
-      `
+      await db.run(
+        `
       CREATE TABLE IF NOT EXISTS invoices_new (
         "id" ${getColumnType('INTEGER PRIMARY KEY AUTOINCREMENT', db.type)},
         "invoiceType" TEXT NOT NULL CHECK("invoiceType" IN ('quotation','invoice')),
@@ -100,10 +99,10 @@ export const up = async (db: DatabaseAdapter) => {
         CHECK ("convertedFromQuotationId" IS NULL OR "convertedFromQuotationId" != "id")
       );
     `
-    );
+      );
 
-    await db.run(
-      `
+      await db.run(
+        `
       INSERT INTO invoices_new (
         "id",
         "invoiceType",
@@ -212,8 +211,8 @@ export const up = async (db: DatabaseAdapter) => {
         "discountAmountCents",
         "discountPercent",
         "shippingFeeCents",
-        "invoicePrefix",
-        "invoiceSuffix",
+        "invoicePrefixSnapshot",
+        "invoiceSuffixSnapshot",
         "customizationColor",
         "customizationLogoSize",
         "customizationFontSizeSize",
@@ -235,24 +234,46 @@ export const up = async (db: DatabaseAdapter) => {
         "taxType"
       FROM invoices;
     `
-    );
+      );
 
-    await db.run('DROP TABLE invoices;');
-    await db.run('ALTER TABLE invoices_new RENAME TO invoices;');
+      await db.run('DROP TABLE invoices;');
+      await db.run('ALTER TABLE invoices_new RENAME TO invoices;');
 
-    await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_clientId ON invoices("clientId")`);
-    await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_businessId ON invoices("businessId")`);
-    await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_business_client ON invoices("businessId", "clientId")`);
-    await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_type ON invoices("invoiceType")`);
-    await db.run(
-      `CREATE INDEX IF NOT EXISTS idx_invoices_convertedFromQuotationId ON invoices("convertedFromQuotationId")`
-    );
-    await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_invoiceNumber ON invoices("invoiceNumber")`);
-    await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_status ON invoices("status")`);
-    await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_issuedAt ON invoices("issuedAt")`);
+      await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_clientId ON invoices("clientId")`);
+      await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_businessId ON invoices("businessId")`);
+      await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_business_client ON invoices("businessId", "clientId")`);
+      await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_type ON invoices("invoiceType")`);
+      await db.run(
+        `CREATE INDEX IF NOT EXISTS idx_invoices_convertedFromQuotationId ON invoices("convertedFromQuotationId")`
+      );
+      await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_invoiceNumber ON invoices("invoiceNumber")`);
+      await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_status ON invoices("status")`);
+      await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_issuedAt ON invoices("issuedAt")`);
 
-    if (db.type === DatabaseType.sqlite) {
       await db.run('PRAGMA foreign_keys = ON;');
+    }
+    if (db.type === DatabaseType.postgre) {
+      await db.run(`
+        ALTER TABLE invoices RENAME COLUMN "invoicePrefixSnapshot" TO "invoicePrefix";
+      `);
+      await db.run(`
+        ALTER TABLE invoices RENAME COLUMN "invoiceSuffixSnapshot" TO "invoiceSuffix";
+      `);
+      await db.run(`
+        ALTER TABLE invoices
+        ADD COLUMN "language" TEXT NOT NULL DEFAULT 'en';
+      `);
+      await db.run(`
+        ALTER TABLE invoices
+        ADD COLUMN "invoiceFullNumber" TEXT GENERATED ALWAYS AS (
+          COALESCE("invoicePrefix", '') || "invoiceNumber" || COALESCE("invoiceSuffix", '')
+        ) STORED;
+      `);
+      await db.run(`ALTER TABLE invoices DROP CONSTRAINT IF EXISTS "invoices_businessId_invoiceNumber_key";`);
+      await db.run(`
+        ALTER TABLE invoices
+        ADD CONSTRAINT "invoices_businessId_invoiceFullNumber_key" UNIQUE ("businessId", "invoiceFullNumber");
+      `);
     }
   } catch (error) {
     if (db.type === DatabaseType.sqlite) {

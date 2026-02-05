@@ -61,12 +61,13 @@ export const handleEntity =
         const setClause =
           fields.map(f => `"${String(f)}" = ?`).join(', ') +
           `, "updatedAt" = ${getDefaultValue("(datetime('now'))", db.type)}`;
-        lastID = await db.run(`UPDATE ${table} SET ${setClause} WHERE "id" = ?`, [...params, data.id ?? -1]);
+        lastID = await db.run(`UPDATE ${table} SET ${setClause} WHERE "id" = ?`, [...params, data.id ?? -1], true);
       } else {
         lastID = await db.run(
           `INSERT INTO ${table} (${fields.map(f => `"${String(f)}"`).join(',')})
            VALUES (${fields.map(() => '?').join(',')})`,
-          params
+          params,
+          true
         );
       }
 

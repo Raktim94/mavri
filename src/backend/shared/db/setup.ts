@@ -31,20 +31,24 @@ export const openPostgreSql = async (data: PostgresConfig): Promise<{ db: Databa
   const sslPart = ssl ? '?sslmode=require' : '';
   const connectionString = `postgresql://${authPart}@${host}:${port}/${safeDatabase}${sslPart}`;
 
-  const tempClient = new Client({
-    host,
-    port,
-    user,
-    password,
-    database: 'postgres',
-    ssl
-  });
-  await tempClient.connect();
-  const res = await tempClient.query('SELECT 1 FROM pg_database WHERE datname = $1', [safeDatabase]);
-  if (res.rowCount === 0) {
-    await tempClient.query(`CREATE DATABASE "${safeDatabase}"`);
+  try {
+    const tempClient = new Client({
+      host,
+      port,
+      user,
+      password,
+      database: 'postgres',
+      ssl
+    });
+    await tempClient.connect();
+    const res = await tempClient.query('SELECT 1 FROM pg_database WHERE datname = $1', [safeDatabase]);
+    if (res.rowCount === 0) {
+      await tempClient.query(`CREATE DATABASE "${safeDatabase}"`);
+    }
+    await tempClient.end();
+  } catch {
+    throw new Error('Database creation failed');
   }
-  await tempClient.end();
 
   const adapter = await createPostgresAdapter(connectionString);
 
@@ -97,11 +101,13 @@ export const openSqlLite = async (data: {
 };
 
 export const initSchema = async (db: DatabaseAdapter): Promise<void> => {
-  if (db.type === DatabaseType.sqlite) {
-    await db.run('PRAGMA foreign_keys = ON;');
-  }
-  await db.run(
-    `CREATE TABLE IF NOT EXISTS settings (
+  try {
+    if (db.type === DatabaseType.sqlite) {
+      await db.run('PRAGMA foreign_keys = ON;');
+    }
+    await db.run('BEGIN');
+    await db.run(
+      `CREATE TABLE IF NOT EXISTS settings (
       "id" ${getColumnType('INTEGER PRIMARY KEY AUTOINCREMENT', db.type)},
       "language" TEXT NOT NULL DEFAULT 'en',
       "amountFormat" TEXT NOT NULL DEFAULT 'en-US',
@@ -117,9 +123,9 @@ export const initSchema = async (db: DatabaseAdapter): Promise<void> => {
       "createdAt" ${getColumnType('DATETIME', db.type)} NOT NULL DEFAULT ${getDefaultValue("(datetime('now'))", db.type)},
       "updatedAt" ${getColumnType('DATETIME', db.type)} NOT NULL DEFAULT ${getDefaultValue("(datetime('now'))", db.type)}
     )`
-  );
-  await db.run(
-    `CREATE TABLE IF NOT EXISTS businesses (
+    );
+    await db.run(
+      `CREATE TABLE IF NOT EXISTS businesses (
       "id" ${getColumnType('INTEGER PRIMARY KEY AUTOINCREMENT', db.type)},
       "name" TEXT NOT NULL,
       "shortName" TEXT NOT NULL CHECK (length("shortName") <= 2),
@@ -139,9 +145,9 @@ export const initSchema = async (db: DatabaseAdapter): Promise<void> => {
       "createdAt" ${getColumnType('DATETIME', db.type)} NOT NULL DEFAULT ${getDefaultValue("(datetime('now'))", db.type)},
       "updatedAt" ${getColumnType('DATETIME', db.type)} NOT NULL DEFAULT ${getDefaultValue("(datetime('now'))", db.type)}
     );`
-  );
-  await db.run(
-    `CREATE TABLE IF NOT EXISTS clients (
+    );
+    await db.run(
+      `CREATE TABLE IF NOT EXISTS clients (
       "id" ${getColumnType('INTEGER PRIMARY KEY AUTOINCREMENT', db.type)},
       "name" TEXT NOT NULL,
       "shortName" TEXT NOT NULL CHECK (length("shortName") <= 2),
@@ -155,27 +161,27 @@ export const initSchema = async (db: DatabaseAdapter): Promise<void> => {
       "createdAt" ${getColumnType('DATETIME', db.type)} NOT NULL DEFAULT ${getDefaultValue("(datetime('now'))", db.type)},
       "updatedAt" ${getColumnType('DATETIME', db.type)} NOT NULL DEFAULT ${getDefaultValue("(datetime('now'))", db.type)}
     );`
-  );
-  await db.run(
-    `CREATE TABLE IF NOT EXISTS units (
+    );
+    await db.run(
+      `CREATE TABLE IF NOT EXISTS units (
       "id" ${getColumnType('INTEGER PRIMARY KEY AUTOINCREMENT', db.type)},
       "name" TEXT NOT NULL UNIQUE,
       "isArchived" INTEGER NOT NULL DEFAULT 0 CHECK ("isArchived" IN (0,1)),
       "createdAt" ${getColumnType('DATETIME', db.type)} NOT NULL DEFAULT ${getDefaultValue("(datetime('now'))", db.type)},
       "updatedAt" ${getColumnType('DATETIME', db.type)} NOT NULL DEFAULT ${getDefaultValue("(datetime('now'))", db.type)}
     );`
-  );
-  await db.run(
-    `CREATE TABLE IF NOT EXISTS categories (
+    );
+    await db.run(
+      `CREATE TABLE IF NOT EXISTS categories (
       "id" ${getColumnType('INTEGER PRIMARY KEY AUTOINCREMENT', db.type)},
       "name" TEXT NOT NULL UNIQUE,
       "isArchived" INTEGER NOT NULL DEFAULT 0 CHECK ("isArchived" IN (0,1)),
       "createdAt" ${getColumnType('DATETIME', db.type)} NOT NULL DEFAULT ${getDefaultValue("(datetime('now'))", db.type)},
       "updatedAt" ${getColumnType('DATETIME', db.type)} NOT NULL DEFAULT ${getDefaultValue("(datetime('now'))", db.type)}
     );`
-  );
-  await db.run(
-    `CREATE TABLE IF NOT EXISTS currencies (
+    );
+    await db.run(
+      `CREATE TABLE IF NOT EXISTS currencies (
       "id" ${getColumnType('INTEGER PRIMARY KEY AUTOINCREMENT', db.type)},
       "code" TEXT NOT NULL UNIQUE,
       "symbol" TEXT NOT NULL,
@@ -186,9 +192,9 @@ export const initSchema = async (db: DatabaseAdapter): Promise<void> => {
       "createdAt" ${getColumnType('DATETIME', db.type)} NOT NULL DEFAULT ${getDefaultValue("(datetime('now'))", db.type)},
       "updatedAt" ${getColumnType('DATETIME', db.type)} NOT NULL DEFAULT ${getDefaultValue("(datetime('now'))", db.type)}
     );`
-  );
-  await db.run(
-    `CREATE TABLE IF NOT EXISTS items (
+    );
+    await db.run(
+      `CREATE TABLE IF NOT EXISTS items (
       "id" ${getColumnType('INTEGER PRIMARY KEY AUTOINCREMENT', db.type)},
       "name" TEXT NOT NULL,
       "amount" TEXT NOT NULL DEFAULT '0',
@@ -201,9 +207,9 @@ export const initSchema = async (db: DatabaseAdapter): Promise<void> => {
       FOREIGN KEY ("unitId") REFERENCES units(id),
       FOREIGN KEY ("categoryId") REFERENCES categories(id)
     );`
-  );
-  await db.run(
-    `CREATE TABLE IF NOT EXISTS invoices (
+    );
+    await db.run(
+      `CREATE TABLE IF NOT EXISTS invoices (
       "id" ${getColumnType('INTEGER PRIMARY KEY AUTOINCREMENT', db.type)},
       "invoiceType" TEXT NOT NULL CHECK("invoiceType" IN ('quotation','invoice')),
       "convertedFromQuotationId" INTEGER NULL,
@@ -280,9 +286,9 @@ export const initSchema = async (db: DatabaseAdapter): Promise<void> => {
       CHECK ("dueDate" IS NULL OR "dueDate" >= "issuedAt"),
       CHECK ("convertedFromQuotationId" IS NULL OR "convertedFromQuotationId" != "id")
     );`
-  );
-  await db.run(
-    `CREATE TABLE IF NOT EXISTS invoice_items (
+    );
+    await db.run(
+      `CREATE TABLE IF NOT EXISTS invoice_items (
       "id" ${getColumnType('INTEGER PRIMARY KEY AUTOINCREMENT', db.type)},
       "parentInvoiceId" INTEGER NOT NULL,    
       "itemId" INTEGER NOT NULL,
@@ -297,9 +303,9 @@ export const initSchema = async (db: DatabaseAdapter): Promise<void> => {
       FOREIGN KEY ("parentInvoiceId") REFERENCES invoices(id) ON DELETE CASCADE,
       FOREIGN KEY ("itemId") REFERENCES items(id)
     );`
-  );
-  await db.run(
-    `CREATE TABLE IF NOT EXISTS invoice_payments (
+    );
+    await db.run(
+      `CREATE TABLE IF NOT EXISTS invoice_payments (
       "id" ${getColumnType('INTEGER PRIMARY KEY AUTOINCREMENT', db.type)},
       "parentInvoiceId" INTEGER NOT NULL,   
       "amountCents" INTEGER NOT NULL,
@@ -310,9 +316,9 @@ export const initSchema = async (db: DatabaseAdapter): Promise<void> => {
       "updatedAt" ${getColumnType('DATETIME', db.type)} NOT NULL DEFAULT ${getDefaultValue("(datetime('now'))", db.type)},
       FOREIGN KEY ("parentInvoiceId") REFERENCES invoices(id) ON DELETE CASCADE
     );`
-  );
-  await db.run(
-    `CREATE TABLE IF NOT EXISTS attachments (
+    );
+    await db.run(
+      `CREATE TABLE IF NOT EXISTS attachments (
       id ${getColumnType('INTEGER PRIMARY KEY AUTOINCREMENT', db.type)},
       "parentInvoiceId" INTEGER NOT NULL,   
       "fileName" TEXT NOT NULL,
@@ -323,30 +329,39 @@ export const initSchema = async (db: DatabaseAdapter): Promise<void> => {
       "updatedAt" ${getColumnType('DATETIME', db.type)} NOT NULL DEFAULT ${getDefaultValue("(datetime('now'))", db.type)},
       FOREIGN KEY ("parentInvoiceId") REFERENCES invoices(id) ON DELETE CASCADE
     );`
-  );
+    );
 
-  await db.run(`CREATE INDEX IF NOT EXISTS idx_invoice_items_invoiceId ON invoice_items("parentInvoiceId")`);
-  await db.run(`CREATE INDEX IF NOT EXISTS idx_invoice_payments_invoiceId ON invoice_payments("parentInvoiceId")`);
-  await db.run(`CREATE INDEX IF NOT EXISTS idx_attachments_invoiceId ON attachments("parentInvoiceId")`);
-  await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_clientId ON invoices("clientId")`);
-  await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_businessId ON invoices("businessId")`);
-  await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_business_client ON invoices("businessId", "clientId")`);
-  await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_type ON invoices("invoiceType")`);
-  await db.run(
-    `CREATE INDEX IF NOT EXISTS idx_invoices_convertedFromQuotationId ON invoices("convertedFromQuotationId")`
-  );
-  await db.run(`CREATE INDEX IF NOT EXISTS idx_invoice_items_itemId ON invoice_items("itemId")`);
-  await db.run(`CREATE INDEX IF NOT EXISTS idx_items_unitId ON items("unitId")`);
-  await db.run(`CREATE INDEX IF NOT EXISTS idx_items_categoryId ON items("categoryId")`);
-  await db.run(`CREATE INDEX IF NOT EXISTS idx_clients_active ON clients("isArchived")`);
-  await db.run(`CREATE INDEX IF NOT EXISTS idx_items_active ON items("isArchived")`);
-  await db.run(`CREATE INDEX IF NOT EXISTS idx_businesses_active ON businesses("isArchived")`);
-  await db.run(`CREATE INDEX IF NOT EXISTS idx_categories_active ON categories("isArchived")`);
-  await db.run(`CREATE INDEX IF NOT EXISTS idx_units_active ON units("isArchived")`);
-  await db.run(`CREATE INDEX IF NOT EXISTS idx_currencies_active ON currencies("isArchived")`);
-  await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_invoiceNumber ON invoices("invoiceNumber")`);
-  await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_status ON invoices("status")`);
-  await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_issuedAt ON invoices("issuedAt")`);
+    await db.run(`CREATE INDEX IF NOT EXISTS idx_invoice_items_invoiceId ON invoice_items("parentInvoiceId")`);
+    await db.run(`CREATE INDEX IF NOT EXISTS idx_invoice_payments_invoiceId ON invoice_payments("parentInvoiceId")`);
+    await db.run(`CREATE INDEX IF NOT EXISTS idx_attachments_invoiceId ON attachments("parentInvoiceId")`);
+    await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_clientId ON invoices("clientId")`);
+    await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_businessId ON invoices("businessId")`);
+    await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_business_client ON invoices("businessId", "clientId")`);
+    await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_type ON invoices("invoiceType")`);
+    await db.run(
+      `CREATE INDEX IF NOT EXISTS idx_invoices_convertedFromQuotationId ON invoices("convertedFromQuotationId")`
+    );
+    await db.run(`CREATE INDEX IF NOT EXISTS idx_invoice_items_itemId ON invoice_items("itemId")`);
+    await db.run(`CREATE INDEX IF NOT EXISTS idx_items_unitId ON items("unitId")`);
+    await db.run(`CREATE INDEX IF NOT EXISTS idx_items_categoryId ON items("categoryId")`);
+    await db.run(`CREATE INDEX IF NOT EXISTS idx_clients_active ON clients("isArchived")`);
+    await db.run(`CREATE INDEX IF NOT EXISTS idx_items_active ON items("isArchived")`);
+    await db.run(`CREATE INDEX IF NOT EXISTS idx_businesses_active ON businesses("isArchived")`);
+    await db.run(`CREATE INDEX IF NOT EXISTS idx_categories_active ON categories("isArchived")`);
+    await db.run(`CREATE INDEX IF NOT EXISTS idx_units_active ON units("isArchived")`);
+    await db.run(`CREATE INDEX IF NOT EXISTS idx_currencies_active ON currencies("isArchived")`);
+    await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_invoiceNumber ON invoices("invoiceNumber")`);
+    await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_status ON invoices("status")`);
+    await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_issuedAt ON invoices("issuedAt")`);
+    await db.run('COMMIT');
+  } catch {
+    try {
+      await db.run('ROLLBACK');
+    } catch {
+      throw new Error(`ROLLBACK failed`);
+    }
+    throw new Error(`Database schema initiation failed`);
+  }
 };
 
 export const initInitialData = async (db: DatabaseAdapter): Promise<void> => {

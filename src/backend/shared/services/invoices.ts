@@ -37,12 +37,13 @@ const handleEntity =
           fields.map(f => `"${String(f)}" = ?`).join(', ') +
           `, "updatedAt" = ${getDefaultValue("(datetime('now'))", db.type)}`;
 
-        lastID = await db.run(`UPDATE ${table} SET ${setClause} WHERE "id" = ?`, [...params, data.id ?? -1]);
+        lastID = await db.run(`UPDATE ${table} SET ${setClause} WHERE "id" = ?`, [...params, data.id ?? -1], true);
       } else {
         lastID = await db.run(
           `INSERT INTO ${table} (${fields.map(f => `"${String(f)}"`).join(',')})
            VALUES (${fields.map(() => '?').join(',')})`,
-          params
+          params,
+          true
         );
       }
 
@@ -181,11 +182,16 @@ const getInvoices = async (db: DatabaseAdapter, options: GetInvoicesOptions) => 
         INNER JOIN invoice_business_snapshots as ibs on ibs."parentInvoiceId" = i."id"
         INNER JOIN invoice_client_snapshots as ics on ics."parentInvoiceId" = i."id"
         ${whereSql}
-        ORDER BY i.createdAt DESC
+        ORDER BY i."createdAt" DESC
       `;
   const invoices = await db.all<Invoice>(invoicesSql);
 
   const invoiceIds = invoices.map(i => i.id) as number[];
+
+  if (invoiceIds.length === 0) {
+    return [];
+  }
+
   const placeholders = invoiceIds.map(() => '?').join(', ');
 
   const [
@@ -610,7 +616,8 @@ export const updateInvoice = async (db: DatabaseAdapter, data: Invoice) => {
           item.taxRate,
           item.taxType ?? null,
           item.customField ? JSON.stringify(item.customField) : null
-        ]
+        ],
+        true
       );
 
       await db.run(
@@ -744,13 +751,11 @@ export const duplicateInvoice = async (
         FROM invoices WHERE "id" = ?;
       `;
 
-    let duplicatedRowID: number | void = await db.run(insertInvoiceSQL, [
-      invoiceType,
-      convertedFromQuotationId,
-      newInvoiceNumber,
-      status,
-      invoiceId
-    ]);
+    let duplicatedRowID: number | void = await db.run(
+      insertInvoiceSQL,
+      [invoiceType, convertedFromQuotationId, newInvoiceNumber, status, invoiceId],
+      true
+    );
     duplicatedRowID = typeof duplicatedRowID === 'number' ? duplicatedRowID : -1;
 
     const duplicateSnapshot = async (table: string, columns: string[]) => {

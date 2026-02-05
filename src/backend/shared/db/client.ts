@@ -12,11 +12,11 @@ const convertQuestionToDollar = (sql: string) => {
 export const createSqliteAdapter = (db: sqlite3.Database): DatabaseAdapter => {
   return {
     type: DatabaseType.sqlite,
-    run: (sql: string, params: unknown[] = []) =>
+    run: (sql: string, params: unknown[] = [], returningId = false) =>
       new Promise<number>((resolve, reject) => {
         db.run(sql, params, function (err) {
           if (err) return reject(err);
-          resolve(this.lastID);
+          resolve(returningId ? this.lastID : -1);
         });
       }),
     get: <T = Record<string, unknown>>(sql: string, params: unknown[] = []) =>
@@ -104,14 +104,14 @@ export const createPostgresAdapter = (connectionString: string): DatabaseAdapter
 
   return {
     type: DatabaseType.postgre,
-    run: async (sql: string, params: unknown[] = []) => {
+    run: async (sql: string, params: unknown[] = [], returningId = false) => {
       const isInsert = sql.trim().toUpperCase().startsWith('INSERT');
-      if (isInsert && !sql.toUpperCase().includes('RETURNING')) {
+      if (returningId && isInsert && !sql.toUpperCase().includes('RETURNING')) {
         sql += ' RETURNING id';
       }
 
       const res = await runQuery(sql, params);
-      if (isInsert) {
+      if (isInsert && returningId) {
         return res.rows[0]?.id ?? -1;
       }
       return res.rowCount ?? 0;

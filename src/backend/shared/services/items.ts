@@ -24,12 +24,13 @@ const handleItemEntity =
           fields.map(f => `"${String(f)}" = ?`).join(', ') +
           `, "updatedAt" = ${getDefaultValue("(datetime('now'))", db.type)}`;
 
-        lastID = await db.run(`UPDATE ${table} SET ${setClause} WHERE "id" = ?`, [...params, data.id ?? -1]);
+        lastID = await db.run(`UPDATE ${table} SET ${setClause} WHERE "id" = ?`, [...params, data.id ?? -1], true);
       } else {
         lastID = await db.run(
           `INSERT INTO ${table} (${fields.map(f => `"${String(f)}"`).join(',')})
            VALUES (${fields.map(() => '?').join(',')})`,
-          params
+          params,
+          true
         );
       }
 
@@ -46,7 +47,7 @@ const handleItemEntity =
         LEFT JOIN invoice_items ii ON ii."itemId" = it."id"
         LEFT JOIN invoices inv ON ii."parentInvoiceId" = inv."id"
         WHERE it."id" = ?
-        GROUP BY it."id"
+        GROUP BY it."id", u."name", c."name"
         ORDER BY it."createdAt" DESC
       `;
 
@@ -81,7 +82,7 @@ export const getAllItemEntities =
       LEFT JOIN categories c ON it."categoryId" = c."id"
       LEFT JOIN invoice_items ii ON ii."itemId" = it."id"
       LEFT JOIN invoices inv ON ii."parentInvoiceId" = inv."id"
-      GROUP BY it."id"
+      GROUP BY it."id", u."name", c."name"
       ${havingClause ? havingClause : ''}
       ORDER BY it."createdAt" DESC
     `;
