@@ -210,16 +210,21 @@ const InvoiceFormComponent: FC<Props> = ({
 
         const convert = (raw: number | undefined) => {
           const value = Number(raw ?? 0);
+          let result = value;
 
           if (prevSubunit === undefined && newSubunit !== undefined) {
-            return value * newSubunit;
+            result = value * newSubunit;
           } else if (prevSubunit !== undefined && newSubunit !== undefined) {
-            return value * (newSubunit / prevSubunit);
+            result = value * (newSubunit / prevSubunit);
           } else if (prevSubunit !== undefined && newSubunit === undefined) {
-            return value / prevSubunit;
+            result = value / prevSubunit;
           }
 
-          return value;
+          if (!Number.isFinite(result) || Number.isNaN(result)) {
+            return 0;
+          }
+
+          return result;
         };
 
         const updatedItems = invoiceForm.invoiceItems?.map(it => {

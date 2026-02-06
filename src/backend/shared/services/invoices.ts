@@ -396,7 +396,11 @@ export const addInvoice = async (db: DatabaseAdapter, data: Invoice) => {
     let failure = undefined;
 
     for (const item of data.invoiceItems ?? []) {
-      const r = await handleInvoiceItems({ ...item, parentInvoiceId: newId });
+      const r = await handleInvoiceItems({
+        ...item,
+        parentInvoiceId: newId,
+        customField: item.customField ? JSON.stringify(item.customField) : undefined
+      });
       if (!r.success || !result.data) {
         try {
           await db.run('ROLLBACK');
@@ -615,7 +619,7 @@ export const updateInvoice = async (db: DatabaseAdapter, data: Invoice) => {
           item.quantity,
           item.taxRate,
           item.taxType ?? null,
-          item.customField ? JSON.stringify(item.customField) : null
+          item.customField ? JSON.stringify(item.customField) : undefined
         ],
         true
       );
@@ -759,12 +763,16 @@ export const duplicateInvoice = async (
     duplicatedRowID = typeof duplicatedRowID === 'number' ? duplicatedRowID : -1;
 
     const duplicateSnapshot = async (table: string, columns: string[]) => {
-      const columnList = columns.map(f => `"${String(f)}" = ?`).join(', ');
-      await db.run(
-        `INSERT INTO ${table} ("parentInvoiceId", ${columnList})
-         SELECT ?, ${columnList} FROM ${table} WHERE "parentInvoiceId" = ?;`,
-        [duplicatedRowID, invoiceId]
-      );
+      const columnList = columns.map(c => `"${c}"`).join(', ');
+
+      const sql = `
+        INSERT INTO ${table} ("parentInvoiceId", ${columnList})
+        SELECT ?, ${columnList}
+        FROM ${table}
+        WHERE "parentInvoiceId" = ?;
+      `;
+
+      await db.run(sql, [duplicatedRowID, invoiceId]);
     };
 
     await duplicateSnapshot('invoice_business_snapshots', [

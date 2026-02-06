@@ -8,7 +8,9 @@ New features & improvements
 
 Bug Fixes
 
-- Fixed custom field value styling to be consistent with other fields. Previously it was using table header styling.
+- Fixed an issue that prevented the “Forget recent databases” action from clearing the full list. Previously, it would forget entries only up to the last one, leaving the final database entry undeleted.
+- Fixed a problem that caused invoice creation to fail when a custom field was included during creation.
+- Corrected styling inconsistencies where custom field values were incorrectly using table header formatting.
 
 ## 2026-02-04, version 1.6.0
 

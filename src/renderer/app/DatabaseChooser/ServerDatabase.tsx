@@ -65,12 +65,11 @@ export const ServerDatabase: FC<Props> = ({ onDatabaseRead }) => {
       const uniqueList = list.filter((item, index, self) => index === self.findIndex(p => isSameDb(p, item)));
       const sortedList = [...uniqueList].sort((a, b) => a.database.localeCompare(b.database));
       setSavedDbs(sortedList);
-      if (sortedList.length > 0)
-        try {
-          localStorage.setItem('connetionData', JSON.stringify(sortedList));
-        } catch {
-          dispatch(addToast({ message: t('error.failedToSave'), severity: 'error' }));
-        }
+      try {
+        localStorage.setItem('connetionData', JSON.stringify(sortedList));
+      } catch {
+        dispatch(addToast({ message: t('error.failedToSave'), severity: 'error' }));
+      }
     },
     [t, dispatch]
   );

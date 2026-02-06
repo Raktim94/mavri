@@ -391,7 +391,7 @@ export const initSchema = async (db: DatabaseAdapter): Promise<void> => {
 export const initInitialData = async (db: DatabaseAdapter): Promise<void> => {
   const row = await db.query('SELECT * FROM settings LIMIT 1');
 
-  if (row) return;
+  if (row && row.rows.length > 0) return;
 
   await db.run(insertOrIgnore('settings', [], [[]], db.type, 'id'));
   await db.run(

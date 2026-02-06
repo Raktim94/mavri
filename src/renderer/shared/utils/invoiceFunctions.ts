@@ -169,6 +169,8 @@ export const getInvoiceItemTaxCents = (invoiceItem: InvoiceItem): number => {
 
 export const getUnitPrice = (data: { supportsSubunit?: boolean; amountCents: number; subunit?: number }): number => {
   const { supportsSubunit, amountCents, subunit } = data;
+  if (supportsSubunit && subunit! === 0) return 0;
+
   const unitPrice = supportsSubunit ? amountCents / subunit! : amountCents;
 
   return unitPrice;

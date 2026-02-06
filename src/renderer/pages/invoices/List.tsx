@@ -47,11 +47,17 @@ const InvoiceListItemComponent: FC<Props> = ({ item, isSelected, onEdit }) => {
   const totalAmountCents = useMemo(() => getTotalAmountCents(item), [item]);
   const remainingCents = useMemo(() => getBalanceDueCents(item), [item]);
   const remainingAmount = useMemo(
-    () => remainingCents / (item.invoiceCurrencySnapshot?.currencySubunit ?? 0),
+    () =>
+      item.invoiceCurrencySnapshot?.currencySubunit === 0
+        ? 0
+        : remainingCents / (item.invoiceCurrencySnapshot?.currencySubunit ?? 0),
     [remainingCents, item]
   );
   const totalAmount = useMemo(
-    () => totalAmountCents / (item.invoiceCurrencySnapshot?.currencySubunit ?? 0),
+    () =>
+      item.invoiceCurrencySnapshot?.currencySubunit === 0
+        ? 0
+        : totalAmountCents / (item.invoiceCurrencySnapshot?.currencySubunit ?? 0),
     [totalAmountCents, item]
   );
 

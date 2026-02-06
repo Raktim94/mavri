@@ -89,12 +89,11 @@ export const LocalDatabase: FC<Props> = ({ onDatabaseRead }) => {
     (list: string[]) => {
       const sortedList = [...list].sort((a, b) => a.localeCompare(b));
       setSavedDbs(sortedList);
-      if (sortedList.length > 0)
-        try {
-          localStorage.setItem('databases', JSON.stringify(sortedList));
-        } catch {
-          dispatch(addToast({ message: t('error.failedToSave'), severity: 'error' }));
-        }
+      try {
+        localStorage.setItem('databases', JSON.stringify(sortedList));
+      } catch {
+        dispatch(addToast({ message: t('error.failedToSave'), severity: 'error' }));
+      }
     },
     [t, dispatch]
   );
