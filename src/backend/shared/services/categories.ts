@@ -52,11 +52,11 @@ export const updateCategory = async (db: DatabaseAdapter, data: Category) => {
           LEFT JOIN invoices inv ON ii."parentInvoiceId" = inv."id"
         `,
     invoiceCountExpr: `
-          COUNT(DISTINCT CASE WHEN inv.invoiceType = 'invoice'
+          COUNT(DISTINCT CASE WHEN inv."invoiceType" = 'invoice'
             THEN ii."parentInvoiceId" END)
         `,
     quotesCountExpr: `
-          COUNT(DISTINCT CASE WHEN inv.invoiceType = 'quotation'
+          COUNT(DISTINCT CASE WHEN inv."invoiceType" = 'quotation'
             THEN ii."parentInvoiceId" END)
         `
   });

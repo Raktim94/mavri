@@ -5,6 +5,14 @@ import type { DbValue } from '../types/dbValue';
 import type { TableColumn } from '../types/tableColumn';
 import type { UpdateData } from '../types/updateData';
 
+export const boolToInt = (value: unknown) => {
+  if (typeof value === 'boolean') {
+    return value ? 1 : 0;
+  }
+
+  return value;
+};
+
 export const convertBooleanFieldsToIntArray = <T extends Record<string, unknown>>(rows: T[]): T[] =>
   rows.map(convertBooleanFieldsToInt);
 
@@ -15,9 +23,7 @@ export const convertBooleanFieldsToInt = <T extends Record<string, unknown>>(row
     if (key in converted) {
       const value = converted[key];
 
-      if (typeof value === 'boolean') {
-        converted[key] = value ? 1 : 0;
-      }
+      converted[key] = boolToInt(value);
     }
   });
 
@@ -88,7 +94,7 @@ export const getColumnType = (sqliteType: string, dbType: DatabaseType) => {
       case 'DATETIME':
         return 'TIMESTAMP';
       case 'INTEGER PRIMARY KEY AUTOINCREMENT':
-        return 'SERIAL PRIMARY KEY';
+        return 'INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY';
       case 'BLOB':
         return 'BYTEA';
       default:

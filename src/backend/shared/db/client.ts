@@ -3,6 +3,7 @@ import sqlite3 from 'sqlite3';
 import { DatabaseType } from '../enums/databaseType';
 import type { DatabaseAdapter } from '../types/DatabaseAdapter';
 import {
+  boolToInt,
   convertBooleanFields,
   convertBooleanFieldsArray,
   convertDateFields,
@@ -111,8 +112,13 @@ export const createPostgresAdapter = (connectionString: string): DatabaseAdapter
     type: DatabaseType.postgre,
     run: async (sql: string, params: unknown[] = [], returningId = false) => {
       const isInsert = sql.trim().toUpperCase().startsWith('INSERT');
+      const isUpdate = sql.trim().toUpperCase().startsWith('UPDATE');
       if (returningId && isInsert && !sql.toUpperCase().includes('RETURNING')) {
         sql += ' RETURNING id';
+      }
+
+      if (isInsert || isUpdate) {
+        params = params.map(boolToInt);
       }
 
       const res = await runQuery(sql, params);

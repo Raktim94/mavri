@@ -128,7 +128,16 @@ export const importAllData = async (db: DatabaseAdapter, parsed: Record<string, 
       const cols = keys.map(k => `"${k}"`).join(',');
       const placeholders = keys.map(() => '?').join(',');
       const params = keys.map(k => toDbValue(row[k]));
-      await db.run(`INSERT INTO ${table} (${cols}) VALUES (${placeholders})`, params);
+      if (db.type === DatabaseType.postgre) {
+        await db.run(
+          `INSERT INTO ${table} (${cols}) 
+          OVERRIDING SYSTEM VALUE
+          VALUES (${placeholders})`,
+          params
+        );
+      } else {
+        await db.run(`INSERT INTO ${table} (${cols}) VALUES (${placeholders})`, params);
+      }
     }
   };
 
@@ -222,6 +231,13 @@ export const importAllData = async (db: DatabaseAdapter, parsed: Record<string, 
 
       for (const [table, key] of Object.entries(tableDataMap)) {
         await insertRows(table, ((parsedMut as Record<string, unknown>)[key] as Record<string, unknown>[]) ?? []);
+        if (db.type === DatabaseType.postgre) {
+          await db.run(`
+            SELECT setval(
+              pg_get_serial_sequence('${table}', 'id'),
+              (SELECT MAX(id) FROM ${table})
+            );`);
+        }
       }
 
       if (parsedMut.settings && typeof parsedMut.settings === 'object') {
@@ -231,7 +247,6 @@ export const importAllData = async (db: DatabaseAdapter, parsed: Record<string, 
 
     return { success: true };
   } catch (error) {
-    console.log(error);
     return { success: false, ...mapDatabaseError(error, db.type) };
   }
 };

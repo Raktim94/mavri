@@ -12,9 +12,10 @@ export const getAllSettings = async (db: DatabaseAdapter) => {
 
 export const updateSettings = async (db: DatabaseAdapter, data: Settings) => {
   try {
-    const { createdAt, updatedAt, ...rest } = data;
+    const { createdAt, updatedAt, id, ...rest } = data;
     void createdAt;
     void updatedAt;
+    void id;
 
     const { fields, params } = prepareUpdate(rest);
     if (!fields.length) return { success: true };

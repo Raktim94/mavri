@@ -82,7 +82,7 @@ export const handleEntity =
         GROUP BY ${alias}."id"
       `;
 
-      const row = await await db.get<T & EntityWithCounts>(sql, [lastID]);
+      const row = await db.get<T & EntityWithCounts>(sql, [lastID]);
 
       return { success: true, data: row ?? undefined };
     } catch (error) {

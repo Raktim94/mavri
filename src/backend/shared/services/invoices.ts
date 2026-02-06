@@ -747,12 +747,12 @@ export const duplicateInvoice = async (
         )
         SELECT
           ?, ?, "businessId", "clientId", "currencyId",
-          "issuedAt", "dueDate", ?, "isArchived", ?, customerNotes,
+          "issuedAt", "dueDate", ?, "isArchived", ?, "customerNotes",
           "thanksNotes", "termsConditionNotes", "discountName", "language", 
           "discountType", "discountAmountCents", "discountPercent", "shippingFeeCents",
           "invoicePrefix", "invoiceSuffix", "taxName", "taxRate", "taxType", "signatureData",
           "signatureSize", "signatureType", "signatureName", "styleProfilesId"
-        FROM invoices WHERE "id" = ?;
+        FROM invoices WHERE "id" = ?
       `;
 
     let duplicatedRowID: number | void = await db.run(
@@ -842,7 +842,7 @@ export const duplicateInvoice = async (
         snap."unitName"
       FROM invoice_item_snapshots AS snap
       JOIN invoice_items AS "oldItems"
-        ON snap.parentInvoiceItemId = "oldItems"."id"
+        ON snap."parentInvoiceItemId" = "oldItems"."id"
       JOIN invoice_items AS "newItems"
        ON "newItems"."itemId" = "oldItems"."itemId"
        AND "newItems"."parentInvoiceId" = ?
