@@ -1,32 +1,22 @@
 import type { DatabaseAdapter } from '../types/DatabaseAdapter';
+import type { Settings } from '../types/settings';
 import { getDefaultValue, prepareUpdate } from '../utils/dbHelper';
 import { mapDatabaseError } from '../utils/errorFunctions';
 
 export const getAllSettings = async (db: DatabaseAdapter) => {
   const row = await db.get('SELECT * FROM settings LIMIT 1');
+  console.log(row);
   if (!row) return { success: true, data: null };
   return { success: true, data: row };
 };
 
-export const updateSettings = async (
-  db: DatabaseAdapter,
-  data: {
-    language?: string;
-    amountFormat?: string;
-    dateFormat?: string;
-    isDarkMode?: boolean;
-    invoicePrefix?: string;
-    invoiceSuffix?: string;
-    shouldIncludeYear?: boolean;
-    shouldIncludeMonth?: boolean;
-    shouldIncludeBusinessName?: boolean;
-    quotesON?: boolean;
-    styleProfilesON?: boolean;
-    reportsON?: boolean;
-  }
-) => {
+export const updateSettings = async (db: DatabaseAdapter, data: Settings) => {
   try {
-    const { fields, params } = prepareUpdate(data);
+    const { createdAt, updatedAt, ...rest } = data;
+    void createdAt;
+    void updatedAt;
+
+    const { fields, params } = prepareUpdate(rest);
     if (!fields.length) return { success: true };
 
     fields.push(`"updatedAt" = ${getDefaultValue("datetime('now')", db.type)}`);
