@@ -5,7 +5,7 @@ import { mapDatabaseError } from '../utils/errorFunctions';
 
 export const getAllSettings = async (db: DatabaseAdapter) => {
   const row = await db.get('SELECT * FROM settings LIMIT 1');
-  console.log(row);
+
   if (!row) return { success: true, data: null };
   return { success: true, data: row };
 };

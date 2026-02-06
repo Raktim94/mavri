@@ -544,7 +544,9 @@ export const isInvoiceFromData = (data: unknown): data is InvoiceFromData => {
     'invoicePrefix',
     'invoiceSuffix',
     'signatureType',
-    'signatureName'
+    'signatureName',
+    'shippingFeeCents',
+    'discountAmountCents'
   ];
 
   for (const key of stringFields) {
@@ -552,7 +554,7 @@ export const isInvoiceFromData = (data: unknown): data is InvoiceFromData => {
     if (val !== undefined && val !== null && typeof val !== 'string') return false;
   }
 
-  const numberFields = ['signatureSize', 'discountAmountCents', 'discountPercent', 'shippingFeeCents'];
+  const numberFields = ['signatureSize', 'discountPercent'];
 
   for (const key of numberFields) {
     const val = d[key];

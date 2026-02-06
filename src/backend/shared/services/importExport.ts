@@ -36,7 +36,7 @@ import {
   encodeLogo,
   encodeStyleProfile
 } from '../utils/dataUrlFunctions';
-import { toDbValue } from '../utils/dbHelper';
+import { convertBooleanFieldsToInt, toDbValue } from '../utils/dbHelper';
 import { mapDatabaseError } from '../utils/errorFunctions';
 
 export const exportAllData = async (db: DatabaseAdapter) => {
@@ -120,7 +120,9 @@ export const importAllData = async (db: DatabaseAdapter, parsed: Record<string, 
   };
 
   const insertRows = async <T extends Record<string, unknown>>(table: string, rows: T[]) => {
-    for (const row of rows) {
+    for (let row of rows) {
+      row = convertBooleanFieldsToInt(row);
+
       const keys = Object.keys(row).filter(k => k !== 'invoiceFullNumber');
       if (!keys.length) continue;
       const cols = keys.map(k => `"${k}"`).join(',');
@@ -131,6 +133,8 @@ export const importAllData = async (db: DatabaseAdapter, parsed: Record<string, 
   };
 
   const updateSettings = async (settings: Record<string, unknown>) => {
+    settings = convertBooleanFieldsToInt(settings);
+
     const fields: string[] = [];
     const params: DbValue[] = [];
 
@@ -227,6 +231,7 @@ export const importAllData = async (db: DatabaseAdapter, parsed: Record<string, 
 
     return { success: true };
   } catch (error) {
+    console.log(error);
     return { success: false, ...mapDatabaseError(error, db.type) };
   }
 };

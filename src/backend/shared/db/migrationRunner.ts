@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { DatabaseType } from '../enums/databaseType';
 import type { DatabaseAdapter } from '../types/DatabaseAdapter';
 import { getColumnType, getDefaultValue } from '../utils/dbHelper';
 import { mapDatabaseError } from '../utils/errorFunctions';
@@ -11,6 +12,9 @@ export const runMigrations = async (db: DatabaseAdapter, migrationsPath: string)
       .filter(f => /^\d{8}-\d{2}-.*\.(cjs|js|ts)$/.test(f))
       .sort();
 
+    if (db.type === DatabaseType.sqlite) {
+      await db.run('PRAGMA foreign_keys = OFF;');
+    }
     await db.run('BEGIN');
 
     await db.run(
@@ -42,12 +46,19 @@ export const runMigrations = async (db: DatabaseAdapter, migrationsPath: string)
     }
 
     await db.run('COMMIT');
+
+    if (db.type === DatabaseType.sqlite) {
+      await db.run('PRAGMA foreign_keys = ON;');
+    }
     return { success: true, message: undefined, data: undefined, key: undefined };
   } catch (error) {
     try {
       await db.run('ROLLBACK');
     } catch {
       throw new Error(`ROLLBACK failed`);
+    }
+    if (db.type === DatabaseType.sqlite) {
+      await db.run('PRAGMA foreign_keys = ON;');
     }
     return { success: false, ...mapDatabaseError(error, db.type) };
   }

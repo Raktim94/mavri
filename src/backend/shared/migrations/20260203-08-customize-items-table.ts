@@ -1,4 +1,3 @@
-import { DatabaseType } from '../enums/databaseType';
 import type { DatabaseAdapter } from '../types/DatabaseAdapter';
 import { getTableColumns } from '../utils/dbHelper';
 import { mapDatabaseError } from '../utils/errorFunctions';
@@ -8,10 +7,6 @@ export const up = async (db: DatabaseAdapter) => {
     const cols = await getTableColumns(db, 'invoice_customizations');
     const colInfo = cols.find(c => c.name === 'showRowNo');
     if (colInfo) return;
-
-    if (db.type === DatabaseType.sqlite) {
-      await db.run('PRAGMA foreign_keys = OFF;');
-    }
 
     await db.run(
       `
@@ -55,14 +50,7 @@ export const up = async (db: DatabaseAdapter) => {
         ADD COLUMN "customField" TEXT;
       `
     );
-
-    if (db.type === DatabaseType.sqlite) {
-      await db.run('PRAGMA foreign_keys = ON;');
-    }
   } catch (error) {
-    if (db.type === DatabaseType.sqlite) {
-      await db.run('PRAGMA foreign_keys = ON;');
-    }
     return { success: false, ...mapDatabaseError(error, db.type) };
   }
 };

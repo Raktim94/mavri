@@ -9,8 +9,6 @@ export const up = async (db: DatabaseAdapter) => {
     if (isExisting) return;
 
     if (db.type === DatabaseType.sqlite) {
-      await db.run('PRAGMA foreign_keys = OFF;');
-
       await db.run('DROP TABLE IF EXISTS invoice_item_snapshots;');
 
       await db.run(
@@ -57,17 +55,12 @@ export const up = async (db: DatabaseAdapter) => {
       await db.run(
         `CREATE INDEX IF NOT EXISTS idx_invoice_item_snapshots_itemName ON invoice_item_snapshots("itemName")`
       );
-
-      await db.run('PRAGMA foreign_keys = ON;');
     }
     if (db.type === DatabaseType.postgre) {
       await db.run(`ALTER TABLE invoice_item_snaphots RENAME TO invoice_item_snapshots;`);
       await db.run(`ALTER INDEX invoice_item_snaphots_pkey RENAME TO invoice_item_snapshots_new_pkey;`);
     }
   } catch (error) {
-    if (db.type === DatabaseType.sqlite) {
-      await db.run('PRAGMA foreign_keys = ON;');
-    }
     return { success: false, ...mapDatabaseError(error, db.type) };
   }
 };

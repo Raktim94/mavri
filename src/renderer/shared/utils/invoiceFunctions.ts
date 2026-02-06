@@ -87,7 +87,7 @@ export const getTotalAmountPaidCents = (invoicePayments: InvoicePayment[]): numb
     return 0;
   }
 
-  const totalCents = invoicePayments.reduce((sum, p) => sum + p.amountCents, 0);
+  const totalCents = invoicePayments.reduce((sum, p) => sum + Number(p.amountCents), 0);
   return totalCents;
 };
 
@@ -112,7 +112,7 @@ export const getSubTotalAmountCents = (invoiceItems: InvoiceItem[], includeTax: 
 
 export const getInvoiceItemAmountCents = (invoiceItem: InvoiceItem): number => {
   return getTotalUnitPrice({
-    unitPrice: invoiceItem.invoiceItemSnapshot.unitPriceCents,
+    unitPrice: Number(invoiceItem.invoiceItemSnapshot.unitPriceCents),
     quantity: invoiceItem.quantity
   });
 };
@@ -128,7 +128,7 @@ export const getDiscountAmountCents = (invoice: Invoice): number => {
     return 0;
   }
 
-  if (invoice.discountType === DiscountType.fixed) return invoice.discountAmountCents;
+  if (invoice.discountType === DiscountType.fixed) return Number(invoice.discountAmountCents);
 
   const subTotalCents = getSubTotalAmountCents(invoice.invoiceItems, false);
   return (subTotalCents * invoice.discountPercent) / 100;
@@ -145,9 +145,10 @@ export const getTotalAmountCents = (invoice: Invoice): number => {
   const amountCents = getTotalAmountAfterDiscountCents(invoice);
   const taxAmountCents = getInvoiceTaxCents(invoice);
 
-  if (invoice.taxType !== InvoiceTaxType.inclusive) return amountCents + taxAmountCents + invoice.shippingFeeCents;
+  if (invoice.taxType !== InvoiceTaxType.inclusive)
+    return amountCents + taxAmountCents + Number(invoice.shippingFeeCents);
 
-  return amountCents + invoice.shippingFeeCents;
+  return amountCents + Number(invoice.shippingFeeCents);
 };
 
 export const getBalanceDueCents = (invoice: Invoice): number => {
@@ -257,7 +258,7 @@ export const getPaidData = (data: {
 
   const amountPaid = getUnitPrice({
     supportsSubunit,
-    amountCents: invoicePayment?.amountCents ?? 0,
+    amountCents: Number(invoicePayment?.amountCents ?? 0),
     subunit: invoiceForm?.invoiceCurrencySnapshot?.currencySubunit
   });
 
@@ -303,7 +304,7 @@ export const getFinancialData = (data: { storeSettings?: Settings; invoiceForm?:
     const { totalUnitPrice, invoiceTaxAmount } = getItemFinancialData({
       storeSettings,
       invoiceForm,
-      unitPriceCents: item.invoiceItemSnapshot.unitPriceCents,
+      unitPriceCents: Number(item.invoiceItemSnapshot.unitPriceCents),
       quantity: item.quantity,
       taxType: item.taxType,
       taxRate: item.taxRate,
@@ -324,7 +325,7 @@ export const getFinancialData = (data: { storeSettings?: Settings; invoiceForm?:
   let discountBaseCents = 0;
   let discountAmount = 0;
   if (invoiceForm?.discountType === DiscountType.fixed) {
-    discountBaseCents = invoiceForm.discountAmountCents ?? 0;
+    discountBaseCents = Number(invoiceForm.discountAmountCents ?? 0);
     discountAmount = getUnitPrice({
       supportsSubunit,
       amountCents: discountBaseCents,
@@ -337,7 +338,7 @@ export const getFinancialData = (data: { storeSettings?: Settings; invoiceForm?:
 
   const shippingAmount = getUnitPrice({
     supportsSubunit,
-    amountCents: invoiceForm?.shippingFeeCents ?? 0,
+    amountCents: Number(invoiceForm?.shippingFeeCents ?? 0),
     subunit: invoiceForm?.invoiceCurrencySnapshot?.currencySubunit
   });
 

@@ -95,12 +95,12 @@ const ItemsListComponent: FC<Props> = ({ invoiceForm, setInvoiceForm, onEdit = (
       >
         {invoiceForm?.invoiceItems?.map((invoiceItem, index) => {
           const { quantity, taxType, taxRate, invoiceItemSnapshot, customField } = invoiceItem;
-          const { unitPriceCents = 0, itemName } = invoiceItemSnapshot;
+          const { unitPriceCents = '0', itemName } = invoiceItemSnapshot;
 
           const { formattedUnitPrice, formattedTotal, formattedTax } = getItemFinancialData({
             storeSettings,
             invoiceForm,
-            unitPriceCents: unitPriceCents,
+            unitPriceCents: Number(unitPriceCents),
             quantity,
             taxType,
             taxRate,

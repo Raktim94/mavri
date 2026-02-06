@@ -12,8 +12,6 @@ export const up = async (db: DatabaseAdapter) => {
       if (type === 'TEXT' || type === 'CHARACTER VARYING' || type === 'VARCHAR') return;
     }
     if (db.type === DatabaseType.sqlite) {
-      await db.run('PRAGMA foreign_keys = OFF;');
-
       await db.run('DROP TABLE IF EXISTS invoice_items_new;');
 
       await db.run(
@@ -54,8 +52,6 @@ export const up = async (db: DatabaseAdapter) => {
 
       await db.run(`CREATE INDEX IF NOT EXISTS idx_invoice_items_invoiceId ON invoice_items("parentInvoiceId")`);
       await db.run(`CREATE INDEX IF NOT EXISTS idx_invoice_items_itemId ON invoice_items("itemId")`);
-
-      await db.run('PRAGMA foreign_keys = ON;');
     }
     if (db.type === DatabaseType.postgre) {
       await db.run(`
@@ -64,9 +60,6 @@ export const up = async (db: DatabaseAdapter) => {
       `);
     }
   } catch (error) {
-    if (db.type === DatabaseType.sqlite) {
-      await db.run('PRAGMA foreign_keys = ON;');
-    }
     return { success: false, ...mapDatabaseError(error, db.type) };
   }
 };

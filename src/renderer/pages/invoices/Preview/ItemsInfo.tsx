@@ -264,12 +264,12 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
       </View>
       {invoiceForm?.invoiceItems?.map((item, index) => {
         const { quantity, taxType, taxRate, invoiceItemSnapshot, customField } = item;
-        const { unitPriceCents = 0, itemName, unitName } = invoiceItemSnapshot;
+        const { unitPriceCents = '0', itemName, unitName } = invoiceItemSnapshot;
 
         const { formattedUnitPrice, formattedTotal, formattedTax } = getItemFinancialData({
           storeSettings,
           invoiceForm,
-          unitPriceCents: unitPriceCents,
+          unitPriceCents: Number(unitPriceCents),
           quantity,
           taxType,
           taxRate,

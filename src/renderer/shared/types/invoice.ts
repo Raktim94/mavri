@@ -175,7 +175,7 @@ export interface DiscountForm {
 export interface InvoicePayment {
   id?: number;
   parentInvoiceId?: number;
-  amountCents: number;
+  amountCents: string;
   paidAt: string;
   paymentMethod: PaymentType;
   notes?: string;
@@ -205,7 +205,7 @@ export interface InvoiceItemSnapshots {
   parentInvoiceItemId: number;
   id?: number;
   itemName: string;
-  unitPriceCents: number;
+  unitPriceCents: string;
   unitName?: string;
 }
 
@@ -287,9 +287,9 @@ export interface InvoiceMeta {
   invoicePrefix?: string;
   invoiceSuffix?: string;
   discountType?: DiscountType;
-  discountAmountCents: number;
+  discountAmountCents: string;
   discountPercent: number;
-  shippingFeeCents: number;
+  shippingFeeCents: string;
   taxName?: string;
   taxRate: number;
   taxType?: InvoiceTaxType;
@@ -337,9 +337,9 @@ export interface InvoiceAddMeta {
   termsConditionNotes?: string;
   discountName?: string;
   discountType?: DiscountType;
-  discountAmountCents?: number;
+  discountAmountCents?: string;
   discountPercent?: number;
-  shippingFeeCents?: number;
+  shippingFeeCents?: string;
   taxName?: string;
   taxRate?: number;
   taxType?: InvoiceTaxType;
@@ -397,9 +397,9 @@ export interface InvoiceFromData {
   termsConditionNotes?: string;
   discountName?: string;
   discountType?: DiscountType;
-  discountAmountCents?: number;
+  discountAmountCents?: string;
   discountPercent?: number;
-  shippingFeeCents?: number;
+  shippingFeeCents?: string;
   taxName?: string;
   taxRate?: number;
   taxType?: InvoiceTaxType;

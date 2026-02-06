@@ -1,4 +1,3 @@
-import { DatabaseType } from '../enums/databaseType';
 import type { DatabaseAdapter } from '../types/DatabaseAdapter';
 import { getColumnType, getDefaultValue, isTableExists } from '../utils/dbHelper';
 import { mapDatabaseError } from '../utils/errorFunctions';
@@ -7,10 +6,6 @@ export const up = async (db: DatabaseAdapter) => {
   try {
     const isExisting = await isTableExists(db, 'invoice_business_snapshots');
     if (isExisting) return;
-
-    if (db.type === DatabaseType.sqlite) {
-      await db.run('PRAGMA foreign_keys = OFF;');
-    }
 
     await db.run(
       `
@@ -362,14 +357,7 @@ export const up = async (db: DatabaseAdapter) => {
     await db.run('ALTER TABLE invoice_items DROP COLUMN "itemNameSnapshot";');
     await db.run('ALTER TABLE invoice_items DROP COLUMN "unitPriceCentsSnapshot";');
     await db.run('ALTER TABLE invoice_items DROP COLUMN "unitNameSnapshot";');
-
-    if (db.type === DatabaseType.sqlite) {
-      await db.run('PRAGMA foreign_keys = ON;');
-    }
   } catch (error) {
-    if (db.type === DatabaseType.sqlite) {
-      await db.run('PRAGMA foreign_keys = ON;');
-    }
     return { success: false, ...mapDatabaseError(error, db.type) };
   }
 };

@@ -208,7 +208,7 @@ const InvoiceFormComponent: FC<Props> = ({
         const prevSubunit = invoiceForm.invoiceCurrencySnapshot?.currencySubunit;
         const newSubunit = data.subunit;
 
-        const convert = (raw: number | undefined) => {
+        const convert = (raw: string | undefined) => {
           const value = Number(raw ?? 0);
           let result = value;
 
@@ -221,10 +221,10 @@ const InvoiceFormComponent: FC<Props> = ({
           }
 
           if (!Number.isFinite(result) || Number.isNaN(result)) {
-            return 0;
+            return '0';
           }
 
-          return result;
+          return result.toString();
         };
 
         const updatedItems = invoiceForm.invoiceItems?.map(it => {
@@ -316,7 +316,7 @@ const InvoiceFormComponent: FC<Props> = ({
           parentInvoiceItemId: newItemID,
           itemName: item.name,
           unitName: item.unitName,
-          unitPriceCents: unitPrice
+          unitPriceCents: unitPrice.toString()
         },
         customField:
           header && value && alignment
@@ -462,7 +462,7 @@ const InvoiceFormComponent: FC<Props> = ({
       startTransition(() => {
         setInvoiceForm({
           ...invoiceForm,
-          shippingFeeCents: fee
+          shippingFeeCents: fee.toString()
         });
       });
     },
@@ -482,7 +482,7 @@ const InvoiceFormComponent: FC<Props> = ({
           discountName: data.discountName,
           discountType: data.discountType,
           discountPercent: data.discountRate ?? 0,
-          discountAmountCents: discountAmount ?? 0
+          discountAmountCents: discountAmount?.toString() ?? '0'
         });
       });
     },
@@ -544,7 +544,7 @@ const InvoiceFormComponent: FC<Props> = ({
         if (index !== -1) {
           invoicePayments[index] = {
             ...invoicePayments[index],
-            amountCents: payment.amountCents ?? 0
+            amountCents: payment.amountCents?.toString() ?? '0'
           };
         } else {
           invoicePayments.push({
@@ -552,7 +552,7 @@ const InvoiceFormComponent: FC<Props> = ({
             paidAt: payment.paidAt,
             paymentMethod: payment.paymentMethod,
             notes: payment.notes,
-            amountCents: payment.amountCents
+            amountCents: payment.amountCents?.toString() ?? '0'
           });
         }
       } else {
@@ -561,7 +561,7 @@ const InvoiceFormComponent: FC<Props> = ({
           paidAt: payment.paidAt,
           paymentMethod: payment.paymentMethod,
           notes: payment.notes,
-          amountCents: payment.amountCents
+          amountCents: payment.amountCents?.toString() ?? '0'
         });
       }
 

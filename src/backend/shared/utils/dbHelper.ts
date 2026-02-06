@@ -5,6 +5,25 @@ import type { DbValue } from '../types/dbValue';
 import type { TableColumn } from '../types/tableColumn';
 import type { UpdateData } from '../types/updateData';
 
+export const convertBooleanFieldsToIntArray = <T extends Record<string, unknown>>(rows: T[]): T[] =>
+  rows.map(convertBooleanFieldsToInt);
+
+export const convertBooleanFieldsToInt = <T extends Record<string, unknown>>(row: T): T => {
+  const converted = { ...row } as Record<string, unknown>;
+
+  BOOLEAN_FIELDS.forEach(key => {
+    if (key in converted) {
+      const value = converted[key];
+
+      if (typeof value === 'boolean') {
+        converted[key] = value ? 1 : 0;
+      }
+    }
+  });
+
+  return converted as T;
+};
+
 export const convertDateFields = <T extends Record<string, unknown>>(row: T): T => {
   const convertedRow = { ...row } as Record<string, unknown>;
 
