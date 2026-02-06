@@ -1,6 +1,6 @@
 # Invoice Builder
 
-## [Date], version [Version]
+## [Date], version 1.7.0
 
 New features & improvements
 

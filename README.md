@@ -120,6 +120,22 @@ This option is ideal if you want:
 - Centralized access from multiple machines
 - Easy backups via mounted volumes
 
+### PostgreSQL Support
+
+Invoice Builder now supports **two database backends**:
+
+| Storage Type            | Description                                                           | Best For                                           |
+| ----------------------- | --------------------------------------------------------------------- | -------------------------------------------------- |
+| **SQLite (local file)** | Simple, portable, zero‑configuration database stored as a single file | Solo users, offline use, desktop mode              |
+| **PostgreSQL (server)** | Network‑accessible database server with concurrency and robustness    | Multi‑user setups, Docker deployments, NAS/servers |
+
+Users can now choose between:
+
+- **Creating or opening a local SQLite database file**, or
+- **Connecting to a PostgreSQL server** by entering host, port, username, password, and database name.
+
+This makes Invoice Builder flexible for both lightweight personal use and more advanced multi‑device or multi‑user environments.
+
 ### Docker Image
 
 You can create a Docker image with the following commands.
@@ -346,6 +362,7 @@ Please open an issue before starting major work to ensure alignment.
 
 | Version | Status                |
 | ------- | --------------------- |
+| v1.7.0  | ✅ Actively supported |
 | v1.6.0  | ✅ Actively supported |
 | v1.5.0  | ✅ Actively supported |
 | v1.4.0  | ✅ Actively supported |
