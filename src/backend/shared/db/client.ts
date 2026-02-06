@@ -2,7 +2,12 @@ import { Pool, type PoolClient } from 'pg';
 import sqlite3 from 'sqlite3';
 import { DatabaseType } from '../enums/databaseType';
 import type { DatabaseAdapter } from '../types/DatabaseAdapter';
-import { convertBooleanFields, convertBooleanFieldsArray } from '../utils/dbHelper';
+import {
+  convertBooleanFields,
+  convertBooleanFieldsArray,
+  convertDateFields,
+  convertDateFieldsArray
+} from '../utils/dbHelper';
 
 const convertQuestionToDollar = (sql: string) => {
   let i = 0;
@@ -119,18 +124,24 @@ export const createPostgresAdapter = (connectionString: string): DatabaseAdapter
     get: async <T = Record<string, unknown>>(sql: string, params: unknown[] = []) => {
       const res = await runQuery(sql, params);
       if (!res.rows[0]) return null;
-      const convertedRow = convertBooleanFields(res.rows[0] as Record<string, unknown>);
-      return convertedRow as T;
+      const convertedBooleanRow = convertBooleanFields(res.rows[0] as Record<string, unknown>);
+      const convertedDateRow = convertDateFields(convertedBooleanRow as Record<string, unknown>);
+
+      return convertedDateRow as T;
     },
     all: async <T = Record<string, unknown>>(sql: string, params: unknown[] = []) => {
       const res = await runQuery(sql, params);
-      const convertedRows = convertBooleanFieldsArray(res.rows as Record<string, unknown>[]);
-      return convertedRows as T[];
+      const convertedBooleanRow = convertBooleanFieldsArray(res.rows as Record<string, unknown>[]);
+      const convertedDateRow = convertDateFieldsArray(convertedBooleanRow as Record<string, unknown>[]);
+
+      return convertedDateRow as T[];
     },
     query: async (sql: string, params: unknown[] = []) => {
       const res = await runQuery(sql, params);
-      const convertedRows = convertBooleanFieldsArray(res.rows as Record<string, unknown>[]);
-      return { rows: convertedRows };
+      const convertedBooleanRow = convertBooleanFieldsArray(res.rows as Record<string, unknown>[]);
+      const convertedDateRow = convertDateFieldsArray(convertedBooleanRow as Record<string, unknown>[]);
+
+      return { rows: convertedDateRow };
     },
     close: async () => {
       await releaseClient();

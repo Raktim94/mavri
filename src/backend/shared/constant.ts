@@ -12,3 +12,5 @@ export const BOOLEAN_FIELDS = [
   'showUnit',
   'showRowNo'
 ] as const;
+
+export const DATE_FIELDS = ['appliedAt', 'createdAt', 'updatedAt', 'issuedAt', 'dueDate', 'paidAt'] as const;

@@ -1,9 +1,28 @@
-import { BOOLEAN_FIELDS } from '../constant';
+import { BOOLEAN_FIELDS, DATE_FIELDS } from '../constant';
 import { DatabaseType } from '../enums/databaseType';
 import type { DatabaseAdapter } from '../types/DatabaseAdapter';
 import type { DbValue } from '../types/dbValue';
 import type { TableColumn } from '../types/tableColumn';
 import type { UpdateData } from '../types/updateData';
+
+export const convertDateFields = <T extends Record<string, unknown>>(row: T): T => {
+  const convertedRow = { ...row } as Record<string, unknown>;
+
+  DATE_FIELDS.forEach(key => {
+    if (key in convertedRow && convertedRow[key] != null) {
+      const value = convertedRow[key];
+
+      if (value instanceof Date) {
+        convertedRow[key] = value.toISOString().replace('T', ' ').replace('Z', '');
+      }
+    }
+  });
+
+  return convertedRow as T;
+};
+
+export const convertDateFieldsArray = <T extends Record<string, unknown>>(rows: T[]): T[] =>
+  rows.map(convertDateFields);
 
 export const convertBooleanFields = <T extends Record<string, unknown>>(row: T): T => {
   const convertedRow = { ...row } as Record<string, unknown>;
@@ -26,7 +45,7 @@ export const prepareUpdate = (data: UpdateData, id?: number) => {
 
   Object.entries(data).forEach(([key, value]) => {
     if (value !== undefined) {
-      fields.push(`${key} = ?`);
+      fields.push(`"${key}" = ?`);
 
       let param: string | number | null;
 
@@ -70,6 +89,8 @@ export const getDefaultValue = (sqliteExpr: string, dbType: DatabaseType) => {
       case "datetime('now', '-90 days')":
         return "NOW() - INTERVAL '90 days'";
       case "(datetime('now'))":
+        return 'NOW()';
+      case "datetime('now')":
         return 'NOW()';
       default:
         return sqliteExpr;
