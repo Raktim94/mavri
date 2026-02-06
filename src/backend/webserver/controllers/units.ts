@@ -1,7 +1,7 @@
 import { type Express, type Request, type Response } from 'express';
 import * as unitsService from '../../shared/services/units';
+import { dbInstance } from '../database';
 import { parseFilter, requireDB } from '../utils/functions';
-import { dbInstance } from './database';
 
 export const initUnitsController = (app: Express) => {
   app.get('/api/units', requireDB, async (req: Request, res: Response) => {

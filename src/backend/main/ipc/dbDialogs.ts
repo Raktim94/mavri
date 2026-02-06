@@ -1,7 +1,10 @@
 import { BrowserWindow, dialog, ipcMain } from 'electron';
 import { join } from 'path';
+import { testPostgresConnection } from '../../shared/db/setup';
+import { DatabaseType } from '../../shared/enums/databaseType';
 import { DBInitType } from '../../shared/enums/dbInitType';
-import { mapSqliteError } from '../../shared/utils/errorFunctions';
+import type { PostgresConfig } from '../../shared/types/postgresConfig';
+import { mapDatabaseError } from '../../shared/utils/errorFunctions';
 import { setupDB } from '../database';
 
 const resetIPCHandlers = () => {
@@ -61,7 +64,7 @@ const resetIPCHandlers = () => {
 
 export const initDBDialogsHandlers = (dbName: string, mainWindow: BrowserWindow) => {
   ipcMain.handle('show-save-db-dialog', async () => {
-    const defaultPath = join(process.env.USERPROFILE || process.cwd(), dbName);
+    const defaultPath = join(process.env.USERPROFILE || process.cwd(), `${dbName}.db`);
     const result = await dialog.showSaveDialog({
       title: 'Select a path and database file name',
       defaultPath,
@@ -70,7 +73,7 @@ export const initDBDialogsHandlers = (dbName: string, mainWindow: BrowserWindow)
     return { success: true, data: { canceled: result.canceled, filePath: result.filePath } };
   });
   ipcMain.handle('show-open-db-dialog', async () => {
-    const defaultPath = join(process.env.USERPROFILE || process.cwd(), dbName);
+    const defaultPath = join(process.env.USERPROFILE || process.cwd(), `${dbName}.db`);
     const result = await dialog.showOpenDialog({
       title: 'Open existing database file',
       defaultPath,
@@ -85,14 +88,35 @@ export const initDBDialogsHandlers = (dbName: string, mainWindow: BrowserWindow)
       }
     };
   });
-  ipcMain.handle('initialize-db', async (_event, opts: { fullPath: string; mode?: DBInitType }) => {
+  ipcMain.handle('test-connection', async (_event, postgresConfig?: PostgresConfig) => {
     try {
-      resetIPCHandlers();
-      const createIfMissing = opts.mode === DBInitType.create || typeof opts.mode === 'undefined';
-      await setupDB({ fullPath: opts.fullPath, createIfMissing, mainWindow });
+      await testPostgresConnection(postgresConfig);
       return { success: true };
     } catch (error) {
-      return { success: false, ...mapSqliteError(error) };
+      return { success: false, ...mapDatabaseError(error, DatabaseType.postgre) };
     }
   });
+  ipcMain.handle(
+    'initialize-db',
+    async (
+      _event,
+      opts: { fullPath?: string; dbType: DatabaseType; mode?: DBInitType; postgresConfig?: PostgresConfig }
+    ) => {
+      try {
+        resetIPCHandlers();
+        const createIfMissing = opts.mode === DBInitType.create || typeof opts.mode === 'undefined';
+
+        await setupDB({
+          sqliteConfig: { fullPath: opts.fullPath },
+          dbType: opts.dbType,
+          createIfMissing,
+          mainWindow,
+          postgresConfig: opts.postgresConfig
+        });
+        return { success: true };
+      } catch (error) {
+        return { success: false, ...mapDatabaseError(error, opts.dbType) };
+      }
+    }
+  );
 };

@@ -1,5 +1,5 @@
-import type { SqliteValue } from './sqliteValue';
+import type { DbValue } from './dbValue';
 
 export interface UpdateData {
-  [key: string]: SqliteValue;
+  [key: string]: DbValue;
 }

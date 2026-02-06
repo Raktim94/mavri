@@ -1,8 +1,8 @@
 import { type Express, type Request, type Response as ResponseExpress } from 'express';
 import * as businessesService from '../../shared/services/businesses';
 import { decodeLogo, encodeResultBusiness } from '../../shared/utils/dataUrlFunctions';
+import { dbInstance } from '../database';
 import { parseFilter, requireDB } from '../utils/functions';
-import { dbInstance } from './database';
 
 export const initBusinessesController = (app: Express) => {
   app.get('/api/businesses', requireDB, async (req: Request, res: ResponseExpress) => {

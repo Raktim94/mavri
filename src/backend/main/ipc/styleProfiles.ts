@@ -1,9 +1,9 @@
 import { ipcMain } from 'electron';
-import type { Database } from 'sqlite3';
 import * as styleProfilesService from '../../shared/services/styleProfiles';
+import type { DatabaseAdapter } from '../../shared/types/DatabaseAdapter';
 import type { StyleProfile } from '../../shared/types/styleProfiles';
 
-export const initStyleProfilesHandlers = (db: Database) => {
+export const initStyleProfilesHandlers = (db: DatabaseAdapter) => {
   ipcMain.handle('add-styleProfile', async (_event, data: StyleProfile) =>
     styleProfilesService.addStyleProfile(db, data)
   );

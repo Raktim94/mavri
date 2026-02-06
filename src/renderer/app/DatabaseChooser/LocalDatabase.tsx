@@ -13,23 +13,24 @@ import {
 } from '@mui/material';
 import { useCallback, useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import i18n from '../i18n';
-import { isWebMode } from '../shared/api/restApi';
-import { DBInitType } from '../shared/enums/dbInitType';
-import { useDBInit } from '../shared/hooks/dbSelector/useDBInit';
-import { useDBListSelector } from '../shared/hooks/dbSelector/useDBListSelector';
-import { useDBOpener } from '../shared/hooks/dbSelector/useDBOpener';
-import { useDBSelector } from '../shared/hooks/dbSelector/useDBSelector';
-import type { DBSelector } from '../shared/types/dbSelector';
-import type { Response } from '../shared/types/response';
-import { useAppDispatch } from '../state/configureStore';
-import { addToast } from '../state/pageSlice';
-import { DBSetterComponent } from './DBNameSetter';
+import i18n from '../../i18n';
+import { isWebMode } from '../../shared/api/restApi';
+import { DatabaseType } from '../../shared/enums/databaseType';
+import { DBInitType } from '../../shared/enums/dbInitType';
+import { useDBInit } from '../../shared/hooks/dbSelector/useDBInit';
+import { useDBListSelector } from '../../shared/hooks/dbSelector/useDBListSelector';
+import { useDBOpener } from '../../shared/hooks/dbSelector/useDBOpener';
+import { useDBSelector } from '../../shared/hooks/dbSelector/useDBSelector';
+import type { DBSelector } from '../../shared/types/dbSelector';
+import type { Response } from '../../shared/types/response';
+import { useAppDispatch } from '../../state/configureStore';
+import { addToast } from '../../state/pageSlice';
+import { NameSetter } from './modals/NameSetter';
 
 interface Props {
   onDatabaseRead?: () => void;
 }
-export const DatabaseChooser: FC<Props> = ({ onDatabaseRead }) => {
+export const LocalDatabase: FC<Props> = ({ onDatabaseRead }) => {
   const dispatch = useAppDispatch();
   const theme = useTheme();
   const { t } = useTranslation();
@@ -71,6 +72,7 @@ export const DatabaseChooser: FC<Props> = ({ onDatabaseRead }) => {
   const { execute: initDB } = useDBInit({
     fullPath: selectedPath ?? '',
     mode: selectionMode,
+    dbType: DatabaseType.sqlite,
     immediate: false,
     onDone: (data: Response<unknown>) => {
       if (!data.success) {
@@ -87,12 +89,11 @@ export const DatabaseChooser: FC<Props> = ({ onDatabaseRead }) => {
     (list: string[]) => {
       const sortedList = [...list].sort((a, b) => a.localeCompare(b));
       setSavedDbs(sortedList);
-      if (sortedList.length > 0)
-        try {
-          localStorage.setItem('databases', JSON.stringify(sortedList));
-        } catch {
-          dispatch(addToast({ message: t('error.failedToSave'), severity: 'error' }));
-        }
+      try {
+        localStorage.setItem('databases', JSON.stringify(sortedList));
+      } catch {
+        dispatch(addToast({ message: t('error.failedToSave'), severity: 'error' }));
+      }
     },
     [t, dispatch]
   );
@@ -158,13 +159,12 @@ export const DatabaseChooser: FC<Props> = ({ onDatabaseRead }) => {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'start',
-        gap: 3,
-        pt: 5
+        gap: 3
       }}
     >
       {isWebMode() && isDBSetterModalOpen && (
         <>
-          <DBSetterComponent
+          <NameSetter
             isOpen={isDBSetterModalOpen}
             onCancel={() => setIsDBSetterModalOpen(false)}
             onSave={name => {

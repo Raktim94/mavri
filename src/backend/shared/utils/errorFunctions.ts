@@ -1,34 +1,54 @@
-import type { SqliteError } from '../../shared/types/sqliteError';
+import { DatabaseType } from '../enums/databaseType';
+import type { DatabaseError } from '../types/databaseError';
 
-export const sqliteErrorMap: Record<string, string> = {
+const sqliteErrorMap: Record<string, string> = {
   'UNIQUE constraint failed': 'error.invalidConstraintUnique',
   'FOREIGN KEY constraint failed': 'error.invalidConstraintForeign',
   'CHECK constraint failed': 'error.invalidConstraintCheck',
   'NOT NULL constraint failed': 'error.invalidConstraintNotNull',
-  SQLITE_ERROR: 'error.sqlSyntaxError',
   'datatype mismatch': 'error.datatypeMismatch',
-  SQLITE_IOERR: 'error.diskIOError',
   'database is locked': 'error.databaseLocked',
-  'file is not a database': 'error.databaseCorrupt'
+  'file is not a database': 'error.databaseCorrupt',
+  SQLITE_ERROR: 'error.sqlSyntaxError',
+  SQLITE_IOERR: 'error.diskIOError'
 };
 
-export const isSqliteError = (error: unknown): error is SqliteError => {
-  return error instanceof Error && 'code' in error && typeof (error as Record<string, unknown>).code === 'string';
+const postgresErrorMap: Record<string, string> = {
+  '23505': 'error.invalidConstraintUnique',
+  '23503': 'error.invalidConstraintForeign',
+  '23502': 'error.invalidConstraintNotNull',
+  '23514': 'error.invalidConstraintCheck',
+  '42601': 'error.sqlSyntaxError',
+  '22P02': 'error.datatypeMismatch'
 };
 
-export const mapSqliteError = (error: unknown): { message?: string; key?: string } => {
-  if (isSqliteError(error)) {
-    for (const [key, mapped] of Object.entries(sqliteErrorMap)) {
-      if (error.message.includes(key)) return { key: mapped };
+export const isDatabaseError = (error: unknown): error is DatabaseError => {
+  return error instanceof Error && typeof (error as unknown as { code?: string }).code === 'string';
+};
+
+export const mapDatabaseError = (error: unknown, dbType: DatabaseType): { key: string; message?: string } => {
+  if (isDatabaseError(error)) {
+    if (dbType === DatabaseType.sqlite) {
+      for (const [snippet, key] of Object.entries(sqliteErrorMap)) {
+        if (error.message.includes(snippet)) {
+          return { key };
+        }
+      }
     }
-    return { message: error.message };
+
+    if (dbType === DatabaseType.postgre) {
+      const mapped = postgresErrorMap[error.code];
+      if (mapped) return { key: mapped };
+    }
+
+    return { key: 'error.unknownError', message: error.message };
   }
+
   if (error instanceof Error) {
     const msg = error.message;
     if (msg.includes('Database file does not exist')) return { key: 'error.databaseFileMissing' };
     if (msg.includes('EBUSY')) return { key: 'error.databaseIsBusy' };
     return { key: 'error.unknownError', message: msg };
   }
-
   return { key: 'error.unknownError', message: String(error) };
 };

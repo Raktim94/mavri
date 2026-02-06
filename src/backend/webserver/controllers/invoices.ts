@@ -1,8 +1,8 @@
 import { type Express, type Request, type Response } from 'express';
 import * as invoicesService from '../../shared/services/invoices';
 import { decodeInvoice, encodeResultInvoices } from '../../shared/utils/dataUrlFunctions';
+import { dbInstance } from '../database';
 import { parseFilter, requireDB } from '../utils/functions';
-import { dbInstance } from './database';
 
 export const initInvoicesController = (app: Express) => {
   app.get('/api/invoices', requireDB, async (req: Request, res: Response) => {

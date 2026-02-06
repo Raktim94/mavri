@@ -1,4 +1,5 @@
 import type { Settings, SettingsUpdate } from '../types/settings';
+import type { DatabaseType } from './../enums/databaseType';
 import type { DBInitType } from './../enums/dbInitType';
 import type { InvoiceType } from './../enums/invoiceType';
 import type { Business, BusinessAdd, BusinessUpdate } from './business';
@@ -10,6 +11,7 @@ import type { ExportMeta } from './exportMeta';
 import type { FilterData } from './filter';
 import type { Invoice, InvoiceAdd, InvoiceUpdate } from './invoice';
 import type { Item, ItemAdd, ItemUpdate } from './item';
+import type { PostgresConfig } from './postgresConfig';
 import type { Response } from './response';
 import type { StyleProfile, StyleProfileAdd, StyleProfileUpdate } from './styleProfiles';
 import type { Unit, UnitAdd, UnitUpdate } from './unit';
@@ -32,8 +34,14 @@ declare global {
       openUrl: (url: string) => Promise<void>;
       selectDatabase: () => Promise<Response<DBSelector>>;
       openDatabase: () => Promise<Response<DBSelector>>;
-      initializeDatabase: (data: { fullPath: string; mode?: DBInitType }) => Promise<Response<unknown>>;
+      initializeDatabase: (data: {
+        postgresConfig?: PostgresConfig;
+        dbType: DatabaseType;
+        fullPath?: string;
+        mode?: DBInitType;
+      }) => Promise<Response<unknown>>;
       getDatabaseList: () => Promise<Response<string[]>>;
+      testConnection: (data: PostgresConfig) => Promise<Response<unknown>>;
 
       getAllSettings: () => Promise<Response<Settings>>;
       updateSettings: (data: SettingsUpdate) => Promise<Response<SettingsUpdate>>;

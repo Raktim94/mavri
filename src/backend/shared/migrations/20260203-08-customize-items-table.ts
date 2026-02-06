@@ -1,78 +1,56 @@
-import sqlite3 from 'sqlite3';
-import { getFirstRow, runAsync } from '../utils/dbFuntions';
-import { mapSqliteError } from '../utils/errorFunctions';
+import type { DatabaseAdapter } from '../types/DatabaseAdapter';
+import { getTableColumns } from '../utils/dbHelper';
+import { mapDatabaseError } from '../utils/errorFunctions';
 
-export const up = async (db: sqlite3.Database) => {
+export const up = async (db: DatabaseAdapter) => {
   try {
-    const colInfo = await getFirstRow(
-      db,
-      `
-        SELECT *
-        FROM pragma_table_info('invoice_customizations')
-        WHERE name = 'showRowNo'
-      `
-    );
-
+    const cols = await getTableColumns(db, 'invoice_customizations');
+    const colInfo = cols.find(c => c.name === 'showRowNo');
     if (colInfo) return;
 
-    await runAsync(db, 'PRAGMA foreign_keys = OFF;');
-    await runAsync(db, 'BEGIN TRANSACTION;');
-
-    await runAsync(
-      db,
+    await db.run(
       `
         ALTER TABLE style_profiles
-        ADD COLUMN showQuantity INTEGER NOT NULL DEFAULT 1 CHECK (showQuantity IN (0,1))
+        ADD COLUMN "showQuantity" INTEGER NOT NULL DEFAULT 1 CHECK ("showQuantity" IN (0,1))
       `
     );
-    await runAsync(
-      db,
+    await db.run(
       `
         ALTER TABLE style_profiles
-        ADD COLUMN showUnit INTEGER NOT NULL DEFAULT 1 CHECK (showUnit IN (0,1))
+        ADD COLUMN "showUnit" INTEGER NOT NULL DEFAULT 1 CHECK ("showUnit" IN (0,1))
       `
     );
-    await runAsync(
-      db,
+    await db.run(
       `
         ALTER TABLE style_profiles
-        ADD COLUMN showRowNo INTEGER NOT NULL DEFAULT 1 CHECK (showRowNo IN (0,1))
+        ADD COLUMN "showRowNo" INTEGER NOT NULL DEFAULT 1 CHECK ("showRowNo" IN (0,1))
       `
     );
-    await runAsync(
-      db,
+    await db.run(
       `
         ALTER TABLE invoice_customizations
-        ADD COLUMN showQuantity INTEGER NOT NULL DEFAULT 1 CHECK (showQuantity IN (0,1))
+        ADD COLUMN "showQuantity" INTEGER NOT NULL DEFAULT 1 CHECK ("showQuantity" IN (0,1))
       `
     );
-    await runAsync(
-      db,
+    await db.run(
       `
         ALTER TABLE invoice_customizations
-        ADD COLUMN showUnit INTEGER NOT NULL DEFAULT 1 CHECK (showUnit IN (0,1))
+        ADD COLUMN "showUnit" INTEGER NOT NULL DEFAULT 1 CHECK ("showUnit" IN (0,1))
       `
     );
-    await runAsync(
-      db,
+    await db.run(
       `
         ALTER TABLE invoice_customizations
-        ADD COLUMN showRowNo INTEGER NOT NULL DEFAULT 1 CHECK (showRowNo IN (0,1))
+        ADD COLUMN "showRowNo" INTEGER NOT NULL DEFAULT 1 CHECK ("showRowNo" IN (0,1))
       `
     );
-    await runAsync(
-      db,
+    await db.run(
       `
         ALTER TABLE invoice_items
-        ADD COLUMN customField TEXT;
+        ADD COLUMN "customField" TEXT;
       `
     );
-
-    await runAsync(db, 'COMMIT;');
-    await runAsync(db, 'PRAGMA foreign_keys = ON;');
   } catch (error) {
-    await runAsync(db, 'ROLLBACK;');
-    await runAsync(db, 'PRAGMA foreign_keys = ON;');
-    return { success: false, ...mapSqliteError(error) };
+    return { success: false, ...mapDatabaseError(error, db.type) };
   }
 };

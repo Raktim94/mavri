@@ -14,7 +14,7 @@ export interface InvoiceItemSnapshots {
   parentInvoiceItemId: number;
   id?: number;
   itemName: string;
-  unitPriceCents: number;
+  unitPriceCents: string;
   unitName?: string;
 }
 
@@ -105,9 +105,9 @@ export interface Invoice {
   invoicePrefix?: string;
   invoiceSuffix?: string;
   discountType?: DiscountType;
-  discountAmountCents: number;
+  discountAmountCents: string;
   discountPercent: number;
-  shippingFeeCents: number;
+  shippingFeeCents: string;
   taxName?: string;
   taxRate: number;
   taxType?: InvoiceTaxType;
@@ -141,7 +141,7 @@ export interface InvoiceAttachment {
 export interface InvoicePayment {
   id: number;
   parentInvoiceId: number;
-  amountCents: number;
+  amountCents: string;
   paidAt: string;
   paymentMethod: string;
   notes?: string;

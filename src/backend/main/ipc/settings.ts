@@ -1,27 +1,9 @@
 import { ipcMain } from 'electron';
-import type { Database } from 'sqlite3';
 import * as settingsService from '../../shared/services/settings';
+import type { DatabaseAdapter } from '../../shared/types/DatabaseAdapter';
+import type { Settings } from '../../shared/types/settings';
 
-export const initSettingsHandlers = (db: Database) => {
+export const initSettingsHandlers = (db: DatabaseAdapter) => {
   ipcMain.handle('get-all-settings', async () => settingsService.getAllSettings(db));
-  ipcMain.handle(
-    'update-settings',
-    async (
-      _event,
-      data: {
-        language?: string;
-        amountFormat?: string;
-        dateFormat?: string;
-        isDarkMode?: boolean;
-        invoicePrefix?: string;
-        invoiceSuffix?: string;
-        shouldIncludeYear?: boolean;
-        shouldIncludeMonth?: boolean;
-        shouldIncludeBusinessName?: boolean;
-        quotesON?: boolean;
-        styleProfilesON?: boolean;
-        reportsON?: boolean;
-      }
-    ) => settingsService.updateSettings(db, data)
-  );
+  ipcMain.handle('update-settings', async (_event, data: Settings) => settingsService.updateSettings(db, data));
 };

@@ -1,6 +1,7 @@
 import { DarkMode, Description, FileDownload, Language, LightMode } from '@mui/icons-material';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
+import CoffeeIcon from '@mui/icons-material/Coffee';
 import ColorLensIcon from '@mui/icons-material/ColorLens';
 import InfoIcon from '@mui/icons-material/Info';
 import PolicyIcon from '@mui/icons-material/Policy';
@@ -178,6 +179,16 @@ export const Menu: FC<Props> = ({
       isSelected: false,
       onClick: () => {
         getApi().openUrl('https://github.com/piratuks/invoice-builder/blob/main/TERMS-OF-USE.md');
+      }
+    },
+    {
+      text: t('settingsMenuItems.titles.buyMeCoffee'),
+      description: t('settingsMenuItems.descriptions.buyMeCoffee'),
+      icon: <CoffeeIcon />,
+      isToggle: false,
+      isSelected: false,
+      onClick: () => {
+        getApi().openUrl('https://www.buymeacoffee.com/evaldizi');
       }
     },
     ...(!isWebMode()

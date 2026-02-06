@@ -1,11 +1,11 @@
 import { dialog, ipcMain } from 'electron';
 import { promises as fs } from 'fs';
 import { join } from 'path';
-import type { Database } from 'sqlite3';
 import * as importExportService from '../../shared/services/importExport';
-import { mapSqliteError } from '../../shared/utils/errorFunctions';
+import type { DatabaseAdapter } from '../../shared/types/DatabaseAdapter';
+import { mapDatabaseError } from '../../shared/utils/errorFunctions';
 
-export const initImportExportHandlers = (db: Database) => {
+export const initImportExportHandlers = (db: DatabaseAdapter) => {
   ipcMain.handle('export-all-data', async () => {
     try {
       const payload = await importExportService.exportAllData(db);
@@ -23,7 +23,7 @@ export const initImportExportHandlers = (db: Database) => {
 
       return { success: true, data: { filePath: result.filePath } };
     } catch (error) {
-      return { success: false, ...mapSqliteError(error) };
+      return { success: false, ...mapDatabaseError(error, db.type) };
     }
   });
 
@@ -42,7 +42,7 @@ export const initImportExportHandlers = (db: Database) => {
       await importExportService.importAllData(db, parsed);
       return { success: true };
     } catch (error) {
-      return { success: false, ...mapSqliteError(error) };
+      return { success: false, ...mapDatabaseError(error, db.type) };
     }
   });
 };

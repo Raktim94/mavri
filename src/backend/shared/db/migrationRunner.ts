@@ -1,30 +1,35 @@
 import fs from 'fs';
 import path from 'path';
-import type { Database } from 'sqlite3';
-import { getFirstRow, runAsync } from '../utils/dbFuntions';
-import { mapSqliteError } from '../utils/errorFunctions';
+import { DatabaseType } from '../enums/databaseType';
+import type { DatabaseAdapter } from '../types/DatabaseAdapter';
+import { getColumnType, getDefaultValue } from '../utils/dbHelper';
+import { mapDatabaseError } from '../utils/errorFunctions';
 
-export const runMigrations = async (db: Database, migrationsPath: string) => {
+export const runMigrations = async (db: DatabaseAdapter, migrationsPath: string) => {
   try {
     const files = fs
       .readdirSync(migrationsPath)
       .filter(f => /^\d{8}-\d{2}-.*\.(cjs|js|ts)$/.test(f))
       .sort();
 
-    await runAsync(
-      db,
+    if (db.type === DatabaseType.sqlite) {
+      await db.run('PRAGMA foreign_keys = OFF;');
+    }
+    await db.run('BEGIN');
+
+    await db.run(
       `
-    CREATE TABLE IF NOT EXISTS migrations (
-      name TEXT PRIMARY KEY,
-      appliedAt DATETIME NOT NULL DEFAULT (datetime('now'))
-    );
-  `
+      CREATE TABLE IF NOT EXISTS migrations (
+        "name" TEXT PRIMARY KEY,
+        "appliedAt" ${getColumnType('DATETIME', db.type)} NOT NULL DEFAULT ${getDefaultValue("(datetime('now'))", db.type)}
+      );
+    `
     );
 
     for (const file of files) {
       const name = path.basename(file);
 
-      const row = await getFirstRow(db, `SELECT 1 FROM migrations WHERE name = ?`, [name]);
+      const row = await db.get(`SELECT 1 FROM migrations WHERE "name" = ?`, [name]);
 
       if (!row) {
         const migrationPath = path.resolve(migrationsPath, file);
@@ -35,13 +40,26 @@ export const runMigrations = async (db: Database, migrationsPath: string) => {
         }
         if (migration.up) {
           await migration.up(db);
-          await runAsync(db, `INSERT INTO migrations(name) VALUES('${name}')`);
+          await db.run(`INSERT INTO migrations("name") VALUES(?)`, [name]);
         }
       }
     }
+
+    await db.run('COMMIT');
+
+    if (db.type === DatabaseType.sqlite) {
+      await db.run('PRAGMA foreign_keys = ON;');
+    }
+    return { success: true, message: undefined, data: undefined, key: undefined };
   } catch (error) {
-    console.log(error);
-    await runAsync(db, 'ROLLBACK;');
-    return { success: false, ...mapSqliteError(error) };
+    try {
+      await db.run('ROLLBACK');
+    } catch {
+      throw new Error(`ROLLBACK failed`);
+    }
+    if (db.type === DatabaseType.sqlite) {
+      await db.run('PRAGMA foreign_keys = ON;');
+    }
+    return { success: false, ...mapDatabaseError(error, db.type) };
   }
 };

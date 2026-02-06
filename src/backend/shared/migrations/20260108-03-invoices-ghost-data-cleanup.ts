@@ -1,21 +1,12 @@
-import sqlite3 from 'sqlite3';
-import { runAsync } from '../utils/dbFuntions';
-import { mapSqliteError } from '../utils/errorFunctions';
+import type { DatabaseAdapter } from '../types/DatabaseAdapter';
+import { mapDatabaseError } from '../utils/errorFunctions';
 
-export const up = async (db: sqlite3.Database) => {
+export const up = async (db: DatabaseAdapter) => {
   try {
-    await runAsync(db, 'PRAGMA foreign_keys = OFF;');
-    await runAsync(db, 'BEGIN TRANSACTION;');
-
-    await runAsync(db, 'delete from invoice_items where parentInvoiceId not in (select id from invoices)');
-    await runAsync(db, 'delete from invoice_payments where parentInvoiceId not in (select id from invoices)');
-    await runAsync(db, 'delete from attachments where parentInvoiceId not in (select id from invoices)');
-
-    await runAsync(db, 'COMMIT;');
-    await runAsync(db, 'PRAGMA foreign_keys = ON;');
+    await db.run('delete from invoice_items where "parentInvoiceId" not in (select "id" from invoices)');
+    await db.run('delete from invoice_payments where "parentInvoiceId" not in (select "id" from invoices)');
+    await db.run('delete from attachments where "parentInvoiceId" not in (select "id" from invoices)');
   } catch (error) {
-    await runAsync(db, 'ROLLBACK;');
-    await runAsync(db, 'PRAGMA foreign_keys = ON;');
-    return { success: false, ...mapSqliteError(error) };
+    return { success: false, ...mapDatabaseError(error, db.type) };
   }
 };

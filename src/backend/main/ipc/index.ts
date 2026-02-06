@@ -1,5 +1,5 @@
 import { BrowserWindow, ipcMain, shell } from 'electron';
-import type { Database } from 'sqlite3';
+import type { DatabaseAdapter } from '../../shared/types/DatabaseAdapter';
 import { initAutoUpdaterHandlers } from './autoUpdater';
 import { initBusinessesHandlers } from './businesses';
 import { initCategoriesHandlers } from './categories';
@@ -12,9 +12,8 @@ import { initSettingsHandlers } from './settings';
 import { initStyleProfilesHandlers } from './styleProfiles';
 import { initUnitsHandlers } from './units';
 
-export const initIpcHandler = (db: Database, path: string, mainWindow: BrowserWindow) => {
-  if (!db) throw new Error('Database not initialized');
-  if (!path) throw new Error('Database path not set');
+export const initIpcHandler = (db: DatabaseAdapter, mainWindow: BrowserWindow) => {
+  if (!db) throw new Error('Database is not initialized');
 
   ipcMain.handle('open-url', async (_event, url: string) => {
     await shell.openExternal(url);
