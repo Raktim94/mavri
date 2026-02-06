@@ -29,7 +29,7 @@ export const initDatabaseController = (app: Express) => {
   });
   app.post('/api/databases/test', async (req: Request, res: Response) => {
     try {
-      const postgresConfig = req.body?.postgresConfig;
+      const postgresConfig = req.body;
 
       await testPostgresConnection(postgresConfig);
       res.json({ success: true });
