@@ -4,18 +4,35 @@
 
 ## Database creation screen
 
-The first screen of the application allows you to **create a new database** at a chosen location or **open an existing one**.
+The first screen of the application lets you choose how you want to work with your database.
+You can either create/open a local database file or connect to a database server.
+
+### Local database
 
 Recently opened databases are displayed in a **quick access list** for faster reopening.
 
 ![First screen](tutorial/initial_screen.jpg)
 
-When the application is used via Docker or the web version (rather than as native software), databases are created in a configured folder and automatically listed for quick access.
-To remove a database from the quick access list, it must no longer be present in that configured folder.
-The database name is specified during creation.
+When the application runs in Docker or the web version, databases are created inside a predefined folder. All databases in that folder are automatically listed in Quick Access.
+To remove a database from the Quick Access list, simply delete it from that folder.
+During creation, you will be prompted to enter the database name.
 
 ![First screen](tutorial/initial_screen_web.jpg)
 ![First screen](tutorial/initial_screen_naming_web.jpg)
+
+### Server database
+
+Recently used server connections also appear in a Quick Access list for faster reconnecting.
+For security reasons, passwords are never saved, so you will always need to re-enter the password when reconnecting.
+On the connection screen, you can:
+
+- Enter server connection details
+- Test the connection
+- Save the connection (without password) for quick access
+
+![First screen](tutorial/connection.jpg)
+![First screen](tutorial/server_connections.jpg)
+![First screen](tutorial/password_enter.jpg)
 
 ## Settings screen
 

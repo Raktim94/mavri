@@ -31,6 +31,10 @@ export const initDatabaseController = (app: Express) => {
     try {
       const postgresConfig = req.body;
 
+      if (postgresConfig.host === 'localhost') {
+        postgresConfig.host = 'host.docker.internal';
+      }
+
       await testPostgresConnection(postgresConfig);
       res.json({ success: true });
     } catch (err) {
@@ -45,6 +49,10 @@ export const initDatabaseController = (app: Express) => {
       const postgresConfig = req.body?.postgresConfig;
       const fullPath = path.resolve(dbDir, name);
       const createIfMissing = mode === DBInitType.create || typeof mode === 'undefined';
+
+      if (process.env.NODE_ENV === 'docker' && postgresConfig.host === 'localhost') {
+        postgresConfig.host = 'host.docker.internal';
+      }
 
       await setupDB({
         sqliteConfig: { fullPath: fullPath },
