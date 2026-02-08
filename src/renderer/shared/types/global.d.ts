@@ -88,6 +88,7 @@ declare global {
       addCurrency: (data: CurrencyAdd) => Promise<Response<Currency>>;
       addBatchCurrency: (data: CurrencyAdd[]) => Promise<Response<Currency[]>>;
 
+      getCustomHeaders: (type: InvoiceType) => Promise<Response<string[]>>;
       getAllInvoices: (type?: InvoiceType, filter?: FilterData[]) => Promise<Response<Invoice[]>>;
       deleteInvoice: (id: number) => Promise<Response<unknown>>;
       addInvoice: (data: InvoiceAdd) => Promise<Response<Invoice>>;

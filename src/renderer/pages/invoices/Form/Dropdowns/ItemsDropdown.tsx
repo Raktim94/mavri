@@ -3,6 +3,7 @@ import { memo, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CRUDPage } from '../../../../shared/components/layout/crudPage/CRUDPage';
 import { FilterType } from '../../../../shared/enums/filterType';
+import type { InvoiceType } from '../../../../shared/enums/invoiceType';
 import { useItemsRetrieve } from '../../../../shared/hooks/items/useItemsRetrieve';
 import type { Filter, FilterData } from '../../../../shared/types/filter';
 import type { ItemForm } from '../../../../shared/types/invoice';
@@ -14,13 +15,14 @@ import { ItemMetadataSetter } from '../Modals/ItemMetadataSetter';
 
 interface Props {
   isOpen: boolean;
+  type: InvoiceType;
   headerOptions: string[];
   onClose?: () => void;
   onOpen?: () => void;
   onClick?: (item: Item, data: ItemForm) => void;
 }
 
-const ItemsDropdownComponent: FC<Props> = ({ isOpen, headerOptions, onClose, onOpen, onClick }) => {
+const ItemsDropdownComponent: FC<Props> = ({ isOpen, type, headerOptions, onClose, onOpen, onClick }) => {
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
 
@@ -39,6 +41,7 @@ const ItemsDropdownComponent: FC<Props> = ({ isOpen, headerOptions, onClose, onO
     <>
       {isOpen && (
         <ItemMetadataSetter
+          type={type}
           headerOptions={headerOptions}
           isOpen={selectedItem !== undefined}
           onCancel={() => setSelectedItem(undefined)}

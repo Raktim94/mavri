@@ -5,6 +5,11 @@ import { dbInstance } from '../database';
 import { parseFilter, requireDB } from '../utils/functions';
 
 export const initInvoicesController = (app: Express) => {
+  app.get('/api/invoices/headers', requireDB, async (req: Request, res: Response) => {
+    const type = req.query.type as 'invoice' | 'quotation';
+    const result = await invoicesService.getCustomHeaders(dbInstance!, type);
+    res.json(result);
+  });
   app.get('/api/invoices', requireDB, async (req: Request, res: Response) => {
     const type = req.query.type as 'invoice' | 'quotation' | undefined;
     const filter = parseFilter(req.query.filter as string);

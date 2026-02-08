@@ -788,6 +788,7 @@ const InvoiceFormComponent: FC<Props> = ({
       />
       <ItemsDropdown
         isOpen={isDropdownOpenItems}
+        type={type}
         headerOptions={customFieldHeaders}
         onClose={() => handleOnClose(setIsDropdownOpenItems)}
         onOpen={() => handleOnOpen(setIsDropdownOpenItems)}
@@ -833,6 +834,7 @@ const InvoiceFormComponent: FC<Props> = ({
         onCancel={() => handleOnClose(setIsModalItemMetadataOpen)}
         currQuantity={selectedInvoiceItem?.quantity}
         customField={selectedInvoiceItem?.customField}
+        type={type}
         headerOptions={customFieldHeaders}
         onSave={handleEditMetadataItem}
       />

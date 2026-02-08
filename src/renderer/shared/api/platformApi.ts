@@ -300,6 +300,7 @@ export const webApi = () => {
     deleteCurrency: (id: number) => apiDelete<Response<unknown>>(`/api/currencies/${id}`),
     addBatchCurrency: (data: CurrencyAdd[]) => apiPost<Response<Currency[]>>('/api/currencies/batch', data),
 
+    getCustomHeaders: async (type: InvoiceType) => apiGet<Response<string[]>>('/api/invoices/headers', { type: type }),
     getAllInvoices: async (type?: InvoiceType, filter?: FilterData[]) => {
       const params: Record<string, string> = {};
       if (type) params.type = type;

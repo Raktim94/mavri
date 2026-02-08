@@ -18,20 +18,27 @@ import { useTranslation } from 'react-i18next';
 import { AmountInput } from '../../../../shared/components/inputs/amountInput/AmountInput';
 import { ModalAppBar } from '../../../../shared/components/layout/modalAppBar/ModalAppBar';
 import { Alignment } from '../../../../shared/enums/alignment';
+import type { InvoiceType } from '../../../../shared/enums/invoiceType';
+import { useHeadersRetrieve } from '../../../../shared/hooks/invoices/useHeadersRetrieve';
 import { useForm } from '../../../../shared/hooks/useForm';
 import type { CustomField, ItemForm } from '../../../../shared/types/invoice';
+import type { Response } from '../../../../shared/types/response';
 import { validators } from '../../../../shared/utils/validatorFunctions';
+import { useAppDispatch } from '../../../../state/configureStore';
+import { addToast } from '../../../../state/pageSlice';
 
 interface Props {
   isOpen: boolean;
+  type: InvoiceType;
+  headerOptions: string[];
   currQuantity?: string;
   customField?: CustomField;
-  headerOptions: string[];
   onCancel?: () => void;
   onSave?: (data: ItemForm) => void;
 }
 const ItemMetadataSetterComponent: FC<Props> = ({
   isOpen,
+  type,
   headerOptions,
   currQuantity,
   customField,
@@ -52,6 +59,23 @@ const ItemMetadataSetterComponent: FC<Props> = ({
     value: false
   });
 
+  const dispatch = useAppDispatch();
+  const [customHeaders, setCustomHeaders] = useState<string[]>([]);
+  const { execute: retrieveHeaders } = useHeadersRetrieve({
+    type: type,
+    immediate: false,
+    onDone: (data: Response<string[]>) => {
+      if (!data.success) {
+        if (data.message) dispatch(addToast({ message: data.message, severity: 'error' }));
+        else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
+      }
+
+      const unique = [...new Set(headerOptions.concat(data.data ?? []))];
+
+      setCustomHeaders(unique);
+    }
+  });
+
   const validateField = (field: keyof typeof errors, value: string) => {
     if (!validators.required(value) && field === 'quantity') {
       setErrors(e => ({ ...e, [field]: true }));
@@ -59,6 +83,10 @@ const ItemMetadataSetterComponent: FC<Props> = ({
       setErrors(e => ({ ...e, [field]: false }));
     }
   };
+
+  useEffect(() => {
+    if (isOpen) retrieveHeaders();
+  }, [isOpen, retrieveHeaders]);
 
   useEffect(() => {
     const valid = (() => {
@@ -124,7 +152,7 @@ const ItemMetadataSetterComponent: FC<Props> = ({
           <Grid size={{ xs: 12, md: 6 }}>
             <Autocomplete
               freeSolo
-              options={headerOptions}
+              options={customHeaders}
               value={form.header}
               renderInput={params => (
                 <TextField

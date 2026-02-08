@@ -2,6 +2,7 @@ import type { Response } from '../../shared/types/response';
 import type { DatabaseAdapter } from '../types/DatabaseAdapter';
 import type { EntityWithId } from '../types/entityWithId';
 import type {
+  CustomField,
   Invoice,
   InvoiceAttachment,
   InvoiceBusinessSnapshots,
@@ -255,6 +256,27 @@ const getInvoices = async (db: DatabaseAdapter, options: GetInvoicesOptions) => 
     invoiceCustomization: invoiceCustomization.find(p => p.parentInvoiceId === invoice.id),
     invoiceStyleProfileSnapshot: invoiceStyleProfileSnapshots.find(p => p.parentInvoiceId === invoice.id)
   }));
+};
+
+export const getCustomHeaders = async (db: DatabaseAdapter, type: 'invoice' | 'quotation') => {
+  const rows = await db.all<{ customField: string | null }>(
+    `
+    SELECT ii.customField
+      FROM invoice_items ii
+      INNER JOIN invoices as i on i."id" = ii."parentInvoiceId"
+      WHERE i."invoiceType" = ?
+      GROUP BY ii.customField
+    `,
+    [type]
+  );
+  const headers: string[] = [];
+  rows.map(row => {
+    const parsed = row.customField ? (JSON.parse(row.customField) as CustomField) : null;
+    if (parsed && !headers.some(h => h === parsed.header)) {
+      headers.push(parsed.header);
+    }
+  });
+  return { success: true, data: headers };
 };
 
 export const getAllInvoices = async (db: DatabaseAdapter, type?: 'invoice' | 'quotation', filter?: FilterData[]) => {
