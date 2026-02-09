@@ -365,7 +365,7 @@ export const webApi = () => {
         input.onchange = async () => {
           const file = input.files?.[0];
           if (!file) {
-            resolve({ success: false, message: 'canceled' });
+            resolve({ success: false });
             return;
           }
           const text = await file.text();

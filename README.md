@@ -80,6 +80,7 @@ If you value **privacy, portability, and control**, this app is built for you.
 - Style profiles are now available for invoices and quotes, enabling quick, consistent theming
 - Show quantity, unit, and row number in the PDF item table
 - Custom header sections and custom values in the PDF item table
+- Ability to reorder all columns/headers in the PDF item table
 
 ### Reports
 

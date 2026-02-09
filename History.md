@@ -6,6 +6,7 @@ New features & improvements
 
 - PostgreSQL support added. Users can now choose between a local SQLite database file or connecting to a PostgreSQL server.
 - Custom header sections are reused per invoices/quotes
+- Added the ability to reorder invoice item table columns, including custom fields, via drag-and-drop. Users can now fully customize the column order in the invoice table, and the changes are reflected in both the UI and exported PDFs.
 - Customization layout improvements
 
 Bug Fixes

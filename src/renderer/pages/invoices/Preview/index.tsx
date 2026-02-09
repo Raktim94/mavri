@@ -45,30 +45,34 @@ const InvoicesPreviewComponent: FC<Props> = ({ onSaveProfile = () => {}, setInvo
 
   const handleOnClickCustomization = useCallback(
     (data: CustomizationForm) => {
-      const cleanedFieldSortOrders: SortOrder = { ...(data.fieldSortOrders ?? DEFAULT_TABLE_FIELD_SORT_ORDERS) };
-      Object.keys(cleanedFieldSortOrders).forEach(key => {
-        if (customFieldHeaders.some(item => item.header === key)) {
-          delete cleanedFieldSortOrders[key];
-        }
-      });
-
       setInvoiceForm({
         ...invoiceForm,
         invoiceCustomization: {
           ...invoiceForm?.invoiceCustomization,
           ...data,
-          fieldSortOrders: cleanedFieldSortOrders
+          fieldSortOrders: Object.entries(data.fieldSortOrders ?? DEFAULT_TABLE_FIELD_SORT_ORDERS).reduce(
+            (acc, [key, value]) => {
+              if (!customFieldHeaders.some(item => item.header === key)) {
+                acc[key] = value;
+              }
+              return acc;
+            },
+            {} as SortOrder
+          )
         },
         invoiceItems: invoiceForm?.invoiceItems?.map(item => {
           const newSortOrder = data.fieldSortOrders
             ? data.fieldSortOrders[item.customField?.header ?? '']
             : item.customField?.sortOrder;
+
           return {
             ...item,
             customField: item.customField
               ? {
                   ...item.customField,
-                  ...(newSortOrder && { sortOrder: newSortOrder })
+                  ...(newSortOrder !== undefined
+                    ? { sortOrder: newSortOrder }
+                    : { sortOrder: item.customField.sortOrder })
                 }
               : item.customField
           };

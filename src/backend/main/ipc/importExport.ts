@@ -35,7 +35,7 @@ export const initImportExportHandlers = (db: DatabaseAdapter) => {
         filters: [{ name: 'JSON', extensions: ['json'] }]
       });
 
-      if (canceled || !filePaths?.[0]) return { success: false, message: 'canceled' };
+      if (canceled || !filePaths?.[0]) return { success: false };
 
       const content = await fs.readFile(filePaths[0], 'utf8');
       const parsed = JSON.parse(content);

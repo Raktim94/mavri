@@ -171,7 +171,6 @@ export const CustomizationLayout: FC<Props> = ({
         acc[item.key] = item.value;
         return acc;
       }, {} as SortOrder);
-
       setForm({ ...form, fieldSortOrders: updatedFieldSortOrders });
     }
   };
@@ -427,6 +426,10 @@ export const CustomizationLayout: FC<Props> = ({
                   strategy={verticalListSortingStrategy}
                 >
                   {sortItemObjectList.map((item, index) => {
+                    if (item.key === 'no' && !form.showRowNo) return null;
+                    if (item.key === 'quantity' && !form.showQuantity) return null;
+                    if (item.key === 'unit' && !form.showUnit) return null;
+
                     return (
                       <SortableItem
                         key={`customizable-sort-order-${item.key}-${index}`}
