@@ -6,6 +6,7 @@ import type { CustomField, InvoiceFromData } from '../../../shared/types/invoice
 import type { Settings } from '../../../shared/types/settings';
 import { createCurrencyFormatter } from '../../../shared/utils/formatFunctions';
 import { getItemFinancialData } from '../../../shared/utils/invoiceFunctions';
+import { DEFAULT_TABLE_FIELD_SORT_ORDERS } from '../../../state/constant';
 import { COLUMN_WEIGHTS, DEFAULT_FONT_SIZES, DEFAULT_USER_COLUMN_WEIGHT, FONT_SIZES, PDF_STYLES } from './constant';
 
 interface PropsLabels {
@@ -113,6 +114,21 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
     return { bckgColor: rowBckgColor, fontColor: rowFontColor, border: rowBorder, borderCell: rowBorderCell };
   }, [invoiceForm]);
 
+  const sortedColumns = useMemo(() => {
+    const sortOrders = invoiceForm?.invoiceCustomization?.fieldSortOrders ?? DEFAULT_TABLE_FIELD_SORT_ORDERS;
+    const defaultCols = Object.entries(sortOrders).map(([key, value]) => ({
+      key,
+      sortOrder: value
+    }));
+    const customCols = customFields.map(f => ({
+      key: f.header,
+      sortOrder: f.sortOrder
+    }));
+    const allCols = [...defaultCols, ...customCols];
+    allCols.sort((a, b) => a.sortOrder - b.sortOrder);
+    return allCols.map(c => c.key);
+  }, [invoiceForm?.invoiceCustomization?.fieldSortOrders, customFields]);
+
   const rowStyle = useMemo(() => {
     let rowBorderBottom: string | undefined = '1px solid #e0e0e0';
     let rowBorderCell: string | undefined = undefined;
@@ -146,121 +162,202 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
           }
         ]}
       >
-        {invoiceForm?.invoiceCustomization?.showRowNo && (
-          <View style={[PDF_STYLES.tableCol, sizes['rowNo'], { borderLeft: rowStyle.borderCell }]}>
-            <Text
-              style={[
-                PDF_STYLES.tableCellHeader,
-                {
-                  fontSize:
-                    FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCellHeader
-                }
-              ]}
-            >
-              #
-            </Text>
-          </View>
-        )}
-        <View style={[PDF_STYLES.tableCol, sizes['item'], { borderLeft: rowStyle.borderCell }]}>
-          <Text
-            style={[
-              PDF_STYLES.tableCellHeader,
-              {
-                fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCellHeader
-              }
-            ]}
-          >
-            {itemLabel}
-          </Text>
-        </View>
-        {customFields.map(field => {
-          return (
-            <View
-              key={field.header}
-              style={[
-                PDF_STYLES.tableCol,
-                sizes[field.header],
-                { textAlign: field.alignment },
-                { borderLeft: rowStyle.borderCell }
-              ]}
-            >
-              <Text
-                style={[
-                  PDF_STYLES.tableCellHeader,
-                  {
-                    fontSize:
-                      FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCellHeader
-                  }
-                ]}
-              >
-                {field.header}
-              </Text>
-            </View>
-          );
+        {sortedColumns.map((colKey, index) => {
+          switch (colKey) {
+            case 'no':
+              if (!invoiceForm?.invoiceCustomization?.showRowNo) return null;
+              return (
+                <View
+                  key={colKey}
+                  style={[
+                    PDF_STYLES.tableCol,
+                    sizes['rowNo'],
+                    {
+                      borderLeft: rowStyle.borderCell,
+                      ...(sortedColumns.length === index + 1 && { borderRight: rowStyle.borderCell })
+                    }
+                  ]}
+                >
+                  <Text
+                    style={[
+                      PDF_STYLES.tableCellHeader,
+                      {
+                        fontSize:
+                          FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCellHeader
+                      }
+                    ]}
+                  >
+                    #
+                  </Text>
+                </View>
+              );
+            case 'item':
+              return (
+                <View
+                  key={colKey}
+                  style={[
+                    PDF_STYLES.tableCol,
+                    sizes['item'],
+                    {
+                      borderLeft: rowStyle.borderCell,
+                      ...(sortedColumns.length === index + 1 && { borderRight: rowStyle.borderCell })
+                    }
+                  ]}
+                >
+                  <Text
+                    style={[
+                      PDF_STYLES.tableCellHeader,
+                      {
+                        fontSize:
+                          FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCellHeader
+                      }
+                    ]}
+                  >
+                    {itemLabel}
+                  </Text>
+                </View>
+              );
+            case 'unit':
+              if (!invoiceForm?.invoiceCustomization?.showUnit) return null;
+              return (
+                <View
+                  key={colKey}
+                  style={[
+                    PDF_STYLES.tableCol,
+                    sizes['unit'],
+                    PDF_STYLES.textEnd,
+                    {
+                      borderLeft: rowStyle.borderCell,
+                      ...(sortedColumns.length === index + 1 && { borderRight: rowStyle.borderCell })
+                    }
+                  ]}
+                >
+                  <Text
+                    style={[
+                      PDF_STYLES.tableCellHeader,
+                      {
+                        fontSize:
+                          FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCellHeader
+                      }
+                    ]}
+                  >
+                    {unitLabel}
+                  </Text>
+                </View>
+              );
+            case 'quantity':
+              if (!invoiceForm?.invoiceCustomization?.showQuantity) return null;
+              return (
+                <View
+                  key={colKey}
+                  style={[
+                    PDF_STYLES.tableCol,
+                    sizes['quantity'],
+                    PDF_STYLES.textEnd,
+                    {
+                      borderLeft: rowStyle.borderCell,
+                      ...(sortedColumns.length === index + 1 && { borderRight: rowStyle.borderCell })
+                    }
+                  ]}
+                >
+                  <Text
+                    style={[
+                      PDF_STYLES.tableCellHeader,
+                      {
+                        fontSize:
+                          FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCellHeader
+                      }
+                    ]}
+                  >
+                    {qtyLabel}
+                  </Text>
+                </View>
+              );
+            case 'unitCost':
+              return (
+                <View
+                  key={colKey}
+                  style={[
+                    PDF_STYLES.tableCol,
+                    sizes['unitCost'],
+                    PDF_STYLES.textEnd,
+                    {
+                      borderLeft: rowStyle.borderCell,
+                      ...(sortedColumns.length === index + 1 && { borderRight: rowStyle.borderCell })
+                    }
+                  ]}
+                >
+                  <Text
+                    style={[
+                      PDF_STYLES.tableCellHeader,
+                      {
+                        fontSize:
+                          FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCellHeader
+                      }
+                    ]}
+                  >
+                    {unitCostLabel}
+                  </Text>
+                </View>
+              );
+            case 'total':
+              return (
+                <View
+                  key={colKey}
+                  style={[
+                    PDF_STYLES.tableCol,
+                    sizes['total'],
+                    PDF_STYLES.textEnd,
+                    {
+                      borderLeft: rowStyle.borderCell,
+                      ...(sortedColumns.length === index + 1 && { borderRight: rowStyle.borderCell })
+                    }
+                  ]}
+                >
+                  <Text
+                    style={[
+                      PDF_STYLES.tableCellHeader,
+                      {
+                        fontSize:
+                          FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCellHeader
+                      }
+                    ]}
+                  >
+                    {totalLabel}
+                  </Text>
+                </View>
+              );
+            default:
+              const field = customFields.find(f => f.header === colKey);
+              if (!field) return null;
+              return (
+                <View
+                  key={field.header}
+                  style={[
+                    PDF_STYLES.tableCol,
+                    sizes[field.header],
+                    { textAlign: field.alignment },
+                    {
+                      borderLeft: rowStyle.borderCell,
+                      ...(sortedColumns.length === index + 1 && { borderRight: rowStyle.borderCell })
+                    }
+                  ]}
+                >
+                  <Text
+                    style={[
+                      PDF_STYLES.tableCellHeader,
+                      {
+                        fontSize:
+                          FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCellHeader
+                      }
+                    ]}
+                  >
+                    {field.header}
+                  </Text>
+                </View>
+              );
+          }
         })}
-        {invoiceForm?.invoiceCustomization?.showUnit && (
-          <View style={[PDF_STYLES.tableCol, sizes['unit'], PDF_STYLES.textEnd, { borderLeft: rowStyle.borderCell }]}>
-            <Text
-              style={[
-                PDF_STYLES.tableCellHeader,
-                {
-                  fontSize:
-                    FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCellHeader
-                }
-              ]}
-            >
-              {unitLabel}
-            </Text>
-          </View>
-        )}
-        {invoiceForm?.invoiceCustomization?.showQuantity && (
-          <View
-            style={[PDF_STYLES.tableCol, sizes['quantity'], PDF_STYLES.textEnd, { borderLeft: rowStyle.borderCell }]}
-          >
-            <Text
-              style={[
-                PDF_STYLES.tableCellHeader,
-                {
-                  fontSize:
-                    FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCellHeader
-                }
-              ]}
-            >
-              {qtyLabel}
-            </Text>
-          </View>
-        )}
-        <View style={[PDF_STYLES.tableCol, sizes['unitCost'], PDF_STYLES.textEnd, { borderLeft: rowStyle.borderCell }]}>
-          <Text
-            style={[
-              PDF_STYLES.tableCellHeader,
-              {
-                fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCellHeader
-              }
-            ]}
-          >
-            {unitCostLabel}
-          </Text>
-        </View>
-        <View
-          style={[
-            PDF_STYLES.tableCol,
-            sizes['total'],
-            PDF_STYLES.textEnd,
-            { borderLeft: rowStyle.borderCell, borderRight: rowStyle.borderCell }
-          ]}
-        >
-          <Text
-            style={[
-              PDF_STYLES.tableCellHeader,
-              {
-                fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCellHeader
-              }
-            ]}
-          >
-            {totalLabel}
-          </Text>
-        </View>
       </View>
       {invoiceForm?.invoiceItems?.map((item, index) => {
         const { quantity, taxType, taxRate, invoiceItemSnapshot, customField } = item;
@@ -287,127 +384,209 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
               }
             ]}
           >
-            {invoiceForm?.invoiceCustomization?.showRowNo && (
-              <View style={[PDF_STYLES.tableCol, sizes['rowNo'], { borderLeft: rowStyle.borderCell }]}>
-                <Text
-                  style={[
-                    {
-                      fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCell
-                    }
-                  ]}
-                >
-                  {index + 1}
-                </Text>
-              </View>
-            )}
-            <View style={[PDF_STYLES.tableCol, sizes['item'], { borderLeft: rowStyle.borderCell }]}>
-              <Text
-                style={[
-                  { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCell }
-                ]}
-              >
-                {itemName}
-              </Text>
-              {taxType && (
-                <Text
-                  style={[
-                    PDF_STYLES.tableCellSubtle,
-                    {
-                      fontSize:
-                        FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCellSubtle
-                    }
-                  ]}
-                >
-                  {itemTaxLabel({ rate: taxRate, amount: formattedTax })}
-                </Text>
-              )}
-            </View>
-            {customFields.map(field => {
-              return (
-                <View
-                  key={field.header}
-                  style={[
-                    PDF_STYLES.tableCol,
-                    sizes[field.header],
-                    { textAlign: field.alignment },
-                    { borderLeft: rowStyle.borderCell }
-                  ]}
-                >
-                  <Text
-                    style={[
-                      {
-                        fontSize:
-                          FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCell
-                      }
-                    ]}
-                  >
-                    {customField?.header === field.header && customField.value ? customField.value : ' '}
-                  </Text>
-                </View>
-              );
+            {sortedColumns.map((colKey, index) => {
+              switch (colKey) {
+                case 'no':
+                  if (!invoiceForm?.invoiceCustomization?.showRowNo) return null;
+                  return (
+                    <View
+                      key={colKey}
+                      style={[
+                        PDF_STYLES.tableCol,
+                        sizes['rowNo'],
+                        {
+                          borderLeft: rowStyle.borderCell,
+                          ...(sortedColumns.length === index + 1 && { borderRight: rowStyle.borderCell })
+                        }
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          {
+                            fontSize:
+                              FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCell
+                          }
+                        ]}
+                      >
+                        {index + 1}
+                      </Text>
+                    </View>
+                  );
+                case 'item':
+                  return (
+                    <View
+                      key={colKey}
+                      style={[
+                        PDF_STYLES.tableCol,
+                        sizes['item'],
+                        {
+                          borderLeft: rowStyle.borderCell,
+                          ...(sortedColumns.length === index + 1 && { borderRight: rowStyle.borderCell })
+                        }
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          {
+                            fontSize:
+                              FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCell
+                          }
+                        ]}
+                      >
+                        {itemName}
+                      </Text>
+                      {taxType && (
+                        <Text
+                          style={[
+                            PDF_STYLES.tableCellSubtle,
+                            {
+                              fontSize:
+                                FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES]
+                                  .tableCellSubtle
+                            }
+                          ]}
+                        >
+                          {itemTaxLabel({ rate: taxRate, amount: formattedTax })}
+                        </Text>
+                      )}
+                    </View>
+                  );
+                case 'unit':
+                  if (!invoiceForm?.invoiceCustomization?.showUnit) return null;
+                  return (
+                    <View
+                      key={colKey}
+                      style={[
+                        PDF_STYLES.tableCol,
+                        sizes['unit'],
+                        PDF_STYLES.textEnd,
+                        {
+                          borderLeft: rowStyle.borderCell,
+                          ...(sortedColumns.length === index + 1 && { borderRight: rowStyle.borderCell })
+                        }
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          {
+                            fontSize:
+                              FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCell
+                          }
+                        ]}
+                      >
+                        {unitName}
+                      </Text>
+                    </View>
+                  );
+                case 'quantity':
+                  if (!invoiceForm?.invoiceCustomization?.showQuantity) return null;
+                  return (
+                    <View
+                      key={colKey}
+                      style={[
+                        PDF_STYLES.tableCol,
+                        sizes['quantity'],
+                        PDF_STYLES.textEnd,
+                        {
+                          borderLeft: rowStyle.borderCell,
+                          ...(sortedColumns.length === index + 1 && { borderRight: rowStyle.borderCell })
+                        }
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          {
+                            fontSize:
+                              FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCell
+                          }
+                        ]}
+                      >
+                        {quantity}
+                      </Text>
+                    </View>
+                  );
+                case 'unitCost':
+                  return (
+                    <View
+                      key={colKey}
+                      style={[
+                        PDF_STYLES.tableCol,
+                        sizes['unitCost'],
+                        PDF_STYLES.textEnd,
+                        {
+                          borderLeft: rowStyle.borderCell,
+                          ...(sortedColumns.length === index + 1 && { borderRight: rowStyle.borderCell })
+                        }
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          {
+                            fontSize:
+                              FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCell
+                          }
+                        ]}
+                      >
+                        {formattedUnitPrice}
+                      </Text>
+                    </View>
+                  );
+                case 'total':
+                  return (
+                    <View
+                      key={colKey}
+                      style={[
+                        PDF_STYLES.tableCol,
+                        sizes['total'],
+                        PDF_STYLES.textEnd,
+                        {
+                          borderLeft: rowStyle.borderCell,
+                          ...(sortedColumns.length === index + 1 && { borderRight: rowStyle.borderCell })
+                        }
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          {
+                            fontSize:
+                              FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCell
+                          }
+                        ]}
+                      >
+                        {formattedTotal}
+                      </Text>
+                    </View>
+                  );
+                default:
+                  const field = customFields.find(f => f.header === colKey);
+                  if (!field) return null;
+                  return (
+                    <View
+                      key={field.header}
+                      style={[
+                        PDF_STYLES.tableCol,
+                        sizes[field.header],
+                        { textAlign: field.alignment },
+                        {
+                          borderLeft: rowStyle.borderCell,
+                          ...(sortedColumns.length === index + 1 && { borderRight: rowStyle.borderCell })
+                        }
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          {
+                            fontSize:
+                              FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCell
+                          }
+                        ]}
+                      >
+                        {customField?.header === field.header && customField.value ? customField.value : ' '}
+                      </Text>
+                    </View>
+                  );
+              }
             })}
-            {invoiceForm?.invoiceCustomization?.showUnit && (
-              <View
-                style={[PDF_STYLES.tableCol, sizes['unit'], PDF_STYLES.textEnd, { borderLeft: rowStyle.borderCell }]}
-              >
-                <Text
-                  style={[
-                    {
-                      fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCell
-                    }
-                  ]}
-                >
-                  {unitName}
-                </Text>
-              </View>
-            )}
-            {invoiceForm?.invoiceCustomization?.showQuantity && (
-              <View
-                style={[
-                  PDF_STYLES.tableCol,
-                  sizes['quantity'],
-                  PDF_STYLES.textEnd,
-                  { borderLeft: rowStyle.borderCell }
-                ]}
-              >
-                <Text
-                  style={[
-                    {
-                      fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCell
-                    }
-                  ]}
-                >
-                  {quantity}
-                </Text>
-              </View>
-            )}
-            <View
-              style={[PDF_STYLES.tableCol, sizes['unitCost'], PDF_STYLES.textEnd, { borderLeft: rowStyle.borderCell }]}
-            >
-              <Text
-                style={[
-                  { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCell }
-                ]}
-              >
-                {formattedUnitPrice}
-              </Text>
-            </View>
-            <View
-              style={[
-                PDF_STYLES.tableCol,
-                sizes['total'],
-                PDF_STYLES.textEnd,
-                { borderLeft: rowStyle.borderCell, borderRight: rowStyle.borderCell }
-              ]}
-            >
-              <Text
-                style={[
-                  { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].tableCell }
-                ]}
-              >
-                {formattedTotal}
-              </Text>
-            </View>
           </View>
         );
       })}

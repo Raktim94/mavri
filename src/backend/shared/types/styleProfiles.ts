@@ -3,6 +3,7 @@ import type { PageFormat } from '../enums/pageFormat';
 import type { SizeType } from '../enums/sizeType';
 import type { TableHeaderStyle } from '../enums/tableHeaderStyle';
 import type { TableRowStyle } from '../enums/tableRowStyle';
+import type { SortOrder } from './sortOrder';
 
 export interface StyleProfile {
   id: number;
@@ -31,4 +32,5 @@ export interface StyleProfile {
   showQuantity: boolean;
   showUnit: boolean;
   showRowNo: boolean;
+  fieldSortOrders: SortOrder | string;
 }

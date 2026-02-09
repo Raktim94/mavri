@@ -107,7 +107,8 @@ const invoiceCustomizationFields: (keyof InvoiceCustomization)[] = [
   'paidWatermarkFileData',
   'showQuantity',
   'showUnit',
-  'showRowNo'
+  'showRowNo',
+  'fieldSortOrders'
 ];
 const invoiceFields: (keyof Invoice)[] = [
   'invoiceType',
@@ -237,35 +238,47 @@ const getInvoices = async (db: DatabaseAdapter, options: GetInvoicesOptions) => 
     invoiceItemIds
   );
 
-  return invoices.map(invoice => ({
-    ...invoice,
-    invoicePayments: invoicePayments.filter(p => p.parentInvoiceId === invoice.id),
-    invoiceItems: invoiceItems
-      .filter(p => p.parentInvoiceId === invoice.id)
-      .map(p => {
-        return {
-          ...p,
-          invoiceItemSnapshot: invoiceItemSnapshots.find(iis => iis.parentInvoiceItemId === p.id),
-          customField: p.customField && typeof p.customField === 'string' ? JSON.parse(p.customField) : p.customField
-        };
-      }),
-    invoiceAttachments: invoiceAttachments.filter(p => p.parentInvoiceId === invoice.id),
-    invoiceBusinessSnapshot: invoiceBusinessSnapshots.find(p => p.parentInvoiceId === invoice.id),
-    invoiceClientSnapshot: invoiceClientSnapshots.find(p => p.parentInvoiceId === invoice.id),
-    invoiceCurrencySnapshot: invoiceCurrencySnapshots.find(p => p.parentInvoiceId === invoice.id),
-    invoiceCustomization: invoiceCustomization.find(p => p.parentInvoiceId === invoice.id),
-    invoiceStyleProfileSnapshot: invoiceStyleProfileSnapshots.find(p => p.parentInvoiceId === invoice.id)
-  }));
+  return invoices.map(invoice => {
+    const specificCustomization = invoiceCustomization.find(p => p.parentInvoiceId === invoice.id);
+
+    return {
+      ...invoice,
+      invoicePayments: invoicePayments.filter(p => p.parentInvoiceId === invoice.id),
+      invoiceItems: invoiceItems
+        .filter(p => p.parentInvoiceId === invoice.id)
+        .map(p => {
+          return {
+            ...p,
+            invoiceItemSnapshot: invoiceItemSnapshots.find(iis => iis.parentInvoiceItemId === p.id),
+            customField: p.customField && typeof p.customField === 'string' ? JSON.parse(p.customField) : p.customField
+          };
+        }),
+      invoiceAttachments: invoiceAttachments.filter(p => p.parentInvoiceId === invoice.id),
+      invoiceBusinessSnapshot: invoiceBusinessSnapshots.find(p => p.parentInvoiceId === invoice.id),
+      invoiceClientSnapshot: invoiceClientSnapshots.find(p => p.parentInvoiceId === invoice.id),
+      invoiceCurrencySnapshot: invoiceCurrencySnapshots.find(p => p.parentInvoiceId === invoice.id),
+      invoiceCustomization: specificCustomization
+        ? {
+            ...specificCustomization,
+            fieldSortOrders:
+              specificCustomization.fieldSortOrders && typeof specificCustomization.fieldSortOrders === 'string'
+                ? JSON.parse(specificCustomization.fieldSortOrders)
+                : specificCustomization.fieldSortOrders
+          }
+        : specificCustomization,
+      invoiceStyleProfileSnapshot: invoiceStyleProfileSnapshots.find(p => p.parentInvoiceId === invoice.id)
+    };
+  });
 };
 
 export const getCustomHeaders = async (db: DatabaseAdapter, type: 'invoice' | 'quotation') => {
   const rows = await db.all<{ customField: string | null }>(
     `
-    SELECT ii.customField
+    SELECT ii."customField"
       FROM invoice_items ii
       INNER JOIN invoices as i on i."id" = ii."parentInvoiceId"
       WHERE i."invoiceType" = ?
-      GROUP BY ii.customField
+      GROUP BY ii."customField"
     `,
     [type]
   );
@@ -361,7 +374,8 @@ export const addInvoice = async (db: DatabaseAdapter, data: Invoice) => {
     if (data.invoiceCustomization) {
       const ibs = await handleInvoiceCustomization({
         ...data.invoiceCustomization,
-        parentInvoiceId: newId
+        parentInvoiceId: newId,
+        fieldSortOrders: JSON.stringify(data.invoiceCustomization.fieldSortOrders)
       });
       if (!ibs.success) {
         try {
@@ -565,7 +579,8 @@ export const updateInvoice = async (db: DatabaseAdapter, data: Invoice) => {
       const ibs = await handleInvoiceCustomization(
         {
           ...data.invoiceCustomization,
-          parentInvoiceId: data.id
+          parentInvoiceId: data.id,
+          fieldSortOrders: JSON.stringify(data.invoiceCustomization.fieldSortOrders)
         },
         true
       );
@@ -839,7 +854,8 @@ export const duplicateInvoice = async (
       'paidWatermarkFileData',
       'showQuantity',
       'showUnit',
-      'showRowNo'
+      'showRowNo',
+      'fieldSortOrders'
     ]);
     await duplicateSnapshot('invoice_style_profile_snapshots', ['styleProfileName']);
 

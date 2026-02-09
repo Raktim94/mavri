@@ -297,8 +297,6 @@ export const up = async (db: DatabaseAdapter) => {
       `);
     }
   } catch (error) {
-    console.log(error);
-
     return { success: false, ...mapDatabaseError(error, db.type) };
   }
 };

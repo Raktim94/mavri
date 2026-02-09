@@ -9,6 +9,7 @@ import type { SizeType } from '../enums/sizeType';
 import type { TableHeaderStyle } from '../enums/tableHeaderStyle';
 import type { TableRowStyle } from '../enums/tableRowStyle';
 import type { InvoiceItemTaxType, InvoiceTaxType } from '../enums/taxType';
+import type { SortOrder } from './sortOrder';
 
 export interface InvoiceItemSnapshots {
   parentInvoiceItemId: number;
@@ -82,6 +83,7 @@ export interface InvoiceCustomization {
   showQuantity: boolean;
   showUnit: boolean;
   showRowNo: boolean;
+  fieldSortOrders: SortOrder | string;
 }
 
 export interface Invoice {
@@ -153,6 +155,7 @@ export interface CustomField {
   header: string;
   value: string;
   alignment: Alignment;
+  sortOrder: number;
 }
 export interface InvoiceItem {
   id: number;

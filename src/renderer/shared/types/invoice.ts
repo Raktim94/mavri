@@ -10,11 +10,13 @@ import type { SizeType } from '../enums/sizeType';
 import type { TableHeaderStyle } from '../enums/tableHeaderStyle';
 import type { TableRowStyle } from '../enums/tableRowStyle';
 import type { InvoiceItemTaxType, InvoiceTaxType } from '../enums/taxType';
+import type { SortOrder } from './sortOrder';
 
 export interface CustomField {
   header: string;
   value: string;
   alignment: Alignment;
+  sortOrder: number;
 }
 export interface PdfTexts {
   billTo: string;
@@ -76,6 +78,7 @@ export interface ItemForm {
   quantity: number | undefined;
   header?: string;
   value?: string;
+  sortOrder?: number;
   alignment?: Alignment;
 }
 
@@ -132,6 +135,7 @@ export interface InvoiceCustomizationMeta {
   showQuantity?: boolean;
   showUnit?: boolean;
   showRowNo?: boolean;
+  fieldSortOrders: SortOrder;
 }
 
 export interface InvoiceCustomization extends InvoiceCustomizationMeta {
@@ -164,6 +168,8 @@ export interface CustomizationForm {
   showQuantity?: boolean;
   showUnit?: boolean;
   showRowNo?: boolean;
+  fieldSortOrders?: SortOrder;
+  customField?: CustomField[];
 }
 
 export interface DiscountForm {

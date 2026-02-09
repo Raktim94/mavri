@@ -22,6 +22,14 @@ export const isStyleProfileFromData = (data: unknown): data is StyleProfileFromD
 
   if (typeof d.name !== 'string') return false;
 
+  if (
+    d.fieldSortOrders !== undefined &&
+    d.fieldSortOrders !== null &&
+    d.fieldSortOrders !== '' &&
+    typeof d.fieldSortOrders !== 'string' &&
+    typeof d.fieldSortOrders !== 'object'
+  )
+    return false;
   if (d.id !== undefined && d.id !== null && d.id !== '' && typeof d.id !== 'number') return false;
 
   if (d.isArchived !== undefined && d.isArchived !== null && d.isArchived !== '' && typeof d.isArchived !== 'boolean')
@@ -428,6 +436,14 @@ export const isInvoiceCustomizationFromData = (data: unknown): data is InvoiceCu
 
   const d = data as Record<string, unknown>;
 
+  if (
+    d.fieldSortOrders !== undefined &&
+    d.fieldSortOrders !== null &&
+    d.fieldSortOrders !== '' &&
+    typeof d.fieldSortOrders !== 'string' &&
+    typeof d.fieldSortOrders !== 'object'
+  )
+    return false;
   if (d.id !== undefined && d.id !== null && d.id !== '' && typeof d.id !== 'number') return false;
   if (
     d.parentInvoiceId !== undefined &&

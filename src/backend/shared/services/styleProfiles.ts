@@ -27,7 +27,8 @@ const styleProfileFields: (keyof StyleProfile)[] = [
   'isArchived',
   'showQuantity',
   'showUnit',
-  'showRowNo'
+  'showRowNo',
+  'fieldSortOrders'
 ];
 
 export const getAllStyleProfiles = async (
@@ -48,7 +49,19 @@ export const getAllStyleProfiles = async (
         `
   });
 
-  return getAll(filter ?? []);
+  const result = await getAll(filter ?? []);
+  result.data = result.data
+    ? result.data?.map(profile => {
+        return {
+          ...profile,
+          fieldSortOrders:
+            profile.fieldSortOrders && typeof profile.fieldSortOrders === 'string'
+              ? JSON.parse(profile.fieldSortOrders)
+              : profile.fieldSortOrders
+        };
+      })
+    : result.data;
+  return result;
 };
 
 export const addStyleProfile = async (
@@ -66,7 +79,20 @@ export const addStyleProfile = async (
             THEN i."id" END)
         `
   });
-  return handle(data);
+  const result = await handle({
+    ...data,
+    fieldSortOrders: JSON.stringify(data.fieldSortOrders)
+  });
+  result.data = result.data
+    ? {
+        ...result.data,
+        fieldSortOrders:
+          result.data.fieldSortOrders && typeof result.data.fieldSortOrders === 'string'
+            ? JSON.parse(result.data.fieldSortOrders)
+            : result.data.fieldSortOrders
+      }
+    : result.data;
+  return result;
 };
 
 export const updateStyleProfile = async (
@@ -84,7 +110,17 @@ export const updateStyleProfile = async (
             THEN i."id" END)
         `
   });
-  return handle(data, true);
+  const result = await handle({ ...data, fieldSortOrders: JSON.stringify(data.fieldSortOrders) }, true);
+  result.data = result.data
+    ? {
+        ...result.data,
+        fieldSortOrders:
+          result.data.fieldSortOrders && typeof result.data.fieldSortOrders === 'string'
+            ? JSON.parse(result.data.fieldSortOrders)
+            : result.data.fieldSortOrders
+      }
+    : result.data;
+  return result;
 };
 
 export const deleteStyleProfile = async (db: DatabaseAdapter, id: number) => {
@@ -111,7 +147,11 @@ export const batchAddStyleProfile = async (db: DatabaseAdapter, data: StyleProfi
   try {
     await db.run('BEGIN');
     for (const row of data) {
-      const result = await handle(row);
+      const result = await handle({
+        ...row,
+        fieldSortOrders:
+          typeof row.fieldSortOrders === 'string' ? row.fieldSortOrders : JSON.stringify(row.fieldSortOrders)
+      });
       if (!result.success) {
         try {
           await db.run('ROLLBACK');

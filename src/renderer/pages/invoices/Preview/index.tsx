@@ -4,9 +4,11 @@ import { Box, Fab, Tooltip } from '@mui/material';
 import { memo, useCallback, useMemo, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useExportPdf } from '../../../shared/hooks/useExportPdf ';
-import type { CustomizationForm, InvoiceFromData } from '../../../shared/types/invoice';
+import type { CustomField, CustomizationForm, InvoiceFromData } from '../../../shared/types/invoice';
+import type { SortOrder } from '../../../shared/types/sortOrder';
 import type { StyleProfileFromData } from '../../../shared/types/styleProfiles';
 import { useAppSelector } from '../../../state/configureStore';
+import { DEFAULT_TABLE_FIELD_SORT_ORDERS } from '../../../state/constant';
 import { selectSettings } from '../../../state/pageSlice';
 import { CustomizationDropdown } from './Dropdowns/CustomizationDropdown';
 import { PreviewCore } from './PreviewCore';
@@ -32,17 +34,48 @@ const InvoicesPreviewComponent: FC<Props> = ({ onSaveProfile = () => {}, setInvo
     setter(false);
   }, []);
 
+  const customFieldHeaders = useMemo(() => {
+    const headers =
+      invoiceForm?.invoiceItems
+        ?.map(item => item.customField)
+        .filter((item): item is CustomField => typeof item === 'object' && item != null) ?? [];
+
+    return [...new Set(headers)];
+  }, [invoiceForm?.invoiceItems]);
+
   const handleOnClickCustomization = useCallback(
     (data: CustomizationForm) => {
+      const cleanedFieldSortOrders: SortOrder = { ...(data.fieldSortOrders ?? DEFAULT_TABLE_FIELD_SORT_ORDERS) };
+      Object.keys(cleanedFieldSortOrders).forEach(key => {
+        if (customFieldHeaders.some(item => item.header === key)) {
+          delete cleanedFieldSortOrders[key];
+        }
+      });
+
       setInvoiceForm({
         ...invoiceForm,
         invoiceCustomization: {
           ...invoiceForm?.invoiceCustomization,
-          ...data
-        }
+          ...data,
+          fieldSortOrders: cleanedFieldSortOrders
+        },
+        invoiceItems: invoiceForm?.invoiceItems?.map(item => {
+          const newSortOrder = data.fieldSortOrders
+            ? data.fieldSortOrders[item.customField?.header ?? '']
+            : item.customField?.sortOrder;
+          return {
+            ...item,
+            customField: item.customField
+              ? {
+                  ...item.customField,
+                  ...(newSortOrder && { sortOrder: newSortOrder })
+                }
+              : item.customField
+          };
+        })
       });
     },
-    [setInvoiceForm, invoiceForm]
+    [setInvoiceForm, invoiceForm, customFieldHeaders]
   );
 
   const customizationData = useMemo(() => {
@@ -65,9 +98,11 @@ const InvoicesPreviewComponent: FC<Props> = ({ onSaveProfile = () => {}, setInvo
       paidWatermarkFileData: invoiceForm?.invoiceCustomization?.paidWatermarkFileData,
       showQuantity: invoiceForm?.invoiceCustomization?.showQuantity,
       showUnit: invoiceForm?.invoiceCustomization?.showUnit,
-      showRowNo: invoiceForm?.invoiceCustomization?.showRowNo
+      showRowNo: invoiceForm?.invoiceCustomization?.showRowNo,
+      fieldSortOrders: invoiceForm?.invoiceCustomization?.fieldSortOrders,
+      customField: customFieldHeaders
     };
-  }, [invoiceForm?.invoiceCustomization]);
+  }, [invoiceForm?.invoiceCustomization, customFieldHeaders]);
 
   return (
     <Box sx={{ height: '100%' }}>

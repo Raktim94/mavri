@@ -6,6 +6,7 @@ import { useForm } from '../../shared/hooks/useForm';
 import type { CustomizationForm } from '../../shared/types/invoice';
 import type { StyleProfile, StyleProfileFromData } from '../../shared/types/styleProfiles';
 import { validators } from '../../shared/utils/validatorFunctions';
+import { DEFAULT_TABLE_FIELD_SORT_ORDERS } from '../../state/constant';
 
 interface Props {
   styleProfile?: StyleProfile;
@@ -35,7 +36,8 @@ export const Form: FC<Props> = ({ handleChange = () => {}, styleProfile }) => {
     isArchived: styleProfile?.isArchived ?? false,
     showQuantity: styleProfile?.showQuantity ?? true,
     showUnit: styleProfile?.showUnit ?? true,
-    showRowNo: styleProfile?.showRowNo ?? true
+    showRowNo: styleProfile?.showRowNo ?? true,
+    fieldSortOrders: styleProfile?.fieldSortOrders ?? DEFAULT_TABLE_FIELD_SORT_ORDERS
   });
 
   const [errors, setErrors] = useState({
@@ -66,7 +68,8 @@ export const Form: FC<Props> = ({ handleChange = () => {}, styleProfile }) => {
         isArchived: form?.isArchived,
         showQuantity: newData?.showQuantity ?? true,
         showUnit: newData?.showUnit ?? true,
-        showRowNo: newData?.showRowNo ?? true
+        showRowNo: newData?.showRowNo ?? true,
+        fieldSortOrders: newData?.fieldSortOrders ?? DEFAULT_TABLE_FIELD_SORT_ORDERS
       });
     },
     [setForm, form, styleProfile]
@@ -79,6 +82,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, styleProfile }) => {
       setErrors(e => ({ ...e, [field]: false }));
     }
   };
+  console.log(styleProfile);
 
   const customizationData = useMemo(() => {
     return {
@@ -100,7 +104,8 @@ export const Form: FC<Props> = ({ handleChange = () => {}, styleProfile }) => {
       paidWatermarkFileData: styleProfile?.paidWatermarkFileData ?? undefined,
       showQuantity: styleProfile?.showQuantity ?? true,
       showUnit: styleProfile?.showUnit ?? true,
-      showRowNo: styleProfile?.showRowNo ?? true
+      showRowNo: styleProfile?.showRowNo ?? true,
+      fieldSortOrders: styleProfile?.fieldSortOrders ?? DEFAULT_TABLE_FIELD_SORT_ORDERS
     };
   }, [styleProfile]);
 
@@ -127,7 +132,8 @@ export const Form: FC<Props> = ({ handleChange = () => {}, styleProfile }) => {
       isArchived: styleProfile?.isArchived ?? false,
       showQuantity: styleProfile?.showQuantity ?? true,
       showUnit: styleProfile?.showUnit ?? true,
-      showRowNo: styleProfile?.showRowNo ?? true
+      showRowNo: styleProfile?.showRowNo ?? true,
+      fieldSortOrders: styleProfile?.fieldSortOrders ?? DEFAULT_TABLE_FIELD_SORT_ORDERS
     });
   }, [styleProfile, setForm]);
 

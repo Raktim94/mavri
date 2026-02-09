@@ -1,18 +1,25 @@
+import { closestCenter, DndContext, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import {
   Box,
   FormControl,
   FormControlLabel,
   FormLabel,
   Grid,
+  IconButton,
+  ListItemButton,
+  ListItemText,
   Radio,
   RadioGroup,
   Switch,
   Tab,
   Tabs,
+  Tooltip,
   Typography
 } from '@mui/material';
 import { MuiColorInput } from 'mui-color-input';
-import { useCallback, useEffect, useRef, useState, type FC, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type FC, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LayoutType } from '../../../enums/layoutType';
 import { PageFormat } from '../../../enums/pageFormat';
@@ -21,9 +28,11 @@ import { TableHeaderStyle } from '../../../enums/tableHeaderStyle';
 import { TableRowStyle } from '../../../enums/tableRowStyle';
 import { useForm } from '../../../hooks/useForm';
 import type { CustomizationForm } from '../../../types/invoice';
+import type { SortOrder } from '../../../types/sortOrder';
 import { toDataUrl, toUint8Array } from '../../../utils/dataUrlFunctions';
 import { a11yProps } from '../../../utils/generalFunctions';
 import { UploadImage } from '../../inputs/uploadImage/UploadImage';
+import { SortableItem } from '../../lists/sortableItem/SortableItem';
 import { TabPanel } from '../tabPanel/TabPanel';
 
 interface Props {
@@ -44,6 +53,44 @@ export const CustomizationLayout: FC<Props> = ({
   const [watermarkUrl, setWatermarkUrl] = useState<string | undefined>(undefined);
   const [watermarkPaidUrl, setWatermarkPaidUrl] = useState<string | undefined>(undefined);
   const [value, setValue] = useState(0);
+  const sensors = useSensors(useSensor(PointerSensor));
+
+  const sortItemObjectList = useMemo(() => {
+    if (form.fieldSortOrders != undefined) {
+      const sortOrders = form.fieldSortOrders;
+      const defaultCols = Object.entries(sortOrders).map(([key, value]) => ({
+        key,
+        value
+      }));
+      const customCols =
+        data?.customField?.map(field => ({
+          key: field.header,
+          value: field.sortOrder
+        })) ?? [];
+      const allCols = [...defaultCols, ...customCols];
+      return allCols.sort((a, b) => a.value - b.value);
+    }
+
+    return [];
+  }, [form.fieldSortOrders, data]);
+
+  const sortItemObjectLabels = useMemo(() => {
+    const defaultLabels: { [K in keyof SortOrder]?: string } = {
+      no: t('common.tableRowNo'),
+      item: t('common.tableItem'),
+      unit: t('common.unit'),
+      quantity: t('invoices.quantity'),
+      unitCost: t('common.unitCost'),
+      total: t('common.total')
+    };
+    const customLabels: { [key: string]: string } = {};
+    if (data && data.customField && data.customField.length > 0) {
+      data.customField.forEach(field => {
+        customLabels[field.header] = field.header;
+      });
+    }
+    return { ...defaultLabels, ...customLabels };
+  }, [t, data]);
 
   const handleChange = (_: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -105,6 +152,29 @@ export const CustomizationLayout: FC<Props> = ({
     },
     []
   );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (active.id !== over?.id) {
+      const oldIndex = sortItemObjectList.findIndex(
+        (i, idx) => `customizable-sort-order-${i.key}-${idx}` === active.id
+      );
+      const newIndex = sortItemObjectList.findIndex((i, idx) => `customizable-sort-order-${i.key}-${idx}` === over?.id);
+      const newItems = arrayMove(sortItemObjectList, oldIndex, newIndex);
+
+      const newItemsWithUpdatedValues = newItems.map((item, index) => ({
+        ...item,
+        value: index
+      }));
+
+      const updatedFieldSortOrders: SortOrder = newItemsWithUpdatedValues.reduce((acc, item) => {
+        acc[item.key] = item.value;
+        return acc;
+      }, {} as SortOrder);
+
+      setForm({ ...form, fieldSortOrders: updatedFieldSortOrders });
+    }
+  };
 
   useEffect(() => {
     if (data) {
@@ -349,6 +419,65 @@ export const CustomizationLayout: FC<Props> = ({
                 }
                 label={t('common.showUnit')}
               />
+            </Grid>
+            <Grid size={{ xs: 12, md: 12 }}>
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <SortableContext
+                  items={sortItemObjectList.map((i, idx) => `customizable-sort-order-${i.key}-${idx}`) ?? []}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {sortItemObjectList.map((item, index) => {
+                    return (
+                      <SortableItem
+                        key={`customizable-sort-order-${item.key}-${index}`}
+                        id={`customizable-sort-order-${item.key}-${index}`}
+                      >
+                        <ListItemButton
+                          sx={{
+                            pt: 2,
+                            pb: 2,
+                            pl: 2,
+                            pr: 2,
+                            width: '100%',
+                            borderRadius: 1,
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            flexDirection: 'row'
+                          }}
+                        >
+                          <ListItemText
+                            primary={
+                              <Typography
+                                component="div"
+                                variant="body2"
+                                sx={{
+                                  fontWeight: 500,
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  display: 'flex',
+                                  justifyContent: 'start',
+                                  flexDirection: 'row'
+                                }}
+                              >
+                                {sortItemObjectLabels[item.key] ?? item.key}
+                              </Typography>
+                            }
+                            disableTypography
+                            sx={{ m: 0 }}
+                            slotProps={{ primary: { sx: { fontWeight: 500, m: 0 } } }}
+                          />
+                          <Tooltip title={t('ariaLabel.dragToSort')}>
+                            <IconButton size="small" data-drag-handle onMouseDown={e => e.stopPropagation()}>
+                              <DragIndicatorIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </ListItemButton>
+                      </SortableItem>
+                    );
+                  })}
+                </SortableContext>
+              </DndContext>
             </Grid>
           </Grid>
         </TabPanel>

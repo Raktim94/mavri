@@ -36,7 +36,8 @@ export const StyleProfilesPage = () => {
     'isArchived',
     'showQuantity',
     'showUnit',
-    'showRowNo'
+    'showRowNo',
+    'fieldSortOrders'
   ];
   const excelFileName = 'style_profiles';
   const excelTemplateData: Rows = [

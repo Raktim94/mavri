@@ -7,6 +7,7 @@ import { useForm } from '../../../../shared/hooks/useForm';
 import type { CustomizationForm } from '../../../../shared/types/invoice';
 import type { StyleProfileFromData } from '../../../../shared/types/styleProfiles';
 import { useAppSelector } from '../../../../state/configureStore';
+import { DEFAULT_TABLE_FIELD_SORT_ORDERS } from '../../../../state/constant';
 import { selectSettings } from '../../../../state/pageSlice';
 import { ProfileNameSetter } from '../../Form/Modals/ProfileNameSetter';
 
@@ -64,7 +65,8 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onSaveProfile
                 paidWatermarkFileData: data?.paidWatermarkFileData ?? undefined,
                 showQuantity: data?.showQuantity ?? true,
                 showUnit: data?.showUnit ?? true,
-                showRowNo: data?.showRowNo ?? true
+                showRowNo: data?.showRowNo ?? true,
+                fieldSortOrders: data?.fieldSortOrders ?? DEFAULT_TABLE_FIELD_SORT_ORDERS
               });
             } else {
               onSaveProfile?.({
@@ -88,7 +90,8 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onSaveProfile
                 paidWatermarkFileData: form?.paidWatermarkFileData ?? undefined,
                 showQuantity: form?.showQuantity ?? true,
                 showUnit: form?.showUnit ?? true,
-                showRowNo: form?.showRowNo ?? true
+                showRowNo: form?.showRowNo ?? true,
+                fieldSortOrders: form?.fieldSortOrders ?? DEFAULT_TABLE_FIELD_SORT_ORDERS
               });
             }
             setIsProfileModalOpen(false);

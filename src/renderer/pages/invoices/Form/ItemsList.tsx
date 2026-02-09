@@ -1,11 +1,11 @@
 import { closestCenter, DndContext, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
-import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { Box, IconButton, ListItemButton, ListItemText, Menu, MenuItem, Tooltip, Typography } from '@mui/material';
-import React, { memo, useMemo, useState, type FC, type ReactElement } from 'react';
+import React, { memo, useMemo, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
+import { SortableItem } from '../../../shared/components/lists/sortableItem/SortableItem';
 import type { InvoiceFromData, InvoiceItem } from '../../../shared/types/invoice';
 import { createCurrencyFormatter } from '../../../shared/utils/formatFunctions';
 import { getItemFinancialData } from '../../../shared/utils/invoiceFunctions';
@@ -18,39 +18,6 @@ interface Props {
   onDelete?: (item: InvoiceItem) => void;
   onEdit?: (item: InvoiceItem) => void;
 }
-
-const SortableItem: FC<{ id: string; children: React.ReactNode }> = ({ id, children }) => {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition
-  };
-
-  const attachListenersRecursively = (node: React.ReactNode): React.ReactNode => {
-    if (!React.isValidElement(node)) return node;
-
-    const element = node as ReactElement<Record<string, unknown> & { children?: React.ReactNode }>;
-
-    if (element.props && element.props['data-drag-handle']) {
-      return React.cloneElement(element, { ...listeners });
-    }
-
-    const childNodes = element.props && (element.props as { children?: React.ReactNode }).children;
-    if (childNodes) {
-      const newChildren = React.Children.map(childNodes, child => attachListenersRecursively(child));
-      if (newChildren === childNodes) return element;
-      return React.cloneElement(element, undefined, newChildren);
-    }
-
-    return element;
-  };
-
-  return (
-    <Box ref={setNodeRef} style={style} {...attributes}>
-      {React.Children.map(children, child => attachListenersRecursively(child))}
-    </Box>
-  );
-};
 
 const ItemsListComponent: FC<Props> = ({ invoiceForm, setInvoiceForm, onEdit = () => {}, onDelete = () => {} }) => {
   const storeSettings = useAppSelector(selectSettings);

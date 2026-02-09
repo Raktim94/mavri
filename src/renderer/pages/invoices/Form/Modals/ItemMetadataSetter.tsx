@@ -51,11 +51,13 @@ const ItemMetadataSetterComponent: FC<Props> = ({
     quantity: Number(currQuantity ?? 0),
     header: customField?.header ?? '',
     value: customField?.value ?? '',
+    sortOrder: customField?.sortOrder ?? undefined,
     alignment: customField?.alignment ?? Alignment.left
   });
   const [errors, setErrors] = useState({
     quantity: false,
     header: false,
+    sortOrder: false,
     value: false
   });
 
@@ -94,11 +96,17 @@ const ItemMetadataSetterComponent: FC<Props> = ({
 
       const header = form.header;
       const value = form.value;
+      const sortOrder = form.sortOrder;
 
-      const bothEmpty = (header === undefined || header === '') && (value === undefined || value === '');
+      const bothEmpty =
+        (header === undefined || header === '') && (value === undefined || value === '') && sortOrder === undefined;
 
       const bothFilled =
-        typeof header === 'string' && header.trim() !== '' && typeof value === 'string' && value.trim() !== '';
+        typeof header === 'string' &&
+        header.trim() !== '' &&
+        typeof value === 'string' &&
+        value.trim() !== '' &&
+        sortOrder != undefined;
 
       return bothEmpty || bothFilled;
     })();
@@ -112,6 +120,7 @@ const ItemMetadataSetterComponent: FC<Props> = ({
         quantity: Number(currQuantity ?? 0),
         header: customField?.header ?? '',
         value: customField?.value ?? '',
+        sortOrder: customField?.sortOrder ?? undefined,
         alignment: customField?.alignment ?? Alignment.left
       });
   }, [currQuantity, customField, isOpen, setForm]);
@@ -129,6 +138,7 @@ const ItemMetadataSetterComponent: FC<Props> = ({
           setErrors({
             quantity: false,
             header: false,
+            sortOrder: false,
             value: false
           });
         }}
@@ -187,6 +197,19 @@ const ItemMetadataSetterComponent: FC<Props> = ({
               onChange={e => {
                 update('value', e.target.value);
                 validateField('value', e.target.value);
+              }}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <AmountInput
+              required={true}
+              label={t('invoices.sortOrder')}
+              value={form.sortOrder}
+              error={errors.sortOrder}
+              helperText={errors.sortOrder ? t('common.fieldRequired') : ''}
+              onChange={e => {
+                update('sortOrder', e);
+                validateField('sortOrder', e != undefined ? e.toString() : '');
               }}
             />
           </Grid>

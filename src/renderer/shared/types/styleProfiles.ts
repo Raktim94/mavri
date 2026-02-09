@@ -3,6 +3,7 @@ import type { PageFormat } from '../enums/pageFormat';
 import type { SizeType } from '../enums/sizeType';
 import type { TableHeaderStyle } from '../enums/tableHeaderStyle';
 import type { TableRowStyle } from '../enums/tableRowStyle';
+import type { SortOrder } from './sortOrder';
 
 export interface StyleProfileMeta {
   id: number;
@@ -29,6 +30,7 @@ export interface StyleProfileMeta {
   showQuantity: boolean;
   showUnit: boolean;
   showRowNo: boolean;
+  fieldSortOrders: SortOrder;
 }
 
 export interface StyleProfile extends StyleProfileMeta {
@@ -61,6 +63,7 @@ export interface StyleProfileAddMeta {
   showQuantity: boolean;
   showUnit: boolean;
   showRowNo: boolean;
+  fieldSortOrders: SortOrder;
 }
 
 export interface StyleProfileAdd extends StyleProfileAddMeta {
@@ -104,4 +107,5 @@ export interface StyleProfileFromData {
   showQuantity: boolean;
   showUnit: boolean;
   showRowNo: boolean;
+  fieldSortOrders: SortOrder;
 }

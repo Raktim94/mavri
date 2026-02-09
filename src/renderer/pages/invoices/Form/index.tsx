@@ -190,7 +190,8 @@ const InvoiceFormComponent: FC<Props> = ({
               data.paidWatermarkFileData ?? invoiceForm.invoiceCustomization?.paidWatermarkFileData,
             showQuantity: data.showQuantity,
             showUnit: data.showUnit,
-            showRowNo: data.showRowNo
+            showRowNo: data.showRowNo,
+            fieldSortOrders: data.fieldSortOrders
           }
         });
       });
@@ -301,7 +302,7 @@ const InvoiceFormComponent: FC<Props> = ({
 
       if (!invoiceForm) return;
 
-      const { quantity, header, value, alignment } = data;
+      const { quantity, header, value, alignment, sortOrder } = data;
 
       const amount = Number(item.amount ?? 0);
       const unitPrice = invoiceForm.invoiceCurrencySnapshot?.currencySubunit
@@ -319,11 +320,12 @@ const InvoiceFormComponent: FC<Props> = ({
           unitPriceCents: unitPrice.toString()
         },
         customField:
-          header && value && alignment
+          header && value && alignment && sortOrder != undefined
             ? {
                 header: header,
                 value: value,
-                alignment: alignment
+                alignment: alignment,
+                sortOrder: sortOrder
               }
             : undefined,
         quantity: quantity?.toString() ?? '0',
@@ -394,7 +396,7 @@ const InvoiceFormComponent: FC<Props> = ({
     (data: ItemForm) => {
       if (!selectedInvoiceItem || !invoiceForm) return;
 
-      const { quantity, header, value, alignment } = data;
+      const { quantity, header, value, alignment, sortOrder } = data;
 
       startTransition(() => {
         setInvoiceForm(prev => {
@@ -410,7 +412,10 @@ const InvoiceFormComponent: FC<Props> = ({
                 return {
                   ...item,
                   ...(quantity !== undefined && { quantity: quantity.toString() }),
-                  customField: header && value && alignment ? { header, value, alignment } : item.customField
+                  customField:
+                    header && value && alignment && sortOrder != undefined
+                      ? { header, value, alignment, sortOrder }
+                      : item.customField
                 };
               }
               if (hasSameHeader && alignment) {
