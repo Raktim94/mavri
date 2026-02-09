@@ -7,6 +7,8 @@ import {
   Radio,
   RadioGroup,
   Switch,
+  Tab,
+  Tabs,
   Typography
 } from '@mui/material';
 import { MuiColorInput } from 'mui-color-input';
@@ -20,7 +22,9 @@ import { TableRowStyle } from '../../../enums/tableRowStyle';
 import { useForm } from '../../../hooks/useForm';
 import type { CustomizationForm } from '../../../types/invoice';
 import { toDataUrl, toUint8Array } from '../../../utils/dataUrlFunctions';
+import { a11yProps } from '../../../utils/generalFunctions';
 import { UploadImage } from '../../inputs/uploadImage/UploadImage';
+import { TabPanel } from '../tabPanel/TabPanel';
 
 interface Props {
   renderCustomTop?: () => ReactNode;
@@ -39,6 +43,11 @@ export const CustomizationLayout: FC<Props> = ({
   const lastEmittedRef = useRef<CustomizationForm | undefined>(data);
   const [watermarkUrl, setWatermarkUrl] = useState<string | undefined>(undefined);
   const [watermarkPaidUrl, setWatermarkPaidUrl] = useState<string | undefined>(undefined);
+  const [value, setValue] = useState(0);
+
+  const handleChange = (_: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
+  };
 
   const onUploadPaidWatermark = async (file?: Blob, filename?: string) => {
     if (file) {
@@ -126,214 +135,243 @@ export const CustomizationLayout: FC<Props> = ({
 
   return (
     <>
-      <Grid container spacing={2}>
+      <Box sx={{ width: '100%' }}>
         {renderCustomTop()}
-        <Grid size={{ xs: 12, md: 6 }}>
-          <MuiColorInput
-            PopoverProps={{
-              sx: {
-                zIndex: theme => theme.zIndex.modal + 2
-              }
-            }}
-            value={form.color ?? ''}
-            label={t('common.color')}
-            format="hex"
-            onChange={(_e, newValue) => {
-              update('color', newValue.hex);
-            }}
+        <Tabs value={value} onChange={handleChange} sx={{ marginTop: 1 }}>
+          <Tab
+            label={<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>Page Setup</Box>}
+            {...a11yProps(0)}
           />
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <FormControl component="fieldset">
-            <FormLabel component="legend">{t('common.pageFormat')}</FormLabel>
-            <RadioGroup
-              row
-              value={form.pageFormat ?? ''}
-              onChange={(_e, newValue) => {
-                update('pageFormat', newValue as PageFormat);
-              }}
-            >
-              <FormControlLabel value={PageFormat.a4} control={<Radio />} label="A4" />
-              <FormControlLabel value={PageFormat.letter} control={<Radio />} label={t('common.letter')} />
-            </RadioGroup>
-          </FormControl>
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <FormControl component="fieldset">
-            <FormLabel component="legend">{t('common.tableHeaderStyle')}</FormLabel>
-            <RadioGroup
-              row
-              value={form.tableHeaderStyle ?? ''}
-              onChange={(_e, newValue) => {
-                update('tableHeaderStyle', newValue as TableHeaderStyle);
-              }}
-            >
-              <FormControlLabel value={TableHeaderStyle.dark} control={<Radio />} label={t('common.dark')} />
-              <FormControlLabel value={TableHeaderStyle.light} control={<Radio />} label={t('common.light')} />
-              <FormControlLabel value={TableHeaderStyle.outline} control={<Radio />} label={t('common.outline')} />
-            </RadioGroup>
-          </FormControl>
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <FormControl component="fieldset">
-            <FormLabel component="legend">{t('common.tableRowStyle')}</FormLabel>
-            <RadioGroup
-              row
-              value={form.tableRowStyle ?? ''}
-              onChange={(_e, newValue) => {
-                update('tableRowStyle', newValue as TableRowStyle);
-              }}
-            >
-              <FormControlLabel value={TableRowStyle.bordered} control={<Radio />} label={t('common.bordered')} />
-              <FormControlLabel value={TableRowStyle.classic} control={<Radio />} label={t('common.classic')} />
-              <FormControlLabel value={TableRowStyle.stripped} control={<Radio />} label={t('common.stripped')} />
-            </RadioGroup>
-          </FormControl>
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <FormControl component="fieldset">
-            <FormLabel component="legend">{t('common.fontSizeStyle')}</FormLabel>
-            <RadioGroup
-              row
-              value={form.fontSize ?? ''}
-              onChange={(_e, newValue) => {
-                update('fontSize', newValue as SizeType);
-              }}
-            >
-              <FormControlLabel value={SizeType.small} control={<Radio />} label={t('common.small')} />
-              <FormControlLabel value={SizeType.medium} control={<Radio />} label={t('common.medium')} />
-              <FormControlLabel value={SizeType.large} control={<Radio />} label={t('common.large')} />
-            </RadioGroup>
-          </FormControl>
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <FormControl component="fieldset">
-            <FormLabel component="legend">{t('common.logoSizeStyle')}</FormLabel>
-            <RadioGroup
-              row
-              value={form.logoSize ?? ''}
-              onChange={(_e, newValue) => {
-                update('logoSize', newValue as SizeType);
-              }}
-            >
-              <FormControlLabel value={SizeType.small} control={<Radio />} label={t('common.small')} />
-              <FormControlLabel value={SizeType.medium} control={<Radio />} label={t('common.medium')} />
-              <FormControlLabel value={SizeType.large} control={<Radio />} label={t('common.large')} />
-            </RadioGroup>
-          </FormControl>
-        </Grid>
-        <Grid size={{ xs: 12, md: 12 }}>
-          <FormControl component="fieldset">
-            <FormLabel component="legend">{t('common.layout')}</FormLabel>
-            <RadioGroup
-              row
-              value={form.layout ?? ''}
-              onChange={(_e, newValue) => {
-                update('layout', newValue as LayoutType);
-              }}
-            >
-              <FormControlLabel value={LayoutType.classic} control={<Radio />} label={t('common.classic')} />
-              <FormControlLabel value={LayoutType.modern} control={<Radio />} label={t('common.modern')} />
-              <FormControlLabel value={LayoutType.compact} control={<Radio />} label={t('common.compact')} />
-            </RadioGroup>
-          </FormControl>
-        </Grid>
-        <Grid size={{ xs: 12, md: 3 }}>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={form.labelUpperCase ?? false}
+          <Tab label={<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>Branding</Box>} {...a11yProps(1)} />
+          <Tab label={<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>Table</Box>} {...a11yProps(2)} />
+          <Tab
+            label={<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}> Typography & Labels</Box>}
+            {...a11yProps(3)}
+          />
+        </Tabs>
+        <TabPanel value={value} index={0}>
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <FormControl component="fieldset">
+                <FormLabel component="legend">{t('common.pageFormat')}</FormLabel>
+                <RadioGroup
+                  row
+                  value={form.pageFormat ?? ''}
+                  onChange={(_e, newValue) => {
+                    update('pageFormat', newValue as PageFormat);
+                  }}
+                >
+                  <FormControlLabel value={PageFormat.a4} control={<Radio />} label="A4" />
+                  <FormControlLabel value={PageFormat.letter} control={<Radio />} label={t('common.letter')} />
+                </RadioGroup>
+              </FormControl>
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <FormControl component="fieldset">
+                <FormLabel component="legend">{t('common.fontSizeStyle')}</FormLabel>
+                <RadioGroup
+                  row
+                  value={form.fontSize ?? ''}
+                  onChange={(_e, newValue) => {
+                    update('fontSize', newValue as SizeType);
+                  }}
+                >
+                  <FormControlLabel value={SizeType.small} control={<Radio />} label={t('common.small')} />
+                  <FormControlLabel value={SizeType.medium} control={<Radio />} label={t('common.medium')} />
+                  <FormControlLabel value={SizeType.large} control={<Radio />} label={t('common.large')} />
+                </RadioGroup>
+              </FormControl>
+            </Grid>
+            <Grid size={{ xs: 12, md: 12 }}>
+              <FormControl component="fieldset">
+                <FormLabel component="legend">{t('common.layout')}</FormLabel>
+                <RadioGroup
+                  row
+                  value={form.layout ?? ''}
+                  onChange={(_e, newValue) => {
+                    update('layout', newValue as LayoutType);
+                  }}
+                >
+                  <FormControlLabel value={LayoutType.classic} control={<Radio />} label={t('common.classic')} />
+                  <FormControlLabel value={LayoutType.modern} control={<Radio />} label={t('common.modern')} />
+                  <FormControlLabel value={LayoutType.compact} control={<Radio />} label={t('common.compact')} />
+                </RadioGroup>
+              </FormControl>
+            </Grid>
+          </Grid>
+        </TabPanel>
+        <TabPanel value={value} index={1}>
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <MuiColorInput
+                PopoverProps={{
+                  sx: {
+                    zIndex: theme => theme.zIndex.modal + 2
+                  }
+                }}
+                value={form.color ?? ''}
+                label={t('common.color')}
+                format="hex"
                 onChange={(_e, newValue) => {
-                  update('labelUpperCase', newValue);
+                  update('color', newValue.hex);
                 }}
               />
-            }
-            label={t('common.labelsUpperCase')}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, md: 3 }}>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={form.showQuantity ?? false}
-                onChange={(_e, newValue) => {
-                  update('showQuantity', newValue);
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <FormControl component="fieldset">
+                <FormLabel component="legend">{t('common.logoSizeStyle')}</FormLabel>
+                <RadioGroup
+                  row
+                  value={form.logoSize ?? ''}
+                  onChange={(_e, newValue) => {
+                    update('logoSize', newValue as SizeType);
+                  }}
+                >
+                  <FormControlLabel value={SizeType.small} control={<Radio />} label={t('common.small')} />
+                  <FormControlLabel value={SizeType.medium} control={<Radio />} label={t('common.medium')} />
+                  <FormControlLabel value={SizeType.large} control={<Radio />} label={t('common.large')} />
+                </RadioGroup>
+              </FormControl>
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Typography
+                component="legend"
+                variant="body1"
+                sx={{ fontWeight: 400, color: 'text.secondary', marginBottom: 1 }}
+              >
+                {t('common.watermark')}
+              </Typography>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  justifyContent: 'start',
+                  alignItems: 'start',
+                  width: '100%',
+                  gap: 1
                 }}
-              />
-            }
-            label={t('common.showQuantity')}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, md: 3 }}>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={form.showRowNo ?? false}
-                onChange={(_e, newValue) => {
-                  update('showRowNo', newValue);
+              >
+                <UploadImage onUpload={onUploadWatermark} imgUrl={watermarkUrl} size={100} />
+              </Box>
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Typography
+                component="legend"
+                variant="body1"
+                sx={{ fontWeight: 400, color: 'text.secondary', marginBottom: 1 }}
+              >
+                {t('common.paidWatermark')}
+              </Typography>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  justifyContent: 'start',
+                  alignItems: 'start',
+                  width: '100%',
+                  gap: 1
                 }}
+              >
+                <UploadImage onUpload={onUploadPaidWatermark} imgUrl={watermarkPaidUrl} size={100} />
+              </Box>
+            </Grid>
+          </Grid>
+        </TabPanel>
+        <TabPanel value={value} index={2}>
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <FormControl component="fieldset">
+                <FormLabel component="legend">{t('common.tableHeaderStyle')}</FormLabel>
+                <RadioGroup
+                  row
+                  value={form.tableHeaderStyle ?? ''}
+                  onChange={(_e, newValue) => {
+                    update('tableHeaderStyle', newValue as TableHeaderStyle);
+                  }}
+                >
+                  <FormControlLabel value={TableHeaderStyle.dark} control={<Radio />} label={t('common.dark')} />
+                  <FormControlLabel value={TableHeaderStyle.light} control={<Radio />} label={t('common.light')} />
+                  <FormControlLabel value={TableHeaderStyle.outline} control={<Radio />} label={t('common.outline')} />
+                </RadioGroup>
+              </FormControl>
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <FormControl component="fieldset">
+                <FormLabel component="legend">{t('common.tableRowStyle')}</FormLabel>
+                <RadioGroup
+                  row
+                  value={form.tableRowStyle ?? ''}
+                  onChange={(_e, newValue) => {
+                    update('tableRowStyle', newValue as TableRowStyle);
+                  }}
+                >
+                  <FormControlLabel value={TableRowStyle.bordered} control={<Radio />} label={t('common.bordered')} />
+                  <FormControlLabel value={TableRowStyle.classic} control={<Radio />} label={t('common.classic')} />
+                  <FormControlLabel value={TableRowStyle.stripped} control={<Radio />} label={t('common.stripped')} />
+                </RadioGroup>
+              </FormControl>
+            </Grid>
+            <Grid size={{ xs: 12, md: 3 }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={form.showQuantity ?? false}
+                    onChange={(_e, newValue) => {
+                      update('showQuantity', newValue);
+                    }}
+                  />
+                }
+                label={t('common.showQuantity')}
               />
-            }
-            label={t('common.showRowNo')}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, md: 3 }}>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={form.showUnit ?? false}
-                onChange={(_e, newValue) => {
-                  update('showUnit', newValue);
-                }}
+            </Grid>
+            <Grid size={{ xs: 12, md: 3 }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={form.showRowNo ?? false}
+                    onChange={(_e, newValue) => {
+                      update('showRowNo', newValue);
+                    }}
+                  />
+                }
+                label={t('common.showRowNo')}
               />
-            }
-            label={t('common.showUnit')}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Typography
-            component="legend"
-            variant="body1"
-            sx={{ fontWeight: 400, color: 'text.secondary', marginBottom: 1 }}
-          >
-            {t('common.watermark')}
-          </Typography>
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'start',
-              alignItems: 'start',
-              width: '100%',
-              gap: 1
-            }}
-          >
-            <UploadImage onUpload={onUploadWatermark} imgUrl={watermarkUrl} size={100} />
-          </Box>
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Typography
-            component="legend"
-            variant="body1"
-            sx={{ fontWeight: 400, color: 'text.secondary', marginBottom: 1 }}
-          >
-            {t('common.paidWatermark')}
-          </Typography>
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'start',
-              alignItems: 'start',
-              width: '100%',
-              gap: 1
-            }}
-          >
-            <UploadImage onUpload={onUploadPaidWatermark} imgUrl={watermarkPaidUrl} size={100} />
-          </Box>
-        </Grid>
+            </Grid>
+            <Grid size={{ xs: 12, md: 3 }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={form.showUnit ?? false}
+                    onChange={(_e, newValue) => {
+                      update('showUnit', newValue);
+                    }}
+                  />
+                }
+                label={t('common.showUnit')}
+              />
+            </Grid>
+          </Grid>
+        </TabPanel>
+        <TabPanel value={value} index={3}>
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, md: 3 }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={form.labelUpperCase ?? false}
+                    onChange={(_e, newValue) => {
+                      update('labelUpperCase', newValue);
+                    }}
+                  />
+                }
+                label={t('common.labelsUpperCase')}
+              />
+            </Grid>
+          </Grid>
+        </TabPanel>
+        <Box sx={{ marginTop: 1 }}></Box>
         {renderCustomBottom()}
-      </Grid>
+      </Box>
     </>
   );
 };

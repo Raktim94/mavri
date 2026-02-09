@@ -5,6 +5,8 @@
 New features & improvements
 
 - PostgreSQL support added. Users can now choose between a local SQLite database file or connecting to a PostgreSQL server.
+- Custom header sections are reused per invoices/quotes
+- Customization layout improvements
 
 Bug Fixes
 

@@ -111,16 +111,7 @@ If you value **privacy, portability, and control**, this app is built for you.
 - **Memory:** 2 GB RAM minimum (1 GB may work for very small datasets)
 - **Disk space:** ~150 MB for the installer; ~500mb for the app; additional space needed for database files
 
-## 🧑‍💻 Self-Hosting (Docker)
-
-Invoice Builder can also be self-hosted using Docker for users who prefer running it on their own server or NAS.
-
-This option is ideal if you want:
-
-- Centralized access from multiple machines
-- Easy backups via mounted volumes
-
-### PostgreSQL Support
+## 🐘 PostgreSQL Support
 
 Invoice Builder now supports **two database backends**:
 
@@ -135,6 +126,15 @@ Users can now choose between:
 - **Connecting to a PostgreSQL server** by entering host, port, username, password, and database name.
 
 This makes Invoice Builder flexible for both lightweight personal use and more advanced multi‑device or multi‑user environments.
+
+## 🧑‍💻 Self-Hosting (Docker)
+
+Invoice Builder can also be self-hosted using Docker for users who prefer running it on their own server or NAS.
+
+This option is ideal if you want:
+
+- Centralized access from multiple machines
+- Easy backups via mounted volumes
 
 ### Docker Image
 
@@ -216,6 +216,7 @@ When an invoice or quote is created, snapshots of the following are stored with 
 - **Client**
 - **Items**
 - **Currency**
+- **Style profile**
 
 Changes to these entities do **not** affect existing invoices or quotes.  
 Snapshots are updated only when editing an invoice or quote and changing the associated **client, business, item, or currency**.

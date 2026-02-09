@@ -3,13 +3,9 @@ import { Box, Tab, Tabs, Tooltip, useTheme } from '@mui/material';
 import { useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TabPanel } from '../../shared/components/layout/tabPanel/TabPanel';
+import { a11yProps } from '../../shared/utils/generalFunctions';
 import { LocalDatabase } from './LocalDatabase';
 import { ServerDatabase } from './ServerDatabase';
-
-const a11yProps = (index: number) => ({
-  id: `mui-tab-${index}`,
-  'aria-controls': `mui-tabpanel-${index}`
-});
 
 interface Props {
   onDatabaseRead?: () => void;
@@ -25,7 +21,7 @@ export const DatabaseChooser: FC<Props> = ({ onDatabaseRead }) => {
 
   return (
     <Box sx={{ width: '100%' }}>
-      <Tabs value={value} onChange={handleChange} aria-label="invoice tabs">
+      <Tabs value={value} onChange={handleChange}>
         <Tab
           label={
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
