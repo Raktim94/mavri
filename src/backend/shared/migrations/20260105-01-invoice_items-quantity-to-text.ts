@@ -41,9 +41,9 @@ export const up = async (db: DatabaseAdapter) => {
         "unitNameSnapshot", "quantity", "taxRate", "taxType", "createdAt", "updatedAt"
       )
       SELECT
-        "id", "parentInvoiceId", "itemId", "itemNameSnapshot", "unitPriceCentsSnapshot",
-        "unitNameSnapshot", CAST("quantity" AS TEXT), "taxRate", "taxType", "createdAt", "updatedAt"
-      FROM invoice_items;
+        ii."id", ii."parentInvoiceId", ii."itemId", ii."itemNameSnapshot", ii."unitPriceCentsSnapshot",
+        ii."unitNameSnapshot", CAST(ii."quantity" AS TEXT), ii."taxRate", ii."taxType", ii."createdAt", ii."updatedAt"
+      FROM invoice_items as ii;
     `
       );
 
@@ -56,7 +56,7 @@ export const up = async (db: DatabaseAdapter) => {
     if (db.type === DatabaseType.postgre) {
       await db.run(`
         ALTER TABLE invoice_items
-        ALTER COLUMN quantity TYPE TEXT USING quantity::text;
+        ALTER COLUMN "quantity" TYPE TEXT USING "quantity"::text;
       `);
     }
   } catch (error) {

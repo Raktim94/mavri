@@ -174,22 +174,22 @@ export const up = async (db: DatabaseAdapter) => {
           "updatedAt"
       )
       SELECT
-          "id",
-          "businessNameSnapshot",
-          "businessShortNameSnapshot",
-          "businessAddressSnapshot",
-          "businessRoleSnapshot",
-          "businessEmailSnapshot",
-          "businessPhoneSnapshot",
-          "businessAdditionalSnapshot",
-          "businessPaymentInformationSnapshot",
-          "businessLogoSnapshot",
-          "businessFileSizeSnapshot",
-          "businessFileTypeSnapshot",
-          "businessFileNameSnapshot",
-          "createdAt",
-          "updatedAt"
-      FROM invoices;
+          i."id",
+          i."businessNameSnapshot",
+          i."businessShortNameSnapshot",
+          i."businessAddressSnapshot",
+          i."businessRoleSnapshot",
+          i."businessEmailSnapshot",
+          i."businessPhoneSnapshot",
+          i."businessAdditionalSnapshot",
+          i."businessPaymentInformationSnapshot",
+          i."businessLogoSnapshot",
+          i."businessFileSizeSnapshot",
+          i."businessFileTypeSnapshot",
+          i."businessFileNameSnapshot",
+          i."createdAt",
+          i."updatedAt"
+      FROM invoices as i;
     `);
     await db.run(`
       INSERT INTO invoice_client_snapshots (
@@ -204,16 +204,16 @@ export const up = async (db: DatabaseAdapter) => {
           "updatedAt"
       )
       SELECT
-          "id",
-          "clientNameSnapshot",
-          "clientAddressSnapshot",
-          "clientEmailSnapshot",
-          "clientPhoneSnapshot",
-          "clientCodeSnapshot",
-          "clientAdditionalSnapshot",
-          "createdAt",
-          "updatedAt"
-      FROM invoices;
+          i."id",
+          i."clientNameSnapshot",
+          i."clientAddressSnapshot",
+          i."clientEmailSnapshot",
+          i."clientPhoneSnapshot",
+          i."clientCodeSnapshot",
+          i."clientAdditionalSnapshot",
+          i."createdAt",
+          i."updatedAt"
+      FROM invoices as i;
     `);
     await db.run(`
       INSERT INTO invoice_currency_snapshots (

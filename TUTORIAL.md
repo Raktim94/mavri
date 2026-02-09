@@ -444,8 +444,12 @@ Click the **Add** button at the bottom to open a modal where you can:
 
 - Enter style profile information
   > 💡 **Name:** must be unique. You cannot create two style profiles with the same name.
+  > 💡 **Sort Order:** under "Table" tab its possible to customize sort order of generic item table headers.
 
-![Style profile creation](tutorial/style_profiles_page_1.jpg)
+![Style profile creation](tutorial/style_profiles_page_1_1.jpg)
+![Style profile creation](tutorial/style_profiles_page_1_2.jpg)
+![Style profile creation](tutorial/style_profiles_page_1_3.jpg)
+![Style profile creation](tutorial/style_profiles_page_1_4.jpg)
 
 ### Editing/Deleting a Style profile
 
@@ -707,8 +711,10 @@ Quotes can be exported **only to XLSX** format.
 - Sections with zero values (**Discount**, **Tax**, **Shipping fees**) are **hidden** in the PDF.
 - **Save as Profile** button will create style profile item with these customization presets for futher usage on other quotes.
 
-![Quotes customized option 1](tutorial/quote_page_40.jpg)
-![Quotes customized option 2](tutorial/quote_page_39.jpg)
+![Quotes customized option 1](tutorial/quote_page_40_1.jpg)
+![Quotes customized option 2](tutorial/quote_page_40_2.jpg)
+![Quotes customized option 3](tutorial/quote_page_40_3.jpg)
+![Quotes customized option 4](tutorial/quote_page_40_4.jpg)
 ![Quotes PDF](tutorial/quote_page_38.jpg)
 ![Quotes PDF attachments](tutorial/quote_page_37.jpg)
 ![Quotes data](tutorial/quote_page_36.jpg)
@@ -931,8 +937,10 @@ Invoices can be exported **only to XLSX** format.
 - Sections with zero values (**Discount**, **Tax**, **Shipping fees**) are **hidden** in the PDF.
 - **Save as Profile** button will create style profile item with these customization presets for futher usage on other quotes.
 
-![Invoices customized option 1](tutorial/invoice_page_40.jpg)
-![Invoices customized option 2](tutorial/invoice_page_39.jpg)
+![Invoices customized option 1](tutorial/invoice_page_40_1.jpg)
+![Invoices customized option 2](tutorial/invoice_page_40_2.jpg)
+![Invoices customized option 3](tutorial/invoice_page_40_3.jpg)
+![Invoices customized option 4](tutorial/invoice_page_40_4.jpg)
 ![Invoices PDF](tutorial/invoice_page_38.jpg)
 ![Invoices PDF attachments](tutorial/invoice_page_37.jpg)
 ![Invoices data](tutorial/invoice_page_36.jpg)

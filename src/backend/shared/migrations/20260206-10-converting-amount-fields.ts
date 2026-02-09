@@ -117,39 +117,39 @@ export const up = async (db: DatabaseAdapter) => {
           "styleProfilesId"
         )
         SELECT
-          "id",
-          "invoiceType",
-          "convertedFromQuotationId",
-          "businessId",
-          "clientId",
-          "currencyId",
-          "createdAt",
-          "updatedAt",
-          "issuedAt",
-          "dueDate",
-          "invoiceNumber",
-          "isArchived",
-          "status",
-          "customerNotes",
-          "thanksNotes",
-          "termsConditionNotes",
-          "discountName",
-          "discountType",
-          "discountAmountCents",
-          "discountPercent",
-          "shippingFeeCents",
-          "invoicePrefix",
-          "invoiceSuffix",
-          "taxName",
-          "taxRate",
-          "taxType",
-          "language",
-          "signatureData",
-          "signatureName",
-          "signatureType",
-          "signatureSize",
-          "styleProfilesId"
-        FROM invoices;
+          i."id",
+          i."invoiceType",
+          i."convertedFromQuotationId",
+          i."businessId",
+          i."clientId",
+          i."currencyId",
+          i."createdAt",
+          i."updatedAt",
+          i."issuedAt",
+          i."dueDate",
+          i."invoiceNumber",
+          i."isArchived",
+          i."status",
+          i."customerNotes",
+          i."thanksNotes",
+          i."termsConditionNotes",
+          i."discountName",
+          i."discountType",
+          i."discountAmountCents",
+          i."discountPercent",
+          i."shippingFeeCents",
+          i."invoicePrefix",
+          i."invoiceSuffix",
+          i."taxName",
+          i."taxRate",
+          i."taxType",
+          i."language",
+          i."signatureData",
+          i."signatureName",
+          i."signatureType",
+          i."signatureSize",
+          i."styleProfilesId"
+        FROM invoices as i;
         `
       );
       await db.run('DROP TABLE invoices;');
@@ -194,15 +194,15 @@ export const up = async (db: DatabaseAdapter) => {
           "updatedAt"
         )
         SELECT
-          "id",
-          "parentInvoiceId",
-          "amountCents",
-          "paidAt",
-          "paymentMethod",
-          "notes",
-          "createdAt",
-          "updatedAt"
-        FROM invoice_payments;
+          ip."id",
+          ip."parentInvoiceId",
+          ip."amountCents",
+          ip."paidAt",
+          ip."paymentMethod",
+          ip."notes",
+          ip."createdAt",
+          ip."updatedAt"
+        FROM invoice_payments as ip;
         );`
       );
 
@@ -236,14 +236,14 @@ export const up = async (db: DatabaseAdapter) => {
             "updatedAt"
         )
         SELECT
-            "id",
-            "parentInvoiceItemId",
-            "itemName",
-            "unitPriceCents",
-            "unitName",
-            "createdAt",
-            "updatedAt"
-        FROM invoice_item_snapshots;
+            iis."id",
+            iis."parentInvoiceItemId",
+            iis."itemName",
+            iis."unitPriceCents",
+            iis."unitName",
+            iis."createdAt",
+            iis."updatedAt"
+        FROM invoice_item_snapshots as iis;
       `);
 
       await db.run('DROP TABLE invoice_item_snapshots;');

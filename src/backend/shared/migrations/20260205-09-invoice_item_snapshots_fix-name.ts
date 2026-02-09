@@ -37,14 +37,14 @@ export const up = async (db: DatabaseAdapter) => {
             "updatedAt"
         )
         SELECT
-            "id",
-            "parentInvoiceItemId",
-            "itemName",
-            "unitPriceCents",
-            "unitName",
-            "createdAt",
-            "updatedAt"
-        FROM invoice_item_snaphots;
+            iis."id",
+            iis."parentInvoiceItemId",
+            iis."itemName",
+            iis."unitPriceCents",
+            iis."unitName",
+            iis."createdAt",
+            iis."updatedAt"
+        FROM invoice_item_snaphots as iis;
       `);
 
       await db.run('DROP TABLE invoice_item_snaphots;');

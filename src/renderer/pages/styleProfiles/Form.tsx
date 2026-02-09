@@ -155,30 +155,30 @@ export const Form: FC<Props> = ({ handleChange = () => {}, styleProfile }) => {
       onChange={handleChangeStyleProfile}
       renderCustomTop={() => {
         return (
-          <Grid size={{ xs: 12, md: 12 }}>
-            <TextField
-              label={t('common.name')}
-              fullWidth
-              required
-              value={form.name}
-              error={errors.name}
-              helperText={errors.name ? t('common.fieldRequired') : ''}
-              onChange={e => {
-                update('name', e.target.value);
-                validateField('name', e.target.value);
-              }}
-            />
-          </Grid>
-        );
-      }}
-      renderCustomBottom={() => {
-        return (
-          <Grid size={{ xs: 12, md: 12 }}>
-            <FormControlLabel
-              control={<Switch checked={form.isArchived} onChange={e => update('isArchived', e.target.checked)} />}
-              label={t('common.archived')}
-            />
-          </Grid>
+          <>
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, md: 12 }}>
+                <TextField
+                  label={t('common.name')}
+                  fullWidth
+                  required
+                  value={form.name}
+                  error={errors.name}
+                  helperText={errors.name ? t('common.fieldRequired') : ''}
+                  onChange={e => {
+                    update('name', e.target.value);
+                    validateField('name', e.target.value);
+                  }}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, md: 12 }}>
+                <FormControlLabel
+                  control={<Switch checked={form.isArchived} onChange={e => update('isArchived', e.target.checked)} />}
+                  label={t('common.archived')}
+                />
+              </Grid>
+            </Grid>
+          </>
         );
       }}
     />

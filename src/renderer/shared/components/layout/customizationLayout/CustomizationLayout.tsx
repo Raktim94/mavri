@@ -208,13 +208,19 @@ export const CustomizationLayout: FC<Props> = ({
         {renderCustomTop()}
         <Tabs value={value} onChange={handleChange} sx={{ marginTop: 1 }}>
           <Tab
-            label={<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>Page Setup</Box>}
+            label={<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>{t('common.pageSetup')}</Box>}
             {...a11yProps(0)}
           />
-          <Tab label={<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>Branding</Box>} {...a11yProps(1)} />
-          <Tab label={<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>Table</Box>} {...a11yProps(2)} />
           <Tab
-            label={<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}> Typography & Labels</Box>}
+            label={<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>{t('common.branding')}</Box>}
+            {...a11yProps(1)}
+          />
+          <Tab
+            label={<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>{t('common.table')}</Box>}
+            {...a11yProps(2)}
+          />
+          <Tab
+            label={<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>{t('common.typographyLabels')}</Box>}
             {...a11yProps(3)}
           />
         </Tabs>
@@ -380,7 +386,7 @@ export const CustomizationLayout: FC<Props> = ({
                 </RadioGroup>
               </FormControl>
             </Grid>
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid size={{ xs: 12, md: 4 }}>
               <FormControlLabel
                 control={
                   <Switch
@@ -393,7 +399,7 @@ export const CustomizationLayout: FC<Props> = ({
                 label={t('common.showQuantity')}
               />
             </Grid>
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid size={{ xs: 12, md: 4 }}>
               <FormControlLabel
                 control={
                   <Switch
@@ -406,7 +412,7 @@ export const CustomizationLayout: FC<Props> = ({
                 label={t('common.showRowNo')}
               />
             </Grid>
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid size={{ xs: 12, md: 4 }}>
               <FormControlLabel
                 control={
                   <Switch
@@ -420,6 +426,13 @@ export const CustomizationLayout: FC<Props> = ({
               />
             </Grid>
             <Grid size={{ xs: 12, md: 12 }}>
+              <Typography
+                component="legend"
+                variant="body1"
+                sx={{ fontWeight: 400, color: 'text.secondary', marginBottom: 1 }}
+              >
+                {t('invoices.sortOrder')}
+              </Typography>
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <SortableContext
                   items={sortItemObjectList.map((i, idx) => `customizable-sort-order-${i.key}-${idx}`) ?? []}
@@ -486,7 +499,7 @@ export const CustomizationLayout: FC<Props> = ({
         </TabPanel>
         <TabPanel value={value} index={3}>
           <Grid container spacing={2}>
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid size={{ xs: 12, md: 12 }}>
               <FormControlLabel
                 control={
                   <Switch
