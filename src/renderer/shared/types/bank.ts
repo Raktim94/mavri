@@ -1,8 +1,8 @@
 export interface BankMeta {
   id: number;
   name: string;
-  bankName: string;
-  accountNumber: string;
+  bankName?: string;
+  accountNumber?: string;
   swiftCode?: string;
   address?: string;
   branchCode?: string;
@@ -29,8 +29,8 @@ export interface BankWeb extends BankMeta {
 
 export interface BankAddMeta {
   name: string;
-  bankName: string;
-  accountNumber: string;
+  bankName?: string;
+  accountNumber?: string;
   swiftCode?: string;
   address?: string;
   branchCode?: string;
@@ -62,8 +62,8 @@ export interface BankUpdateWeb extends BankAddWeb {
 export interface BankFromData {
   id?: number;
   name: string;
-  bankName: string;
-  accountNumber: string;
+  bankName?: string;
+  accountNumber?: string;
   swiftCode?: string;
   address?: string;
   branchCode?: string;

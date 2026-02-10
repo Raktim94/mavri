@@ -6,6 +6,10 @@ New features & improvements
 
 - Introduced collapsible sections in the main menu, allowing related items to be grouped for a cleaner and more organized navigation experience.
 
+Bug Fixes
+
+- Fixed an issue which showed "save" button as active for empty invoice/quote
+
 ## 2026-02-09, version 1.7.0
 
 New features & improvements

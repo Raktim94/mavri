@@ -1,8 +1,8 @@
 export interface Bank {
   id?: number;
   name: string;
-  bankName: string;
-  accountNumber: string;
+  bankName?: string;
+  accountNumber?: string;
   swiftCode?: string;
   address?: string;
   branchCode?: string;

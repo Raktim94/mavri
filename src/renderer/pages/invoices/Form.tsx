@@ -14,6 +14,7 @@ import type { Invoice, InvoiceFromData } from '../../shared/types/invoice';
 import type { Response } from '../../shared/types/response';
 import type { StyleProfileAdd, StyleProfileFromData } from '../../shared/types/styleProfiles';
 import { useAppDispatch } from '../../state/configureStore';
+import { DEFAULT_TABLE_FIELD_SORT_ORDERS } from '../../state/constant';
 import { addToast } from '../../state/pageSlice';
 import { InvoiceForm } from './Form/index';
 import { InvoicesPreview } from './Preview';
@@ -108,7 +109,8 @@ const InvoiceFormComponent: FC<Props> = ({
             labelUpperCase: false,
             showQuantity: true,
             showUnit: true,
-            showRowNo: true
+            showRowNo: true,
+            fieldSortOrders: DEFAULT_TABLE_FIELD_SORT_ORDERS
           }
         });
       }

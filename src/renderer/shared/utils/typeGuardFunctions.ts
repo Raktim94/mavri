@@ -590,10 +590,15 @@ export const isInvoiceFromData = (data: unknown): data is InvoiceFromData => {
   if (d.invoiceNumber !== undefined && d.invoiceNumber !== null && typeof d.invoiceNumber !== 'string') return false;
   if (d.status !== undefined && d.status !== null && typeof d.status !== 'string') return false;
 
-  if (!isInvoiceBusinessSnapshotFromData(d.invoiceBusinessSnapshot)) return false;
-  if (!isInvoiceClientSnapshotFromData(d.invoiceClientSnapshot)) return false;
-  if (!isInvoiceCurrencySnapshotFromData(d.invoiceCurrencySnapshot)) return false;
-  if (!isInvoiceCustomizationFromData(d.invoiceCustomization)) return false;
+  if (d.invoiceBusinessSnapshot !== undefined && !isInvoiceBusinessSnapshotFromData(d.invoiceBusinessSnapshot))
+    return false;
+
+  if (d.invoiceClientSnapshot !== undefined && !isInvoiceClientSnapshotFromData(d.invoiceClientSnapshot)) return false;
+
+  if (d.invoiceCurrencySnapshot !== undefined && !isInvoiceCurrencySnapshotFromData(d.invoiceCurrencySnapshot))
+    return false;
+
+  if (d.invoiceCustomization !== undefined && !isInvoiceCustomizationFromData(d.invoiceCustomization)) return false;
 
   if (d.taxRate !== undefined && d.taxRate !== null && typeof d.taxRate !== 'number') return false;
 
