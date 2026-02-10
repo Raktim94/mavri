@@ -6,6 +6,7 @@ import { InvoiceStatus } from '../../../shared/enums/invoiceStatus';
 import { InvoiceType } from '../../../shared/enums/invoiceType';
 import type { Language } from '../../../shared/enums/language';
 import { useExportPdf } from '../../../shared/hooks/useExportPdf ';
+import type { Bank } from '../../../shared/types/bank';
 import type { Business } from '../../../shared/types/business';
 import type { Client } from '../../../shared/types/client';
 import type { Currency } from '../../../shared/types/currency';
@@ -30,7 +31,7 @@ import { StatusSelector } from './../Form/StatusSelector';
 import { AttachmentsList } from './AttachmentsList';
 import { BusinessSelector } from './BusinessSelector';
 import { ClientInvoiceRow } from './ClientInvoiceRow';
-import { CurrencyLanguageProfileRow } from './CurrencyLanguageProfileRow';
+import { BanksDropdown } from './Dropdowns/BanksDropdown';
 import { BusinessesDropdown } from './Dropdowns/BusinessesDropdown';
 import { ClientsDropdown } from './Dropdowns/ClientsDropdown';
 import { CurrenciesDropdown } from './Dropdowns/CurrenciesDropdown';
@@ -44,6 +45,7 @@ import { ItemSelector } from './ItemSelector';
 import { ItemsList } from './ItemsList';
 import { ItemMetadataSetter } from './Modals/ItemMetadataSetter';
 import { SignatureSelector } from './SignatureSelector';
+import { TopRow } from './TopRow';
 
 interface Props {
   invoiceForm?: InvoiceFromData;
@@ -68,6 +70,7 @@ const InvoiceFormComponent: FC<Props> = ({
   const [isDropdownOpenBusinesses, setIsDropdownOpenBusinesses] = useState<boolean>(false);
   const [isDropdownOpenCurrencies, setIsDropdownOpenCurrencies] = useState<boolean>(false);
   const [isDropdownOpenStyleProfile, setIsDropdownOpenStyleProfile] = useState<boolean>(false);
+  const [isDropdownOpenBanks, setIsDropdownOpenBanks] = useState<boolean>(false);
   const [isDropdownOpenClients, setIsDropdownOpenClients] = useState<boolean>(false);
   const [isDropdownOpenInvoiceInfo, setIsDropdownOpenInvoiceInfo] = useState<boolean>(false);
   const [isDropdownOpenMoreAction, setMoreActionDropdown] = useState<boolean>(false);
@@ -122,31 +125,64 @@ const InvoiceFormComponent: FC<Props> = ({
   const handleOnClickBusiness = useCallback(
     (data: Business) => {
       handleOnClose(setIsDropdownOpenBusinesses);
-      if (invoiceForm?.businessId !== data.id) {
-        startTransition(() => {
-          setInvoiceForm({
-            ...invoiceForm,
-            businessId: data.id,
-            invoiceBusinessSnapshot: {
-              ...invoiceForm?.invoiceBusinessSnapshot,
-              parentInvoiceId: invoiceForm?.id,
-              businessName: data.name,
-              businessAddress: data.address,
-              businessRole: data.role,
-              businessShortName: data.shortName,
-              businessEmail: data.email,
-              businessPhone: data.phone,
-              businessAdditional: data.additional,
-              // Legacy payment info. New payment info is via Bank
-              businessPaymentInformation: data.paymentInformation,
-              businessLogo: data.logo ?? undefined,
-              businessFileSize: data.fileSize,
-              businessFileType: data.fileType,
-              businessFileName: data.fileName
-            }
-          });
+
+      if (!invoiceForm) return;
+
+      startTransition(() => {
+        setInvoiceForm({
+          ...invoiceForm,
+          businessId: data.id,
+          invoiceBusinessSnapshot: {
+            ...invoiceForm?.invoiceBusinessSnapshot,
+            parentInvoiceId: invoiceForm?.id,
+            businessName: data.name,
+            businessAddress: data.address,
+            businessRole: data.role,
+            businessShortName: data.shortName,
+            businessEmail: data.email,
+            businessPhone: data.phone,
+            businessAdditional: data.additional,
+            // Legacy payment info. New payment info is via Bank
+            businessPaymentInformation: data.paymentInformation,
+            businessLogo: data.logo ?? undefined,
+            businessFileSize: data.fileSize,
+            businessFileType: data.fileType,
+            businessFileName: data.fileName
+          }
         });
-      }
+      });
+    },
+    [handleOnClose, setInvoiceForm, invoiceForm]
+  );
+
+  const handleOnClickBank = useCallback(
+    (data: Bank) => {
+      handleOnClose(setIsDropdownOpenBanks);
+
+      if (!invoiceForm) return;
+
+      startTransition(() => {
+        setInvoiceForm({
+          ...invoiceForm,
+          bankId: data.id,
+          invoiceBankSnapshot: {
+            ...invoiceForm?.invoiceBankSnapshot,
+            parentInvoiceId: invoiceForm?.id,
+            name: data.name,
+            bankName: data.bankName,
+            accountNumber: data.accountNumber,
+            swiftCode: data.swiftCode,
+            address: data.address,
+            branchCode: data.branchCode,
+            type: data.type,
+            routingNumber: data.routingNumber,
+            qrCode: data.qrCode ?? undefined,
+            qrCodeFileSize: data.qrCodeFileSize,
+            qrCodeFileType: data.qrCodeFileType,
+            qrCodeFileName: data.qrCodeFileName
+          }
+        });
+      });
     },
     [handleOnClose, setInvoiceForm, invoiceForm]
   );
@@ -204,70 +240,68 @@ const InvoiceFormComponent: FC<Props> = ({
     (data: Currency) => {
       handleOnClose(setIsDropdownOpenCurrencies);
 
-      if (invoiceForm?.currencyId !== data.id) {
-        if (!invoiceForm) return;
+      if (!invoiceForm) return;
 
-        const prevSubunit = invoiceForm.invoiceCurrencySnapshot?.currencySubunit;
-        const newSubunit = data.subunit;
+      const prevSubunit = invoiceForm.invoiceCurrencySnapshot?.currencySubunit;
+      const newSubunit = data.subunit;
 
-        const convert = (raw: string | undefined) => {
-          const value = Number(raw ?? 0);
-          let result = value;
+      const convert = (raw: string | undefined) => {
+        const value = Number(raw ?? 0);
+        let result = value;
 
-          if (prevSubunit === undefined && newSubunit !== undefined) {
-            result = value * newSubunit;
-          } else if (prevSubunit !== undefined && newSubunit !== undefined) {
-            result = value * (newSubunit / prevSubunit);
-          } else if (prevSubunit !== undefined && newSubunit === undefined) {
-            result = value / prevSubunit;
+        if (prevSubunit === undefined && newSubunit !== undefined) {
+          result = value * newSubunit;
+        } else if (prevSubunit !== undefined && newSubunit !== undefined) {
+          result = value * (newSubunit / prevSubunit);
+        } else if (prevSubunit !== undefined && newSubunit === undefined) {
+          result = value / prevSubunit;
+        }
+
+        if (!Number.isFinite(result) || Number.isNaN(result)) {
+          return '0';
+        }
+
+        return result.toString();
+      };
+
+      const updatedItems = invoiceForm.invoiceItems?.map(it => {
+        return {
+          ...it,
+          invoiceItemSnapshot: {
+            ...it.invoiceItemSnapshot,
+            unitPriceCents: convert(it.invoiceItemSnapshot.unitPriceCents)
           }
-
-          if (!Number.isFinite(result) || Number.isNaN(result)) {
-            return '0';
-          }
-
-          return result.toString();
         };
+      });
 
-        const updatedItems = invoiceForm.invoiceItems?.map(it => {
-          return {
-            ...it,
-            invoiceItemSnapshot: {
-              ...it.invoiceItemSnapshot,
-              unitPriceCents: convert(it.invoiceItemSnapshot.unitPriceCents)
-            }
-          };
+      const updatedPayments = invoiceForm.invoicePayments?.map(it => {
+        return {
+          ...it,
+          amountCents: convert(it.amountCents)
+        };
+      });
+
+      const updatedShippingFee = convert(invoiceForm?.shippingFeeCents);
+      const updatedDiscountAmount = convert(invoiceForm?.discountAmountCents);
+
+      startTransition(() => {
+        setInvoiceForm({
+          ...invoiceForm,
+          currencyId: data.id,
+          invoiceCurrencySnapshot: {
+            ...invoiceForm.invoiceCurrencySnapshot,
+            parentInvoiceId: invoiceForm.id!,
+            currencyCode: data.code,
+            currencySymbol: data.symbol,
+            currencySubunit: data.subunit
+          },
+          currencyFormat: data.format,
+          invoiceItems: updatedItems ?? invoiceForm.invoiceItems,
+          invoicePayments: updatedPayments ?? invoiceForm.invoicePayments,
+          shippingFeeCents: updatedShippingFee,
+          discountAmountCents: updatedDiscountAmount
         });
-
-        const updatedPayments = invoiceForm.invoicePayments?.map(it => {
-          return {
-            ...it,
-            amountCents: convert(it.amountCents)
-          };
-        });
-
-        const updatedShippingFee = convert(invoiceForm?.shippingFeeCents);
-        const updatedDiscountAmount = convert(invoiceForm?.discountAmountCents);
-
-        startTransition(() => {
-          setInvoiceForm({
-            ...invoiceForm,
-            currencyId: data.id,
-            invoiceCurrencySnapshot: {
-              ...invoiceForm.invoiceCurrencySnapshot,
-              parentInvoiceId: invoiceForm.id!,
-              currencyCode: data.code,
-              currencySymbol: data.symbol,
-              currencySubunit: data.subunit
-            },
-            currencyFormat: data.format,
-            invoiceItems: updatedItems ?? invoiceForm.invoiceItems,
-            invoicePayments: updatedPayments ?? invoiceForm.invoicePayments,
-            shippingFeeCents: updatedShippingFee,
-            discountAmountCents: updatedDiscountAmount
-          });
-        });
-      }
+      });
     },
     [handleOnClose, setInvoiceForm, invoiceForm]
   );
@@ -276,23 +310,21 @@ const InvoiceFormComponent: FC<Props> = ({
     (data: Client) => {
       handleOnClose(setIsDropdownOpenClients);
 
-      if (invoiceForm?.clientId !== data.id) {
-        startTransition(() => {
-          setInvoiceForm({
-            ...invoiceForm,
-            clientId: data.id,
-            invoiceClientSnapshot: {
-              ...invoiceForm?.invoiceClientSnapshot,
-              clientName: data.name,
-              clientAddress: data.address,
-              clientEmail: data.email,
-              clientPhone: data.phone,
-              clientCode: data.code,
-              clientAdditional: data.additional
-            }
-          });
+      startTransition(() => {
+        setInvoiceForm({
+          ...invoiceForm,
+          clientId: data.id,
+          invoiceClientSnapshot: {
+            ...invoiceForm?.invoiceClientSnapshot,
+            clientName: data.name,
+            clientAddress: data.address,
+            clientEmail: data.email,
+            clientPhone: data.phone,
+            clientCode: data.code,
+            clientAdditional: data.additional
+          }
         });
-      }
+      });
     },
     [handleOnClose, setInvoiceForm, invoiceForm]
   );
@@ -682,7 +714,8 @@ const InvoiceFormComponent: FC<Props> = ({
       }}
     >
       <Divider flexItem />
-      <CurrencyLanguageProfileRow
+      <TopRow
+        onEditBank={() => onEdit(setIsDropdownOpenBanks)}
         onEditCurrency={() => onEdit(setIsDropdownOpenCurrencies)}
         onEditLanguage={() => onEdit(setIsDropdownOpenLanguages)}
         onEditStyleProfile={() => onEdit(setIsDropdownOpenStyleProfile)}
@@ -779,6 +812,12 @@ const InvoiceFormComponent: FC<Props> = ({
         onClose={() => handleOnClose(setIsDropdownOpenStyleProfile)}
         onOpen={() => handleOnOpen(setIsDropdownOpenStyleProfile)}
         onClick={handleOnClickStyleProfile}
+      />
+      <BanksDropdown
+        isOpen={isDropdownOpenBanks}
+        onClose={() => handleOnClose(setIsDropdownOpenBanks)}
+        onOpen={() => handleOnOpen(setIsDropdownOpenBanks)}
+        onClick={handleOnClickBank}
       />
       <CurrenciesDropdown
         isOpen={isDropdownOpenCurrencies}

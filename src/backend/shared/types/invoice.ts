@@ -38,6 +38,24 @@ export interface InvoiceClientSnapshots {
   clientAdditional?: string;
 }
 
+export interface InvoiceBankSnapshots {
+  parentInvoiceId: number;
+  id?: number;
+  name: string;
+  bankName?: string;
+  accountNumber?: string;
+  swiftCode?: string;
+  address?: string;
+  branchCode?: string;
+  type?: string;
+  routingNumber?: string;
+  upiCode?: string;
+  qrCodeFileSize?: number;
+  qrCodeFileType?: string;
+  qrCodeFileName?: string;
+  qrCode?: Uint8Array;
+}
+
 export interface InvoiceBusinessSnapshots {
   parentInvoiceId: number;
   id?: number;
@@ -93,6 +111,7 @@ export interface Invoice {
   convertedFromQuotationId?: number;
   businessId: number;
   clientId: number;
+  bankId?: number;
   currencyId: number;
   createdAt: string;
   updatedAt: string;
@@ -125,6 +144,7 @@ export interface Invoice {
   styleProfilesId?: number;
   invoiceStyleProfileSnapshot?: InvoiceStyleProfileSnapshots;
   invoiceCustomization?: InvoiceCustomization;
+  invoiceBankSnapshot?: InvoiceBankSnapshots;
   invoiceBusinessSnapshot?: InvoiceBusinessSnapshots;
   invoiceClientSnapshot?: InvoiceClientSnapshots;
   invoiceCurrencySnapshot?: InvoiceCurrencySnapshots;

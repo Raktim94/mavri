@@ -74,6 +74,12 @@ const mapInvoiceFromWeb = (i: InvoiceWeb) => ({
         businessLogo: base64ToBytesOrUndef(i.invoiceBusinessSnapshot?.businessLogo)
       }
     : i.invoiceBusinessSnapshot,
+  invoiceBankSnapshot: i.invoiceBankSnapshot
+    ? {
+        ...i.invoiceBankSnapshot,
+        qrCode: base64ToBytesOrUndef(i.invoiceBankSnapshot?.qrCode)
+      }
+    : i.invoiceBankSnapshot,
   invoiceCustomization: i.invoiceCustomization
     ? {
         ...i.invoiceCustomization,
@@ -93,6 +99,12 @@ const mapInvoiceToWeb = async (data: InvoiceUpdate | InvoiceAdd) => ({
         businessLogo: await fileToBase64(data.invoiceBusinessSnapshot?.businessLogo)
       }
     : data.invoiceBusinessSnapshot,
+  invoiceBankSnapshot: data.invoiceBankSnapshot
+    ? {
+        ...data.invoiceBankSnapshot,
+        qrCode: await fileToBase64(data.invoiceBankSnapshot?.qrCode)
+      }
+    : data.invoiceBankSnapshot,
   invoiceCustomization: data.invoiceCustomization
     ? {
         ...data.invoiceCustomization,

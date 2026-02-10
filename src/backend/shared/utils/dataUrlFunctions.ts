@@ -2,7 +2,7 @@ import type { Response } from '../../shared/types/response';
 import type { Bank } from '../types/bank';
 import type { Business } from '../types/business';
 import type { EntityWithCounts } from '../types/entityWithCounts';
-import type { Invoice, InvoiceBusinessSnapshots, InvoiceCustomization } from '../types/invoice';
+import type { Invoice, InvoiceBankSnapshots, InvoiceBusinessSnapshots, InvoiceCustomization } from '../types/invoice';
 import type { StyleProfile } from '../types/styleProfiles';
 import { fromBase64 } from './generalFunctions';
 
@@ -100,7 +100,13 @@ export const decodeInvoice = <T extends Record<string, unknown>>(invoice: T) => 
   invoiceAttachments: decodeInvoiceAttachments(invoice.invoiceAttachments as { data?: unknown }[] | null | undefined),
   invoiceBusinessSnapshot: decodeInvoiceBusinessSnapshotImport(
     invoice?.invoiceBusinessSnapshot as InvoiceBusinessSnapshots
-  )
+  ),
+  invoiceBankSnapshot: decodeInvoiceBankSnapshotImport(invoice?.invoiceBankSnapshot as InvoiceBankSnapshots)
+});
+
+export const decodeInvoiceBankSnapshotImport = (invoiceB: InvoiceBankSnapshots) => ({
+  ...invoiceB,
+  qrCode: invoiceB.qrCode ? fromBase64(invoiceB.qrCode) : null
 });
 
 export const decodeInvoiceBusinessSnapshotImport = (invoiceBS: InvoiceBusinessSnapshots) => ({
@@ -128,6 +134,7 @@ export const encodeInvoice = <T extends Record<string, unknown>>(invoice?: T | n
     invoiceBusinessSnapshot: encodeInvoiceBusinessSnapshotExport(
       invoice?.invoiceBusinessSnapshot as InvoiceBusinessSnapshots
     ),
+    invoiceBankSnapshot: encodeInvoiceBankSnapshotExport(invoice?.invoiceBankSnapshot as InvoiceBankSnapshots),
     invoiceAttachments: encodeInvoiceAttachments(invoice.invoiceAttachments as { data?: unknown }[] | null | undefined)
   };
 };
@@ -137,6 +144,14 @@ export const encodeInvoiceBusinessSnapshotExport = (invoiceBS?: InvoiceBusinessS
   return {
     ...invoiceBS,
     businessLogo: invoiceBS.businessLogo ? (invoiceBS.businessLogo as Buffer).toString('base64') : null
+  };
+};
+
+export const encodeInvoiceBankSnapshotExport = (invoiceB?: InvoiceBankSnapshots | null) => {
+  if (!invoiceB) return invoiceB;
+  return {
+    ...invoiceB,
+    qrCode: invoiceB.qrCode ? (invoiceB.qrCode as Buffer).toString('base64') : null
   };
 };
 

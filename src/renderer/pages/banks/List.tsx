@@ -5,14 +5,22 @@ import type { Bank } from '../../shared/types/bank';
 interface Props {
   item: Bank;
   selectedItem?: Bank;
-  onEdit: (item: Bank) => void;
-  onDelete: (id: number) => void;
+  showDeleteButton?: boolean;
+  onEdit?: (item: Bank) => void;
+  onDelete?: (id: number) => void;
 }
-export const List: FC<Props> = ({ item, selectedItem, onEdit, onDelete }) => {
+export const List: FC<Props> = ({
+  item,
+  selectedItem,
+  onEdit = () => {},
+  onDelete = () => {},
+  showDeleteButton = true
+}) => {
   return (
     <GenericList
       item={item}
       selectedItem={selectedItem}
+      showDeleteButton={showDeleteButton}
       onEdit={onEdit}
       onDelete={onDelete}
       getName={c => c.name}

@@ -109,6 +109,31 @@ export interface AttachmentForm {
   data: Uint8Array;
 }
 
+export interface InvoiceBankSnapshotsMeta {
+  parentInvoiceId?: number;
+  id?: number;
+  name?: string;
+  bankName?: string;
+  accountNumber?: string;
+  swiftCode?: string;
+  address?: string;
+  branchCode?: string;
+  type?: string;
+  routingNumber?: string;
+  upiCode?: string;
+  qrCodeFileSize?: number;
+  qrCodeFileType?: string;
+  qrCodeFileName?: string;
+}
+
+export interface InvoiceBankSnapshots extends InvoiceBankSnapshotsMeta {
+  qrCode?: Uint8Array;
+}
+
+export interface InvoiceBankSnapshotsWeb extends InvoiceBankSnapshotsMeta {
+  qrCode?: string;
+}
+
 export interface InvoiceStyleProfileSnapshots {
   parentInvoiceId?: number;
   id?: number;
@@ -278,6 +303,7 @@ export interface InvoiceMeta {
   convertedFromQuotationId?: number;
   invoiceFullNumber: string;
   businessId: number;
+  bankId?: number;
   clientId: number;
   currencyId: number;
   createdAt: string;
@@ -318,6 +344,7 @@ export interface Invoice extends InvoiceMeta {
   invoiceAttachments: InvoiceAttachment[];
   invoiceBusinessSnapshot?: InvoiceBusinessSnapshots;
   invoiceCustomization?: InvoiceCustomization;
+  invoiceBankSnapshot?: InvoiceBankSnapshots;
 }
 
 export interface InvoiceWeb extends InvoiceMeta {
@@ -325,11 +352,13 @@ export interface InvoiceWeb extends InvoiceMeta {
   invoiceAttachments: InvoiceAttachmentWeb[];
   invoiceBusinessSnapshot?: InvoiceBusinessSnapshotsWeb;
   invoiceCustomization?: InvoiceCustomizationWeb;
+  invoiceBankSnapshot?: InvoiceBankSnapshotsWeb;
 }
 export interface InvoiceAddMeta {
   invoiceType?: InvoiceType;
   convertedFromQuotationId?: number;
   businessId?: number;
+  bankId?: number;
   clientId?: number;
   currencyId?: number;
   issuedAt?: string;
@@ -368,6 +397,7 @@ export interface InvoiceAdd extends InvoiceAddMeta {
   invoiceAttachments?: InvoiceAttachment[];
   invoiceBusinessSnapshot?: InvoiceBusinessSnapshots;
   invoiceCustomization?: InvoiceCustomization;
+  invoiceBankSnapshot?: InvoiceBankSnapshots;
 }
 
 export interface InvoiceUpdate extends InvoiceAdd {
@@ -379,6 +409,7 @@ export interface InvoiceAddWeb extends InvoiceAddMeta {
   invoiceAttachments?: InvoiceAttachmentWeb[];
   invoiceBusinessSnapshot?: InvoiceBusinessSnapshotsWeb;
   invoiceCustomization?: InvoiceCustomizationWeb;
+  invoiceBankSnapshot?: InvoiceBankSnapshotsWeb;
 }
 
 export interface InvoiceUpdateWeb extends InvoiceAddWeb {
@@ -390,6 +421,7 @@ export interface InvoiceFromData {
   invoiceType?: InvoiceType;
   convertedFromQuotationId?: number;
   businessId?: number;
+  bankId?: number;
   clientId?: number;
   currencyId?: number;
   issuedAt?: string;
@@ -413,6 +445,7 @@ export interface InvoiceFromData {
   invoicePayments?: InvoicePayment[];
   invoiceItems?: InvoiceItem[];
   invoiceAttachments?: InvoiceAttachment[];
+  invoiceBankSnapshot?: InvoiceBankSnapshots;
   invoiceBusinessSnapshot?: InvoiceBusinessSnapshots;
   invoiceClientSnapshot?: InvoiceClientSnapshots;
   invoiceCurrencySnapshot?: InvoiceCurrencySnapshots;

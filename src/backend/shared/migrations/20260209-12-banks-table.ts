@@ -34,7 +34,7 @@ export const up = async (db: DatabaseAdapter) => {
       CREATE TABLE IF NOT EXISTS invoice_bank_snapshots (
         "id" ${getColumnType('INTEGER PRIMARY KEY AUTOINCREMENT', db.type)},
         "parentInvoiceId" INTEGER NOT NULL,
-        "name" TEXT NOT NULL UNIQUE,
+        "name" TEXT NOT NULL,
         "bankName" TEXT NOT NULL,
         "accountNumber" TEXT NOT NULL,
         "swiftCode" TEXT,

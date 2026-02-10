@@ -1,5 +1,3 @@
-// db may be sqlite3 Database or a Postgres adapter — typed as `any` at runtime
-
 import { DatabaseType } from '../enums/databaseType';
 import type { Bank } from '../types/bank';
 import type { Business } from '../types/business';
@@ -11,6 +9,7 @@ import type { DbValue } from '../types/dbValue';
 import type {
   Invoice,
   InvoiceAttachment,
+  InvoiceBankSnapshots,
   InvoiceBusinessSnapshots,
   InvoiceClientSnapshots,
   InvoiceCurrencySnapshots,
@@ -26,6 +25,7 @@ import type { Unit } from '../types/unit';
 import {
   decodeBank,
   decodeInvoiceAttachment,
+  decodeInvoiceBankSnapshotImport,
   decodeInvoiceBusinessSnapshotImport,
   decodeInvoiceCustomizationImport,
   decodeInvoiceImport,
@@ -33,6 +33,7 @@ import {
   decodeStyleProfile,
   encodeBank,
   encodeInvoiceAttachment,
+  encodeInvoiceBankSnapshotExport,
   encodeInvoiceBusinessSnapshotExport,
   encodeInvoiceCustomizationExport,
   encodeInvoiceExport,
@@ -54,6 +55,7 @@ export const exportAllData = async (db: DatabaseAdapter) => {
     const categories = await db.all<Category>('SELECT * FROM categories');
     const currencies = await db.all<Currency>('SELECT * FROM currencies');
     const invoices = await db.all<Invoice>('SELECT * FROM invoices');
+    const invoiceBankSnapshots = await db.all<InvoiceBankSnapshots>('SELECT * FROM invoice_bank_snapshots');
     const invoiceBusinessSnapshots = await db.all<InvoiceBusinessSnapshots>('SELECT * FROM invoice_business_snapshots');
     const invoiceClientSnapshots = await db.all<InvoiceClientSnapshots>('SELECT * FROM invoice_client_snapshots');
     const invoiceCurrencySnapshots = await db.all<InvoiceCurrencySnapshots>('SELECT * FROM invoice_currency_snapshots');
@@ -71,6 +73,7 @@ export const exportAllData = async (db: DatabaseAdapter) => {
     const styleProfilesModified = styleProfiles.map(encodeStyleProfile);
     const banksModified = banks.map(encodeBank);
     const invoicesModified = invoices.map(encodeInvoiceExport);
+    const invoiceBankSnapshotsModified = invoiceBankSnapshots.map(encodeInvoiceBankSnapshotExport);
     const invoiceBusinessSnapshotsModified = invoiceBusinessSnapshots.map(encodeInvoiceBusinessSnapshotExport);
     const invoiceCustomizationsModified = invoiceCustomizations.map(encodeInvoiceCustomizationExport);
 
@@ -83,6 +86,7 @@ export const exportAllData = async (db: DatabaseAdapter) => {
       categories,
       currencies,
       invoices: invoicesModified,
+      invoiceBankSnapshots: invoiceBankSnapshotsModified,
       invoiceBusinessSnapshots: invoiceBusinessSnapshotsModified,
       invoiceCustomizations: invoiceCustomizationsModified,
       invoiceClientSnapshots,
@@ -173,6 +177,7 @@ export const importAllData = async (db: DatabaseAdapter, parsed: Record<string, 
         'invoice_customizations',
         'invoice_currency_snapshots',
         'invoice_client_snapshots',
+        'invoice_bank_snapshots',
         'invoice_business_snapshots',
         'invoice_item_snapshots',
         'invoice_items',
@@ -204,6 +209,7 @@ export const importAllData = async (db: DatabaseAdapter, parsed: Record<string, 
         invoices: 'invoices',
         invoice_style_profile_snapshots: 'invoiceStyleProfileSnapshots',
         invoice_business_snapshots: 'invoiceBusinessSnapshots',
+        invoice_bank_snapshots: 'invoiceBankSnapshots',
         invoice_customizations: 'invoiceCustomizations',
         invoice_client_snapshots: 'invoiceClientSnapshots',
         invoice_currency_snapshots: 'invoiceCurrencySnapshots',
@@ -234,6 +240,9 @@ export const importAllData = async (db: DatabaseAdapter, parsed: Record<string, 
         parsedMut.invoiceBusinessSnapshots = parsedMut.invoiceBusinessSnapshots.map(
           decodeInvoiceBusinessSnapshotImport
         );
+      }
+      if (Array.isArray(parsedMut.invoiceBankSnapshots)) {
+        parsedMut.invoiceBankSnapshots = parsedMut.invoiceBankSnapshots.map(decodeInvoiceBankSnapshotImport);
       }
       if (Array.isArray(parsedMut.invoiceCustomizations)) {
         parsedMut.invoiceCustomizations = parsedMut.invoiceCustomizations.map(decodeInvoiceCustomizationImport);

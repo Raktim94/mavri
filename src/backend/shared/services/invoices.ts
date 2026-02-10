@@ -5,6 +5,7 @@ import type {
   CustomField,
   Invoice,
   InvoiceAttachment,
+  InvoiceBankSnapshots,
   InvoiceBusinessSnapshots,
   InvoiceClientSnapshots,
   InvoiceCurrencySnapshots,
@@ -68,6 +69,22 @@ const invoiceClientSnapshotsFields: (keyof InvoiceClientSnapshots)[] = [
   'clientCode',
   'clientAdditional'
 ];
+const invoiceBankSnapshotsFields: (keyof InvoiceBankSnapshots)[] = [
+  'parentInvoiceId',
+  'name',
+  'bankName',
+  'accountNumber',
+  'swiftCode',
+  'address',
+  'branchCode',
+  'type',
+  'routingNumber',
+  'upiCode',
+  'qrCode',
+  'qrCodeFileSize',
+  'qrCodeFileType',
+  'qrCodeFileName'
+];
 const invoiceBusinessSnapshotsFields: (keyof InvoiceBusinessSnapshots)[] = [
   'parentInvoiceId',
   'businessName',
@@ -119,6 +136,7 @@ const invoiceFields: (keyof Invoice)[] = [
   'currencyId',
   'issuedAt',
   'dueDate',
+  'bankId',
   'invoiceNumber',
   'isArchived',
   'status',
@@ -205,7 +223,8 @@ const getInvoices = async (db: DatabaseAdapter, options: GetInvoicesOptions) => 
     invoiceClientSnapshots,
     invoiceCurrencySnapshots,
     invoiceCustomization,
-    invoiceStyleProfileSnapshots
+    invoiceStyleProfileSnapshots,
+    invoiceBankSnapshots
   ] = await Promise.all([
     db.all<InvoicePayment>(`SELECT * FROM invoice_payments WHERE "parentInvoiceId" IN (${placeholders})`, invoiceIds),
     db.all<InvoiceItem>(`SELECT * FROM invoice_items WHERE "parentInvoiceId" IN (${placeholders})`, invoiceIds),
@@ -228,6 +247,10 @@ const getInvoices = async (db: DatabaseAdapter, options: GetInvoicesOptions) => 
     ),
     db.all<InvoiceStyleProfileSnapshots>(
       `SELECT * FROM invoice_style_profile_snapshots WHERE "parentInvoiceId" IN (${placeholders})`,
+      invoiceIds
+    ),
+    db.all<InvoiceBankSnapshots>(
+      `SELECT * FROM invoice_bank_snapshots WHERE "parentInvoiceId" IN (${placeholders})`,
       invoiceIds
     )
   ]);
@@ -255,6 +278,7 @@ const getInvoices = async (db: DatabaseAdapter, options: GetInvoicesOptions) => 
           };
         }),
       invoiceAttachments: invoiceAttachments.filter(p => p.parentInvoiceId === invoice.id),
+      invoiceBankSnapshot: invoiceBankSnapshots.find(p => p.parentInvoiceId === invoice.id),
       invoiceBusinessSnapshot: invoiceBusinessSnapshots.find(p => p.parentInvoiceId === invoice.id),
       invoiceClientSnapshot: invoiceClientSnapshots.find(p => p.parentInvoiceId === invoice.id),
       invoiceCurrencySnapshot: invoiceCurrencySnapshots.find(p => p.parentInvoiceId === invoice.id),
@@ -309,6 +333,11 @@ export const deleteInvoice = async (db: DatabaseAdapter, id: number) => {
 
 export const addInvoice = async (db: DatabaseAdapter, data: Invoice) => {
   const handleInvoice = handleEntity<Invoice>(db, 'invoices', invoiceFields);
+  const handleInvoiceBankSnapshots = handleEntity<InvoiceBankSnapshots>(
+    db,
+    'invoice_bank_snapshots',
+    invoiceBankSnapshotsFields
+  );
   const handleInvoiceBusinessSnapshots = handleEntity<InvoiceBusinessSnapshots>(
     db,
     'invoice_business_snapshots',
@@ -358,7 +387,7 @@ export const addInvoice = async (db: DatabaseAdapter, data: Invoice) => {
     }
 
     const newId = result.data;
-    if (data.styleProfilesId && data.invoiceStyleProfileSnapshot) {
+    if (data.styleProfilesId != undefined && data.invoiceStyleProfileSnapshot) {
       const ibs = await handleInvoiceStyleProfileSnapshots({
         ...data.invoiceStyleProfileSnapshot,
         parentInvoiceId: newId
@@ -387,7 +416,7 @@ export const addInvoice = async (db: DatabaseAdapter, data: Invoice) => {
         return { success: false, key: ibs.key, message: ibs.message };
       }
     }
-    if (data.currencyId && data.invoiceCurrencySnapshot) {
+    if (data.currencyId != undefined && data.invoiceCurrencySnapshot) {
       const ibs = await handleInvoiceCurrencySnapshots({
         ...data.invoiceCurrencySnapshot,
         parentInvoiceId: newId
@@ -401,7 +430,21 @@ export const addInvoice = async (db: DatabaseAdapter, data: Invoice) => {
         return { success: false, key: ibs.key, message: ibs.message };
       }
     }
-    if (data.businessId && data.invoiceBusinessSnapshot) {
+    if (data.bankId != undefined && data.invoiceBankSnapshot) {
+      const ibs = await handleInvoiceBankSnapshots({
+        ...data.invoiceBankSnapshot,
+        parentInvoiceId: newId
+      });
+      if (!ibs.success) {
+        try {
+          await db.run('ROLLBACK');
+        } catch {
+          throw new Error(`ROLLBACK failed`);
+        }
+        return { success: false, key: ibs.key, message: ibs.message };
+      }
+    }
+    if (data.businessId != undefined && data.invoiceBusinessSnapshot) {
       const ibs = await handleInvoiceBusinessSnapshots({
         ...data.invoiceBusinessSnapshot,
         parentInvoiceId: newId
@@ -415,7 +458,7 @@ export const addInvoice = async (db: DatabaseAdapter, data: Invoice) => {
         return { success: false, key: ibs.key, message: ibs.message };
       }
     }
-    if (data.clientId && data.invoiceClientSnapshot) {
+    if (data.clientId != undefined && data.invoiceClientSnapshot) {
       const ibs = await handleInvoiceClientSnapshots({
         ...data.invoiceClientSnapshot,
         parentInvoiceId: newId
@@ -525,6 +568,11 @@ export const updateInvoice = async (db: DatabaseAdapter, data: Invoice) => {
     'invoice_business_snapshots',
     invoiceBusinessSnapshotsFields
   );
+  const handleInvoiceBankSnapshots = handleEntity<InvoiceBankSnapshots>(
+    db,
+    'invoice_bank_snapshots',
+    invoiceBankSnapshotsFields
+  );
   const handleInvoiceStyleProfileSnapshots = handleEntity<InvoiceStyleProfileSnapshots>(
     db,
     'invoice_style_profile_snapshots',
@@ -559,13 +607,13 @@ export const updateInvoice = async (db: DatabaseAdapter, data: Invoice) => {
       return { success: false, key: result.key };
     }
 
-    if (data.styleProfilesId && data.invoiceStyleProfileSnapshot) {
+    if (data.styleProfilesId != undefined && data.invoiceStyleProfileSnapshot) {
       const ibs = await handleInvoiceStyleProfileSnapshots(
         {
           ...data.invoiceStyleProfileSnapshot,
           parentInvoiceId: data.id
         },
-        true
+        data.invoiceStyleProfileSnapshot.id != undefined
       );
       if (!ibs.success) {
         try {
@@ -583,7 +631,7 @@ export const updateInvoice = async (db: DatabaseAdapter, data: Invoice) => {
           parentInvoiceId: data.id,
           fieldSortOrders: JSON.stringify(data.invoiceCustomization.fieldSortOrders)
         },
-        true
+        data.invoiceCustomization.id != undefined
       );
       if (!ibs.success) {
         try {
@@ -594,13 +642,13 @@ export const updateInvoice = async (db: DatabaseAdapter, data: Invoice) => {
         return { success: false, key: ibs.key, message: ibs.message };
       }
     }
-    if (data.currencyId && data.invoiceCurrencySnapshot) {
+    if (data.currencyId != undefined && data.invoiceCurrencySnapshot) {
       const ibs = await handleInvoiceCurrencySnapshots(
         {
           ...data.invoiceCurrencySnapshot,
           parentInvoiceId: data.id
         },
-        true
+        data.invoiceCurrencySnapshot.id != undefined
       );
       if (!ibs.success) {
         try {
@@ -611,13 +659,30 @@ export const updateInvoice = async (db: DatabaseAdapter, data: Invoice) => {
         return { success: false, key: ibs.key, message: ibs.message };
       }
     }
-    if (data.businessId && data.invoiceBusinessSnapshot) {
+    if (data.bankId != undefined && data.invoiceBankSnapshot) {
+      const ibs = await handleInvoiceBankSnapshots(
+        {
+          ...data.invoiceBankSnapshot,
+          parentInvoiceId: data.id
+        },
+        data.invoiceBankSnapshot.id != undefined
+      );
+      if (!ibs.success) {
+        try {
+          await db.run('ROLLBACK');
+        } catch {
+          throw new Error(`ROLLBACK failed`);
+        }
+        return { success: false, key: ibs.key, message: ibs.message };
+      }
+    }
+    if (data.businessId != undefined && data.invoiceBusinessSnapshot) {
       const ibs = await handleInvoiceBusinessSnapshots(
         {
           ...data.invoiceBusinessSnapshot,
           parentInvoiceId: data.id
         },
-        true
+        data.invoiceBusinessSnapshot.id != undefined
       );
       if (!ibs.success) {
         try {
@@ -628,13 +693,13 @@ export const updateInvoice = async (db: DatabaseAdapter, data: Invoice) => {
         return { success: false, key: ibs.key, message: ibs.message };
       }
     }
-    if (data.clientId && data.invoiceClientSnapshot) {
+    if (data.clientId != undefined && data.invoiceClientSnapshot) {
       const ibs = await handleInvoiceClientSnapshots(
         {
           ...data.invoiceClientSnapshot,
           parentInvoiceId: data.id
         },
-        true
+        data.invoiceClientSnapshot.id != undefined
       );
       if (!ibs.success) {
         try {
@@ -781,7 +846,7 @@ export const duplicateInvoice = async (
           "thanksNotes", "termsConditionNotes", "discountName", "language", 
           "discountType", "discountAmountCents", "discountPercent", "shippingFeeCents",
           "invoicePrefix", "invoiceSuffix", "taxName", "taxRate", "taxType", "signatureData",
-          "signatureSize", "signatureType", "signatureName", "styleProfilesId"
+          "signatureSize", "signatureType", "signatureName", "styleProfilesId", "bankId"
         )
         SELECT
           ?, ?, "businessId", "clientId", "currencyId",
@@ -789,7 +854,7 @@ export const duplicateInvoice = async (
           "thanksNotes", "termsConditionNotes", "discountName", "language", 
           "discountType", "discountAmountCents", "discountPercent", "shippingFeeCents",
           "invoicePrefix", "invoiceSuffix", "taxName", "taxRate", "taxType", "signatureData",
-          "signatureSize", "signatureType", "signatureName", "styleProfilesId"
+          "signatureSize", "signatureType", "signatureName", "styleProfilesId", "bankId"
         FROM invoices WHERE "id" = ?
       `;
 
@@ -813,6 +878,21 @@ export const duplicateInvoice = async (
       await db.run(sql, [duplicatedRowID, invoiceId]);
     };
 
+    await duplicateSnapshot('invoice_bank_snapshots', [
+      'name',
+      'bankName',
+      'accountNumber',
+      'swiftCode',
+      'address',
+      'branchCode',
+      'type',
+      'routingNumber',
+      'upiCode',
+      'qrCode',
+      'qrCodeFileSize',
+      'qrCodeFileType',
+      'qrCodeFileName'
+    ]);
     await duplicateSnapshot('invoice_business_snapshots', [
       'businessName',
       'businessShortName',
