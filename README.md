@@ -364,20 +364,7 @@ Please open an issue before starting major work to ensure alignment.
 
 | Version | Status                |
 | ------- | --------------------- |
-| v1.7.0  | ✅ Actively supported |
-| v1.6.0  | ✅ Actively supported |
-| v1.5.0  | ✅ Actively supported |
-| v1.4.0  | ✅ Actively supported |
-| v1.3.0  | ✅ Actively supported |
-| v1.2.1  | ✅ Actively supported |
-| v1.2.0  | ✅ Actively supported |
-| v1.1.4  | ✅ Actively supported |
-| v1.1.3  | ✅ Actively supported |
-| v1.1.2  | ✅ Actively supported |
-| v1.1.1  | ✅ Actively supported |
-| v1.1.0  | ✅ Actively supported |
-| v1.0.7  | ✅ Actively supported |
-| v1.0.5  | ✅ Actively supported |
+| v2.0.0  | ✅ Actively supported |
 
 Details about supported versions and update policy will be documented here.
 

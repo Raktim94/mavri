@@ -48,6 +48,7 @@ export interface InvoiceBusinessSnapshots {
   businessEmail?: string;
   businessPhone?: string;
   businessAdditional?: string;
+  // Legacy payment info. New payment info is via Bank
   businessPaymentInformation?: string;
   businessLogo?: Uint8Array;
   businessFileSize?: number;

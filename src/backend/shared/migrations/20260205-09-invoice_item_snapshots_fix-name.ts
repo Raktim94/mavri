@@ -58,7 +58,7 @@ export const up = async (db: DatabaseAdapter) => {
     }
     if (db.type === DatabaseType.postgre) {
       await db.run(`ALTER TABLE invoice_item_snaphots RENAME TO invoice_item_snapshots;`);
-      await db.run(`ALTER INDEX invoice_item_snaphots_pkey RENAME TO invoice_item_snapshots_new_pkey;`);
+      await db.run(`ALTER INDEX invoice_item_snaphots_pkey RENAME TO invoice_item_snapshots_pkey;`);
     }
   } catch (error) {
     return { success: false, ...mapDatabaseError(error, db.type) };

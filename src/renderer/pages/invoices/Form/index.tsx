@@ -137,6 +137,7 @@ const InvoiceFormComponent: FC<Props> = ({
               businessEmail: data.email,
               businessPhone: data.phone,
               businessAdditional: data.additional,
+              // Legacy payment info. New payment info is via Bank
               businessPaymentInformation: data.paymentInformation,
               businessLogo: data.logo ?? undefined,
               businessFileSize: data.fileSize,

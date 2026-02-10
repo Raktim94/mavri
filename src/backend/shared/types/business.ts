@@ -9,6 +9,7 @@ export interface Business {
   address?: string;
   website?: string;
   additional?: string;
+  // Legacy payment info. New payment info is via Bank
   paymentInformation?: string;
   isArchived: boolean;
   fileSize?: number;

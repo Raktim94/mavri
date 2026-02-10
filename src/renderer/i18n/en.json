@@ -172,6 +172,7 @@
     "paidWatermark": "Paid watermark",
     "password": "Password",
     "paymentInfo": "Payment information",
+    "paymentInfoLegacy": "This is legacy payment information. New payment details should be set via the Bank section.",
     "paypal": "PayPal",
     "phone": "Phone",
     "phoneHelper": "Enter phone number in international format",

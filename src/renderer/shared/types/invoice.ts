@@ -257,6 +257,7 @@ export interface InvoiceBusinessSnapshotsMeta {
   businessEmail?: string;
   businessPhone?: string;
   businessAdditional?: string;
+  // Legacy payment info. New payment info is via Bank
   businessPaymentInformation?: string;
   businessFileSize?: number;
   businessFileType?: string;

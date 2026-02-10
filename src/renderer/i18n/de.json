@@ -172,6 +172,7 @@
     "paidWatermark": "Bezahlt-Wasserzeichen",
     "password": "Passwort",
     "paymentInfo": "Zahlungsinformationen",
+    "paymentInfoLegacy": "Dies sind veraltete Zahlungsinformationen. Neue Zahlungsdetails sollten im Bereich „Bank“ festgelegt werden.",
     "paypal": "PayPal",
     "phone": "Telefon",
     "phoneHelper": "Telefonnummer im internationalen Format eingeben",

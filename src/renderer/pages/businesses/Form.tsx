@@ -1,4 +1,5 @@
-import { FormControlLabel, Grid, Switch, TextField } from '@mui/material';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { Box, FormControlLabel, Grid, Switch, TextField, Tooltip } from '@mui/material';
 import { useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { UploadImage } from '../../shared/components/inputs/uploadImage/UploadImage';
@@ -24,6 +25,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, business }) => {
     address: business?.address ?? '',
     website: business?.website ?? '',
     additional: business?.additional ?? '',
+    // Legacy payment info. New payment info is via Bank
     paymentInformation: business?.paymentInformation ?? '',
     fileSize: business?.fileSize,
     fileType: business?.fileType,
@@ -79,6 +81,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, business }) => {
       address: business?.address ?? '',
       website: business?.website ?? '',
       additional: business?.additional ?? '',
+      // Legacy payment info. New payment info is via Bank
       paymentInformation: business?.paymentInformation ?? '',
       description: business?.description ?? '',
       isArchived: business?.isArchived ?? false
@@ -219,16 +222,26 @@ export const Form: FC<Props> = ({ handleChange = () => {}, business }) => {
           onChange={e => update('additional', e.target.value)}
         />
       </Grid>
-      <Grid size={{ xs: 12, md: 12 }}>
-        <TextField
-          multiline
-          rows={5}
-          label={t('common.paymentInfo')}
-          fullWidth
-          value={form.paymentInformation}
-          onChange={e => update('paymentInformation', e.target.value)}
-        />
-      </Grid>
+      {form.paymentInformation && (
+        <Grid size={{ xs: 12, md: 12 }}>
+          {/* Legacy payment info. New payment info is via Bank */}
+          <TextField
+            multiline
+            rows={5}
+            fullWidth
+            value={form.paymentInformation}
+            disabled={true}
+            label={
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                {t('common.paymentInfo')}
+                <Tooltip title={t('common.paymentInfoLegacy')}>
+                  <InfoOutlinedIcon fontSize="small" sx={{ color: 'action.active', cursor: 'pointer' }} />
+                </Tooltip>
+              </Box>
+            }
+          />
+        </Grid>
+      )}
       <Grid size={{ xs: 12, md: 12 }}>
         <FormControlLabel
           control={<Switch checked={form.isArchived} onChange={e => update('isArchived', e.target.checked)} />}

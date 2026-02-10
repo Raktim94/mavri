@@ -8,6 +8,7 @@ export interface BusinessMeta {
   phone?: string;
   website?: string;
   additional?: string;
+  // Legacy payment info. New payment info is via Bank
   paymentInformation?: string;
   invoiceCount: number;
   quotesCount: number;
@@ -37,6 +38,7 @@ export interface BusinessAddMeta {
   phone?: string;
   website?: string;
   additional?: string;
+  // Legacy payment info. New payment info is via Bank
   paymentInformation?: string;
   fileSize?: number;
   fileType?: string;
@@ -72,6 +74,7 @@ export interface BusinessFromData {
   address?: string;
   website?: string;
   additional?: string;
+  // Legacy payment info. New payment info is via Bank
   paymentInformation?: string;
   fileSize?: number;
   fileType?: string;

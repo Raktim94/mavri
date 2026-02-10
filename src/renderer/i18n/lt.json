@@ -172,6 +172,7 @@
     "paidWatermark": "Apmokestintas ženklinimas",
     "password": "Slaptažodis",
     "paymentInfo": "Mokėjimo informacija",
+    "paymentInfoLegacy": "Tai yra senstelėjusi mokėjimo informacija. Nauji mokėjimo duomenys turėtų būti nustatyti per Banko skiltį.",
     "paypal": "PayPal",
     "phone": "Telefonas",
     "phoneHelper": "Įveskite telefono numerį tarptautiniu formatu",

@@ -191,6 +191,7 @@ export const isBusinessFromData = (data: unknown): data is BusinessFromData => {
   if (d.website !== undefined && d.website !== null && d.website !== '' && typeof d.website !== 'string') return false;
   if (d.additional !== undefined && d.additional !== null && d.additional !== '' && typeof d.additional !== 'string')
     return false;
+  // Legacy payment info. New payment info is via Bank
   if (
     d.paymentInformation !== undefined &&
     d.paymentInformation !== null &&
@@ -354,6 +355,7 @@ export const isInvoiceBusinessSnapshotFromData = (data: unknown): data is Invoic
     'businessEmail',
     'businessPhone',
     'businessAdditional',
+    // Legacy payment info. New payment info is via Bank
     'businessPaymentInformation',
     'businessFileType',
     'businessFileName'

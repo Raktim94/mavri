@@ -172,6 +172,7 @@
     "paidWatermark": "Filigrane payé",
     "password": "Mot de passe",
     "paymentInfo": "Informations de paiement",
+    "paymentInfoLegacy": "Il s'agit d'informations de paiement héritées. Les nouvelles informations de paiement doivent être définies via la section Banque.",
     "paypal": "PayPal",
     "phone": "Téléphone",
     "phoneHelper": "Entrez le numéro au format international",
