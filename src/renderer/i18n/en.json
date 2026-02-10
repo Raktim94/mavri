@@ -27,6 +27,27 @@
     "search": "Search",
     "uploadImage": "Upload image"
   },
+  "banks": {
+    "add": "Add bank",
+    "filter": {
+      "activeDesc": "Banks that are not archived",
+      "activeText": "Active banks",
+      "allText": "All banks",
+      "archivedDesc": "Banks that have been archived",
+      "archivedText": "Archived banks",
+      "atleastOneInvoiceDesc": "Banks which has at least one invoice",
+      "atleastOneInvoiceText": "Banks who have invoices",
+      "noInvoices30Desc": "No invoices in the last 30 days",
+      "noInvoices30Text": "Inactive banks (30 days)",
+      "noInvoices60Desc": "No invoices in the last 60 days",
+      "noInvoices60Text": "Inactive banks (60 days)",
+      "noInvoices90Desc": "No invoices in the last 90 days",
+      "noInvoices90Text": "Inactive banks (90 days)",
+      "noInvoicesDesc": "Banks with no invoices",
+      "noInvoicesText": "Banks who do not have invoices"
+    },
+    "noItem": "Selected a bank to view details."
+  },
   "businesses": {
     "add": "Add business",
     "filter": {

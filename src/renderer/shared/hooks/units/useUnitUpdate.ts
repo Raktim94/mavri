@@ -5,7 +5,7 @@ import type { Response } from '../../types/response';
 import type { Unit, UnitUpdate } from '../../types/unit';
 import { useAsyncAction } from '../useAsyncAction';
 
-interface UseUnitUpdateParams extends RequestHook<Response<UnitUpdate>> {
+interface UseUnitUpdateParams extends RequestHook<Response<Unit>> {
   unit?: UnitUpdate;
 }
 

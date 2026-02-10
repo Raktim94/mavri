@@ -1,4 +1,5 @@
 import type { Response } from '../../shared/types/response';
+import type { Bank } from '../types/bank';
 import type { Business } from '../types/business';
 import type { EntityWithCounts } from '../types/entityWithCounts';
 import type { Invoice, InvoiceBusinessSnapshots, InvoiceCustomization } from '../types/invoice';
@@ -21,6 +22,25 @@ export const encodeResultBusiness = (
 ) => ({
   ...result,
   data: Array.isArray(result.data) ? result.data.map(encodeLogo) : encodeLogo(result.data)
+});
+
+export const decodeBank = <T extends { qrCode?: unknown }>(data: T) => ({
+  ...data,
+  qrCode: data.qrCode ? fromBase64(data.qrCode as string) : null
+});
+
+export const encodeBank = (data?: (Bank & EntityWithCounts) | null) => {
+  if (!data) return data;
+  const bufQrCode = data.qrCode as Buffer | null;
+  return {
+    ...data,
+    qrCode: bufQrCode ? bufQrCode.toString('base64') : null
+  };
+};
+
+export const encodeResultBank = (result: Response<(Bank & EntityWithCounts)[] | (Bank & EntityWithCounts)>) => ({
+  ...result,
+  data: Array.isArray(result.data) ? result.data.map(encodeBank) : encodeBank(result.data)
 });
 
 export const decodeStyleProfile = <T extends { paidWatermarkFileData?: unknown; watermarkFileData?: unknown }>(

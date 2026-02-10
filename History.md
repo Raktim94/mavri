@@ -2,6 +2,10 @@
 
 ## [DATE], version 2.0.0
 
+New features & improvements
+
+- Introduced collapsible sections in the main menu, allowing related items to be grouped for a cleaner and more organized navigation experience.
+
 ## 2026-02-09, version 1.7.0
 
 New features & improvements

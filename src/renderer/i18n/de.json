@@ -27,6 +27,27 @@
     "search": "Suchen",
     "uploadImage": "Bild hochladen"
   },
+  "banks": {
+    "add": "Bank hinzufügen",
+    "filter": {
+      "activeDesc": "Banken, die nicht archiviert sind",
+      "activeText": "Aktive Banken",
+      "allText": "Alle Banken",
+      "archivedDesc": "Banken, die archiviert wurden",
+      "archivedText": "Archivierte Banken",
+      "atleastOneInvoiceDesc": "Banken mit mindestens einer Rechnung",
+      "atleastOneInvoiceText": "Banken mit Rechnungen",
+      "noInvoices30Desc": "Keine Rechnungen in den letzten 30 Tagen",
+      "noInvoices30Text": "Inaktive Banken (30 Tage)",
+      "noInvoices60Desc": "Keine Rechnungen in den letzten 60 Tagen",
+      "noInvoices60Text": "Inaktive Banken (60 Tage)",
+      "noInvoices90Desc": "Keine Rechnungen in den letzten 90 Tagen",
+      "noInvoices90Text": "Inaktive Banken (90 Tage)",
+      "noInvoicesDesc": "Banken ohne Rechnungen",
+      "noInvoicesText": "Banken, die keine Rechnungen haben"
+    },
+    "noItem": "Wählen Sie eine Bank aus, um Details anzuzeigen."
+  },
   "businesses": {
     "add": "Unternehmen hinzufügen",
     "filter": {

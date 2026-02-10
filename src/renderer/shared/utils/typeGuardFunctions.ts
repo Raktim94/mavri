@@ -1,4 +1,5 @@
 import { CurrencyFormat } from '../enums/currencyFormat';
+import type { BankFromData } from '../types/bank';
 import type { BusinessFromData } from '../types/business';
 import type { CategoryFromData } from '../types/category';
 import type { ClientFromData } from '../types/client';
@@ -14,6 +15,68 @@ import type { ItemFromData } from '../types/item';
 import type { StyleProfileFromData } from '../types/styleProfiles';
 import type { UnitFromData } from '../types/unit';
 import { validators } from './validatorFunctions';
+
+export const isBankFromData = (data: unknown): data is BankFromData => {
+  if (typeof data !== 'object' || data === null) return false;
+
+  const d = data as Record<string, unknown>;
+
+  if (typeof d.name !== 'string') return false;
+
+  if (d.id !== undefined && d.id !== null && d.id !== '' && typeof d.id !== 'number') return false;
+
+  if (d.isArchived !== undefined && d.isArchived !== null && d.isArchived !== '' && typeof d.isArchived !== 'boolean')
+    return false;
+
+  if (d.qrCode !== undefined && d.qrCode !== '' && d.qrCode != null) {
+    const isBlob = d.qrCode instanceof Uint8Array;
+    if (!isBlob) return false;
+  }
+
+  if (d.bankName !== undefined && d.bankName !== null && d.bankName !== '') {
+    if (typeof d.bankName !== 'string') return false;
+  }
+
+  if (d.accountNumber !== undefined && d.accountNumber !== null && d.accountNumber !== '') {
+    if (typeof d.accountNumber !== 'string') return false;
+  }
+
+  if (d.swiftCode !== undefined && d.swiftCode !== null && d.swiftCode !== '') {
+    if (typeof d.swiftCode !== 'string') return false;
+  }
+
+  if (d.address !== undefined && d.address !== null && d.address !== '') {
+    if (typeof d.address !== 'string') return false;
+  }
+
+  if (d.branchCode !== undefined && d.branchCode !== null && d.branchCode !== '') {
+    if (typeof d.branchCode !== 'string') return false;
+  }
+
+  if (d.routingNumber !== undefined && d.routingNumber !== null && d.routingNumber !== '') {
+    if (typeof d.routingNumber !== 'string') return false;
+  }
+
+  if (d.type !== undefined && d.type !== null && d.type !== '') {
+    if (typeof d.type !== 'string') return false;
+  }
+
+  if (d.upiCode !== undefined && d.upiCode !== null && d.upiCode !== '') {
+    if (typeof d.upiCode !== 'string') return false;
+  }
+
+  if (d.qrCodeFileType !== undefined && d.qrCodeFileType !== null && d.qrCodeFileType !== '') {
+    if (typeof d.qrCodeFileType !== 'string') return false;
+  }
+
+  if (d.qrCodeFileName !== undefined && d.qrCodeFileName !== null && d.qrCodeFileName !== '') {
+    if (typeof d.qrCodeFileName !== 'string') return false;
+  }
+
+  if (d.qrCodeFileSize !== undefined && d.qrCodeFileSize !== null && typeof d.qrCodeFileSize !== 'number') return false;
+
+  return true;
+};
 
 export const isStyleProfileFromData = (data: unknown): data is StyleProfileFromData => {
   if (typeof data !== 'object' || data === null) return false;

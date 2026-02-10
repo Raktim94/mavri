@@ -5,7 +5,7 @@ import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
 import { useAsyncAction } from '../useAsyncAction';
 
-interface UseInvoiceAddParams extends RequestHook<Response<InvoiceAdd>> {
+interface UseInvoiceAddParams extends RequestHook<Response<Invoice>> {
   invoice?: InvoiceAdd;
 }
 

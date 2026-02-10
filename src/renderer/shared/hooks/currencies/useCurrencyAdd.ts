@@ -5,7 +5,7 @@ import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
 import { useAsyncAction } from '../useAsyncAction';
 
-interface UseCurrencyAddParams extends RequestHook<Response<CurrencyAdd>> {
+interface UseCurrencyAddParams extends RequestHook<Response<Currency>> {
   currency?: CurrencyAdd;
 }
 

@@ -5,7 +5,7 @@ import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
 import { useAsyncAction } from '../useAsyncAction';
 
-interface UseBusinessUpdateParams extends RequestHook<Response<BusinessUpdate>> {
+interface UseBusinessUpdateParams extends RequestHook<Response<Business>> {
   business?: BusinessUpdate;
 }
 
