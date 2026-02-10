@@ -12,8 +12,8 @@ export const up = async (db: DatabaseAdapter) => {
       `CREATE TABLE IF NOT EXISTS banks (
         "id" ${getColumnType('INTEGER PRIMARY KEY AUTOINCREMENT', db.type)},
         "name" TEXT NOT NULL UNIQUE,
-        "bankName" TEXT NOT NULL,
-        "accountNumber" TEXT NOT NULL,
+        "bankName" TEXT,
+        "accountNumber" TEXT,
         "swiftCode" TEXT,
         "address" TEXT,
         "branchCode" TEXT,
@@ -225,6 +225,12 @@ export const up = async (db: DatabaseAdapter) => {
         ADD CONSTRAINT invoices_bankId_fkey
         FOREIGN KEY ("bankId") REFERENCES banks("id");
       `);
+      await db.run(`
+        ALTER TABLE invoices
+        ADD CONSTRAINT invoices_styleProfilesId_fkey
+        FOREIGN KEY ("styleProfilesId") REFERENCES style_profiles("id");
+      `);
+      await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_styleProfilesId ON style_profiles("styleProfilesId")`);
       await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_bankId ON invoices("bankId")`);
     }
 
