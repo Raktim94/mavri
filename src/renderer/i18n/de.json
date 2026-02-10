@@ -119,10 +119,12 @@
     "creditCard": "Kreditkarte",
     "currency": "Währung",
     "dark": "Dunkel",
+    "data": "Daten",
     "database": "Datenbankname",
     "date": "Datum",
     "dbName": "Datenbankname",
     "description": "Beschreibung",
+    "documents": "Dokumente",
     "downloadTemplate": "Vorlage herunterladen",
     "downloading": "Wird heruntergeladen...",
     "dueDate": "Fälligkeitsdatum",
@@ -395,6 +397,7 @@
     "language": "Sprache"
   },
   "menuItems": {
+    "banks": "Banken",
     "businesses": "Unternehmen",
     "categories": "Kategorien",
     "clients": "Kunden",

@@ -119,10 +119,12 @@
     "creditCard": "Carte de crédit",
     "currency": "Devise",
     "dark": "Sombre",
+    "data": "Données",
     "database": "Nom de la base de données",
     "date": "Date",
     "dbName": "Nom de la base de données",
     "description": "Description",
+    "documents": "Documents",
     "downloadTemplate": "Télécharger le modèle",
     "downloading": "Téléchargement...",
     "dueDate": "Date d’échéance",
@@ -395,6 +397,7 @@
     "language": "Langue"
   },
   "menuItems": {
+    "banks": "Banques",
     "businesses": "Entreprises",
     "categories": "Catégories",
     "clients": "Clients",

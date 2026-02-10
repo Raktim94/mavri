@@ -119,10 +119,12 @@
     "creditCard": "Kredito kortelė",
     "currency": "Valiuta",
     "dark": "Tamsus",
+    "data": "Duomenys",
     "database": "Duomenų bazės pavadinimas",
     "date": "Data",
     "dbName": "Duomenų bazės pavadinimas",
     "description": "Aprašymas",
+    "documents": "Dokumentai",
     "downloadTemplate": "Atsisiųsti šabloną",
     "downloading": "Atsisiunčiama...",
     "dueDate": "Terminas",
@@ -395,6 +397,7 @@
     "language": "Kalba"
   },
   "menuItems": {
+    "banks": "Bankai",
     "businesses": "Įmonės",
     "categories": "Kategorijos",
     "clients": "Klientai",

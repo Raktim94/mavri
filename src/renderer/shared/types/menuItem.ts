@@ -12,3 +12,10 @@ export interface MenuItem {
   onClick?: (item: MenuItem) => void;
   minHeight?: number;
 }
+
+export interface MenuItemMetadata {
+  groupName?: string;
+  groupIcon?: ReactNode;
+  isOpen?: boolean;
+  items: MenuItem[];
+}

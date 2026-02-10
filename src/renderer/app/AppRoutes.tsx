@@ -29,7 +29,7 @@ export const AppRoutes: FC = () => {
       <Route path="invoices" element={<InvoicesPage type={InvoiceType.invoice} />} />
       <Route path="quotes" element={<QuotesPage />} />
       <Route path="reports" element={<ReportsPage />} />
-      <Route path="quotes" element={<BanksPage />} />
+      <Route path="banks" element={<BanksPage />} />
       <Route path="*" element={<Navigate to="/invoices" replace />} />
     </Routes>
   );

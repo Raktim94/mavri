@@ -119,10 +119,12 @@
     "creditCard": "Credit card",
     "currency": "Currency",
     "dark": "Dark",
+    "data": "Data",
     "database": "Database name",
     "date": "Date",
     "dbName": "Database name",
     "description": "Description",
+    "documents": "Documents",
     "downloadTemplate": "Download template",
     "downloading": "Downloading...",
     "dueDate": "Due date",
@@ -395,6 +397,7 @@
     "language": "Language"
   },
   "menuItems": {
+    "banks": "Banks",
     "businesses": "Businesses",
     "categories": "Categories",
     "clients": "Clients",

@@ -49,163 +49,175 @@ export const Menu: FC<Props> = ({
 
   const personalization = [
     {
-      text: t('settingsMenuItems.titles.languageFormat'),
-      description: t('settingsMenuItems.descriptions.languageFormat'),
-      icon: <Language />,
-      isToggle: false,
-      isSelected: MenuItemSettings.LanguageFormat === selectedMenu,
-      onClick: () => onSelected(MenuItemSettings.LanguageFormat)
-    },
-    {
-      text: t('settingsMenuItems.titles.customizeInvoice'),
-      description: t('settingsMenuItems.descriptions.customizeInvoice'),
-      icon: <Description />,
-      isToggle: false,
-      isSelected: MenuItemSettings.Receipt === selectedMenu,
-      onClick: () => onSelected(MenuItemSettings.Receipt)
-    },
-    {
-      text: t('settingsMenuItems.titles.darkMode'),
-      description: t('settingsMenuItems.descriptions.darkMode'),
-      icon: mode === Themes.light ? <DarkMode /> : <LightMode />,
-      isToggle: true,
-      isSelected: false,
-      checked: mode === Themes.dark,
-      onChange: () => {
-        toggleMode();
-        onModeChange(mode === Themes.light);
-      }
+      items: [
+        {
+          text: t('settingsMenuItems.titles.languageFormat'),
+          description: t('settingsMenuItems.descriptions.languageFormat'),
+          icon: <Language />,
+          isToggle: false,
+          isSelected: MenuItemSettings.LanguageFormat === selectedMenu,
+          onClick: () => onSelected(MenuItemSettings.LanguageFormat)
+        },
+        {
+          text: t('settingsMenuItems.titles.customizeInvoice'),
+          description: t('settingsMenuItems.descriptions.customizeInvoice'),
+          icon: <Description />,
+          isToggle: false,
+          isSelected: MenuItemSettings.Receipt === selectedMenu,
+          onClick: () => onSelected(MenuItemSettings.Receipt)
+        },
+        {
+          text: t('settingsMenuItems.titles.darkMode'),
+          description: t('settingsMenuItems.descriptions.darkMode'),
+          icon: mode === Themes.light ? <DarkMode /> : <LightMode />,
+          isToggle: true,
+          isSelected: false,
+          checked: mode === Themes.dark,
+          onChange: () => {
+            toggleMode();
+            onModeChange(mode === Themes.light);
+          }
+        }
+      ]
     }
   ];
 
   const featureToggles = [
     {
-      text: t('settingsMenuItems.titles.turnQuotes'),
-      description: t('settingsMenuItems.descriptions.turnQuotes'),
-      icon: <ReceiptIcon />,
-      isToggle: true,
-      isSelected: false,
-      checked: storeSettings?.quotesON ?? true,
-      onChange: () => {
-        toggleQuotes(!storeSettings?.quotesON);
-      }
-    },
-    {
-      text: t('settingsMenuItems.titles.turnReports'),
-      description: t('settingsMenuItems.descriptions.turnReports'),
-      icon: <AssessmentIcon />,
-      isToggle: true,
-      isSelected: false,
-      checked: storeSettings?.reportsON ?? true,
-      onChange: () => {
-        toggleReports(!storeSettings?.reportsON);
-      }
-    },
-    {
-      text: t('settingsMenuItems.titles.turnStyleProfiles'),
-      description: t('settingsMenuItems.descriptions.turnStyleProfiles'),
-      icon: <ColorLensIcon />,
-      isToggle: true,
-      isSelected: false,
-      checked: storeSettings?.styleProfilesON ?? true,
-      onChange: () => {
-        toggleStyleProfiles(!storeSettings?.styleProfilesON);
-      }
+      items: [
+        {
+          text: t('settingsMenuItems.titles.turnQuotes'),
+          description: t('settingsMenuItems.descriptions.turnQuotes'),
+          icon: <ReceiptIcon />,
+          isToggle: true,
+          isSelected: false,
+          checked: storeSettings?.quotesON ?? true,
+          onChange: () => {
+            toggleQuotes(!storeSettings?.quotesON);
+          }
+        },
+        {
+          text: t('settingsMenuItems.titles.turnReports'),
+          description: t('settingsMenuItems.descriptions.turnReports'),
+          icon: <AssessmentIcon />,
+          isToggle: true,
+          isSelected: false,
+          checked: storeSettings?.reportsON ?? true,
+          onChange: () => {
+            toggleReports(!storeSettings?.reportsON);
+          }
+        },
+        {
+          text: t('settingsMenuItems.titles.turnStyleProfiles'),
+          description: t('settingsMenuItems.descriptions.turnStyleProfiles'),
+          icon: <ColorLensIcon />,
+          isToggle: true,
+          isSelected: false,
+          checked: storeSettings?.styleProfilesON ?? true,
+          onChange: () => {
+            toggleStyleProfiles(!storeSettings?.styleProfilesON);
+          }
+        }
+      ]
     }
   ];
 
   const appManagement = [
     {
-      text: t('settingsMenuItems.titles.import'),
-      description: t('settingsMenuItems.descriptions.import'),
-      icon: <UploadFileIcon />,
-      isSelected: false,
-      isToggle: false,
-      onClick: onImportJSON
-    },
-    {
-      text: t('settingsMenuItems.titles.export'),
-      description: t('settingsMenuItems.descriptions.export'),
-      icon: <FileDownload />,
-      isSelected: false,
-      isToggle: false,
-      onClick: onExportJSON
-    },
-    {
-      text: t('settingsMenuItems.titles.share'),
-      description: t('settingsMenuItems.descriptions.share'),
-      icon: <ShareIcon />,
-      isSelected: false,
-      isToggle: false,
-      onClick: () => {
-        getApi().openUrl('https://github.com/piratuks/invoice-builder');
-      }
-    },
-    {
-      text: t('settingsMenuItems.titles.support'),
-      description: t('settingsMenuItems.descriptions.support'),
-      icon: <SupportAgentIcon />,
-      isSelected: false,
-      isToggle: false,
-      onClick: () => {
-        getApi().openUrl('https://github.com/piratuks/invoice-builder/issues');
-      }
-    },
-    {
-      text: t('settingsMenuItems.titles.privacyPolicy'),
-      description: t('settingsMenuItems.descriptions.privacyPolicy'),
-      icon: <PolicyIcon />,
-      isSelected: false,
-      isToggle: false,
-      onClick: () => {
-        getApi().openUrl('https://github.com/piratuks/invoice-builder/blob/main/PRIVACY-POLICY.md');
-      }
-    },
-    {
-      text: t('settingsMenuItems.titles.tutorial'),
-      description: t('settingsMenuItems.descriptions.tutorial'),
-      icon: <PolicyIcon />,
-      isSelected: false,
-      isToggle: false,
-      onClick: () => {
-        getApi().openUrl('https://github.com/piratuks/invoice-builder/blob/main/TUTORIAL.md');
-      }
-    },
-    {
-      text: t('settingsMenuItems.titles.about'),
-      description: t('settingsMenuItems.descriptions.about'),
-      icon: <InfoIcon />,
-      isToggle: false,
-      isSelected: false,
-      onClick: () => {
-        getApi().openUrl('https://github.com/piratuks/invoice-builder/blob/main/TERMS-OF-USE.md');
-      }
-    },
-    {
-      text: t('settingsMenuItems.titles.buyMeCoffee'),
-      description: t('settingsMenuItems.descriptions.buyMeCoffee'),
-      icon: <CoffeeIcon />,
-      isToggle: false,
-      isSelected: false,
-      onClick: () => {
-        getApi().openUrl('https://www.buymeacoffee.com/evaldizi');
-      }
-    },
-    ...(!isWebMode()
-      ? [
-          {
-            text: t('settingsMenuItems.titles.checkForUpdate'),
-            description: updateMessage,
-            icon: <AutorenewIcon />,
-            isToggle: false,
-            isSelected: false,
-            onClick: () => {
-              dispatch(setUpdateMessage(t('common.checking')));
-              getApi().checkForUpdates();
-            }
+      items: [
+        {
+          text: t('settingsMenuItems.titles.import'),
+          description: t('settingsMenuItems.descriptions.import'),
+          icon: <UploadFileIcon />,
+          isSelected: false,
+          isToggle: false,
+          onClick: onImportJSON
+        },
+        {
+          text: t('settingsMenuItems.titles.export'),
+          description: t('settingsMenuItems.descriptions.export'),
+          icon: <FileDownload />,
+          isSelected: false,
+          isToggle: false,
+          onClick: onExportJSON
+        },
+        {
+          text: t('settingsMenuItems.titles.share'),
+          description: t('settingsMenuItems.descriptions.share'),
+          icon: <ShareIcon />,
+          isSelected: false,
+          isToggle: false,
+          onClick: () => {
+            getApi().openUrl('https://github.com/piratuks/invoice-builder');
           }
-        ]
-      : [])
+        },
+        {
+          text: t('settingsMenuItems.titles.support'),
+          description: t('settingsMenuItems.descriptions.support'),
+          icon: <SupportAgentIcon />,
+          isSelected: false,
+          isToggle: false,
+          onClick: () => {
+            getApi().openUrl('https://github.com/piratuks/invoice-builder/issues');
+          }
+        },
+        {
+          text: t('settingsMenuItems.titles.privacyPolicy'),
+          description: t('settingsMenuItems.descriptions.privacyPolicy'),
+          icon: <PolicyIcon />,
+          isSelected: false,
+          isToggle: false,
+          onClick: () => {
+            getApi().openUrl('https://github.com/piratuks/invoice-builder/blob/main/PRIVACY-POLICY.md');
+          }
+        },
+        {
+          text: t('settingsMenuItems.titles.tutorial'),
+          description: t('settingsMenuItems.descriptions.tutorial'),
+          icon: <PolicyIcon />,
+          isSelected: false,
+          isToggle: false,
+          onClick: () => {
+            getApi().openUrl('https://github.com/piratuks/invoice-builder/blob/main/TUTORIAL.md');
+          }
+        },
+        {
+          text: t('settingsMenuItems.titles.about'),
+          description: t('settingsMenuItems.descriptions.about'),
+          icon: <InfoIcon />,
+          isToggle: false,
+          isSelected: false,
+          onClick: () => {
+            getApi().openUrl('https://github.com/piratuks/invoice-builder/blob/main/TERMS-OF-USE.md');
+          }
+        },
+        {
+          text: t('settingsMenuItems.titles.buyMeCoffee'),
+          description: t('settingsMenuItems.descriptions.buyMeCoffee'),
+          icon: <CoffeeIcon />,
+          isToggle: false,
+          isSelected: false,
+          onClick: () => {
+            getApi().openUrl('https://www.buymeacoffee.com/evaldizi');
+          }
+        },
+        ...(!isWebMode()
+          ? [
+              {
+                text: t('settingsMenuItems.titles.checkForUpdate'),
+                description: updateMessage,
+                icon: <AutorenewIcon />,
+                isToggle: false,
+                isSelected: false,
+                onClick: () => {
+                  dispatch(setUpdateMessage(t('common.checking')));
+                  getApi().checkForUpdates();
+                }
+              }
+            ]
+          : [])
+      ]
+    }
   ];
 
   return (
