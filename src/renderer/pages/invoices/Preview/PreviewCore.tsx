@@ -3,6 +3,7 @@ import { memo, useEffect, useState, type FC } from 'react';
 import {
   getAttachmentsUrl,
   getLogoUrl,
+  getQRCodeUrls,
   getSignatureUrls,
   getWatermarkPaidUrl,
   getWatermarkUrl
@@ -23,6 +24,7 @@ const PreviewCoreComponent: FC<Props> = ({ invoiceForm }) => {
   const [watermarkPaidUrl, setWatermarkPaidUrl] = useState<string | undefined>();
   const [attachmentUrls, setAttachmentUrls] = useState<AttachmentURL[]>([]);
   const [signatureUrl, setSignatureUrl] = useState<string | undefined>();
+  const [qrCodeUrl, setQrCodeUrl] = useState<string | undefined>();
   const [loading, setLoading] = useState(true);
   const pdfTexts = usePdfTexts(invoiceForm);
 
@@ -32,15 +34,17 @@ const PreviewCoreComponent: FC<Props> = ({ invoiceForm }) => {
     setLogoUrl(undefined);
     setWatermarkUrl(undefined);
     setWatermarkPaidUrl(undefined);
+    setQrCodeUrl(undefined);
     setLoading(true);
 
     const loadData = async () => {
-      const [logo, watermark, watermarkPaid, attachments, signature] = await Promise.all([
+      const [logo, watermark, watermarkPaid, attachments, signature, qrCode] = await Promise.all([
         getLogoUrl(invoiceForm),
         getWatermarkUrl(invoiceForm),
         getWatermarkPaidUrl(invoiceForm),
         getAttachmentsUrl(invoiceForm),
-        getSignatureUrls(invoiceForm)
+        getSignatureUrls(invoiceForm),
+        getQRCodeUrls(invoiceForm)
       ]);
 
       if (!cancelled) {
@@ -49,6 +53,7 @@ const PreviewCoreComponent: FC<Props> = ({ invoiceForm }) => {
         setWatermarkPaidUrl(watermarkPaid);
         setAttachmentUrls(attachments);
         setSignatureUrl(signature);
+        setQrCodeUrl(qrCode);
         setLoading(false);
       }
     };
@@ -72,6 +77,7 @@ const PreviewCoreComponent: FC<Props> = ({ invoiceForm }) => {
         invoiceForm={invoiceForm}
         storeSettings={storeSettings}
         logoUrl={logoUrl}
+        qrCodeUrl={qrCodeUrl}
         attachmentUrls={attachmentUrls}
         pdfTexts={pdfTexts}
         watermarkUrl={watermarkUrl}

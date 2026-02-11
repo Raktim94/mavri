@@ -76,6 +76,7 @@ export const PDF_STYLES = StyleSheet.create({
   pt20: { paddingTop: 20 },
   pb20: { paddingBottom: 20 },
   pt10: { paddingTop: 10 },
+  pb10: { paddingBottom: 10 },
   pb5: { paddingBottom: 5 },
   pt5: { paddingTop: 5 },
   w100: { width: '100%' },

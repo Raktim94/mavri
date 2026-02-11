@@ -54,6 +54,21 @@ export const getLogoUrl = async (invoiceForm?: InvoiceFromData) => {
   return logoUrl;
 };
 
+export const getQRCodeUrls = async (invoiceForm?: InvoiceFromData) => {
+  if (!invoiceForm) return;
+
+  let qrCodeUrl: string | undefined;
+
+  if (invoiceForm.invoiceBankSnapshot?.qrCode) {
+    qrCodeUrl = await toDataUrl(
+      invoiceForm.invoiceBankSnapshot?.qrCode,
+      invoiceForm.invoiceBankSnapshot?.qrCodeFileType
+    );
+  }
+
+  return qrCodeUrl;
+};
+
 export const getWatermarkUrl = async (invoiceForm?: InvoiceFromData) => {
   if (!invoiceForm) return;
 
@@ -96,12 +111,14 @@ export const useExportPdf = (data: { invoiceForm?: InvoiceFromData; storeSetting
     const watermarkUrl = await getWatermarkUrl(invoiceForm);
     const watermarkPaidUrl = await getWatermarkPaidUrl(invoiceForm);
     const signatureUrl = await getSignatureUrls(invoiceForm);
+    const qrCodeUrl = await getQRCodeUrls(invoiceForm);
 
     const blob = await pdf(
       <PDFDocument
         invoiceForm={invoiceForm}
         storeSettings={storeSettings}
         logoUrl={logoUrl}
+        qrCodeUrl={qrCodeUrl}
         attachmentUrls={attachmentUrls}
         pdfTexts={pdfTexts}
         watermarkUrl={watermarkUrl}

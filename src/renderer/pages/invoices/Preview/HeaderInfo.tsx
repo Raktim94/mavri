@@ -8,7 +8,6 @@ import { ClientInfo } from './ClientInfo';
 import { PDF_STYLES } from './constant';
 import { InvoiceInformationInfo } from './InvoiceInformationInfo';
 import { LogoInfo } from './LogoInfo';
-import { PaymentInfo } from './PaymentInfo';
 import { TitleInfo } from './TitleInfo';
 
 interface Props {
@@ -86,8 +85,6 @@ const HeaderInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, logoUrl, p
           </View>
           <View style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart, PDF_STYLES.pt20]}>
             <ClientInfo invoiceForm={invoiceForm} billToLabel={pdfTexts.billTo} />
-            <View style={PDF_STYLES.flexGrow} />
-            <PaymentInfo invoiceForm={invoiceForm} paymentInfoLabel={pdfTexts.paymentInfo} />
           </View>
         </>
       )}
