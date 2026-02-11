@@ -60,7 +60,7 @@ const BusinessSelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
               variant="body1"
               sx={{ fontWeight: 600, color: 'primary.main', overflow: 'hidden', textOverflow: 'ellipsis' }}
             >
-              {t('businesses.title').toUpperCase()}
+              {t('businesses.title').toUpperCase()} *
             </Typography>
           }
           secondary={

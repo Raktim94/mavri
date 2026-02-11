@@ -270,7 +270,8 @@ export const InvoicesPage: FC<Props> = ({ type }) => {
             if (isInvoiceFromData(d.invoice)) {
               onChange({
                 changedData: d.invoice,
-                isFormValid: d.isFormValid
+                isFormValid: d.isFormValid,
+                description: d.description
               });
             }
           }}

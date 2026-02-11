@@ -35,7 +35,7 @@ const ClientSelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
               variant="body1"
               sx={{ fontWeight: 600, color: 'primary.main', overflow: 'hidden', textOverflow: 'ellipsis' }}
             >
-              {t('invoices.billTo').toUpperCase()}
+              {t('invoices.billTo').toUpperCase()} *
             </Typography>
           }
           secondary={

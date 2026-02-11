@@ -4,11 +4,13 @@
 
 New features & improvements
 
-- Added collapsible sections to the main menu, allowing related items to be grouped for a cleaner and more organized navigation experience.
+- Added a tooltip explaining why the Save button is disabled when an invoice or quote is invalid
+- Added a visual "\*" indicator to highlight required fields in invoices and quotes
+- Added collapsible sections to the main menu, allowing related items to be grouped for a cleaner and more organized navigation experience
 - Introduced Banks as the new source of payment information. This is a breaking change:
-  - The previous Business → PaymentInformation field is now considered legacy and becomes read‑only.
-  - Invoices and quotes created prior to this release will continue using the legacy field to preserve existing data. These documents will also retain the legacy Classic / Modern / Compact layouts.
-  - All newly created invoices and quotes must use the new Banks payment information structure.
+  - The previous Business → PaymentInformation field is now considered legacy and becomes read‑only
+  - Invoices and quotes created prior to this release will continue using the legacy field to preserve existing data. These documents will also retain the legacy Classic / Modern / Compact layouts
+  - All newly created invoices and quotes must use the new Banks payment information structure
 
 Bug Fixes
 

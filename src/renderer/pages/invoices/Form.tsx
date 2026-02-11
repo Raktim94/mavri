@@ -23,7 +23,7 @@ interface Props {
   invoice?: Invoice;
   type: InvoiceType;
   mode: InvoiceFormMode;
-  handleChange?: (data: { invoice: InvoiceFromData; isFormValid: boolean }) => void;
+  handleChange?: (data: { invoice: InvoiceFromData; isFormValid: boolean; description?: string }) => void;
   handleDelete?: (id: number) => void;
   handleDuplicate?: (id: number, invoiceType: InvoiceType) => void;
 }
@@ -157,7 +157,8 @@ const InvoiceFormComponent: FC<Props> = ({
     debounceTimerRef.current = window.setTimeout(() => {
       handleChange({
         invoice: invoiceForm,
-        isFormValid
+        isFormValid,
+        description: t('common.invalidForm')
       });
     }, 250);
 
@@ -166,7 +167,7 @@ const InvoiceFormComponent: FC<Props> = ({
         window.clearTimeout(debounceTimerRef.current);
       }
     };
-  }, [invoiceForm, isFormValid, handleChange]);
+  }, [invoiceForm, isFormValid, t, handleChange]);
 
   if (mode === InvoiceFormMode.edit) {
     return (

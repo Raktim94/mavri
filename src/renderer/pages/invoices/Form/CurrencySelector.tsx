@@ -22,7 +22,7 @@ const CurrencySelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
               variant="body1"
               sx={{ fontWeight: 600, color: theme.palette.primary.main, overflow: 'hidden', textOverflow: 'ellipsis' }}
             >
-              {t('common.currency').toUpperCase()}
+              {t('common.currency').toUpperCase()} *
             </Typography>
           }
           secondary={
