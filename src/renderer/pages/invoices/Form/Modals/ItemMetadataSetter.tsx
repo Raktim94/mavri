@@ -48,7 +48,7 @@ const ItemMetadataSetterComponent: FC<Props> = ({
   const { t } = useTranslation();
   const [isFormValid, setIsFormValid] = useState(true);
   const { form, setForm, update } = useForm<ItemForm>({
-    quantity: Number(currQuantity ?? 0),
+    quantity: Number(currQuantity ?? 1),
     header: customField?.header ?? '',
     value: customField?.value ?? '',
     sortOrder: customField?.sortOrder ?? undefined,
@@ -117,7 +117,7 @@ const ItemMetadataSetterComponent: FC<Props> = ({
   useEffect(() => {
     if (isOpen)
       setForm({
-        quantity: Number(currQuantity ?? 0),
+        quantity: Number(currQuantity ?? 1),
         header: customField?.header ?? '',
         value: customField?.value ?? '',
         sortOrder: customField?.sortOrder ?? undefined,
