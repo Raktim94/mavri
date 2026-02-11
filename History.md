@@ -4,6 +4,8 @@
 
 New features & improvements
 
+- Added validations for custom header sections (which now will be presented in UI)
+- Prefiling custom header section data if selected from existing one (sort order, alignment)
 - Added a tooltip explaining why the Save button is disabled when an invoice or quote is invalid
 - Added a visual "\*" indicator to highlight required fields in invoices and quotes
 - Added collapsible sections to the main menu, allowing related items to be grouped for a cleaner and more organized navigation experience

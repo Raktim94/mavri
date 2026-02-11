@@ -12,6 +12,7 @@ import type { Client } from '../../../shared/types/client';
 import type { Currency } from '../../../shared/types/currency';
 import type {
   AttachmentForm,
+  CustomFieldMeta,
   DiscountForm,
   InvoiceFromData,
   InvoiceInfo,
@@ -104,10 +105,19 @@ const InvoiceFormComponent: FC<Props> = ({
   const customFieldHeaders = useMemo(() => {
     const headers =
       invoiceForm?.invoiceItems
-        ?.map(item => item.customField?.header)
-        .filter((item): item is string => typeof item === 'string' && item != null) ?? [];
+        ?.map(item => {
+          if (!item.customField) return undefined;
+          return {
+            header: item.customField.header,
+            sortOrder: item.customField.sortOrder,
+            alignment: item.customField.alignment
+          };
+        })
+        .filter((item): item is CustomFieldMeta => typeof item === 'object' && item != null) ?? [];
 
-    return [...new Set(headers)];
+    const uniqueHeaders = [...new Map(headers.map(h => [h.header, h])).values()];
+
+    return uniqueHeaders;
   }, [invoiceForm?.invoiceItems]);
 
   const onEdit = (setter: React.Dispatch<React.SetStateAction<boolean>>) => {

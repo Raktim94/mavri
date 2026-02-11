@@ -10,7 +10,7 @@ import type { Currency, CurrencyAdd, CurrencyUpdate } from './currency';
 import type { DBSelector } from './dbSelector';
 import type { ExportMeta } from './exportMeta';
 import type { FilterData } from './filter';
-import type { Invoice, InvoiceAdd, InvoiceUpdate } from './invoice';
+import type { CustomFieldMeta, Invoice, InvoiceAdd, InvoiceUpdate } from './invoice';
 import type { Item, ItemAdd, ItemUpdate } from './item';
 import type { PostgresConfig } from './postgresConfig';
 import type { Response } from './response';
@@ -89,7 +89,7 @@ declare global {
       addCurrency: (data: CurrencyAdd) => Promise<Response<Currency>>;
       addBatchCurrency: (data: CurrencyAdd[]) => Promise<Response<Currency[]>>;
 
-      getCustomHeaders: (type: InvoiceType) => Promise<Response<string[]>>;
+      getCustomHeaders: (type: InvoiceType) => Promise<Response<CustomFieldMeta[]>>;
       getAllInvoices: (type?: InvoiceType, filter?: FilterData[]) => Promise<Response<Invoice[]>>;
       deleteInvoice: (id: number) => Promise<Response<unknown>>;
       addInvoice: (data: InvoiceAdd) => Promise<Response<Invoice>>;

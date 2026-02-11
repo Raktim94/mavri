@@ -10,7 +10,14 @@ import type { Currency, CurrencyAdd, CurrencyUpdate } from '../types/currency';
 import type { DBSelector } from '../types/dbSelector';
 import type { ExportMeta } from '../types/exportMeta';
 import type { FilterData } from '../types/filter';
-import type { InvoiceAdd, InvoiceAttachment, InvoiceAttachmentWeb, InvoiceUpdate, InvoiceWeb } from '../types/invoice';
+import type {
+  CustomFieldMeta,
+  InvoiceAdd,
+  InvoiceAttachment,
+  InvoiceAttachmentWeb,
+  InvoiceUpdate,
+  InvoiceWeb
+} from '../types/invoice';
 import type { Item, ItemAdd, ItemUpdate } from '../types/item';
 import type { PostgresConfig } from '../types/postgresConfig';
 import type { Response } from '../types/response';
@@ -353,7 +360,8 @@ export const webApi = () => {
     deleteBank: (id: number) => apiDelete<Response<unknown>>(`/api/banks/${id}`),
     addBatchBank: (data: BankAdd[]) => apiPost<Response<BankAdd[]>>('/api/bnaks/batch', data),
 
-    getCustomHeaders: async (type: InvoiceType) => apiGet<Response<string[]>>('/api/invoices/headers', { type: type }),
+    getCustomHeaders: async (type: InvoiceType) =>
+      apiGet<Response<CustomFieldMeta[]>>('/api/invoices/headers', { type: type }),
     getAllInvoices: async (type?: InvoiceType, filter?: FilterData[]) => {
       const params: Record<string, string> = {};
       if (type) params.type = type;

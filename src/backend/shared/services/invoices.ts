@@ -3,6 +3,7 @@ import type { DatabaseAdapter } from '../types/DatabaseAdapter';
 import type { EntityWithId } from '../types/entityWithId';
 import type {
   CustomField,
+  CustomFieldMeta,
   Invoice,
   InvoiceAttachment,
   InvoiceBankSnapshots,
@@ -307,14 +308,18 @@ export const getCustomHeaders = async (db: DatabaseAdapter, type: 'invoice' | 'q
     `,
     [type]
   );
-  const headers: string[] = [];
+  const headersMeta: CustomFieldMeta[] = [];
   rows.map(row => {
     const parsed = row.customField ? (JSON.parse(row.customField) as CustomField) : null;
-    if (parsed && !headers.some(h => h === parsed.header)) {
-      headers.push(parsed.header);
+    if (parsed && !headersMeta.some(h => h.header === parsed.header)) {
+      headersMeta.push({
+        header: parsed.header,
+        sortOrder: parsed.sortOrder,
+        alignment: parsed.alignment
+      });
     }
   });
-  return { success: true, data: headers };
+  return { success: true, data: headersMeta };
 };
 
 export const getAllInvoices = async (db: DatabaseAdapter, type?: 'invoice' | 'quotation', filter?: FilterData[]) => {
