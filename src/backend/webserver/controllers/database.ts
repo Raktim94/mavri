@@ -50,7 +50,7 @@ export const initDatabaseController = (app: Express) => {
       const fullPath = path.resolve(dbDir, name);
       const createIfMissing = mode === DBInitType.create || typeof mode === 'undefined';
 
-      if (process.env.NODE_ENV === 'docker' && postgresConfig.host === 'localhost') {
+      if (process.env.NODE_ENV === 'docker' && postgresConfig && postgresConfig.host === 'localhost') {
         postgresConfig.host = 'host.docker.internal';
       }
 
