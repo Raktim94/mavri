@@ -11,43 +11,43 @@ export const up = async (db: DatabaseAdapter) => {
     await db.run(
       `
         ALTER TABLE style_profiles
-        ADD COLUMN IF NOT EXISTS "showQuantity" INTEGER NOT NULL DEFAULT 1 CHECK ("showQuantity" IN (0,1))
+        ADD COLUMN "showQuantity" INTEGER NOT NULL DEFAULT 1 CHECK ("showQuantity" IN (0,1))
       `
     );
     await db.run(
       `
         ALTER TABLE style_profiles
-        ADD COLUMN IF NOT EXISTS "showUnit" INTEGER NOT NULL DEFAULT 1 CHECK ("showUnit" IN (0,1))
+        ADD COLUMN "showUnit" INTEGER NOT NULL DEFAULT 1 CHECK ("showUnit" IN (0,1))
       `
     );
     await db.run(
       `
         ALTER TABLE style_profiles
-        ADD COLUMN IF NOT EXISTS "showRowNo" INTEGER NOT NULL DEFAULT 1 CHECK ("showRowNo" IN (0,1))
+        ADD COLUMN "showRowNo" INTEGER NOT NULL DEFAULT 1 CHECK ("showRowNo" IN (0,1))
       `
     );
     await db.run(
       `
         ALTER TABLE invoice_customizations
-        ADD COLUMN IF NOT EXISTS "showQuantity" INTEGER NOT NULL DEFAULT 1 CHECK ("showQuantity" IN (0,1))
+        ADD COLUMN "showQuantity" INTEGER NOT NULL DEFAULT 1 CHECK ("showQuantity" IN (0,1))
       `
     );
     await db.run(
       `
         ALTER TABLE invoice_customizations
-        ADD COLUMN IF NOT EXISTS "showUnit" INTEGER NOT NULL DEFAULT 1 CHECK ("showUnit" IN (0,1))
+        ADD COLUMN "showUnit" INTEGER NOT NULL DEFAULT 1 CHECK ("showUnit" IN (0,1))
       `
     );
     await db.run(
       `
         ALTER TABLE invoice_customizations
-        ADD COLUMN IF NOT EXISTS "showRowNo" INTEGER NOT NULL DEFAULT 1 CHECK ("showRowNo" IN (0,1))
+        ADD COLUMN "showRowNo" INTEGER NOT NULL DEFAULT 1 CHECK ("showRowNo" IN (0,1))
       `
     );
     await db.run(
       `
         ALTER TABLE invoice_items
-        ADD COLUMN IF NOT EXISTS "customField" TEXT;
+        ADD COLUMN "customField" TEXT;
       `
     );
   } catch (error) {
