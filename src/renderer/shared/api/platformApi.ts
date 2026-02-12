@@ -2,6 +2,7 @@ import pako from 'pako';
 import type { DatabaseType } from '../enums/databaseType';
 import type { DBInitType } from '../enums/dbInitType';
 import type { InvoiceType } from '../enums/invoiceType';
+import type { BankAdd, BankUpdate, BankUpdateWeb, BankWeb } from '../types/bank';
 import type { BusinessAdd, BusinessUpdate, BusinessWeb } from '../types/business';
 import type { Category, CategoryAdd, CategoryUpdate } from '../types/category';
 import type { Client, ClientAdd, ClientUpdate } from '../types/client';
@@ -9,7 +10,14 @@ import type { Currency, CurrencyAdd, CurrencyUpdate } from '../types/currency';
 import type { DBSelector } from '../types/dbSelector';
 import type { ExportMeta } from '../types/exportMeta';
 import type { FilterData } from '../types/filter';
-import type { InvoiceAdd, InvoiceAttachment, InvoiceAttachmentWeb, InvoiceUpdate, InvoiceWeb } from '../types/invoice';
+import type {
+  CustomFieldMeta,
+  InvoiceAdd,
+  InvoiceAttachment,
+  InvoiceAttachmentWeb,
+  InvoiceUpdate,
+  InvoiceWeb
+} from '../types/invoice';
 import type { Item, ItemAdd, ItemUpdate } from '../types/item';
 import type { PostgresConfig } from '../types/postgresConfig';
 import type { Response } from '../types/response';
@@ -31,6 +39,16 @@ const fileToBase64 = async (file?: Uint8Array | null) => {
 };
 
 const base64ToBytesOrUndef = (b64?: string | null) => (b64 ? base64ToBytes(b64) : undefined);
+
+const mapBankFromWeb = <T extends BankWeb | BankUpdateWeb>(b: T) => ({
+  ...b,
+  qrCode: base64ToBytesOrUndef(b.qrCode)
+});
+
+const mapBankToWeb = async <T extends BankUpdate | BankAdd>(data: T) => ({
+  ...data,
+  qrCode: await fileToBase64(data.qrCode)
+});
 
 const mapStyleProfileFromWeb = <T extends StyleProfileWeb | StyleProfileUpdateWeb>(sp: T) => ({
   ...sp,
@@ -63,6 +81,12 @@ const mapInvoiceFromWeb = (i: InvoiceWeb) => ({
         businessLogo: base64ToBytesOrUndef(i.invoiceBusinessSnapshot?.businessLogo)
       }
     : i.invoiceBusinessSnapshot,
+  invoiceBankSnapshot: i.invoiceBankSnapshot
+    ? {
+        ...i.invoiceBankSnapshot,
+        qrCode: base64ToBytesOrUndef(i.invoiceBankSnapshot?.qrCode)
+      }
+    : i.invoiceBankSnapshot,
   invoiceCustomization: i.invoiceCustomization
     ? {
         ...i.invoiceCustomization,
@@ -82,6 +106,12 @@ const mapInvoiceToWeb = async (data: InvoiceUpdate | InvoiceAdd) => ({
         businessLogo: await fileToBase64(data.invoiceBusinessSnapshot?.businessLogo)
       }
     : data.invoiceBusinessSnapshot,
+  invoiceBankSnapshot: data.invoiceBankSnapshot
+    ? {
+        ...data.invoiceBankSnapshot,
+        qrCode: await fileToBase64(data.invoiceBankSnapshot?.qrCode)
+      }
+    : data.invoiceBankSnapshot,
   invoiceCustomization: data.invoiceCustomization
     ? {
         ...data.invoiceCustomization,
@@ -300,7 +330,38 @@ export const webApi = () => {
     deleteCurrency: (id: number) => apiDelete<Response<unknown>>(`/api/currencies/${id}`),
     addBatchCurrency: (data: CurrencyAdd[]) => apiPost<Response<Currency[]>>('/api/currencies/batch', data),
 
-    getCustomHeaders: async (type: InvoiceType) => apiGet<Response<string[]>>('/api/invoices/headers', { type: type }),
+    getAllBanks: async (filter?: FilterData[]) => {
+      const response = await apiGet<Response<BankWeb[]>>(
+        '/api/banks',
+        filter?.length ? { filter: JSON.stringify(filter) } : undefined
+      );
+
+      return {
+        ...response,
+        data: response.data?.map(mapBankFromWeb) ?? []
+      };
+    },
+    updateBank: async (data: BankUpdate) => {
+      const response = await apiPut<Response<BankWeb>>('/api/banks', await mapBankToWeb(data));
+
+      return {
+        ...response,
+        data: response.data && mapBankFromWeb(response.data)
+      };
+    },
+    addBank: async (data: BankAdd) => {
+      const response = await apiPost<Response<BankWeb>>('/api/banks', await mapBankToWeb(data));
+
+      return {
+        ...response,
+        data: response.data && mapBankFromWeb(response.data)
+      };
+    },
+    deleteBank: (id: number) => apiDelete<Response<unknown>>(`/api/banks/${id}`),
+    addBatchBank: (data: BankAdd[]) => apiPost<Response<BankAdd[]>>('/api/bnaks/batch', data),
+
+    getCustomHeaders: async (type: InvoiceType) =>
+      apiGet<Response<CustomFieldMeta[]>>('/api/invoices/headers', { type: type }),
     getAllInvoices: async (type?: InvoiceType, filter?: FilterData[]) => {
       const params: Record<string, string> = {};
       if (type) params.type = type;

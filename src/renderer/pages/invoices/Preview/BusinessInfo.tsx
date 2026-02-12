@@ -77,6 +77,18 @@ const BusinessInfoComponent: FC<Props> = ({ invoiceForm, logoUrl }) => {
             {invoiceForm?.invoiceBusinessSnapshot?.businessPhone}
           </Text>
         )}
+        {invoiceForm?.invoiceBusinessSnapshot?.businessVatCode && (
+          <Text
+            style={[
+              PDF_STYLES.businessText,
+              {
+                fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].businessText
+              }
+            ]}
+          >
+            {invoiceForm?.invoiceBusinessSnapshot?.businessVatCode}
+          </Text>
+        )}
         {invoiceForm?.invoiceBusinessSnapshot?.businessAdditional && (
           <Text
             style={[

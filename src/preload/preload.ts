@@ -1,6 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import type { DBInitType } from '../renderer/shared/enums/dbInitType';
 import type { InvoiceType } from '../renderer/shared/enums/invoiceType';
+import type { Bank, BankAdd, BankUpdate } from '../renderer/shared/types/bank';
 import type { BusinessAdd, BusinessUpdate } from '../renderer/shared/types/business';
 import type { CategoryAdd, CategoryUpdate } from '../renderer/shared/types/category';
 import type { ClientAdd, ClientUpdate } from '../renderer/shared/types/client';
@@ -101,6 +102,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   updateInvoice: (data: InvoiceUpdate) => ipcRenderer.invoke('update-invoice', data),
   addInvoice: (data: InvoiceAdd) => ipcRenderer.invoke('add-invoice', data),
   duplicateInvoice: (id: number, invoiceType: InvoiceType) => ipcRenderer.invoke('duplicate-invoice', id, invoiceType),
+
+  getAllBanks: (filter?: FilterData[]) => ipcRenderer.invoke('get-all-banks', filter),
+  updateBank: (data: BankUpdate) => ipcRenderer.invoke('update-bank', data),
+  deleteBank: (id: number) => ipcRenderer.invoke('delete-bank', id),
+  addBank: (data: BankAdd) => ipcRenderer.invoke('add-bank', data),
+  addBatchBank: (data: Bank[]) => ipcRenderer.invoke('batch-add-bank', data),
 
   exportAllData: () => ipcRenderer.invoke('export-all-data'),
   importAllData: () => ipcRenderer.invoke('import-all-data')

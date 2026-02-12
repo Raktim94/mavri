@@ -23,7 +23,7 @@ const LanguageSelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
               variant="body1"
               sx={{ fontWeight: 600, color: theme.palette.primary.main, overflow: 'hidden', textOverflow: 'ellipsis' }}
             >
-              {t('languageFormat.language').toUpperCase()}
+              {t('languageFormat.language').toUpperCase()} *
             </Typography>
           }
           secondary={

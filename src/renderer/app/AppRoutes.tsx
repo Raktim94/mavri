@@ -1,5 +1,6 @@
 import type { FC } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
+import { BanksPage } from '../pages/banks';
 import { BusinessesPage } from '../pages/businesses';
 import { CategoriesPage } from '../pages/categories';
 import { ClientsPage } from '../pages/clients';
@@ -28,6 +29,7 @@ export const AppRoutes: FC = () => {
       <Route path="invoices" element={<InvoicesPage type={InvoiceType.invoice} />} />
       <Route path="quotes" element={<QuotesPage />} />
       <Route path="reports" element={<ReportsPage />} />
+      <Route path="banks" element={<BanksPage />} />
       <Route path="*" element={<Navigate to="/invoices" replace />} />
     </Routes>
   );

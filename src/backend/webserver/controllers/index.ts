@@ -1,4 +1,5 @@
 import { type Express } from 'express';
+import { initBanksController } from './banks';
 import { initBusinessesController } from './businesses';
 import { initCategoriesController } from './categories';
 import { initClientsController } from './clients';
@@ -21,4 +22,5 @@ export const initControllers = (app: Express) => {
   initStyleProfilesController(app);
   initUnitsController(app);
   initCurrenciesController(app);
+  initBanksController(app);
 };

@@ -15,12 +15,14 @@ const businessFields: (keyof Business)[] = [
   'phone',
   'website',
   'additional',
-  'paymentInformation',
+  // Legacy payment info. New payment info is via Bank
+  // 'paymentInformation',
   'logo',
   'fileSize',
   'fileType',
   'fileName',
   'description',
+  'vatCode',
   'isArchived'
 ];
 

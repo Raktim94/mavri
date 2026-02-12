@@ -57,7 +57,12 @@ const resetIPCHandlers = () => {
     'update-styleProfile',
     'delete-styleProfile',
     'batch-add-styleProfile',
-    'get-all-styleProfiles'
+    'get-all-styleProfiles',
+    'add-bank',
+    'update-bank',
+    'delete-bank',
+    'batch-add-bank',
+    'get-all-banks'
   ];
 
   handlers.forEach(handler => ipcMain.removeHandler(handler));

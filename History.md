@@ -1,5 +1,24 @@
 # Invoice Builder
 
+## 2026-02-12, version 2.0.0
+
+New features & improvements
+
+- Added dedicated VAT fields for both businesses and clients
+- Introduced validations for custom header sections (now visible in the UI)
+- Implemented pre‑filling of custom header section data from the last used configuration when selecting an existing one (including sort order and alignment)
+- Added a tooltip explaining why the Save button is disabled when an invoice or quote is invalid
+- Added a visual "\*" indicator to highlight required fields in invoices and quotes
+- Added collapsible sections to the main menu, allowing related items to be grouped for a cleaner and more organized navigation experience
+- Introduced Banks as the new source of payment information - breaking change:
+  - The previous Business → PaymentInformation field is now considered legacy and becomes read‑only
+  - Invoices and quotes created prior to this release will continue using the legacy field to preserve existing data; these documents will also retain the legacy Classic, Modern / Compact layouts
+  - All newly created invoices and quotes must use the new Banks payment information structure
+
+Bug Fixes
+
+- Fixed an issue where the Save button appeared active for empty invoices/quotes
+
 ## 2026-02-09, version 1.7.0
 
 New features & improvements

@@ -5,7 +5,7 @@ import type { Response } from '../../types/response';
 import type { StyleProfile, StyleProfileUpdate } from '../../types/styleProfiles';
 import { useAsyncAction } from '../useAsyncAction';
 
-interface UseStyleProfileUpdateParams extends RequestHook<Response<StyleProfileUpdate>> {
+interface UseStyleProfileUpdateParams extends RequestHook<Response<StyleProfile>> {
   styleProfile?: StyleProfileUpdate;
 }
 

@@ -1,6 +1,5 @@
-// db may be sqlite3 Database or a Postgres adapter — typed as `any` at runtime
-
 import { DatabaseType } from '../enums/databaseType';
+import type { Bank } from '../types/bank';
 import type { Business } from '../types/business';
 import type { Category } from '../types/category';
 import type { Client } from '../types/client';
@@ -10,6 +9,7 @@ import type { DbValue } from '../types/dbValue';
 import type {
   Invoice,
   InvoiceAttachment,
+  InvoiceBankSnapshots,
   InvoiceBusinessSnapshots,
   InvoiceClientSnapshots,
   InvoiceCurrencySnapshots,
@@ -23,13 +23,17 @@ import type { Item } from '../types/item';
 import type { StyleProfile } from '../types/styleProfiles';
 import type { Unit } from '../types/unit';
 import {
+  decodeBank,
   decodeInvoiceAttachment,
+  decodeInvoiceBankSnapshotImport,
   decodeInvoiceBusinessSnapshotImport,
   decodeInvoiceCustomizationImport,
   decodeInvoiceImport,
   decodeLogo,
   decodeStyleProfile,
+  encodeBank,
   encodeInvoiceAttachment,
+  encodeInvoiceBankSnapshotExport,
   encodeInvoiceBusinessSnapshotExport,
   encodeInvoiceCustomizationExport,
   encodeInvoiceExport,
@@ -41,6 +45,7 @@ import { mapDatabaseError } from '../utils/errorFunctions';
 
 export const exportAllData = async (db: DatabaseAdapter) => {
   try {
+    const banks = await db.all<Bank>('SELECT * FROM banks');
     const styleProfiles = await db.all<StyleProfile>('SELECT * FROM style_profiles');
     const settingsRow = await db.get('SELECT * FROM settings LIMIT 1');
     const businesses = await db.all<Business>('SELECT * FROM businesses');
@@ -50,6 +55,7 @@ export const exportAllData = async (db: DatabaseAdapter) => {
     const categories = await db.all<Category>('SELECT * FROM categories');
     const currencies = await db.all<Currency>('SELECT * FROM currencies');
     const invoices = await db.all<Invoice>('SELECT * FROM invoices');
+    const invoiceBankSnapshots = await db.all<InvoiceBankSnapshots>('SELECT * FROM invoice_bank_snapshots');
     const invoiceBusinessSnapshots = await db.all<InvoiceBusinessSnapshots>('SELECT * FROM invoice_business_snapshots');
     const invoiceClientSnapshots = await db.all<InvoiceClientSnapshots>('SELECT * FROM invoice_client_snapshots');
     const invoiceCurrencySnapshots = await db.all<InvoiceCurrencySnapshots>('SELECT * FROM invoice_currency_snapshots');
@@ -65,7 +71,9 @@ export const exportAllData = async (db: DatabaseAdapter) => {
     const attachmentsModified = attachments.map(encodeInvoiceAttachment);
     const businessesModified = businesses.map(encodeLogo);
     const styleProfilesModified = styleProfiles.map(encodeStyleProfile);
+    const banksModified = banks.map(encodeBank);
     const invoicesModified = invoices.map(encodeInvoiceExport);
+    const invoiceBankSnapshotsModified = invoiceBankSnapshots.map(encodeInvoiceBankSnapshotExport);
     const invoiceBusinessSnapshotsModified = invoiceBusinessSnapshots.map(encodeInvoiceBusinessSnapshotExport);
     const invoiceCustomizationsModified = invoiceCustomizations.map(encodeInvoiceCustomizationExport);
 
@@ -78,12 +86,14 @@ export const exportAllData = async (db: DatabaseAdapter) => {
       categories,
       currencies,
       invoices: invoicesModified,
+      invoiceBankSnapshots: invoiceBankSnapshotsModified,
       invoiceBusinessSnapshots: invoiceBusinessSnapshotsModified,
       invoiceCustomizations: invoiceCustomizationsModified,
       invoiceClientSnapshots,
       invoiceCurrencySnapshots,
       invoiceStyleProfileSnapshots,
       styleProfiles: styleProfilesModified,
+      banks: banksModified,
       invoiceItems,
       invoiceItemSnapshots,
       invoicePayments,
@@ -167,6 +177,7 @@ export const importAllData = async (db: DatabaseAdapter, parsed: Record<string, 
         'invoice_customizations',
         'invoice_currency_snapshots',
         'invoice_client_snapshots',
+        'invoice_bank_snapshots',
         'invoice_business_snapshots',
         'invoice_item_snapshots',
         'invoice_items',
@@ -192,11 +203,13 @@ export const importAllData = async (db: DatabaseAdapter, parsed: Record<string, 
         categories: 'categories',
         businesses: 'businesses',
         style_profiles: 'styleProfiles',
+        banks: 'banks',
         clients: 'clients',
         items: 'items',
         invoices: 'invoices',
         invoice_style_profile_snapshots: 'invoiceStyleProfileSnapshots',
         invoice_business_snapshots: 'invoiceBusinessSnapshots',
+        invoice_bank_snapshots: 'invoiceBankSnapshots',
         invoice_customizations: 'invoiceCustomizations',
         invoice_client_snapshots: 'invoiceClientSnapshots',
         invoice_currency_snapshots: 'invoiceCurrencySnapshots',
@@ -214,6 +227,9 @@ export const importAllData = async (db: DatabaseAdapter, parsed: Record<string, 
       if (Array.isArray(parsedMut.styleProfiles)) {
         parsedMut.styleProfiles = parsedMut.styleProfiles.map(decodeStyleProfile);
       }
+      if (Array.isArray(parsedMut.banks)) {
+        parsedMut.banks = parsedMut.banks.map(decodeBank);
+      }
       if (Array.isArray(parsedMut.businesses)) {
         parsedMut.businesses = parsedMut.businesses.map(decodeLogo);
       }
@@ -224,6 +240,9 @@ export const importAllData = async (db: DatabaseAdapter, parsed: Record<string, 
         parsedMut.invoiceBusinessSnapshots = parsedMut.invoiceBusinessSnapshots.map(
           decodeInvoiceBusinessSnapshotImport
         );
+      }
+      if (Array.isArray(parsedMut.invoiceBankSnapshots)) {
+        parsedMut.invoiceBankSnapshots = parsedMut.invoiceBankSnapshots.map(decodeInvoiceBankSnapshotImport);
       }
       if (Array.isArray(parsedMut.invoiceCustomizations)) {
         parsedMut.invoiceCustomizations = parsedMut.invoiceCustomizations.map(decodeInvoiceCustomizationImport);

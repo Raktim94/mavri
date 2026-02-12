@@ -2,16 +2,18 @@ import { Text, View } from '@react-pdf/renderer';
 import { memo, type FC } from 'react';
 import type { InvoiceFromData } from '../../../shared/types/invoice';
 import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './constant';
+import { QRCodeInfo } from './QRCodeInfo';
 
 interface Props {
+  qrCodeUrl?: string;
   invoiceForm?: InvoiceFromData;
   paymentInfoLabel: string;
 }
-const PaymentInfoComponent: FC<Props> = ({ invoiceForm, paymentInfoLabel }) => {
-  if (!invoiceForm?.invoiceBusinessSnapshot?.businessPaymentInformation) return null;
+const PaymentInfoComponent: FC<Props> = ({ invoiceForm, qrCodeUrl, paymentInfoLabel }) => {
+  if (!invoiceForm?.invoiceBankSnapshot) return null;
 
   return (
-    <View style={[PDF_STYLES.alignStart, PDF_STYLES.gap4, PDF_STYLES.maxw50]}>
+    <View style={[PDF_STYLES.alignStart, PDF_STYLES.gap4]}>
       <Text
         style={[
           PDF_STYLES.regularBold,
@@ -20,14 +22,81 @@ const PaymentInfoComponent: FC<Props> = ({ invoiceForm, paymentInfoLabel }) => {
       >
         {paymentInfoLabel}:
       </Text>
-      <Text
-        style={[
-          PDF_STYLES.businessText,
-          { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].businessText }
-        ]}
-      >
-        {invoiceForm?.invoiceBusinessSnapshot?.businessPaymentInformation}
-      </Text>
+      <View style={[PDF_STYLES.alignStart, PDF_STYLES.gap4, PDF_STYLES.row]}>
+        <View style={[PDF_STYLES.alignStart, PDF_STYLES.gap4]}>
+          {invoiceForm?.invoiceBankSnapshot?.bankName && (
+            <Text
+              style={[
+                PDF_STYLES.businessText,
+                { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].businessText }
+              ]}
+            >
+              {invoiceForm?.invoiceBankSnapshot?.bankName}
+            </Text>
+          )}
+          {invoiceForm?.invoiceBankSnapshot?.address && (
+            <Text
+              style={[
+                PDF_STYLES.businessText,
+                { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].businessText }
+              ]}
+            >
+              {invoiceForm?.invoiceBankSnapshot?.address}
+            </Text>
+          )}
+          {invoiceForm?.invoiceBankSnapshot?.accountNumber && (
+            <Text
+              style={[
+                PDF_STYLES.businessText,
+                { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].businessText }
+              ]}
+            >
+              {invoiceForm?.invoiceBankSnapshot?.accountNumber}
+            </Text>
+          )}
+          {invoiceForm?.invoiceBankSnapshot?.branchCode && (
+            <Text
+              style={[
+                PDF_STYLES.businessText,
+                { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].businessText }
+              ]}
+            >
+              {invoiceForm?.invoiceBankSnapshot?.swiftCode}
+            </Text>
+          )}
+          {invoiceForm?.invoiceBankSnapshot?.routingNumber && (
+            <Text
+              style={[
+                PDF_STYLES.businessText,
+                { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].businessText }
+              ]}
+            >
+              {invoiceForm?.invoiceBankSnapshot?.routingNumber}
+            </Text>
+          )}
+          {invoiceForm?.invoiceBankSnapshot?.branchCode && (
+            <Text
+              style={[
+                PDF_STYLES.businessText,
+                { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].businessText }
+              ]}
+            >
+              {invoiceForm?.invoiceBankSnapshot?.branchCode}
+            </Text>
+          )}
+          {invoiceForm?.invoiceBankSnapshot?.upiCode && (
+            <Text
+              style={[
+                PDF_STYLES.businessText,
+                { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].businessText }
+              ]}
+            >
+              {invoiceForm?.invoiceBankSnapshot?.upiCode}
+            </Text>
+          )}
+        </View>
+        <QRCodeInfo qrCodeUrl={qrCodeUrl} invoiceForm={invoiceForm} />
+      </View>
     </View>
   );
 };

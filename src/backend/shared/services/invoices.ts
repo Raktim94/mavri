@@ -3,8 +3,10 @@ import type { DatabaseAdapter } from '../types/DatabaseAdapter';
 import type { EntityWithId } from '../types/entityWithId';
 import type {
   CustomField,
+  CustomFieldMeta,
   Invoice,
   InvoiceAttachment,
+  InvoiceBankSnapshots,
   InvoiceBusinessSnapshots,
   InvoiceClientSnapshots,
   InvoiceCurrencySnapshots,
@@ -25,34 +27,6 @@ type GetInvoicesOptions = {
   filter?: FilterData[];
 };
 
-const handleEntity =
-  <T extends EntityWithId>(db: DatabaseAdapter, table: string, fields: readonly (keyof T)[]) =>
-  async (data: T, isUpdate = false): Promise<Response<number>> => {
-    const params = fields.map(key => (data[key] ?? null) as string | number | null);
-
-    try {
-      let lastID: number = -1;
-
-      if (isUpdate) {
-        const setClause =
-          fields.map(f => `"${String(f)}" = ?`).join(', ') +
-          `, "updatedAt" = ${getDefaultValue("(datetime('now'))", db.type)}`;
-
-        lastID = await db.run(`UPDATE ${table} SET ${setClause} WHERE "id" = ?`, [...params, data.id ?? -1], true);
-      } else {
-        lastID = await db.run(
-          `INSERT INTO ${table} (${fields.map(f => `"${String(f)}"`).join(',')})
-           VALUES (${fields.map(() => '?').join(',')})`,
-          params,
-          true
-        );
-      }
-
-      return { success: true, data: lastID };
-    } catch (error) {
-      return { success: false, ...mapDatabaseError(error, db.type) };
-    }
-  };
 const invoiceCurrencySnapshotsFields: (keyof InvoiceCurrencySnapshots)[] = [
   'parentInvoiceId',
   'currencyCode',
@@ -66,7 +40,24 @@ const invoiceClientSnapshotsFields: (keyof InvoiceClientSnapshots)[] = [
   'clientEmail',
   'clientPhone',
   'clientCode',
-  'clientAdditional'
+  'clientAdditional',
+  'clientVatCode'
+];
+const invoiceBankSnapshotsFields: (keyof InvoiceBankSnapshots)[] = [
+  'parentInvoiceId',
+  'name',
+  'bankName',
+  'accountNumber',
+  'swiftCode',
+  'address',
+  'branchCode',
+  'type',
+  'routingNumber',
+  'upiCode',
+  'qrCode',
+  'qrCodeFileSize',
+  'qrCodeFileType',
+  'qrCodeFileName'
 ];
 const invoiceBusinessSnapshotsFields: (keyof InvoiceBusinessSnapshots)[] = [
   'parentInvoiceId',
@@ -77,7 +68,9 @@ const invoiceBusinessSnapshotsFields: (keyof InvoiceBusinessSnapshots)[] = [
   'businessEmail',
   'businessPhone',
   'businessAdditional',
-  'businessPaymentInformation',
+  'businessVatCode',
+  // Legacy payment info. New payment info is via Bank
+  // 'businessPaymentInformation',
   'businessLogo',
   'businessFileSize',
   'businessFileType',
@@ -118,6 +111,7 @@ const invoiceFields: (keyof Invoice)[] = [
   'currencyId',
   'issuedAt',
   'dueDate',
+  'bankId',
   'invoiceNumber',
   'isArchived',
   'status',
@@ -157,6 +151,159 @@ const itemsSnapshotFields: (keyof InvoiceItemSnapshots)[] = [
   'unitPriceCents',
   'unitName'
 ];
+
+const handleEntity =
+  <T extends EntityWithId>(db: DatabaseAdapter, table: string, fields: readonly (keyof T)[]) =>
+  async (data: T, isUpdate = false): Promise<Response<number>> => {
+    const params = fields.map(key => (data[key] ?? null) as string | number | null);
+
+    try {
+      let lastID: number = -1;
+
+      if (isUpdate) {
+        const setClause =
+          fields.map(f => `"${String(f)}" = ?`).join(', ') +
+          `, "updatedAt" = ${getDefaultValue("(datetime('now'))", db.type)}`;
+
+        lastID = await db.run(`UPDATE ${table} SET ${setClause} WHERE "id" = ?`, [...params, data.id ?? -1], true);
+      } else {
+        lastID = await db.run(
+          `INSERT INTO ${table} (${fields.map(f => `"${String(f)}"`).join(',')})
+           VALUES (${fields.map(() => '?').join(',')})`,
+          params,
+          true
+        );
+      }
+
+      return { success: true, data: lastID };
+    } catch (error) {
+      return { success: false, ...mapDatabaseError(error, db.type) };
+    }
+  };
+
+const rollbackOrThrow = async (db: DatabaseAdapter) => {
+  try {
+    await db.run('ROLLBACK');
+  } catch {
+    throw new Error(`ROLLBACK failed`);
+  }
+};
+
+const createInvoiceHandlers = (db: DatabaseAdapter) => ({
+  handleInvoice: handleEntity<Invoice>(db, 'invoices', invoiceFields),
+  handleInvoiceBankSnapshots: handleEntity<InvoiceBankSnapshots>(
+    db,
+    'invoice_bank_snapshots',
+    invoiceBankSnapshotsFields
+  ),
+  handleInvoiceBusinessSnapshots: handleEntity<InvoiceBusinessSnapshots>(
+    db,
+    'invoice_business_snapshots',
+    invoiceBusinessSnapshotsFields
+  ),
+  handleInvoiceClientSnapshots: handleEntity<InvoiceClientSnapshots>(
+    db,
+    'invoice_client_snapshots',
+    invoiceClientSnapshotsFields
+  ),
+  handleInvoiceCurrencySnapshots: handleEntity<InvoiceCurrencySnapshots>(
+    db,
+    'invoice_currency_snapshots',
+    invoiceCurrencySnapshotsFields
+  ),
+  handleInvoiceCustomization: handleEntity<InvoiceCustomization>(
+    db,
+    'invoice_customizations',
+    invoiceCustomizationFields
+  ),
+  handleInvoiceStyleProfileSnapshots: handleEntity<InvoiceStyleProfileSnapshots>(
+    db,
+    'invoice_style_profile_snapshots',
+    invoiceStyleProfileSnapshotsFields
+  ),
+  handleInvoiceItemSnapshots: handleEntity<InvoiceItemSnapshots>(db, 'invoice_item_snapshots', itemsSnapshotFields),
+  handleInvoicePayments: handleEntity<InvoicePayment>(db, 'invoice_payments', paymentsFields),
+  handleInvoiceItems: handleEntity<InvoiceItem>(db, 'invoice_items', itemsFields),
+  handleAttachments: handleEntity<InvoiceAttachment>(db, 'attachments', attachmentFields)
+});
+
+const processItems = async (
+  db: DatabaseAdapter,
+  handlers: {
+    handleInvoiceItems: (data: InvoiceItem) => Promise<Response<number>>;
+    handleInvoiceItemSnapshots: (data: InvoiceItemSnapshots) => Promise<Response<number>>;
+  },
+  parentInvoiceId: number,
+  items?: InvoiceItem[] | null
+) => {
+  for (const item of items ?? []) {
+    const r = await handlers.handleInvoiceItems({
+      ...item,
+      parentInvoiceId,
+      customField: item.customField ? JSON.stringify(item.customField) : undefined
+    } as unknown as InvoiceItem);
+    if (!r.success) {
+      await rollbackOrThrow(db);
+      return r;
+    }
+    const newItemId = r.data;
+    if (newItemId && item.invoiceItemSnapshot) {
+      const ibs = await handlers.handleInvoiceItemSnapshots({
+        ...item.invoiceItemSnapshot,
+        parentInvoiceItemId: newItemId
+      } as unknown as InvoiceItemSnapshots);
+      if (!ibs.success) {
+        await rollbackOrThrow(db);
+        return ibs;
+      }
+    }
+  }
+  return { success: true } as Response<number>;
+};
+
+const processPayments = async (
+  db: DatabaseAdapter,
+  handlers: { handleInvoicePayments: (data: InvoicePayment, isUpdate?: boolean) => Promise<Response<number>> },
+  parentInvoiceId: number,
+  payments?: InvoicePayment[] | null
+) => {
+  for (const payment of payments ?? []) {
+    if (payment.id) {
+      const existing = await db.get(`SELECT "id" FROM invoice_payments WHERE "id" = ?`, [payment.id]);
+      if (existing) {
+        const r = await handlers.handleInvoicePayments({ ...payment, parentInvoiceId } as InvoicePayment, true);
+        if (!r.success) {
+          await rollbackOrThrow(db);
+          return r;
+        }
+        continue;
+      }
+    }
+
+    const r = await handlers.handleInvoicePayments({ ...payment, parentInvoiceId } as InvoicePayment);
+    if (!r.success) {
+      await rollbackOrThrow(db);
+      return r;
+    }
+  }
+  return { success: true } as Response<number>;
+};
+
+const processAttachments = async (
+  db: DatabaseAdapter,
+  handlers: { handleAttachments: (data: InvoiceAttachment) => Promise<Response<number>> },
+  parentInvoiceId: number,
+  attachments?: InvoiceAttachment[] | null
+) => {
+  for (const attachment of attachments ?? []) {
+    const r = await handlers.handleAttachments({ ...attachment, parentInvoiceId } as InvoiceAttachment);
+    if (!r.success) {
+      await rollbackOrThrow(db);
+      return r;
+    }
+  }
+  return { success: true } as Response<number>;
+};
 
 const getInvoices = async (db: DatabaseAdapter, options: GetInvoicesOptions) => {
   const { id, type, filter } = options;
@@ -204,7 +351,8 @@ const getInvoices = async (db: DatabaseAdapter, options: GetInvoicesOptions) => 
     invoiceClientSnapshots,
     invoiceCurrencySnapshots,
     invoiceCustomization,
-    invoiceStyleProfileSnapshots
+    invoiceStyleProfileSnapshots,
+    invoiceBankSnapshots
   ] = await Promise.all([
     db.all<InvoicePayment>(`SELECT * FROM invoice_payments WHERE "parentInvoiceId" IN (${placeholders})`, invoiceIds),
     db.all<InvoiceItem>(`SELECT * FROM invoice_items WHERE "parentInvoiceId" IN (${placeholders})`, invoiceIds),
@@ -227,6 +375,10 @@ const getInvoices = async (db: DatabaseAdapter, options: GetInvoicesOptions) => 
     ),
     db.all<InvoiceStyleProfileSnapshots>(
       `SELECT * FROM invoice_style_profile_snapshots WHERE "parentInvoiceId" IN (${placeholders})`,
+      invoiceIds
+    ),
+    db.all<InvoiceBankSnapshots>(
+      `SELECT * FROM invoice_bank_snapshots WHERE "parentInvoiceId" IN (${placeholders})`,
       invoiceIds
     )
   ]);
@@ -254,6 +406,7 @@ const getInvoices = async (db: DatabaseAdapter, options: GetInvoicesOptions) => 
           };
         }),
       invoiceAttachments: invoiceAttachments.filter(p => p.parentInvoiceId === invoice.id),
+      invoiceBankSnapshot: invoiceBankSnapshots.find(p => p.parentInvoiceId === invoice.id),
       invoiceBusinessSnapshot: invoiceBusinessSnapshots.find(p => p.parentInvoiceId === invoice.id),
       invoiceClientSnapshot: invoiceClientSnapshots.find(p => p.parentInvoiceId === invoice.id),
       invoiceCurrencySnapshot: invoiceCurrencySnapshots.find(p => p.parentInvoiceId === invoice.id),
@@ -282,14 +435,18 @@ export const getCustomHeaders = async (db: DatabaseAdapter, type: 'invoice' | 'q
     `,
     [type]
   );
-  const headers: string[] = [];
+  const headersMeta: CustomFieldMeta[] = [];
   rows.map(row => {
     const parsed = row.customField ? (JSON.parse(row.customField) as CustomField) : null;
-    if (parsed && !headers.some(h => h === parsed.header)) {
-      headers.push(parsed.header);
+    if (parsed && !headersMeta.some(h => h.header === parsed.header)) {
+      headersMeta.push({
+        header: parsed.header,
+        sortOrder: parsed.sortOrder,
+        alignment: parsed.alignment
+      });
     }
   });
-  return { success: true, data: headers };
+  return { success: true, data: headersMeta };
 };
 
 export const getAllInvoices = async (db: DatabaseAdapter, type?: 'invoice' | 'quotation', filter?: FilterData[]) => {
@@ -307,40 +464,19 @@ export const deleteInvoice = async (db: DatabaseAdapter, id: number) => {
 };
 
 export const addInvoice = async (db: DatabaseAdapter, data: Invoice) => {
-  const handleInvoice = handleEntity<Invoice>(db, 'invoices', invoiceFields);
-  const handleInvoiceBusinessSnapshots = handleEntity<InvoiceBusinessSnapshots>(
-    db,
-    'invoice_business_snapshots',
-    invoiceBusinessSnapshotsFields
-  );
-  const handleInvoiceClientSnapshots = handleEntity<InvoiceClientSnapshots>(
-    db,
-    'invoice_client_snapshots',
-    invoiceClientSnapshotsFields
-  );
-  const handleInvoiceCurrencySnapshots = handleEntity<InvoiceCurrencySnapshots>(
-    db,
-    'invoice_currency_snapshots',
-    invoiceCurrencySnapshotsFields
-  );
-  const handleInvoiceCustomization = handleEntity<InvoiceCustomization>(
-    db,
-    'invoice_customizations',
-    invoiceCustomizationFields
-  );
-  const handleInvoiceStyleProfileSnapshots = handleEntity<InvoiceStyleProfileSnapshots>(
-    db,
-    'invoice_style_profile_snapshots',
-    invoiceStyleProfileSnapshotsFields
-  );
-  const handleInvoiceItemSnapshots = handleEntity<InvoiceItemSnapshots>(
-    db,
-    'invoice_item_snapshots',
-    itemsSnapshotFields
-  );
-  const handleInvoicePayments = handleEntity<InvoicePayment>(db, 'invoice_payments', paymentsFields);
-  const handleInvoiceItems = handleEntity<InvoiceItem>(db, 'invoice_items', itemsFields);
-  const handleAttachments = handleEntity<InvoiceAttachment>(db, 'attachments', attachmentFields);
+  const {
+    handleInvoice,
+    handleInvoiceBankSnapshots,
+    handleInvoiceBusinessSnapshots,
+    handleInvoiceClientSnapshots,
+    handleInvoiceCurrencySnapshots,
+    handleInvoiceCustomization,
+    handleInvoiceStyleProfileSnapshots,
+    handleInvoiceItemSnapshots,
+    handleInvoicePayments,
+    handleInvoiceItems,
+    handleAttachments
+  } = createInvoiceHandlers(db);
 
   try {
     await db.run('BEGIN');
@@ -348,26 +484,18 @@ export const addInvoice = async (db: DatabaseAdapter, data: Invoice) => {
     const result = await handleInvoice(data);
 
     if (!result.success || !result.data) {
-      try {
-        await db.run('ROLLBACK');
-      } catch {
-        throw new Error(`ROLLBACK failed`);
-      }
+      await rollbackOrThrow(db);
       return { success: false, key: result.key };
     }
 
     const newId = result.data;
-    if (data.styleProfilesId && data.invoiceStyleProfileSnapshot) {
+    if (data.styleProfilesId != undefined && data.invoiceStyleProfileSnapshot) {
       const ibs = await handleInvoiceStyleProfileSnapshots({
         ...data.invoiceStyleProfileSnapshot,
         parentInvoiceId: newId
       });
       if (!ibs.success) {
-        try {
-          await db.run('ROLLBACK');
-        } catch {
-          throw new Error(`ROLLBACK failed`);
-        }
+        await rollbackOrThrow(db);
         return { success: false, key: ibs.key, message: ibs.message };
       }
     }
@@ -378,127 +506,69 @@ export const addInvoice = async (db: DatabaseAdapter, data: Invoice) => {
         fieldSortOrders: JSON.stringify(data.invoiceCustomization.fieldSortOrders)
       });
       if (!ibs.success) {
-        try {
-          await db.run('ROLLBACK');
-        } catch {
-          throw new Error(`ROLLBACK failed`);
-        }
+        await rollbackOrThrow(db);
         return { success: false, key: ibs.key, message: ibs.message };
       }
     }
-    if (data.currencyId && data.invoiceCurrencySnapshot) {
+    if (data.currencyId != undefined && data.invoiceCurrencySnapshot) {
       const ibs = await handleInvoiceCurrencySnapshots({
         ...data.invoiceCurrencySnapshot,
         parentInvoiceId: newId
       });
       if (!ibs.success) {
-        try {
-          await db.run('ROLLBACK');
-        } catch {
-          throw new Error(`ROLLBACK failed`);
-        }
+        await rollbackOrThrow(db);
         return { success: false, key: ibs.key, message: ibs.message };
       }
     }
-    if (data.businessId && data.invoiceBusinessSnapshot) {
+    if (data.bankId != undefined && data.invoiceBankSnapshot) {
+      const ibs = await handleInvoiceBankSnapshots({
+        ...data.invoiceBankSnapshot,
+        parentInvoiceId: newId
+      });
+      if (!ibs.success) {
+        await rollbackOrThrow(db);
+        return { success: false, key: ibs.key, message: ibs.message };
+      }
+    }
+    if (data.businessId != undefined && data.invoiceBusinessSnapshot) {
       const ibs = await handleInvoiceBusinessSnapshots({
         ...data.invoiceBusinessSnapshot,
         parentInvoiceId: newId
       });
       if (!ibs.success) {
-        try {
-          await db.run('ROLLBACK');
-        } catch {
-          throw new Error(`ROLLBACK failed`);
-        }
+        await rollbackOrThrow(db);
         return { success: false, key: ibs.key, message: ibs.message };
       }
     }
-    if (data.clientId && data.invoiceClientSnapshot) {
+    if (data.clientId != undefined && data.invoiceClientSnapshot) {
       const ibs = await handleInvoiceClientSnapshots({
         ...data.invoiceClientSnapshot,
         parentInvoiceId: newId
       });
       if (!ibs.success) {
-        try {
-          await db.run('ROLLBACK');
-        } catch {
-          throw new Error(`ROLLBACK failed`);
-        }
+        await rollbackOrThrow(db);
         return { success: false, key: ibs.key, message: ibs.message };
       }
     }
 
-    let failure = undefined;
-
-    for (const item of data.invoiceItems ?? []) {
-      const r = await handleInvoiceItems({
-        ...item,
-        parentInvoiceId: newId,
-        customField: item.customField ? JSON.stringify(item.customField) : undefined
-      });
-      if (!r.success || !result.data) {
-        try {
-          await db.run('ROLLBACK');
-        } catch {
-          throw new Error(`ROLLBACK failed`);
-        }
-        failure = r;
-        break;
-      }
-      const newItemId = r.data;
-      if (newItemId && item.invoiceItemSnapshot) {
-        const ibs = await handleInvoiceItemSnapshots({
-          ...item.invoiceItemSnapshot,
-          parentInvoiceItemId: newItemId
-        });
-        if (!ibs.success) {
-          try {
-            await db.run('ROLLBACK');
-          } catch {
-            throw new Error(`ROLLBACK failed`);
-          }
-          return { success: false, key: ibs.key, message: ibs.message };
-        }
-      }
+    const itemsResult = await processItems(
+      db,
+      { handleInvoiceItems, handleInvoiceItemSnapshots },
+      newId,
+      data.invoiceItems
+    );
+    if (!itemsResult.success) {
+      return { success: false, key: itemsResult.key, message: itemsResult.message };
     }
 
-    if (failure) {
-      return { success: false, key: failure.key, message: failure.message };
+    const paymentsResult = await processPayments(db, { handleInvoicePayments }, newId, data.invoicePayments);
+    if (!paymentsResult.success) {
+      return { success: false, key: paymentsResult.key, message: paymentsResult.message };
     }
 
-    for (const payment of data.invoicePayments ?? []) {
-      const r = await handleInvoicePayments({ ...payment, parentInvoiceId: newId });
-      if (!r.success) {
-        try {
-          await db.run('ROLLBACK');
-        } catch {
-          throw new Error(`ROLLBACK failed`);
-        }
-        failure = r;
-        break;
-      }
-    }
-
-    if (failure) {
-      return { success: false, key: failure.key, message: failure.message };
-    }
-
-    for (const attachment of data.invoiceAttachments ?? []) {
-      const r = await handleAttachments({ ...attachment, parentInvoiceId: newId });
-      if (!r.success) {
-        try {
-          await db.run('ROLLBACK');
-        } catch {
-          throw new Error(`ROLLBACK failed`);
-        }
-        failure = r;
-        break;
-      }
-    }
-
-    if (failure) {
-      return { success: false, key: failure.key, message: failure.message };
+    const attachmentsResult = await processAttachments(db, { handleAttachments }, newId, data.invoiceAttachments);
+    if (!attachmentsResult.success) {
+      return { success: false, key: attachmentsResult.key, message: attachmentsResult.message };
     }
 
     const newResult = await getInvoices(db, { id: newId });
@@ -506,72 +576,45 @@ export const addInvoice = async (db: DatabaseAdapter, data: Invoice) => {
     await db.run('COMMIT');
     return { success: true, data: newResult.length > 0 ? newResult[0] : newResult };
   } catch (error) {
-    try {
-      await db.run('ROLLBACK');
-    } catch {
-      throw new Error(`ROLLBACK failed`);
-    }
+    await rollbackOrThrow(db);
     return { success: false, ...mapDatabaseError(error, db.type) };
   }
 };
 
 export const updateInvoice = async (db: DatabaseAdapter, data: Invoice) => {
-  const handleInvoice = handleEntity<Invoice>(db, 'invoices', invoiceFields);
-  const handleInvoicePayments = handleEntity<InvoicePayment>(db, 'invoice_payments', paymentsFields);
-  const handleAttachments = handleEntity<InvoiceAttachment>(db, 'attachments', attachmentFields);
-  const handleInvoiceBusinessSnapshots = handleEntity<InvoiceBusinessSnapshots>(
-    db,
-    'invoice_business_snapshots',
-    invoiceBusinessSnapshotsFields
-  );
-  const handleInvoiceStyleProfileSnapshots = handleEntity<InvoiceStyleProfileSnapshots>(
-    db,
-    'invoice_style_profile_snapshots',
-    invoiceStyleProfileSnapshotsFields
-  );
-  const handleInvoiceClientSnapshots = handleEntity<InvoiceClientSnapshots>(
-    db,
-    'invoice_client_snapshots',
-    invoiceClientSnapshotsFields
-  );
-  const handleInvoiceCurrencySnapshots = handleEntity<InvoiceCurrencySnapshots>(
-    db,
-    'invoice_currency_snapshots',
-    invoiceCurrencySnapshotsFields
-  );
-  const handleInvoiceCustomization = handleEntity<InvoiceCustomization>(
-    db,
-    'invoice_customizations',
-    invoiceCustomizationFields
-  );
+  const {
+    handleInvoice,
+    handleInvoicePayments,
+    handleAttachments,
+    handleInvoiceBusinessSnapshots,
+    handleInvoiceBankSnapshots,
+    handleInvoiceStyleProfileSnapshots,
+    handleInvoiceClientSnapshots,
+    handleInvoiceCurrencySnapshots,
+    handleInvoiceCustomization,
+    handleInvoiceItems,
+    handleInvoiceItemSnapshots
+  } = createInvoiceHandlers(db);
 
   try {
     await db.run('BEGIN');
 
     const result = await handleInvoice(data, true);
     if (!result.success || !data.id) {
-      try {
-        await db.run('ROLLBACK');
-      } catch {
-        throw new Error(`ROLLBACK failed`);
-      }
+      await rollbackOrThrow(db);
       return { success: false, key: result.key };
     }
 
-    if (data.styleProfilesId && data.invoiceStyleProfileSnapshot) {
+    if (data.styleProfilesId != undefined && data.invoiceStyleProfileSnapshot) {
       const ibs = await handleInvoiceStyleProfileSnapshots(
         {
           ...data.invoiceStyleProfileSnapshot,
           parentInvoiceId: data.id
         },
-        true
+        data.invoiceStyleProfileSnapshot.id != undefined
       );
       if (!ibs.success) {
-        try {
-          await db.run('ROLLBACK');
-        } catch {
-          throw new Error(`ROLLBACK failed`);
-        }
+        await rollbackOrThrow(db);
         return { success: false, key: ibs.key, message: ibs.message };
       }
     }
@@ -582,41 +625,46 @@ export const updateInvoice = async (db: DatabaseAdapter, data: Invoice) => {
           parentInvoiceId: data.id,
           fieldSortOrders: JSON.stringify(data.invoiceCustomization.fieldSortOrders)
         },
-        true
+        data.invoiceCustomization.id != undefined
       );
       if (!ibs.success) {
-        try {
-          await db.run('ROLLBACK');
-        } catch {
-          throw new Error(`ROLLBACK failed`);
-        }
+        await rollbackOrThrow(db);
         return { success: false, key: ibs.key, message: ibs.message };
       }
     }
-    if (data.currencyId && data.invoiceCurrencySnapshot) {
+    if (data.currencyId != undefined && data.invoiceCurrencySnapshot) {
       const ibs = await handleInvoiceCurrencySnapshots(
         {
           ...data.invoiceCurrencySnapshot,
           parentInvoiceId: data.id
         },
-        true
+        data.invoiceCurrencySnapshot.id != undefined
       );
       if (!ibs.success) {
-        try {
-          await db.run('ROLLBACK');
-        } catch {
-          throw new Error(`ROLLBACK failed`);
-        }
+        await rollbackOrThrow(db);
         return { success: false, key: ibs.key, message: ibs.message };
       }
     }
-    if (data.businessId && data.invoiceBusinessSnapshot) {
+    if (data.bankId != undefined && data.invoiceBankSnapshot) {
+      const ibs = await handleInvoiceBankSnapshots(
+        {
+          ...data.invoiceBankSnapshot,
+          parentInvoiceId: data.id
+        },
+        data.invoiceBankSnapshot.id != undefined
+      );
+      if (!ibs.success) {
+        await rollbackOrThrow(db);
+        return { success: false, key: ibs.key, message: ibs.message };
+      }
+    }
+    if (data.businessId != undefined && data.invoiceBusinessSnapshot) {
       const ibs = await handleInvoiceBusinessSnapshots(
         {
           ...data.invoiceBusinessSnapshot,
           parentInvoiceId: data.id
         },
-        true
+        data.invoiceBusinessSnapshot.id != undefined
       );
       if (!ibs.success) {
         try {
@@ -627,13 +675,13 @@ export const updateInvoice = async (db: DatabaseAdapter, data: Invoice) => {
         return { success: false, key: ibs.key, message: ibs.message };
       }
     }
-    if (data.clientId && data.invoiceClientSnapshot) {
+    if (data.clientId != undefined && data.invoiceClientSnapshot) {
       const ibs = await handleInvoiceClientSnapshots(
         {
           ...data.invoiceClientSnapshot,
           parentInvoiceId: data.id
         },
-        true
+        data.invoiceClientSnapshot.id != undefined
       );
       if (!ibs.success) {
         try {
@@ -647,29 +695,14 @@ export const updateInvoice = async (db: DatabaseAdapter, data: Invoice) => {
 
     await db.run('DELETE FROM invoice_items WHERE "parentInvoiceId" = ?;', [data.id]);
 
-    for (const item of data.invoiceItems ?? []) {
-      const newItemID: number = await db.run(
-        `INSERT INTO invoice_items ("parentInvoiceId", "itemId", "quantity", "taxRate", "taxType", "customField") VALUES (?, ?, ?, ?, ?, ?)`,
-        [
-          data.id,
-          item.itemId,
-          item.quantity,
-          item.taxRate,
-          item.taxType ?? null,
-          item.customField ? JSON.stringify(item.customField) : undefined
-        ],
-        true
-      );
-
-      await db.run(
-        `INSERT INTO invoice_item_snapshots ("parentInvoiceItemId", "itemName", "unitPriceCents", "unitName") VALUES (?, ?, ?, ?)`,
-        [
-          newItemID,
-          item.invoiceItemSnapshot.itemName,
-          item.invoiceItemSnapshot.unitPriceCents,
-          item.invoiceItemSnapshot.unitName ?? null
-        ]
-      );
+    const itemsResult = await processItems(
+      db,
+      { handleInvoiceItems, handleInvoiceItemSnapshots },
+      data.id,
+      data.invoiceItems
+    );
+    if (!itemsResult.success) {
+      return { success: false, key: itemsResult.key, message: itemsResult.message };
     }
 
     const ids = (data.invoicePayments ?? []).map(p => p.id).filter(Boolean);
@@ -682,58 +715,15 @@ export const updateInvoice = async (db: DatabaseAdapter, data: Invoice) => {
       await db.run(`DELETE FROM invoice_payments WHERE "parentInvoiceId" = ?`, [data.id]);
     }
 
-    let failure = undefined;
-
-    for (const payment of data.invoicePayments ?? []) {
-      if (payment.id) {
-        const existing = await db.get(`SELECT "id" FROM invoice_payments WHERE "id" = ?`, [payment.id]);
-        if (existing) {
-          const r = await handleInvoicePayments({ ...payment, parentInvoiceId: data.id }, true);
-          if (!r.success) {
-            try {
-              await db.run('ROLLBACK');
-            } catch {
-              throw new Error(`ROLLBACK failed`);
-            }
-            failure = r;
-            break;
-          }
-          continue;
-        }
-      }
-
-      const r = await handleInvoicePayments({ ...payment, parentInvoiceId: data.id });
-      if (!r.success) {
-        try {
-          await db.run('ROLLBACK');
-        } catch {
-          throw new Error(`ROLLBACK failed`);
-        }
-        failure = r;
-        break;
-      }
-    }
-
-    if (failure) {
-      return { success: false, key: failure.key, message: failure.message };
+    const paymentsResult = await processPayments(db, { handleInvoicePayments }, data.id, data.invoicePayments);
+    if (!paymentsResult.success) {
+      return { success: false, key: paymentsResult.key, message: paymentsResult.message };
     }
 
     await db.run('DELETE FROM attachments WHERE "parentInvoiceId" = ?;', [data.id]);
-    for (const attachment of data.invoiceAttachments ?? []) {
-      const r = await handleAttachments({ ...attachment, parentInvoiceId: data.id });
-      if (!r.success) {
-        try {
-          await db.run('ROLLBACK');
-        } catch {
-          throw new Error(`ROLLBACK failed`);
-        }
-        failure = r;
-        break;
-      }
-    }
-
-    if (failure) {
-      return { success: false, key: failure.key, message: failure.message };
+    const attachmentsResult = await processAttachments(db, { handleAttachments }, data.id, data.invoiceAttachments);
+    if (!attachmentsResult.success) {
+      return { success: false, key: attachmentsResult.key, message: attachmentsResult.message };
     }
 
     const newResult = await getInvoices(db, { id: data.id });
@@ -741,11 +731,7 @@ export const updateInvoice = async (db: DatabaseAdapter, data: Invoice) => {
     await db.run('COMMIT');
     return { success: true, data: newResult.length > 0 ? newResult[0] : newResult };
   } catch (error) {
-    try {
-      await db.run('ROLLBACK');
-    } catch {
-      throw new Error(`ROLLBACK failed`);
-    }
+    await rollbackOrThrow(db);
     return { success: false, ...mapDatabaseError(error, db.type) };
   }
 };
@@ -780,7 +766,7 @@ export const duplicateInvoice = async (
           "thanksNotes", "termsConditionNotes", "discountName", "language", 
           "discountType", "discountAmountCents", "discountPercent", "shippingFeeCents",
           "invoicePrefix", "invoiceSuffix", "taxName", "taxRate", "taxType", "signatureData",
-          "signatureSize", "signatureType", "signatureName", "styleProfilesId"
+          "signatureSize", "signatureType", "signatureName", "styleProfilesId", "bankId"
         )
         SELECT
           ?, ?, "businessId", "clientId", "currencyId",
@@ -788,7 +774,7 @@ export const duplicateInvoice = async (
           "thanksNotes", "termsConditionNotes", "discountName", "language", 
           "discountType", "discountAmountCents", "discountPercent", "shippingFeeCents",
           "invoicePrefix", "invoiceSuffix", "taxName", "taxRate", "taxType", "signatureData",
-          "signatureSize", "signatureType", "signatureName", "styleProfilesId"
+          "signatureSize", "signatureType", "signatureName", "styleProfilesId", "bankId"
         FROM invoices WHERE "id" = ?
       `;
 
@@ -812,6 +798,21 @@ export const duplicateInvoice = async (
       await db.run(sql, [duplicatedRowID, invoiceId]);
     };
 
+    await duplicateSnapshot('invoice_bank_snapshots', [
+      'name',
+      'bankName',
+      'accountNumber',
+      'swiftCode',
+      'address',
+      'branchCode',
+      'type',
+      'routingNumber',
+      'upiCode',
+      'qrCode',
+      'qrCodeFileSize',
+      'qrCodeFileType',
+      'qrCodeFileName'
+    ]);
     await duplicateSnapshot('invoice_business_snapshots', [
       'businessName',
       'businessShortName',
@@ -820,7 +821,9 @@ export const duplicateInvoice = async (
       'businessEmail',
       'businessPhone',
       'businessAdditional',
-      'businessPaymentInformation',
+      'businessVatCode',
+      // Legacy payment info. New payment info is via Bank
+      // 'businessPaymentInformation',
       'businessLogo',
       'businessFileSize',
       'businessFileType',
@@ -832,6 +835,7 @@ export const duplicateInvoice = async (
       'clientEmail',
       'clientPhone',
       'clientCode',
+      'clientVatCode',
       'clientAdditional'
     ]);
     await duplicateSnapshot('invoice_currency_snapshots', ['currencyCode', 'currencySymbol', 'currencySubunit']);

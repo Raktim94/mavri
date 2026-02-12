@@ -1,7 +1,22 @@
 export const validators = {
   email: (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
   phone: (v: string) => /^\+[1-9]\d{6,14}$/.test(v),
-  required: (v: string) => v.trim() !== ''
+  required: (v: string) => v.trim() !== '',
+  iban: (v: string) => /^[A-Z]{2}[0-9A-Z]{6,32}$/.test(v.replace(/\s+/g, '').toUpperCase()),
+  swift: (v: string) => /^[A-Z0-9]{8}([A-Z0-9]{3})?$/.test(v.toUpperCase()),
+  routingNumber: (v: string) => /^\d{9}$/.test(v),
+  branchCode: (v: string) => v === '' || /^\d{3,6}$/.test(v),
+  upiOrPix: (v: string) => {
+    if (!v) return false;
+
+    const upi = /^[a-zA-Z0-9._]+@[a-zA-Z0-9]+$/.test(v);
+    const email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    const phone = /^\+[1-9]\d{6,14}$/.test(v);
+    const cpf = /^\d{11}$/.test(v);
+    const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
+
+    return upi || email || phone || cpf || uuid;
+  }
 } as const;
 
 export const validateOnlyNumbersLetters = (value: string) => {

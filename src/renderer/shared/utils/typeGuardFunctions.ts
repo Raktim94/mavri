@@ -1,4 +1,5 @@
 import { CurrencyFormat } from '../enums/currencyFormat';
+import type { BankFromData } from '../types/bank';
 import type { BusinessFromData } from '../types/business';
 import type { CategoryFromData } from '../types/category';
 import type { ClientFromData } from '../types/client';
@@ -14,6 +15,68 @@ import type { ItemFromData } from '../types/item';
 import type { StyleProfileFromData } from '../types/styleProfiles';
 import type { UnitFromData } from '../types/unit';
 import { validators } from './validatorFunctions';
+
+export const isBankFromData = (data: unknown): data is BankFromData => {
+  if (typeof data !== 'object' || data === null) return false;
+
+  const d = data as Record<string, unknown>;
+
+  if (typeof d.name !== 'string') return false;
+
+  if (d.id !== undefined && d.id !== null && d.id !== '' && typeof d.id !== 'number') return false;
+
+  if (d.isArchived !== undefined && d.isArchived !== null && d.isArchived !== '' && typeof d.isArchived !== 'boolean')
+    return false;
+
+  if (d.qrCode !== undefined && d.qrCode !== '' && d.qrCode != null) {
+    const isBlob = d.qrCode instanceof Uint8Array;
+    if (!isBlob) return false;
+  }
+
+  if (d.bankName !== undefined && d.bankName !== null && d.bankName !== '') {
+    if (typeof d.bankName !== 'string') return false;
+  }
+
+  if (d.accountNumber !== undefined && d.accountNumber !== null && d.accountNumber !== '') {
+    if (typeof d.accountNumber !== 'string') return false;
+  }
+
+  if (d.swiftCode !== undefined && d.swiftCode !== null && d.swiftCode !== '') {
+    if (typeof d.swiftCode !== 'string') return false;
+  }
+
+  if (d.address !== undefined && d.address !== null && d.address !== '') {
+    if (typeof d.address !== 'string') return false;
+  }
+
+  if (d.branchCode !== undefined && d.branchCode !== null && d.branchCode !== '') {
+    if (typeof d.branchCode !== 'string') return false;
+  }
+
+  if (d.routingNumber !== undefined && d.routingNumber !== null && d.routingNumber !== '') {
+    if (typeof d.routingNumber !== 'string') return false;
+  }
+
+  if (d.type !== undefined && d.type !== null && d.type !== '') {
+    if (typeof d.type !== 'string') return false;
+  }
+
+  if (d.upiCode !== undefined && d.upiCode !== null && d.upiCode !== '') {
+    if (typeof d.upiCode !== 'string') return false;
+  }
+
+  if (d.qrCodeFileType !== undefined && d.qrCodeFileType !== null && d.qrCodeFileType !== '') {
+    if (typeof d.qrCodeFileType !== 'string') return false;
+  }
+
+  if (d.qrCodeFileName !== undefined && d.qrCodeFileName !== null && d.qrCodeFileName !== '') {
+    if (typeof d.qrCodeFileName !== 'string') return false;
+  }
+
+  if (d.qrCodeFileSize !== undefined && d.qrCodeFileSize !== null && typeof d.qrCodeFileSize !== 'number') return false;
+
+  return true;
+};
 
 export const isStyleProfileFromData = (data: unknown): data is StyleProfileFromData => {
   if (typeof data !== 'object' || data === null) return false;
@@ -191,6 +254,8 @@ export const isBusinessFromData = (data: unknown): data is BusinessFromData => {
   if (d.website !== undefined && d.website !== null && d.website !== '' && typeof d.website !== 'string') return false;
   if (d.additional !== undefined && d.additional !== null && d.additional !== '' && typeof d.additional !== 'string')
     return false;
+  if (d.vatCode !== undefined && d.vatCode !== null && d.vatCode !== '' && typeof d.vatCode !== 'string') return false;
+  // Legacy payment info. New payment info is via Bank
   if (
     d.paymentInformation !== undefined &&
     d.paymentInformation !== null &&
@@ -298,6 +363,7 @@ export const isClientFromData = (data: unknown): data is ClientFromData => {
   if (d.code !== undefined && d.code !== null && d.code !== '' && typeof d.code !== 'string') return false;
   if (d.additional !== undefined && d.additional !== null && d.additional !== '' && typeof d.additional !== 'string')
     return false;
+  if (d.vatCode !== undefined && d.vatCode !== null && d.vatCode !== '' && typeof d.vatCode !== 'string') return false;
 
   return true;
 };
@@ -327,6 +393,51 @@ export const isCurrencyFromData = (data: unknown): data is CurrencyFromData => {
   return true;
 };
 
+export const isInvoiceBankSnapshotFromData = (data: unknown): data is InvoiceBusinessSnapshots => {
+  if (typeof data !== 'object' || data === null) return false;
+
+  const d = data as Record<string, unknown>;
+
+  if (d.name !== undefined && d.name !== null && typeof d.name !== 'string') return false;
+  if (d.id !== undefined && d.id !== null && d.id !== '' && typeof d.id !== 'number') return false;
+  if (
+    d.parentInvoiceId !== undefined &&
+    d.parentInvoiceId !== null &&
+    d.parentInvoiceId !== '' &&
+    typeof d.parentInvoiceId !== 'number'
+  )
+    return false;
+
+  const stringFields = [
+    'bankName',
+    'accountNumber',
+    'swiftCode',
+    'address',
+    'branchCode',
+    'type',
+    'routingNumber',
+    'upiCode',
+    'qrCodeFileType',
+    'qrCodeFileName'
+  ];
+
+  for (const key of stringFields) {
+    const val = d[key];
+    if (val !== undefined && val !== null && typeof val !== 'string') return false;
+  }
+
+  const numberFields = ['qrCodeFileSize'];
+
+  for (const key of numberFields) {
+    const val = d[key];
+    if (val !== undefined && val !== null && typeof val !== 'number') return false;
+  }
+
+  if (d.qrCode !== undefined && d.qrCode !== null && !(d.qrCode instanceof Uint8Array)) return false;
+
+  return true;
+};
+
 export const isInvoiceBusinessSnapshotFromData = (data: unknown): data is InvoiceBusinessSnapshots => {
   if (typeof data !== 'object' || data === null) return false;
 
@@ -343,10 +454,6 @@ export const isInvoiceBusinessSnapshotFromData = (data: unknown): data is Invoic
     typeof d.parentInvoiceId !== 'number'
   )
     return false;
-  if (d.createdAt !== undefined && d.createdAt !== null && d.createdAt !== '' && typeof d.createdAt !== 'string')
-    return false;
-  if (d.updatedAt !== undefined && d.updatedAt !== null && d.updatedAt !== '' && typeof d.updatedAt !== 'string')
-    return false;
 
   const stringFields = [
     'businessAddress',
@@ -354,6 +461,8 @@ export const isInvoiceBusinessSnapshotFromData = (data: unknown): data is Invoic
     'businessEmail',
     'businessPhone',
     'businessAdditional',
+    'businessVatCode',
+    // Legacy payment info. New payment info is via Bank
     'businessPaymentInformation',
     'businessFileType',
     'businessFileName'
@@ -391,12 +500,15 @@ export const isInvoiceClientSnapshotFromData = (data: unknown): data is InvoiceC
     typeof d.parentInvoiceId !== 'number'
   )
     return false;
-  if (d.createdAt !== undefined && d.createdAt !== null && d.createdAt !== '' && typeof d.createdAt !== 'string')
-    return false;
-  if (d.updatedAt !== undefined && d.updatedAt !== null && d.updatedAt !== '' && typeof d.updatedAt !== 'string')
-    return false;
 
-  const stringFields = ['clientAddress', 'clientEmail', 'clientPhone', 'clientCode', 'clientAdditional'];
+  const stringFields = [
+    'clientAddress',
+    'clientEmail',
+    'clientPhone',
+    'clientCode',
+    'clientAdditional',
+    'clientVatCode'
+  ];
 
   for (const key of stringFields) {
     const val = d[key];
@@ -419,10 +531,7 @@ export const isInvoiceCurrencySnapshotFromData = (data: unknown): data is Invoic
     typeof d.parentInvoiceId !== 'number'
   )
     return false;
-  if (d.createdAt !== undefined && d.createdAt !== null && d.createdAt !== '' && typeof d.createdAt !== 'string')
-    return false;
-  if (d.updatedAt !== undefined && d.updatedAt !== null && d.updatedAt !== '' && typeof d.updatedAt !== 'string')
-    return false;
+
   if (d.currencyCode !== undefined && d.currencyCode !== null && typeof d.currencyCode !== 'string') return false;
   if (d.currencySymbol !== undefined && d.currencySymbol !== null && typeof d.currencySymbol !== 'string') return false;
   if (d.currencySubunit !== undefined && d.currencySubunit !== null && typeof d.currencySubunit !== 'number')
@@ -451,10 +560,6 @@ export const isInvoiceCustomizationFromData = (data: unknown): data is InvoiceCu
     d.parentInvoiceId !== '' &&
     typeof d.parentInvoiceId !== 'number'
   )
-    return false;
-  if (d.createdAt !== undefined && d.createdAt !== null && d.createdAt !== '' && typeof d.createdAt !== 'string')
-    return false;
-  if (d.updatedAt !== undefined && d.updatedAt !== null && d.updatedAt !== '' && typeof d.updatedAt !== 'string')
     return false;
 
   if (d.color !== undefined && d.color !== null && typeof d.color !== 'string') return false;
@@ -520,15 +625,25 @@ export const isInvoiceFromData = (data: unknown): data is InvoiceFromData => {
   if (d.businessId !== undefined && d.businessId !== null && typeof d.businessId !== 'number') return false;
   if (d.clientId !== undefined && d.clientId !== null && typeof d.clientId !== 'number') return false;
   if (d.currencyId !== undefined && d.currencyId !== null && typeof d.currencyId !== 'number') return false;
+  if (d.bankId !== undefined && d.bankId !== null && typeof d.bankId !== 'number') return false;
+  if (d.styleProfilesId !== undefined && d.styleProfilesId !== null && typeof d.styleProfilesId !== 'number')
+    return false;
   if (d.issuedAt !== undefined && d.issuedAt !== null && typeof d.issuedAt !== 'string') return false;
   if (d.language !== undefined && d.language !== null && typeof d.language !== 'string') return false;
   if (d.invoiceNumber !== undefined && d.invoiceNumber !== null && typeof d.invoiceNumber !== 'string') return false;
   if (d.status !== undefined && d.status !== null && typeof d.status !== 'string') return false;
 
-  if (!isInvoiceBusinessSnapshotFromData(d.invoiceBusinessSnapshot)) return false;
-  if (!isInvoiceClientSnapshotFromData(d.invoiceClientSnapshot)) return false;
-  if (!isInvoiceCurrencySnapshotFromData(d.invoiceCurrencySnapshot)) return false;
-  if (!isInvoiceCustomizationFromData(d.invoiceCustomization)) return false;
+  if (d.invoiceBankSnapshot !== undefined && !isInvoiceBankSnapshotFromData(d.invoiceBankSnapshot)) return false;
+
+  if (d.invoiceBusinessSnapshot !== undefined && !isInvoiceBusinessSnapshotFromData(d.invoiceBusinessSnapshot))
+    return false;
+
+  if (d.invoiceClientSnapshot !== undefined && !isInvoiceClientSnapshotFromData(d.invoiceClientSnapshot)) return false;
+
+  if (d.invoiceCurrencySnapshot !== undefined && !isInvoiceCurrencySnapshotFromData(d.invoiceCurrencySnapshot))
+    return false;
+
+  if (d.invoiceCustomization !== undefined && !isInvoiceCustomizationFromData(d.invoiceCustomization)) return false;
 
   if (d.taxRate !== undefined && d.taxRate !== null && typeof d.taxRate !== 'number') return false;
 

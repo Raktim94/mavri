@@ -42,14 +42,14 @@ If you value **privacy, portability, and control**, this app is built for you.
 - Create and manage **Invoices** and **Quotes**
 - Offline-first: works without internet
 - Database-file based (create or open a database anywhere)
-- Automatic snapshotting of business, client, item, and currency data per invoice/quote
+- Automatic snapshotting of business, bank, style profile, client, item, and currency data per invoice/quote
 - Multi-currency support: choose the currency for each invoice/quote individually
 - Responsive layout - usable on small and large screens, resizable windows supported
 - Invoice/Quote translations – select a language per document, independent of app settings
 
 ### Business Data Management
 
-- Businesses, Clients, Items, Categories, Units, Currencies
+- Banks, Businesses, Clients, Items, Categories, Units, Currencies
 - Search, sort, filter, archive (non-destructive)
 - XLSX import/export for most entities
 - Automatic creation of missing units/categories on item import
@@ -81,6 +81,7 @@ If you value **privacy, portability, and control**, this app is built for you.
 - Show quantity, unit, and row number in the PDF item table
 - Custom header sections and custom values in the PDF item table
 - Ability to reorder all columns/headers in the PDF item table
+- Ability to include QR codes for payment into PDF
 
 ### Reports
 
@@ -201,6 +202,7 @@ No account required.
    - a Business
    - a Currency
    - a Client
+   - a Bank
    - an Item
 4. Create your first Invoice or Quote
 5. Preview and export to PDF
@@ -213,6 +215,7 @@ Detailed tutorials and usage guides are available [here](TUTORIAL.md)
 
 When an invoice or quote is created, snapshots of the following are stored with the document to ensure historical accuracy:
 
+- **Bank**
 - **Business**
 - **Client**
 - **Items**
@@ -364,20 +367,7 @@ Please open an issue before starting major work to ensure alignment.
 
 | Version | Status                |
 | ------- | --------------------- |
-| v1.7.0  | ✅ Actively supported |
-| v1.6.0  | ✅ Actively supported |
-| v1.5.0  | ✅ Actively supported |
-| v1.4.0  | ✅ Actively supported |
-| v1.3.0  | ✅ Actively supported |
-| v1.2.1  | ✅ Actively supported |
-| v1.2.0  | ✅ Actively supported |
-| v1.1.4  | ✅ Actively supported |
-| v1.1.3  | ✅ Actively supported |
-| v1.1.2  | ✅ Actively supported |
-| v1.1.1  | ✅ Actively supported |
-| v1.1.0  | ✅ Actively supported |
-| v1.0.7  | ✅ Actively supported |
-| v1.0.5  | ✅ Actively supported |
+| v2.0.0  | ✅ Actively supported |
 
 Details about supported versions and update policy will be documented here.
 

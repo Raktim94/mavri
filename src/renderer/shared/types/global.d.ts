@@ -2,6 +2,7 @@ import type { Settings, SettingsUpdate } from '../types/settings';
 import type { DatabaseType } from './../enums/databaseType';
 import type { DBInitType } from './../enums/dbInitType';
 import type { InvoiceType } from './../enums/invoiceType';
+import type { Bank, BankAdd, BankUpdate } from './bank';
 import type { Business, BusinessAdd, BusinessUpdate } from './business';
 import type { Category, CategoryAdd, CategoryUpdate } from './category';
 import type { Client, ClientAdd, ClientUpdate } from './client';
@@ -9,7 +10,7 @@ import type { Currency, CurrencyAdd, CurrencyUpdate } from './currency';
 import type { DBSelector } from './dbSelector';
 import type { ExportMeta } from './exportMeta';
 import type { FilterData } from './filter';
-import type { Invoice, InvoiceAdd, InvoiceUpdate } from './invoice';
+import type { CustomFieldMeta, Invoice, InvoiceAdd, InvoiceUpdate } from './invoice';
 import type { Item, ItemAdd, ItemUpdate } from './item';
 import type { PostgresConfig } from './postgresConfig';
 import type { Response } from './response';
@@ -88,12 +89,18 @@ declare global {
       addCurrency: (data: CurrencyAdd) => Promise<Response<Currency>>;
       addBatchCurrency: (data: CurrencyAdd[]) => Promise<Response<Currency[]>>;
 
-      getCustomHeaders: (type: InvoiceType) => Promise<Response<string[]>>;
+      getCustomHeaders: (type: InvoiceType) => Promise<Response<CustomFieldMeta[]>>;
       getAllInvoices: (type?: InvoiceType, filter?: FilterData[]) => Promise<Response<Invoice[]>>;
       deleteInvoice: (id: number) => Promise<Response<unknown>>;
       addInvoice: (data: InvoiceAdd) => Promise<Response<Invoice>>;
       updateInvoice: (data: InvoiceUpdate) => Promise<Response<Invoice>>;
       duplicateInvoice: (id: number, invoiceType: InvoiceType) => Promise<Response<Invoice>>;
+
+      getAllBanks: (filter?: FilterData[]) => Promise<Response<Bank[]>>;
+      updateBank: (data: BankUpdate) => Promise<Response<Bank>>;
+      deleteBank: (id: number) => Promise<Response<unknown>>;
+      addBank: (data: BankAdd) => Promise<Response<Bank>>;
+      addBatchBank: (data: BankAdd[]) => Promise<Response<Bank[]>>;
 
       exportAllData: () => Promise<Response<ExportMeta>>;
       importAllData: () => Promise<Response<unknown>>;

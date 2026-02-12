@@ -14,6 +14,7 @@ import type { Invoice, InvoiceFromData } from '../../shared/types/invoice';
 import type { Response } from '../../shared/types/response';
 import type { StyleProfileAdd, StyleProfileFromData } from '../../shared/types/styleProfiles';
 import { useAppDispatch } from '../../state/configureStore';
+import { DEFAULT_TABLE_FIELD_SORT_ORDERS } from '../../state/constant';
 import { addToast } from '../../state/pageSlice';
 import { InvoiceForm } from './Form/index';
 import { InvoicesPreview } from './Preview';
@@ -22,7 +23,7 @@ interface Props {
   invoice?: Invoice;
   type: InvoiceType;
   mode: InvoiceFormMode;
-  handleChange?: (data: { invoice: InvoiceFromData; isFormValid: boolean }) => void;
+  handleChange?: (data: { invoice: InvoiceFromData; isFormValid: boolean; description?: string }) => void;
   handleDelete?: (id: number) => void;
   handleDuplicate?: (id: number, invoiceType: InvoiceType) => void;
 }
@@ -108,7 +109,8 @@ const InvoiceFormComponent: FC<Props> = ({
             labelUpperCase: false,
             showQuantity: true,
             showUnit: true,
-            showRowNo: true
+            showRowNo: true,
+            fieldSortOrders: DEFAULT_TABLE_FIELD_SORT_ORDERS
           }
         });
       }
@@ -155,7 +157,8 @@ const InvoiceFormComponent: FC<Props> = ({
     debounceTimerRef.current = window.setTimeout(() => {
       handleChange({
         invoice: invoiceForm,
-        isFormValid
+        isFormValid,
+        description: t('common.invalidForm')
       });
     }, 250);
 
@@ -164,7 +167,7 @@ const InvoiceFormComponent: FC<Props> = ({
         window.clearTimeout(debounceTimerRef.current);
       }
     };
-  }, [invoiceForm, isFormValid, handleChange]);
+  }, [invoiceForm, isFormValid, t, handleChange]);
 
   if (mode === InvoiceFormMode.edit) {
     return (

@@ -36,6 +36,25 @@ export interface InvoiceClientSnapshots {
   clientPhone?: string;
   clientCode?: string;
   clientAdditional?: string;
+  clientVatCode?: string;
+}
+
+export interface InvoiceBankSnapshots {
+  parentInvoiceId: number;
+  id?: number;
+  name: string;
+  bankName?: string;
+  accountNumber?: string;
+  swiftCode?: string;
+  address?: string;
+  branchCode?: string;
+  type?: string;
+  routingNumber?: string;
+  upiCode?: string;
+  qrCodeFileSize?: number;
+  qrCodeFileType?: string;
+  qrCodeFileName?: string;
+  qrCode?: Uint8Array;
 }
 
 export interface InvoiceBusinessSnapshots {
@@ -48,11 +67,13 @@ export interface InvoiceBusinessSnapshots {
   businessEmail?: string;
   businessPhone?: string;
   businessAdditional?: string;
+  // Legacy payment info. New payment info is via Bank
   businessPaymentInformation?: string;
   businessLogo?: Uint8Array;
   businessFileSize?: number;
   businessFileType?: string;
   businessFileName?: string;
+  businessVatCode?: string;
 }
 
 export interface InvoiceStyleProfileSnapshots {
@@ -92,6 +113,7 @@ export interface Invoice {
   convertedFromQuotationId?: number;
   businessId: number;
   clientId: number;
+  bankId?: number;
   currencyId: number;
   createdAt: string;
   updatedAt: string;
@@ -124,6 +146,7 @@ export interface Invoice {
   styleProfilesId?: number;
   invoiceStyleProfileSnapshot?: InvoiceStyleProfileSnapshots;
   invoiceCustomization?: InvoiceCustomization;
+  invoiceBankSnapshot?: InvoiceBankSnapshots;
   invoiceBusinessSnapshot?: InvoiceBusinessSnapshots;
   invoiceClientSnapshot?: InvoiceClientSnapshots;
   invoiceCurrencySnapshot?: InvoiceCurrencySnapshots;
@@ -151,12 +174,16 @@ export interface InvoicePayment {
   updatedAt: string;
 }
 
-export interface CustomField {
+export interface CustomFieldMeta {
   header: string;
-  value: string;
   alignment: Alignment;
   sortOrder: number;
 }
+
+export interface CustomField extends CustomFieldMeta {
+  value: string;
+}
+
 export interface InvoiceItem {
   id: number;
   parentInvoiceId: number;

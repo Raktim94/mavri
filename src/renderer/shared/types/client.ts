@@ -7,6 +7,7 @@ export interface Client {
   phone?: string;
   code?: string;
   additional?: string;
+  vatCode?: string;
   invoiceCount: number;
   quotesCount: number;
   createdAt: string;
@@ -23,6 +24,7 @@ export interface ClientAdd {
   phone?: string;
   code?: string;
   additional?: string;
+  vatCode?: string;
   description?: string;
   isArchived: boolean;
 }
@@ -40,6 +42,7 @@ export interface ClientFromData {
   address?: string;
   code?: string;
   additional?: string;
+  vatCode?: string;
   description?: string;
   isArchived: boolean;
 }

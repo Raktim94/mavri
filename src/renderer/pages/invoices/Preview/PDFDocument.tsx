@@ -11,6 +11,9 @@ import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './constant';
 import { FinancialInfo } from './FinancialInfo';
 import { HeaderInfo } from './HeaderInfo';
 import { ItemsInfo } from './ItemsInfo';
+import { ClassicLayout } from './LegacyLayout/Classic';
+import { CompactLayout } from './LegacyLayout/Compact';
+import { ModernLayout } from './LegacyLayout/Modern';
 import { NotesInfo } from './NotesInfo';
 import { PageCounterInfo } from './PageCounterInfo';
 import { PaymentInfo } from './PaymentInfo';
@@ -39,6 +42,7 @@ interface Props {
   invoiceForm?: InvoiceFromData;
   storeSettings?: Settings;
   logoUrl?: string;
+  qrCodeUrl?: string;
   signatureUrl?: string;
   attachmentUrls: AttachmentURL[];
   pdfTexts: PdfTexts;
@@ -49,6 +53,7 @@ const PDFDocumentComponent: FC<Props> = ({
   invoiceForm,
   storeSettings,
   logoUrl,
+  qrCodeUrl,
   signatureUrl,
   attachmentUrls,
   pdfTexts,
@@ -57,78 +62,133 @@ const PDFDocumentComponent: FC<Props> = ({
 }) => {
   return (
     <Document>
-      <Page
-        size={invoiceForm?.invoiceCustomization?.pageFormat}
-        style={[
-          PDF_STYLES.page,
-          {
-            fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].page
-          }
-        ]}
-      >
-        {invoiceForm?.status === InvoiceStatus.paid && (
-          <WatermarkPaidInfo invoiceForm={invoiceForm} watermarkPaidUrl={watermarkPaidUrl} />
+      {invoiceForm?.id != undefined &&
+        invoiceForm?.invoiceBankSnapshot === undefined &&
+        invoiceForm?.invoiceBusinessSnapshot?.businessPaymentInformation &&
+        invoiceForm?.invoiceCustomization?.layout === LayoutType.compact && (
+          <CompactLayout
+            invoiceForm={invoiceForm}
+            storeSettings={storeSettings}
+            logoUrl={logoUrl}
+            signatureUrl={signatureUrl}
+            pdfTexts={pdfTexts}
+            watermarkUrl={watermarkUrl}
+            watermarkPaidUrl={watermarkPaidUrl}
+          />
         )}
-        <WatermarkInfo invoiceForm={invoiceForm} watermarkUrl={watermarkUrl} />
+      {invoiceForm?.id != undefined &&
+        invoiceForm?.invoiceBankSnapshot === undefined &&
+        invoiceForm?.invoiceBusinessSnapshot?.businessPaymentInformation &&
+        invoiceForm?.invoiceCustomization?.layout === LayoutType.classic && (
+          <ClassicLayout
+            invoiceForm={invoiceForm}
+            storeSettings={storeSettings}
+            logoUrl={logoUrl}
+            signatureUrl={signatureUrl}
+            pdfTexts={pdfTexts}
+            watermarkUrl={watermarkUrl}
+            watermarkPaidUrl={watermarkPaidUrl}
+          />
+        )}
+      {invoiceForm?.id != undefined &&
+        invoiceForm?.invoiceBankSnapshot === undefined &&
+        invoiceForm?.invoiceBusinessSnapshot?.businessPaymentInformation &&
+        invoiceForm?.invoiceCustomization?.layout === LayoutType.modern && (
+          <ModernLayout
+            invoiceForm={invoiceForm}
+            storeSettings={storeSettings}
+            logoUrl={logoUrl}
+            signatureUrl={signatureUrl}
+            pdfTexts={pdfTexts}
+            watermarkUrl={watermarkUrl}
+            watermarkPaidUrl={watermarkPaidUrl}
+          />
+        )}
 
-        <HeaderInfo invoiceForm={invoiceForm} storeSettings={storeSettings} logoUrl={logoUrl} pdfTexts={pdfTexts} />
-        <ItemsInfo
-          invoiceForm={invoiceForm}
-          storeSettings={storeSettings}
-          labels={{
-            itemLabel: pdfTexts.itemLabel,
-            unitLabel: pdfTexts.unitLabel,
-            qtyLabel: pdfTexts.qtyLabel,
-            unitCostLabel: pdfTexts.unitCostLabel,
-            totalLabel: pdfTexts.totalLabel2,
-            itemTaxLabel: pdfTexts.itemTaxLabel
-          }}
-        />
-        <View
-          wrap={false}
-          style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart, PDF_STYLES.pt10]}
-          minPresenceAhead={20}
+      {!(
+        invoiceForm?.id != undefined &&
+        invoiceForm?.invoiceBankSnapshot === undefined &&
+        invoiceForm?.invoiceBusinessSnapshot?.businessPaymentInformation
+      ) && (
+        <Page
+          size={invoiceForm?.invoiceCustomization?.pageFormat}
+          style={[
+            PDF_STYLES.page,
+            {
+              fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].page
+            }
+          ]}
         >
-          {invoiceForm?.invoiceCustomization?.layout === LayoutType.compact && (
-            <PaymentInfo invoiceForm={invoiceForm} paymentInfoLabel={pdfTexts.paymentInfo} />
+          {invoiceForm?.status === InvoiceStatus.paid && (
+            <WatermarkPaidInfo invoiceForm={invoiceForm} watermarkPaidUrl={watermarkPaidUrl} />
           )}
-          {invoiceForm?.invoiceCustomization?.layout !== LayoutType.compact && <View style={PDF_STYLES.flexGrow} />}
-          <FinancialInfo
+          <WatermarkInfo invoiceForm={invoiceForm} watermarkUrl={watermarkUrl} />
+
+          <HeaderInfo invoiceForm={invoiceForm} storeSettings={storeSettings} logoUrl={logoUrl} pdfTexts={pdfTexts} />
+          <ItemsInfo
             invoiceForm={invoiceForm}
             storeSettings={storeSettings}
             labels={{
-              subTotalLabel: pdfTexts.subTotalLabel,
-              discountPrctLabel: pdfTexts.discountPrctLabel,
-              discountLabel: pdfTexts.discountLabel,
-              taxExclusiveLabel: pdfTexts.taxExclusiveLabel,
-              taxInclusiveLabel: pdfTexts.taxInclusiveLabel,
-              taxRateLabel: pdfTexts.taxRateLabel,
-              taxExclusivePerItemLabel: pdfTexts.taxExclusivePerItemLabel,
-              taxInclusivePerItemLabel: pdfTexts.taxInclusivePerItemLabel,
-              shippingFeeLabel: pdfTexts.shippingFeeLabel,
-              totalLabel: pdfTexts.totalLabel1,
-              paidLabel: pdfTexts.paidLabel,
-              balanceDueLabel: pdfTexts.balanceDueLabel,
-              taxLabel: pdfTexts.taxLabel
+              itemLabel: pdfTexts.itemLabel,
+              unitLabel: pdfTexts.unitLabel,
+              qtyLabel: pdfTexts.qtyLabel,
+              unitCostLabel: pdfTexts.unitCostLabel,
+              totalLabel: pdfTexts.totalLabel2,
+              itemTaxLabel: pdfTexts.itemTaxLabel
             }}
           />
-        </View>
-        <NotesInfo
-          invoiceForm={invoiceForm}
-          labels={{
-            customerNoteLabel: pdfTexts.customerNote,
-            termsConditionsLabel: pdfTexts.termsConditions
-          }}
-        />
-        <PageCounterInfo
-          invoiceForm={invoiceForm}
-          labels={{
-            ofLabel: pdfTexts.of,
-            pageLabel: pdfTexts.page
-          }}
-        />
-        <SignatureInfo invoiceForm={invoiceForm} signatureUrl={signatureUrl} />
-      </Page>
+          <View
+            wrap={false}
+            style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart, PDF_STYLES.pt10]}
+            minPresenceAhead={20}
+          >
+            <View style={PDF_STYLES.flexGrow} />
+            <FinancialInfo
+              invoiceForm={invoiceForm}
+              storeSettings={storeSettings}
+              labels={{
+                subTotalLabel: pdfTexts.subTotalLabel,
+                discountPrctLabel: pdfTexts.discountPrctLabel,
+                discountLabel: pdfTexts.discountLabel,
+                taxExclusiveLabel: pdfTexts.taxExclusiveLabel,
+                taxInclusiveLabel: pdfTexts.taxInclusiveLabel,
+                taxRateLabel: pdfTexts.taxRateLabel,
+                taxExclusivePerItemLabel: pdfTexts.taxExclusivePerItemLabel,
+                taxInclusivePerItemLabel: pdfTexts.taxInclusivePerItemLabel,
+                shippingFeeLabel: pdfTexts.shippingFeeLabel,
+                totalLabel: pdfTexts.totalLabel1,
+                paidLabel: pdfTexts.paidLabel,
+                balanceDueLabel: pdfTexts.balanceDueLabel,
+                taxLabel: pdfTexts.taxLabel
+              }}
+            />
+          </View>
+          <NotesInfo
+            invoiceForm={invoiceForm}
+            labels={{
+              customerNoteLabel: pdfTexts.customerNote,
+              termsConditionsLabel: pdfTexts.termsConditions
+            }}
+          />
+          <View
+            wrap={false}
+            style={[PDF_STYLES.row, PDF_STYLES.spaceBetween, PDF_STYLES.alignStart, PDF_STYLES.pt20]}
+            minPresenceAhead={20}
+          >
+            <PaymentInfo invoiceForm={invoiceForm} paymentInfoLabel={pdfTexts.paymentInfo} qrCodeUrl={qrCodeUrl} />
+          </View>
+
+          <PageCounterInfo
+            invoiceForm={invoiceForm}
+            labels={{
+              ofLabel: pdfTexts.of,
+              pageLabel: pdfTexts.page
+            }}
+          />
+          <SignatureInfo invoiceForm={invoiceForm} signatureUrl={signatureUrl} />
+        </Page>
+      )}
+
       {attachmentUrls.map(item => (
         <Page
           key={item.id}

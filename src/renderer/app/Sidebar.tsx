@@ -1,4 +1,15 @@
-import { Business, ChevronLeft, ChevronRight, Description, Inventory, People, Settings } from '@mui/icons-material';
+import {
+  Business,
+  ChevronLeft,
+  ChevronRight,
+  Description,
+  Folder,
+  Inventory,
+  People,
+  Settings,
+  TableChart
+} from '@mui/icons-material';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import CategoryIcon from '@mui/icons-material/Category';
@@ -51,115 +62,144 @@ export const Sidebar: FC = () => {
 
   const menuItems = [
     {
-      text: t('menuItems.invoices'),
-      icon: <Description />,
-      path: '/invoices',
-      isToggle: false,
-      minHeight: 50,
-      isSelected: isSelected,
-      onClick: onClickNavigate
-    },
-    ...(storeSettings?.quotesON
-      ? [
-          {
-            text: t('menuItems.quotes'),
-            icon: <ReceiptIcon />,
-            path: '/quotes',
-            isToggle: false,
-            minHeight: 50,
-            isSelected: isSelected,
-            onClick: onClickNavigate
-          }
-        ]
-      : []),
-    ...(storeSettings?.styleProfilesON
-      ? [
-          {
-            text: t('menuItems.styleProfiles'),
-            icon: <ColorLensIcon />,
-            path: '/styleProfiles',
-            isToggle: false,
-            minHeight: 50,
-            isSelected: isSelected,
-            onClick: onClickNavigate
-          }
-        ]
-      : []),
-    {
-      text: t('menuItems.items'),
-      icon: <Inventory />,
-      path: '/items',
-      isToggle: false,
-      minHeight: 50,
-      isSelected: isSelected,
-      onClick: onClickNavigate
+      groupName: t('common.documents'),
+      groupIcon: <Folder />,
+      isOpen: true,
+      items: [
+        {
+          text: t('menuItems.invoices'),
+          icon: <Description />,
+          path: '/invoices',
+          isToggle: false,
+          minHeight: 50,
+          group: 'Documents',
+          isSelected: isSelected,
+          onClick: onClickNavigate
+        },
+        ...(storeSettings?.quotesON
+          ? [
+              {
+                text: t('menuItems.quotes'),
+                icon: <ReceiptIcon />,
+                path: '/quotes',
+                group: 'Documents',
+                isToggle: false,
+                minHeight: 50,
+                isSelected: isSelected,
+                onClick: onClickNavigate
+              }
+            ]
+          : [])
+      ]
     },
     {
-      text: t('menuItems.currencies'),
-      icon: <AttachMoneyIcon />,
-      path: '/currencies',
-      isToggle: false,
-      minHeight: 50,
-      isSelected: isSelected,
-      onClick: onClickNavigate
+      groupName: t('common.data'),
+      groupIcon: <TableChart />,
+      isOpen: false,
+      items: [
+        {
+          text: t('menuItems.banks'),
+          icon: <AccountBalanceIcon />,
+          path: '/banks',
+          isToggle: false,
+          minHeight: 50,
+          isSelected: isSelected,
+          onClick: onClickNavigate
+        },
+        {
+          text: t('menuItems.items'),
+          icon: <Inventory />,
+          path: '/items',
+          isToggle: false,
+          minHeight: 50,
+          isSelected: isSelected,
+          onClick: onClickNavigate
+        },
+        {
+          text: t('menuItems.currencies'),
+          icon: <AttachMoneyIcon />,
+          path: '/currencies',
+          isToggle: false,
+          minHeight: 50,
+          isSelected: isSelected,
+          onClick: onClickNavigate
+        },
+        {
+          text: t('menuItems.units'),
+          icon: <ScaleIcon />,
+          path: '/units',
+          isToggle: false,
+          minHeight: 50,
+          isSelected: isSelected,
+          onClick: onClickNavigate
+        },
+        {
+          text: t('menuItems.categories'),
+          icon: <CategoryIcon />,
+          path: '/categories',
+          isToggle: false,
+          minHeight: 50,
+          isSelected: isSelected,
+          onClick: onClickNavigate
+        },
+        {
+          text: t('menuItems.clients'),
+          icon: <People />,
+          path: '/clients',
+          isToggle: false,
+          minHeight: 50,
+          isSelected: isSelected,
+          onClick: onClickNavigate
+        },
+        {
+          text: t('menuItems.businesses'),
+          icon: <Business />,
+          path: '/businesses',
+          isToggle: false,
+          minHeight: 50,
+          isSelected: isSelected,
+          onClick: onClickNavigate
+        }
+      ]
     },
     {
-      text: t('menuItems.units'),
-      icon: <ScaleIcon />,
-      path: '/units',
-      isToggle: false,
-      minHeight: 50,
-      isSelected: isSelected,
-      onClick: onClickNavigate
-    },
-    {
-      text: t('menuItems.categories'),
-      icon: <CategoryIcon />,
-      path: '/categories',
-      isToggle: false,
-      minHeight: 50,
-      isSelected: isSelected,
-      onClick: onClickNavigate
-    },
-    {
-      text: t('menuItems.clients'),
-      icon: <People />,
-      path: '/clients',
-      isToggle: false,
-      minHeight: 50,
-      isSelected: isSelected,
-      onClick: onClickNavigate
-    },
-    {
-      text: t('menuItems.businesses'),
-      icon: <Business />,
-      path: '/businesses',
-      isToggle: false,
-      minHeight: 50,
-      isSelected: isSelected,
-      onClick: onClickNavigate
-    },
-    ...(storeSettings?.reportsON
-      ? [
-          {
-            text: t('menuItems.reports'),
-            icon: <AssessmentIcon />,
-            path: '/reports',
-            isToggle: false,
-            minHeight: 50,
-            isSelected: isSelected,
-            onClick: onClickNavigate
-          }
-        ]
-      : []),
-    {
-      text: t('menuItems.settings'),
-      icon: <Settings />,
-      path: '/settings',
-      isToggle: false,
-      minHeight: 50,
-      isSelected: isSelected,
-      onClick: onClickNavigate
+      items: [
+        ...(storeSettings?.styleProfilesON
+          ? [
+              {
+                text: t('menuItems.styleProfiles'),
+                icon: <ColorLensIcon />,
+                path: '/styleProfiles',
+                isToggle: false,
+                minHeight: 50,
+                isSelected: isSelected,
+                onClick: onClickNavigate
+              }
+            ]
+          : []),
+        ...(storeSettings?.reportsON
+          ? [
+              {
+                text: t('menuItems.reports'),
+                icon: <AssessmentIcon />,
+                path: '/reports',
+                isToggle: false,
+                minHeight: 50,
+                isSelected: isSelected,
+                onClick: onClickNavigate
+              }
+            ]
+          : []),
+        {
+          text: t('menuItems.settings'),
+          icon: <Settings />,
+          path: '/settings',
+          isToggle: false,
+          minHeight: 50,
+          isSelected: isSelected,
+          onClick: onClickNavigate
+        }
+      ]
     }
   ];
 

@@ -5,7 +5,7 @@ import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
 import { useAsyncAction } from '../useAsyncAction';
 
-interface UseClientUpdateParams extends RequestHook<Response<ClientUpdate>> {
+interface UseClientUpdateParams extends RequestHook<Response<Client>> {
   client?: ClientUpdate;
 }
 

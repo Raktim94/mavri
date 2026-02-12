@@ -1,7 +1,8 @@
 import type { Response } from '../../shared/types/response';
+import type { Bank } from '../types/bank';
 import type { Business } from '../types/business';
 import type { EntityWithCounts } from '../types/entityWithCounts';
-import type { Invoice, InvoiceBusinessSnapshots, InvoiceCustomization } from '../types/invoice';
+import type { Invoice, InvoiceBankSnapshots, InvoiceBusinessSnapshots, InvoiceCustomization } from '../types/invoice';
 import type { StyleProfile } from '../types/styleProfiles';
 import { fromBase64 } from './generalFunctions';
 
@@ -21,6 +22,25 @@ export const encodeResultBusiness = (
 ) => ({
   ...result,
   data: Array.isArray(result.data) ? result.data.map(encodeLogo) : encodeLogo(result.data)
+});
+
+export const decodeBank = <T extends { qrCode?: unknown }>(data: T) => ({
+  ...data,
+  qrCode: data.qrCode ? fromBase64(data.qrCode as string) : null
+});
+
+export const encodeBank = (data?: (Bank & EntityWithCounts) | null) => {
+  if (!data) return data;
+  const bufQrCode = data.qrCode as Buffer | null;
+  return {
+    ...data,
+    qrCode: bufQrCode ? bufQrCode.toString('base64') : null
+  };
+};
+
+export const encodeResultBank = (result: Response<(Bank & EntityWithCounts)[] | (Bank & EntityWithCounts)>) => ({
+  ...result,
+  data: Array.isArray(result.data) ? result.data.map(encodeBank) : encodeBank(result.data)
 });
 
 export const decodeStyleProfile = <T extends { paidWatermarkFileData?: unknown; watermarkFileData?: unknown }>(
@@ -80,7 +100,13 @@ export const decodeInvoice = <T extends Record<string, unknown>>(invoice: T) => 
   invoiceAttachments: decodeInvoiceAttachments(invoice.invoiceAttachments as { data?: unknown }[] | null | undefined),
   invoiceBusinessSnapshot: decodeInvoiceBusinessSnapshotImport(
     invoice?.invoiceBusinessSnapshot as InvoiceBusinessSnapshots
-  )
+  ),
+  invoiceBankSnapshot: decodeInvoiceBankSnapshotImport(invoice?.invoiceBankSnapshot as InvoiceBankSnapshots)
+});
+
+export const decodeInvoiceBankSnapshotImport = (invoiceB: InvoiceBankSnapshots) => ({
+  ...invoiceB,
+  qrCode: invoiceB.qrCode ? fromBase64(invoiceB.qrCode) : null
 });
 
 export const decodeInvoiceBusinessSnapshotImport = (invoiceBS: InvoiceBusinessSnapshots) => ({
@@ -108,6 +134,7 @@ export const encodeInvoice = <T extends Record<string, unknown>>(invoice?: T | n
     invoiceBusinessSnapshot: encodeInvoiceBusinessSnapshotExport(
       invoice?.invoiceBusinessSnapshot as InvoiceBusinessSnapshots
     ),
+    invoiceBankSnapshot: encodeInvoiceBankSnapshotExport(invoice?.invoiceBankSnapshot as InvoiceBankSnapshots),
     invoiceAttachments: encodeInvoiceAttachments(invoice.invoiceAttachments as { data?: unknown }[] | null | undefined)
   };
 };
@@ -117,6 +144,14 @@ export const encodeInvoiceBusinessSnapshotExport = (invoiceBS?: InvoiceBusinessS
   return {
     ...invoiceBS,
     businessLogo: invoiceBS.businessLogo ? (invoiceBS.businessLogo as Buffer).toString('base64') : null
+  };
+};
+
+export const encodeInvoiceBankSnapshotExport = (invoiceB?: InvoiceBankSnapshots | null) => {
+  if (!invoiceB) return invoiceB;
+  return {
+    ...invoiceB,
+    qrCode: invoiceB.qrCode ? (invoiceB.qrCode as Buffer).toString('base64') : null
   };
 };
 

@@ -27,6 +27,8 @@ export const BusinessesPage = () => {
     'website',
     'description',
     'additional',
+    'vatCode',
+    // Legacy payment info. New payment info is via Bank
     'paymentInformation',
     'isArchived',
     'fileSize',
@@ -46,6 +48,7 @@ export const BusinessesPage = () => {
       additional: 'AC',
       description: 'Some description',
       isArchived: false,
+      // Legacy payment info. New payment info is via Bank
       paymentInformation:
         '`Cardholder Name: John Doe; Card Type: Visa; Card Number: 4111 1111 1111 1111; Expiration Date: 12/2026; CVV: 123; Billing Address: 123 Main Street, Apt 4B, Springfield, IL 62704; Payment Method: Credit Card; Transaction ID: TXN1234567890; Payment Status: Completed; Amount Paid: $250.00 USD; Currency: USD; Payment Date: 2025-11-17`'
     },

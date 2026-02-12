@@ -5,7 +5,7 @@ import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
 import { useAsyncAction } from '../useAsyncAction';
 
-interface UseCategoryAddParams extends RequestHook<Response<CategoryAdd>> {
+interface UseCategoryAddParams extends RequestHook<Response<Category>> {
   category?: CategoryAdd;
 }
 

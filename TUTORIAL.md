@@ -148,6 +148,69 @@ You can:
 
 ![Businesses import/export](tutorial/businesses_page_5.jpg)
 
+## Banks screen
+
+The **Banks** screen allows you to **create, read, update, and delete (CRUD)** bank data.
+
+You can also:
+
+- **Filter** banks by various criteria
+- **Import** and **export** banks via XLSX
+  > 💡 **Note:** XLSX import/export does **not** include bank qr code data.
+
+### Adding a Bankl
+
+Click the **Add** button at the bottom to open a modal where you can:
+
+- Enter bank information
+- Upload a QR code (crop and adjust as needed)
+  > ⚠️ Maximum file size: 2 MB
+
+![Banks creation](tutorial/banks_page_1.jpg)
+
+### Editing/Deleting a Bank
+
+Once banks are added, select one from the list to edit it on the right side. Each bank item also shows:
+
+- Number of invoices created
+- Number of quotes created (hidden if the layout is disabled in settings)
+
+You can also:
+
+- **Search banks by name**
+- **Delete a bank** by clicking the red trash icon
+
+![Banks list](tutorial/banks_page_2.jpg)
+
+### Filters
+
+Banks have filters to control what is displayed. By default:
+
+- **Active**: shows all banks except archived
+
+The **archived flag** can be toggled during creation or editing. This flag only affects filtering and does not delete the bank.
+
+![Banks filters](tutorial/banks_page_3.jpg)
+
+### Sorting
+
+Banks can be sorted by:
+
+- Name
+- Last updated date
+
+![Banks sort](tutorial/banks_page_4.jpg)
+
+### Import & Export
+
+You can:
+
+- Export banks to XLSX
+- Import banks from XLSX
+- Download a XLSX template for bank import
+
+![Banks import/export](tutorial/banks_page_5.jpg)
+
 ## Clients screen
 
 The **Clients** screen allows you to **create, read, update, and delete (CRUD)** client data. You can also **filter**, **import**, and **export** clients via XLSX.

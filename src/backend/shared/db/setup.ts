@@ -228,8 +228,8 @@ export const initSchema = async (db: DatabaseAdapter): Promise<void> => {
       "isArchived" INTEGER NOT NULL DEFAULT 0 CHECK ("isArchived" IN (0,1)),
       "createdAt" ${getColumnType('DATETIME', db.type)} NOT NULL DEFAULT ${getDefaultValue("(datetime('now'))", db.type)},
       "updatedAt" ${getColumnType('DATETIME', db.type)} NOT NULL DEFAULT ${getDefaultValue("(datetime('now'))", db.type)},
-      FOREIGN KEY ("unitId") REFERENCES units(id),
-      FOREIGN KEY ("categoryId") REFERENCES categories(id)
+      FOREIGN KEY ("unitId") REFERENCES units("id"),
+      FOREIGN KEY ("categoryId") REFERENCES categories("id")
     );`
     );
     await db.run(
@@ -324,8 +324,8 @@ export const initSchema = async (db: DatabaseAdapter): Promise<void> => {
       "taxType" TEXT CHECK("taxType" IN ('exclusive','inclusive') OR "taxType" IS NULL),
       "createdAt" ${getColumnType('DATETIME', db.type)} NOT NULL DEFAULT ${getDefaultValue("(datetime('now'))", db.type)},
       "updatedAt" ${getColumnType('DATETIME', db.type)} NOT NULL DEFAULT ${getDefaultValue("(datetime('now'))", db.type)},
-      FOREIGN KEY ("parentInvoiceId") REFERENCES invoices(id) ON DELETE CASCADE,
-      FOREIGN KEY ("itemId") REFERENCES items(id)
+      FOREIGN KEY ("parentInvoiceId") REFERENCES invoices("id") ON DELETE CASCADE,
+      FOREIGN KEY ("itemId") REFERENCES items("id")
     );`
     );
     await db.run(
@@ -338,7 +338,7 @@ export const initSchema = async (db: DatabaseAdapter): Promise<void> => {
       "notes" TEXT,
       "createdAt" ${getColumnType('DATETIME', db.type)} NOT NULL DEFAULT ${getDefaultValue("(datetime('now'))", db.type)},
       "updatedAt" ${getColumnType('DATETIME', db.type)} NOT NULL DEFAULT ${getDefaultValue("(datetime('now'))", db.type)},
-      FOREIGN KEY ("parentInvoiceId") REFERENCES invoices(id) ON DELETE CASCADE
+      FOREIGN KEY ("parentInvoiceId") REFERENCES invoices("id") ON DELETE CASCADE
     );`
     );
     await db.run(
@@ -351,7 +351,7 @@ export const initSchema = async (db: DatabaseAdapter): Promise<void> => {
       "data" ${getColumnType('BLOB', db.type)} NOT NULL,                
       "createdAt" ${getColumnType('DATETIME', db.type)} NOT NULL DEFAULT ${getDefaultValue("(datetime('now'))", db.type)},
       "updatedAt" ${getColumnType('DATETIME', db.type)} NOT NULL DEFAULT ${getDefaultValue("(datetime('now'))", db.type)},
-      FOREIGN KEY ("parentInvoiceId") REFERENCES invoices(id) ON DELETE CASCADE
+      FOREIGN KEY ("parentInvoiceId") REFERENCES invoices("id") ON DELETE CASCADE
     );`
     );
 

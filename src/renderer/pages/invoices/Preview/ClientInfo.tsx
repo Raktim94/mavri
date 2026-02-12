@@ -73,6 +73,16 @@ const ClientInfoComponent: FC<Props> = ({ invoiceForm, billToLabel }) => {
           {invoiceForm?.invoiceClientSnapshot?.clientCode}
         </Text>
       )}
+      {invoiceForm?.invoiceClientSnapshot?.clientVatCode && (
+        <Text
+          style={[
+            PDF_STYLES.businessText,
+            { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].businessText }
+          ]}
+        >
+          {invoiceForm?.invoiceClientSnapshot?.clientVatCode}
+        </Text>
+      )}
       {invoiceForm?.invoiceClientSnapshot?.clientAdditional && (
         <Text
           style={[

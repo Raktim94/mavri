@@ -1,6 +1,7 @@
 import { BrowserWindow, ipcMain, shell } from 'electron';
 import type { DatabaseAdapter } from '../../shared/types/DatabaseAdapter';
 import { initAutoUpdaterHandlers } from './autoUpdater';
+import { initBanksHandlers } from './banks';
 import { initBusinessesHandlers } from './businesses';
 import { initCategoriesHandlers } from './categories';
 import { initClientsHandlers } from './clients';
@@ -30,4 +31,5 @@ export const initIpcHandler = (db: DatabaseAdapter, mainWindow: BrowserWindow) =
   initItemsHandlers(db);
   initSettingsHandlers(db);
   initUnitsHandlers(db);
+  initBanksHandlers(db);
 };

@@ -6,7 +6,7 @@ import { FilterType } from '../../../../shared/enums/filterType';
 import type { InvoiceType } from '../../../../shared/enums/invoiceType';
 import { useItemsRetrieve } from '../../../../shared/hooks/items/useItemsRetrieve';
 import type { Filter, FilterData } from '../../../../shared/types/filter';
-import type { ItemForm } from '../../../../shared/types/invoice';
+import type { CustomFieldMeta, ItemForm } from '../../../../shared/types/invoice';
 import type { Item, ItemAdd, ItemUpdate } from '../../../../shared/types/item';
 import type { Response } from '../../../../shared/types/response';
 import { createCommonFilters, createInvoiceFilters } from '../../../../shared/utils/filterSortFunctions';
@@ -16,7 +16,7 @@ import { ItemMetadataSetter } from '../Modals/ItemMetadataSetter';
 interface Props {
   isOpen: boolean;
   type: InvoiceType;
-  headerOptions: string[];
+  headerOptions: CustomFieldMeta[];
   onClose?: () => void;
   onOpen?: () => void;
   onClick?: (item: Item, data: ItemForm) => void;
