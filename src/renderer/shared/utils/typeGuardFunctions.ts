@@ -254,6 +254,7 @@ export const isBusinessFromData = (data: unknown): data is BusinessFromData => {
   if (d.website !== undefined && d.website !== null && d.website !== '' && typeof d.website !== 'string') return false;
   if (d.additional !== undefined && d.additional !== null && d.additional !== '' && typeof d.additional !== 'string')
     return false;
+  if (d.vatCode !== undefined && d.vatCode !== null && d.vatCode !== '' && typeof d.vatCode !== 'string') return false;
   // Legacy payment info. New payment info is via Bank
   if (
     d.paymentInformation !== undefined &&
@@ -362,6 +363,7 @@ export const isClientFromData = (data: unknown): data is ClientFromData => {
   if (d.code !== undefined && d.code !== null && d.code !== '' && typeof d.code !== 'string') return false;
   if (d.additional !== undefined && d.additional !== null && d.additional !== '' && typeof d.additional !== 'string')
     return false;
+  if (d.vatCode !== undefined && d.vatCode !== null && d.vatCode !== '' && typeof d.vatCode !== 'string') return false;
 
   return true;
 };
@@ -459,6 +461,7 @@ export const isInvoiceBusinessSnapshotFromData = (data: unknown): data is Invoic
     'businessEmail',
     'businessPhone',
     'businessAdditional',
+    'businessVatCode',
     // Legacy payment info. New payment info is via Bank
     'businessPaymentInformation',
     'businessFileType',
@@ -498,7 +501,14 @@ export const isInvoiceClientSnapshotFromData = (data: unknown): data is InvoiceC
   )
     return false;
 
-  const stringFields = ['clientAddress', 'clientEmail', 'clientPhone', 'clientCode', 'clientAdditional'];
+  const stringFields = [
+    'clientAddress',
+    'clientEmail',
+    'clientPhone',
+    'clientCode',
+    'clientAdditional',
+    'clientVatCode'
+  ];
 
   for (const key of stringFields) {
     const val = d[key];
