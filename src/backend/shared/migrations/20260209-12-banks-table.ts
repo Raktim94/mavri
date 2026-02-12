@@ -218,7 +218,7 @@ export const up = async (db: DatabaseAdapter) => {
     if (db.type === DatabaseType.postgre) {
       await db.run(`
         ALTER TABLE invoices
-        ALTER COLUMN "bankId" INTEGER;
+        ADD COLUMN "bankId" INTEGER;
       `);
       await db.run(`
         ALTER TABLE invoices
@@ -230,7 +230,7 @@ export const up = async (db: DatabaseAdapter) => {
         ADD CONSTRAINT invoices_styleProfilesId_fkey
         FOREIGN KEY ("styleProfilesId") REFERENCES style_profiles("id");
       `);
-      await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_styleProfilesId ON style_profiles("styleProfilesId")`);
+      await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_styleProfilesId ON invoices("styleProfilesId")`);
       await db.run(`CREATE INDEX IF NOT EXISTS idx_invoices_bankId ON invoices("bankId")`);
     }
 
@@ -239,7 +239,7 @@ export const up = async (db: DatabaseAdapter) => {
 
     return { success: true };
   } catch (error) {
-    console.log(error);
+    console.log(error, 'sssssssssssssssss');
     return { success: false, ...mapDatabaseError(error, db.type) };
   }
 };

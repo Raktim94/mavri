@@ -257,11 +257,11 @@ export const up = async (db: DatabaseAdapter) => {
       `);
       await db.run(`
         ALTER TABLE invoices
-        ADD COLUMN "language" TEXT NOT NULL DEFAULT 'en';
+        ADD COLUMN IF NOT EXISTS "language" TEXT NOT NULL DEFAULT 'en';
       `);
       await db.run(`
         ALTER TABLE invoices
-        ADD COLUMN "invoiceFullNumber" TEXT GENERATED ALWAYS AS (
+        ADD COLUMN IF NOT EXISTS "invoiceFullNumber" TEXT GENERATED ALWAYS AS (
           COALESCE("invoicePrefix", '') || "invoiceNumber" || COALESCE("invoiceSuffix", '')
         ) STORED;
       `);

@@ -11,25 +11,25 @@ export const up = async (db: DatabaseAdapter) => {
     await db.run(
       `
         ALTER TABLE clients
-        ADD COLUMN "vatCode" TEXT
+        ADD COLUMN IF NOT EXISTS "vatCode" TEXT
       `
     );
     await db.run(
       `
         ALTER TABLE businesses
-        ADD COLUMN "vatCode" TEXT
+        ADD COLUMN IF NOT EXISTS "vatCode" TEXT
       `
     );
     await db.run(
       `
         ALTER TABLE invoice_business_snapshots
-        ADD COLUMN "businessVatCode" TEXT
+        ADD COLUMN IF NOT EXISTS "businessVatCode" TEXT
       `
     );
     await db.run(
       `
         ALTER TABLE invoice_client_snapshots
-        ADD COLUMN "clientVatCode" TEXT
+        ADD COLUMN IF NOT EXISTS "clientVatCode" TEXT
       `
     );
   } catch (error) {
