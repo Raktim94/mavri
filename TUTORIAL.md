@@ -158,7 +158,7 @@ You can also:
 - **Import** and **export** banks via XLSX
   > 💡 **Note:** XLSX import/export does **not** include bank qr code data.
 
-### Adding a Bankl
+### Adding a Bank
 
 Click the **Add** button at the bottom to open a modal where you can:
 
