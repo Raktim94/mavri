@@ -157,7 +157,8 @@ const InvoiceFormComponent: FC<Props> = ({
             businessLogo: data.logo ?? undefined,
             businessFileSize: data.fileSize,
             businessFileType: data.fileType,
-            businessFileName: data.fileName
+            businessFileName: data.fileName,
+            businessVatCode: data.vatCode
           }
         });
       });
@@ -331,7 +332,8 @@ const InvoiceFormComponent: FC<Props> = ({
             clientEmail: data.email,
             clientPhone: data.phone,
             clientCode: data.code,
-            clientAdditional: data.additional
+            clientAdditional: data.additional,
+            clientVatCode: data.vatCode
           }
         });
       });

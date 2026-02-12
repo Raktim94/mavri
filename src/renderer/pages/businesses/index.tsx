@@ -27,6 +27,7 @@ export const BusinessesPage = () => {
     'website',
     'description',
     'additional',
+    'vatCode',
     // Legacy payment info. New payment info is via Bank
     'paymentInformation',
     'isArchived',

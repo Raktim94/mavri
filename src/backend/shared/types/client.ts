@@ -6,6 +6,7 @@ export interface Client {
   shortName: string;
   address?: string;
   additional?: string;
+  vatCode?: string;
   code?: string;
   description?: string;
   isArchived: boolean;

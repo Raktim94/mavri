@@ -254,6 +254,7 @@
     "upiCodeInvalid": "Įveskite galiojantį UPI ID, el. paštą, tarptautinį telefono numerį, CPF arba UUID",
     "upload": "Įkelti",
     "user": "Vartotojo vardas",
+    "vatCode": "PVM kodas",
     "watermark": "Ženklinimas"
   },
   "currencies": {

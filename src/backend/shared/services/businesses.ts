@@ -22,6 +22,7 @@ const businessFields: (keyof Business)[] = [
   'fileType',
   'fileName',
   'description',
+  'vatCode',
   'isArchived'
 ];
 

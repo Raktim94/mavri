@@ -274,6 +274,7 @@ export interface InvoiceClientSnapshots {
   clientPhone?: string;
   clientCode?: string;
   clientAdditional?: string;
+  clientVatCode?: string;
 }
 
 export interface InvoiceBusinessSnapshotsMeta {
@@ -291,6 +292,7 @@ export interface InvoiceBusinessSnapshotsMeta {
   businessFileSize?: number;
   businessFileType?: string;
   businessFileName?: string;
+  businessVatCode?: string;
 }
 
 export interface InvoiceBusinessSnapshots extends InvoiceBusinessSnapshotsMeta {

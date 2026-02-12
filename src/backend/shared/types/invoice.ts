@@ -36,6 +36,7 @@ export interface InvoiceClientSnapshots {
   clientPhone?: string;
   clientCode?: string;
   clientAdditional?: string;
+  clientVatCode?: string;
 }
 
 export interface InvoiceBankSnapshots {
@@ -72,6 +73,7 @@ export interface InvoiceBusinessSnapshots {
   businessFileSize?: number;
   businessFileType?: string;
   businessFileName?: string;
+  businessVatCode?: string;
 }
 
 export interface InvoiceStyleProfileSnapshots {

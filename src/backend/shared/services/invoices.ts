@@ -40,7 +40,8 @@ const invoiceClientSnapshotsFields: (keyof InvoiceClientSnapshots)[] = [
   'clientEmail',
   'clientPhone',
   'clientCode',
-  'clientAdditional'
+  'clientAdditional',
+  'clientVatCode'
 ];
 const invoiceBankSnapshotsFields: (keyof InvoiceBankSnapshots)[] = [
   'parentInvoiceId',
@@ -67,6 +68,7 @@ const invoiceBusinessSnapshotsFields: (keyof InvoiceBusinessSnapshots)[] = [
   'businessEmail',
   'businessPhone',
   'businessAdditional',
+  'businessVatCode',
   // Legacy payment info. New payment info is via Bank
   // 'businessPaymentInformation',
   'businessLogo',
@@ -819,6 +821,7 @@ export const duplicateInvoice = async (
       'businessEmail',
       'businessPhone',
       'businessAdditional',
+      'businessVatCode',
       // Legacy payment info. New payment info is via Bank
       // 'businessPaymentInformation',
       'businessLogo',
@@ -832,6 +835,7 @@ export const duplicateInvoice = async (
       'clientEmail',
       'clientPhone',
       'clientCode',
+      'clientVatCode',
       'clientAdditional'
     ]);
     await duplicateSnapshot('invoice_currency_snapshots', ['currencyCode', 'currencySymbol', 'currencySubunit']);

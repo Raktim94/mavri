@@ -254,6 +254,7 @@
     "upiCodeInvalid": "Enter a valid UPI ID, email, international phone number, CPF, or UUID",
     "upload": "Upload",
     "user": "Username",
+    "vatCode": "VAT code",
     "watermark": "Watermark"
   },
   "currencies": {

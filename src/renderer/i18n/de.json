@@ -254,6 +254,7 @@
     "upiCodeInvalid": "Geben Sie eine gültige UPI-ID, E-Mail, internationale Telefonnummer, CPF oder UUID ein",
     "upload": "Hochladen",
     "user": "Benutzername",
+    "vatCode": "USt-IdNr.",
     "watermark": "Wasserzeichen"
   },
   "currencies": {

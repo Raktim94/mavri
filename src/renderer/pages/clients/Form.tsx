@@ -19,6 +19,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, client }) => {
     shortName: client?.shortName ?? '',
     code: client?.code ?? '',
     address: client?.address ?? '',
+    vatCode: client?.vatCode ?? '',
     additional: client?.additional ?? '',
     description: client?.description ?? '',
     isArchived: client?.isArchived ?? false
@@ -51,6 +52,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, client }) => {
       shortName: client?.shortName ?? '',
       code: client?.code ?? '',
       address: client?.address ?? '',
+      vatCode: client?.vatCode ?? '',
       additional: client?.additional ?? '',
       description: client?.description ?? '',
       isArchived: client?.isArchived ?? false
@@ -162,6 +164,15 @@ export const Form: FC<Props> = ({ handleChange = () => {}, client }) => {
           fullWidth
           value={form.description}
           onChange={e => update('description', e.target.value)}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, md: 6 }}>
+        <TextField
+          label={t('common.vatCode')}
+          fullWidth
+          rows={5}
+          value={form.vatCode}
+          onChange={e => update('vatCode', e.target.value)}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 12 }}>

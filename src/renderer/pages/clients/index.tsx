@@ -27,6 +27,7 @@ export const ClientsPage: FC = () => {
     'code',
     'description',
     'additional',
+    'vatCode',
     'isArchived'
   ];
   const excelFileName = 'clients';
@@ -39,7 +40,7 @@ export const ClientsPage: FC = () => {
       phone: '+14155552671',
       code: 'A001',
       description: 'Some description',
-      additional: 'VAT DE123456789',
+      vatCode: 'VAT DE123456789',
       isArchived: false
     },
     {

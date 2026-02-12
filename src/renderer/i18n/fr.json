@@ -254,6 +254,7 @@
     "upiCodeInvalid": "Saisissez un identifiant UPI valide, un e-mail, un numéro de téléphone international, un CPF ou un UUID",
     "upload": "Téléverser",
     "user": "Nom d’utilisateur",
+    "vatCode": "Code TVA",
     "watermark": "Filigrane"
   },
   "currencies": {

@@ -25,6 +25,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, business }) => {
     address: business?.address ?? '',
     website: business?.website ?? '',
     additional: business?.additional ?? '',
+    vatCode: business?.vatCode ?? '',
     // Legacy payment info. New payment info is via Bank
     paymentInformation: business?.paymentInformation ?? '',
     fileSize: business?.fileSize,
@@ -81,6 +82,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, business }) => {
       address: business?.address ?? '',
       website: business?.website ?? '',
       additional: business?.additional ?? '',
+      vatCode: business?.vatCode ?? '',
       // Legacy payment info. New payment info is via Bank
       paymentInformation: business?.paymentInformation ?? '',
       description: business?.description ?? '',
@@ -210,6 +212,15 @@ export const Form: FC<Props> = ({ handleChange = () => {}, business }) => {
           rows={5}
           value={form.description}
           onChange={e => update('description', e.target.value)}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, md: 6 }}>
+        <TextField
+          label={t('common.vatCode')}
+          fullWidth
+          rows={5}
+          value={form.vatCode}
+          onChange={e => update('vatCode', e.target.value)}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 12 }}>

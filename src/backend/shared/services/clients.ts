@@ -15,6 +15,7 @@ const clientFields: (keyof Client)[] = [
   'code',
   'additional',
   'description',
+  'vatCode',
   'isArchived'
 ];
 
