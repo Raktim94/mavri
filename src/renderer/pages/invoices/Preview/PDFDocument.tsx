@@ -13,7 +13,7 @@ import { HeaderInfo } from './HeaderInfo';
 import { ItemsInfo } from './ItemsInfo';
 import { ClassicLayout } from './LegacyLayout/Classic';
 import { CompactLayout } from './LegacyLayout/Compact';
-import { ModerLayout } from './LegacyLayout/Modern';
+import { ModernLayout } from './LegacyLayout/Modern';
 import { NotesInfo } from './NotesInfo';
 import { PageCounterInfo } from './PageCounterInfo';
 import { PaymentInfo } from './PaymentInfo';
@@ -62,7 +62,8 @@ const PDFDocumentComponent: FC<Props> = ({
 }) => {
   return (
     <Document>
-      {invoiceForm?.invoiceBankSnapshot === undefined &&
+      {invoiceForm?.id != undefined &&
+        invoiceForm?.invoiceBankSnapshot === undefined &&
         invoiceForm?.invoiceBusinessSnapshot?.businessPaymentInformation &&
         invoiceForm?.invoiceCustomization?.layout === LayoutType.compact && (
           <CompactLayout
@@ -75,7 +76,8 @@ const PDFDocumentComponent: FC<Props> = ({
             watermarkPaidUrl={watermarkPaidUrl}
           />
         )}
-      {invoiceForm?.invoiceBankSnapshot === undefined &&
+      {invoiceForm?.id != undefined &&
+        invoiceForm?.invoiceBankSnapshot === undefined &&
         invoiceForm?.invoiceBusinessSnapshot?.businessPaymentInformation &&
         invoiceForm?.invoiceCustomization?.layout === LayoutType.classic && (
           <ClassicLayout
@@ -88,10 +90,11 @@ const PDFDocumentComponent: FC<Props> = ({
             watermarkPaidUrl={watermarkPaidUrl}
           />
         )}
-      {invoiceForm?.invoiceBankSnapshot === undefined &&
+      {invoiceForm?.id != undefined &&
+        invoiceForm?.invoiceBankSnapshot === undefined &&
         invoiceForm?.invoiceBusinessSnapshot?.businessPaymentInformation &&
         invoiceForm?.invoiceCustomization?.layout === LayoutType.modern && (
-          <ModerLayout
+          <ModernLayout
             invoiceForm={invoiceForm}
             storeSettings={storeSettings}
             logoUrl={logoUrl}
@@ -102,7 +105,11 @@ const PDFDocumentComponent: FC<Props> = ({
           />
         )}
 
-      {invoiceForm?.invoiceBankSnapshot && (
+      {!(
+        invoiceForm?.id != undefined &&
+        invoiceForm?.invoiceBankSnapshot === undefined &&
+        invoiceForm?.invoiceBusinessSnapshot?.businessPaymentInformation
+      ) && (
         <Page
           size={invoiceForm?.invoiceCustomization?.pageFormat}
           style={[

@@ -22,7 +22,7 @@ interface Props {
   watermarkUrl?: string;
   watermarkPaidUrl?: string;
 }
-const ModerLayoutComponent: FC<Props> = ({
+const ModernLayoutComponent: FC<Props> = ({
   invoiceForm,
   storeSettings,
   logoUrl,
@@ -103,4 +103,4 @@ const ModerLayoutComponent: FC<Props> = ({
     </Page>
   );
 };
-export const ModerLayout = memo(ModerLayoutComponent);
+export const ModernLayout = memo(ModernLayoutComponent);
