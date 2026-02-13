@@ -102,12 +102,6 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onSaveProfile
         <SwipeableDrawer
           anchor="bottom"
           open={isOpen}
-          ModalProps={{
-            sx: {
-              zIndex: theme => theme.zIndex.modal + 1
-            },
-            BackdropProps: { invisible: true }
-          }}
           onClose={() => onClose?.()}
           onOpen={() => onOpen?.()}
           slotProps={{

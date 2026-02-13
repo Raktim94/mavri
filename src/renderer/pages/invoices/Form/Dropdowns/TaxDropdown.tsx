@@ -96,11 +96,6 @@ const TaxDropdownComponent: FC<Props> = ({ isOpen, data, onClose, onOpen, onClic
         open={isOpen}
         onClose={() => onClose?.()}
         onOpen={() => onOpen?.()}
-        ModalProps={{
-          sx: {
-            zIndex: theme => theme.zIndex.modal + 1
-          }
-        }}
         slotProps={{
           paper: {
             sx: {
@@ -133,13 +128,6 @@ const TaxDropdownComponent: FC<Props> = ({ isOpen, data, onClose, onOpen, onClic
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, md: 12 }}>
             <Autocomplete
-              slotProps={{
-                popper: {
-                  sx: {
-                    zIndex: theme => theme.zIndex.modal + 2
-                  }
-                }
-              }}
               fullWidth
               options={taxTypeOptions}
               getOptionLabel={option => option.label}

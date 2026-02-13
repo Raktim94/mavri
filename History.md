@@ -1,5 +1,11 @@
 # Invoice Builder
 
+## 2026-02-13, version 2.0.1
+
+Bug Fixes
+
+- Fixed an issue where invoice modals could render behind other UI elements due to an incorrect `z-index`
+
 ## 2026-02-12, version 2.0.0
 
 New features & improvements

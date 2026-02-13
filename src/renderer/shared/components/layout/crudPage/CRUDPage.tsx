@@ -457,7 +457,7 @@ export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
     <PageAppBar
       title={title}
       isOpen={isModalOpen}
-      isModal={inlineOnAdd && isDesktop ? false : typeof selectedItem === 'undefined'}
+      isModal={inlineOnAdd || isDesktop ? false : typeof selectedItem === 'undefined'}
       handleClose={handleCloseModal}
       handleSave={handleSave}
       renderCustomButtons={renderCustomButtons}
@@ -623,7 +623,7 @@ export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
   );
   return (
     <>
-      {(!inlineOnAdd && isModalOpen && crBusiness) || (inlineOnAdd && !isDesktop && isModalOpen && crBusiness)}
+      {!inlineOnAdd && isModalOpen && crBusiness}
       <Confirmation
         onCancel={handleCancelDelete}
         onConfirm={handleConfirmDelete}
@@ -641,7 +641,7 @@ export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
                 <Content node={rightColumn} />
               </>
             ) : (
-              <>{typeof selectedItem === 'undefined' ? leftColumn : <Content node={rightColumn} />}</>
+              <>{typeof selectedItem === 'undefined' && !isModalOpen ? leftColumn : <Content node={rightColumn} />}</>
             )}
           </>
         )}

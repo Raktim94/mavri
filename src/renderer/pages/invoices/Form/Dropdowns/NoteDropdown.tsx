@@ -31,11 +31,6 @@ const NoteDropdownComponent: FC<Props> = ({ isOpen, title, currentNote, onClose,
         open={isOpen}
         onClose={() => onClose?.()}
         onOpen={() => onOpen?.()}
-        ModalProps={{
-          sx: {
-            zIndex: theme => theme.zIndex.modal + 1
-          }
-        }}
         slotProps={{
           paper: {
             sx: {

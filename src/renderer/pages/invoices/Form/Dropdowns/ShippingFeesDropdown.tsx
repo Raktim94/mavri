@@ -41,11 +41,6 @@ const ShippingFeesDropdownComponent: FC<Props> = ({ isOpen, currShippingFee, onC
         open={isOpen}
         onClose={() => onClose?.()}
         onOpen={() => onOpen?.()}
-        ModalProps={{
-          sx: {
-            zIndex: theme => theme.zIndex.modal + 1
-          }
-        }}
         slotProps={{
           paper: {
             sx: {

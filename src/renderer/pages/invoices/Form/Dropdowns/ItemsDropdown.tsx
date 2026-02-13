@@ -58,11 +58,6 @@ const ItemsDropdownComponent: FC<Props> = ({ isOpen, type, headerOptions, onClos
           open={isOpen}
           onClose={() => onClose?.()}
           onOpen={() => onOpen?.()}
-          ModalProps={{
-            sx: {
-              zIndex: theme => theme.zIndex.modal + 1
-            }
-          }}
           slotProps={{
             paper: {
               sx: {
