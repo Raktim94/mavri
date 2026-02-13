@@ -457,7 +457,7 @@ export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
     <PageAppBar
       title={title}
       isOpen={isModalOpen}
-      isModal={inlineOnAdd || isDesktop ? false : typeof selectedItem === 'undefined'}
+      isModal={inlineOnAdd ? false : typeof selectedItem === 'undefined'}
       handleClose={handleCloseModal}
       handleSave={handleSave}
       renderCustomButtons={renderCustomButtons}

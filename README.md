@@ -367,7 +367,7 @@ Please open an issue before starting major work to ensure alignment.
 
 | Version | Status                |
 | ------- | --------------------- |
-| v2.0.1  | ✅ Actively supported |
+| v2.0.2  | ✅ Actively supported |
 | v2.0.0  | ✅ Actively supported |
 
 Details about supported versions and update policy will be documented here.
