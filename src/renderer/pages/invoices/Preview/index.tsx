@@ -87,6 +87,7 @@ const InvoicesPreviewComponent: FC<Props> = ({ onSaveProfile = () => {}, setInvo
       color: invoiceForm?.invoiceCustomization?.color,
       logoSize: invoiceForm?.invoiceCustomization?.logoSize,
       fontSize: invoiceForm?.invoiceCustomization?.fontSize,
+      fontFamily: invoiceForm?.invoiceCustomization?.fontFamily,
       layout: invoiceForm?.invoiceCustomization?.layout,
       tableHeaderStyle: invoiceForm?.invoiceCustomization?.tableHeaderStyle,
       tableRowStyle: invoiceForm?.invoiceCustomization?.tableRowStyle,

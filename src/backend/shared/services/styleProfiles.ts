@@ -11,6 +11,7 @@ const styleProfileFields: (keyof StyleProfile)[] = [
   'color',
   'logoSize',
   'fontSize',
+  'fontFamily',
   'layout',
   'tableHeaderStyle',
   'tableRowStyle',

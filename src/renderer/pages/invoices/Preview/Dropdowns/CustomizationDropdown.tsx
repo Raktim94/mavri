@@ -3,6 +3,7 @@ import { memo, useCallback, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CustomizationLayout } from '../../../../shared/components/layout/customizationLayout/CustomizationLayout';
 import { PageHeader } from '../../../../shared/components/layout/pageHeader/PageHeader';
+import { FontFamily } from '../../../../shared/enums/fontFamily';
 import { useForm } from '../../../../shared/hooks/useForm';
 import type { CustomizationForm } from '../../../../shared/types/invoice';
 import type { StyleProfileFromData } from '../../../../shared/types/styleProfiles';
@@ -50,6 +51,7 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onSaveProfile
                 color: data?.color,
                 logoSize: data?.logoSize,
                 fontSize: data?.fontSize,
+                fontFamily: data?.fontFamily ?? FontFamily.roboto,
                 layout: data?.layout,
                 tableHeaderStyle: data?.tableHeaderStyle,
                 tableRowStyle: data?.tableRowStyle,
@@ -75,6 +77,7 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onSaveProfile
                 color: form?.color,
                 logoSize: form?.logoSize,
                 fontSize: form?.fontSize,
+                fontFamily: form?.fontFamily ?? FontFamily.roboto,
                 layout: form?.layout,
                 tableHeaderStyle: form?.tableHeaderStyle,
                 tableRowStyle: form?.tableRowStyle,

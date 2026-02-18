@@ -1,3 +1,4 @@
+import type { FontFamily } from '../enums/fontFamily';
 import type { LayoutType } from '../enums/layoutType';
 import type { PageFormat } from '../enums/pageFormat';
 import type { SizeType } from '../enums/sizeType';
@@ -11,6 +12,7 @@ export interface StyleProfile {
   color?: string;
   logoSize?: SizeType;
   fontSize?: SizeType;
+  fontFamily: FontFamily;
   layout?: LayoutType;
   tableHeaderStyle?: TableHeaderStyle;
   tableRowStyle?: TableRowStyle;

@@ -160,6 +160,7 @@
     "exported": "Exportiert",
     "exportedTo": "Exportiert nach {{path}}",
     "fieldRequired": "Feld ist erforderlich",
+    "fontFamilyStyle": "Schriftfamilie",
     "fontSizeStyle": "Schriftgröße",
     "from": "Von",
     "host": "Hostname",

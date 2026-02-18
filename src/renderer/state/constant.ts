@@ -77,3 +77,11 @@ export const DEFAULT_TABLE_FIELD_SORT_ORDERS = {
   unitCost: 4,
   total: 5
 };
+
+export const FONT_ITEMS_ARRAY = [
+  { label: 'Helvetica', value: 'Helvetica' },
+  { label: 'Times-Roman', value: 'Times-Roman' },
+  { label: 'Courier', value: 'Courier' },
+  { label: 'Roboto', value: 'Roboto' },
+  { label: 'Inter', value: 'Inter' }
+];

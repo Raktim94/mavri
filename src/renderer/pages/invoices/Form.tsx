@@ -1,5 +1,6 @@
 import { memo, useCallback, useDeferredValue, useEffect, useRef, useState, useTransition, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
+import { FontFamily } from '../../shared/enums/fontFamily';
 import { InvoiceFormMode } from '../../shared/enums/invoiceFormMode';
 import { InvoiceStatus } from '../../shared/enums/invoiceStatus';
 import { InvoiceType } from '../../shared/enums/invoiceType';
@@ -102,6 +103,7 @@ const InvoiceFormComponent: FC<Props> = ({
             color: '#006400',
             logoSize: SizeType.medium,
             fontSize: SizeType.medium,
+            fontFamily: FontFamily.roboto,
             layout: LayoutType.classic,
             tableHeaderStyle: TableHeaderStyle.light,
             tableRowStyle: TableRowStyle.classic,

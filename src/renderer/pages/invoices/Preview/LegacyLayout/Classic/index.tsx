@@ -1,9 +1,9 @@
 import { Page, View } from '@react-pdf/renderer';
-import { memo, type FC } from 'react';
+import { memo, useMemo, type FC } from 'react';
 import { InvoiceStatus } from '../../../../../shared/enums/invoiceStatus';
 import type { InvoiceFromData, PdfTexts } from '../../../../../shared/types/invoice';
 import type { Settings } from '../../../../../shared/types/settings';
-import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from '../../constant';
+import { createCustomFontStyles, DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from '../../constant';
 import { FinancialInfo } from '../../FinancialInfo';
 import { ItemsInfo } from '../../ItemsInfo';
 import { NotesInfo } from '../../NotesInfo';
@@ -31,11 +31,17 @@ const ClassicLayoutComponent: FC<Props> = ({
   watermarkUrl,
   watermarkPaidUrl
 }) => {
+  const dynamicStyle = useMemo(
+    () => createCustomFontStyles(invoiceForm?.invoiceCustomization?.fontFamily),
+    [invoiceForm?.invoiceCustomization?.fontFamily]
+  );
+
   return (
     <Page
       size={invoiceForm?.invoiceCustomization?.pageFormat}
       style={[
         PDF_STYLES.page,
+        dynamicStyle.customFont,
         {
           fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].page
         }

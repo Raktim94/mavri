@@ -173,6 +173,20 @@ export const isStyleProfileFromData = (data: unknown): data is StyleProfileFromD
     return false;
 
   if (
+    d.fontFamily !== undefined &&
+    d.fontFamily !== null &&
+    !(
+      typeof d.fontFamily !== 'string' ||
+      d.fontFamily === 'Helvetica' ||
+      d.fontFamily === 'Times-Roman' ||
+      d.fontFamily === 'Courier' ||
+      d.fontFamily === 'Roboto' ||
+      d.fontFamily === 'Inter'
+    )
+  )
+    return false;
+
+  if (
     d.layout !== undefined &&
     d.layout !== null &&
     !(typeof d.layout !== 'string' || d.layout === 'classic' || d.layout === 'modern' || d.layout === 'compact')

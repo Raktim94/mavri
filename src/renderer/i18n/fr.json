@@ -160,6 +160,7 @@
     "exported": "Exporté",
     "exportedTo": "Exporté vers {{path}}",
     "fieldRequired": "Champ requis",
+    "fontFamilyStyle": "Famille de polices",
     "fontSizeStyle": "Taille de police",
     "from": "De",
     "host": "Nom d’hôte",

@@ -2,6 +2,7 @@ import { FormControlLabel, Grid, Switch, TextField } from '@mui/material';
 import { useCallback, useEffect, useMemo, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CustomizationLayout } from '../../shared/components/layout/customizationLayout/CustomizationLayout';
+import { FontFamily } from '../../shared/enums/fontFamily';
 import { useForm } from '../../shared/hooks/useForm';
 import type { CustomizationForm } from '../../shared/types/invoice';
 import type { StyleProfile, StyleProfileFromData } from '../../shared/types/styleProfiles';
@@ -20,6 +21,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, styleProfile }) => {
     color: styleProfile?.color,
     logoSize: styleProfile?.logoSize,
     fontSize: styleProfile?.fontSize,
+    fontFamily: styleProfile?.fontFamily ?? FontFamily.roboto,
     layout: styleProfile?.layout,
     tableHeaderStyle: styleProfile?.tableHeaderStyle,
     tableRowStyle: styleProfile?.tableRowStyle,
@@ -50,6 +52,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, styleProfile }) => {
         color: newData?.color,
         logoSize: newData?.logoSize,
         fontSize: newData?.fontSize,
+        fontFamily: newData?.fontFamily ?? FontFamily.roboto,
         layout: newData?.layout,
         tableHeaderStyle: newData?.tableHeaderStyle,
         tableRowStyle: newData?.tableRowStyle,
@@ -82,13 +85,13 @@ export const Form: FC<Props> = ({ handleChange = () => {}, styleProfile }) => {
       setErrors(e => ({ ...e, [field]: false }));
     }
   };
-  console.log(styleProfile);
 
   const customizationData = useMemo(() => {
     return {
       color: styleProfile?.color,
       logoSize: styleProfile?.logoSize,
       fontSize: styleProfile?.fontSize,
+      fontFamily: styleProfile?.fontFamily ?? FontFamily.roboto,
       layout: styleProfile?.layout,
       tableHeaderStyle: styleProfile?.tableHeaderStyle,
       tableRowStyle: styleProfile?.tableRowStyle,
@@ -116,6 +119,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, styleProfile }) => {
       color: styleProfile?.color,
       logoSize: styleProfile?.logoSize,
       fontSize: styleProfile?.fontSize,
+      fontFamily: styleProfile?.fontFamily ?? FontFamily.roboto,
       layout: styleProfile?.layout,
       tableHeaderStyle: styleProfile?.tableHeaderStyle,
       tableRowStyle: styleProfile?.tableRowStyle,
