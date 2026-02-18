@@ -118,6 +118,7 @@ export const importAllData = async (db: DatabaseAdapter, parsed: Record<string, 
       await fn();
       await db.run('COMMIT');
     } catch (err) {
+      console.log(err);
       try {
         await db.run('ROLLBACK');
       } catch {
@@ -193,7 +194,8 @@ export const importAllData = async (db: DatabaseAdapter, parsed: Record<string, 
         'units',
         'categories',
         'currencies',
-        'style_profiles'
+        'style_profiles',
+        'banks'
       ];
 
       for (const table of deleteOrder) {

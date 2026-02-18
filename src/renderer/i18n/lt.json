@@ -160,6 +160,7 @@
     "exported": "Eksportuota",
     "exportedTo": "Eksportuota į {{path}}",
     "fieldRequired": "Laukas yra privalomas",
+    "fontFamilyStyle": "Šrifto šeima",
     "fontSizeStyle": "Šrifto dydis",
     "from": "Nuo",
     "host": "Serverio adresas",

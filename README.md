@@ -71,7 +71,7 @@ If you value **privacy, portability, and control**, this app is built for you.
 - Live PDF preview
 - A4 / Letter formats
 - Layout presets
-- Color, font size, logo size customization
+- Color, font size, font family (Supported fonts: Helvetica, Times-Roman, Courier, Roboto, Inter), logo size customization
 - Table header & row styles
 - Uppercase label toggle
 - Quote & invoice watermarks (including paid watermark)

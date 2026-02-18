@@ -2,6 +2,13 @@ import { StyleSheet } from '@react-pdf/renderer';
 import { SizeType } from '../../../shared/enums/sizeType';
 import type { ColumnWeights } from '../../../shared/types/columnsWeights';
 
+export const createCustomFontStyles = (fontFamily?: string) =>
+  StyleSheet.create({
+    customFont: {
+      fontFamily: fontFamily || 'Roboto'
+    }
+  });
+
 export const DEFAULT_FONT_SIZES = SizeType.medium;
 export const DEFAULT_LOGO_SIZES = SizeType.medium;
 export const DEFAULT_USER_COLUMN_WEIGHT = 10;
@@ -62,8 +69,7 @@ export const FONT_SIZES = {
 
 export const PDF_STYLES = StyleSheet.create({
   page: {
-    padding: 32,
-    fontFamily: 'Roboto'
+    padding: 32
   },
   header: { paddingBottom: 16 },
   row: { flexDirection: 'row' },

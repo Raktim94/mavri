@@ -223,6 +223,7 @@ const InvoiceFormComponent: FC<Props> = ({
             color: data.color ?? invoiceForm.invoiceCustomization!.color,
             logoSize: data.logoSize ?? invoiceForm.invoiceCustomization!.logoSize,
             fontSize: data.fontSize ?? invoiceForm.invoiceCustomization!.fontSize,
+            fontFamily: data.fontFamily ?? invoiceForm.invoiceCustomization!.fontFamily,
             layout: data.layout ?? invoiceForm.invoiceCustomization!.layout,
             tableHeaderStyle: data.tableHeaderStyle ?? invoiceForm.invoiceCustomization!.tableHeaderStyle,
             tableRowStyle: data.tableRowStyle ?? invoiceForm.invoiceCustomization!.tableRowStyle,

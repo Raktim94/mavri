@@ -2,6 +2,7 @@ import { closestCenter, DndContext, PointerSensor, useSensor, useSensors, type D
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import {
+  Autocomplete,
   Box,
   FormControl,
   FormControlLabel,
@@ -15,12 +16,15 @@ import {
   Switch,
   Tab,
   Tabs,
+  TextField,
   Tooltip,
   Typography
 } from '@mui/material';
 import { MuiColorInput } from 'mui-color-input';
 import { useCallback, useEffect, useMemo, useRef, useState, type FC, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { FONT_ITEMS_ARRAY } from '../../../../state/constant';
+import { FontFamily } from '../../../enums/fontFamily';
 import { LayoutType } from '../../../enums/layoutType';
 import { PageFormat } from '../../../enums/pageFormat';
 import { SizeType } from '../../../enums/sizeType';
@@ -47,6 +51,7 @@ export const CustomizationLayout: FC<Props> = ({
   renderCustomTop = () => null,
   renderCustomBottom = () => null
 }) => {
+  const optionsFont = FONT_ITEMS_ARRAY;
   const { t } = useTranslation();
   const { form, setForm, update } = useForm<CustomizationForm>(data ?? {});
   const lastEmittedRef = useRef<CustomizationForm | undefined>(data);
@@ -243,6 +248,22 @@ export const CustomizationLayout: FC<Props> = ({
             </Grid>
             <Grid size={{ xs: 12, md: 6 }}>
               <FormControl component="fieldset">
+                <FormLabel component="legend">{t('common.layout')}</FormLabel>
+                <RadioGroup
+                  row
+                  value={form.layout ?? ''}
+                  onChange={(_e, newValue) => {
+                    update('layout', newValue as LayoutType);
+                  }}
+                >
+                  <FormControlLabel value={LayoutType.classic} control={<Radio />} label={t('common.classic')} />
+                  <FormControlLabel value={LayoutType.modern} control={<Radio />} label={t('common.modern')} />
+                  <FormControlLabel value={LayoutType.compact} control={<Radio />} label={t('common.compact')} />
+                </RadioGroup>
+              </FormControl>
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <FormControl component="fieldset">
                 <FormLabel component="legend">{t('common.fontSizeStyle')}</FormLabel>
                 <RadioGroup
                   row
@@ -257,21 +278,20 @@ export const CustomizationLayout: FC<Props> = ({
                 </RadioGroup>
               </FormControl>
             </Grid>
-            <Grid size={{ xs: 12, md: 12 }}>
-              <FormControl component="fieldset">
-                <FormLabel component="legend">{t('common.layout')}</FormLabel>
-                <RadioGroup
-                  row
-                  value={form.layout ?? ''}
-                  onChange={(_e, newValue) => {
-                    update('layout', newValue as LayoutType);
-                  }}
-                >
-                  <FormControlLabel value={LayoutType.classic} control={<Radio />} label={t('common.classic')} />
-                  <FormControlLabel value={LayoutType.modern} control={<Radio />} label={t('common.modern')} />
-                  <FormControlLabel value={LayoutType.compact} control={<Radio />} label={t('common.compact')} />
-                </RadioGroup>
-              </FormControl>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Autocomplete
+                fullWidth
+                options={optionsFont}
+                getOptionLabel={option => option.label}
+                disableClearable={true}
+                value={optionsFont.find(opt => opt.value === (form.fontFamily ?? FontFamily.roboto))}
+                onChange={(_e, newValue) => {
+                  if (!newValue) return;
+                  update('fontFamily', newValue.value as FontFamily);
+                }}
+                renderInput={params => <TextField {...params} label={t('common.fontFamilyStyle')} />}
+                freeSolo={false}
+              />
             </Grid>
           </Grid>
         </TabPanel>

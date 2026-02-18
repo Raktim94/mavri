@@ -1,5 +1,6 @@
 import type { Alignment } from '../enums/alignment';
 import type { DiscountType } from '../enums/discountType';
+import type { FontFamily } from '../enums/fontFamily';
 import type { InvoiceStatus } from '../enums/invoiceStatus';
 import type { InvoiceType } from '../enums/invoiceType';
 import type { Language } from '../enums/language';
@@ -96,6 +97,7 @@ export interface InvoiceCustomization {
   color: string;
   logoSize: SizeType;
   fontSize: SizeType;
+  fontFamily: FontFamily;
   layout: LayoutType;
   tableHeaderStyle: TableHeaderStyle;
   tableRowStyle: TableRowStyle;
