@@ -118,7 +118,6 @@ export const importAllData = async (db: DatabaseAdapter, parsed: Record<string, 
       await fn();
       await db.run('COMMIT');
     } catch (err) {
-      console.log(err);
       try {
         await db.run('ROLLBACK');
       } catch {
