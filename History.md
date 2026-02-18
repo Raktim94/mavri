@@ -1,5 +1,12 @@
 # Invoice Builder
 
+## [DATE], version 2.1.0
+
+New features & improvements
+
+- Automatically prefill issue date
+- Automatically prefill invoice numbers
+
 ## 2026-02-13, version 2.0.2
 
 Bug Fixes

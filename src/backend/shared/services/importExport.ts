@@ -45,6 +45,7 @@ import { mapDatabaseError } from '../utils/errorFunctions';
 
 export const exportAllData = async (db: DatabaseAdapter) => {
   try {
+    const invoiceSequences = await db.all<Bank>('SELECT * FROM invoice_sequences');
     const banks = await db.all<Bank>('SELECT * FROM banks');
     const styleProfiles = await db.all<StyleProfile>('SELECT * FROM style_profiles');
     const settingsRow = await db.get('SELECT * FROM settings LIMIT 1');
@@ -81,6 +82,7 @@ export const exportAllData = async (db: DatabaseAdapter) => {
       settings: settingsRow ?? null,
       businesses: businessesModified,
       clients,
+      invoiceSequences,
       items,
       units,
       categories,
@@ -173,6 +175,7 @@ export const importAllData = async (db: DatabaseAdapter, parsed: Record<string, 
 
     await runInTransaction(async () => {
       const deleteOrder = [
+        'invoice_sequences',
         'invoice_style_profile_snapshots',
         'invoice_customizations',
         'invoice_currency_snapshots',
@@ -207,6 +210,7 @@ export const importAllData = async (db: DatabaseAdapter, parsed: Record<string, 
         clients: 'clients',
         items: 'items',
         invoices: 'invoices',
+        invoice_sequences: 'invoiceSequences',
         invoice_style_profile_snapshots: 'invoiceStyleProfileSnapshots',
         invoice_business_snapshots: 'invoiceBusinessSnapshots',
         invoice_bank_snapshots: 'invoiceBankSnapshots',

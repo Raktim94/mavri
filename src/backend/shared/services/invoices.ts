@@ -1,4 +1,5 @@
 import type { Response } from '../../shared/types/response';
+import { InvoiceStatus } from '../enums/invoiceStatus';
 import type { DatabaseAdapter } from '../types/DatabaseAdapter';
 import type { EntityWithId } from '../types/entityWithId';
 import type {
@@ -14,6 +15,7 @@ import type {
   InvoiceItem,
   InvoiceItemSnapshots,
   InvoicePayment,
+  InvoiceSequence,
   InvoiceStyleProfileSnapshots
 } from '../types/invoice';
 import type { FilterData } from '../types/invoiceFilter';
@@ -151,6 +153,7 @@ const itemsSnapshotFields: (keyof InvoiceItemSnapshots)[] = [
   'unitPriceCents',
   'unitName'
 ];
+const invoiceSequencesFields: (keyof InvoiceSequence)[] = ['nextSequence', 'clientId', 'businessId'];
 
 const handleEntity =
   <T extends EntityWithId>(db: DatabaseAdapter, table: string, fields: readonly (keyof T)[]) =>
@@ -224,7 +227,8 @@ const createInvoiceHandlers = (db: DatabaseAdapter) => ({
   handleInvoiceItemSnapshots: handleEntity<InvoiceItemSnapshots>(db, 'invoice_item_snapshots', itemsSnapshotFields),
   handleInvoicePayments: handleEntity<InvoicePayment>(db, 'invoice_payments', paymentsFields),
   handleInvoiceItems: handleEntity<InvoiceItem>(db, 'invoice_items', itemsFields),
-  handleAttachments: handleEntity<InvoiceAttachment>(db, 'attachments', attachmentFields)
+  handleAttachments: handleEntity<InvoiceAttachment>(db, 'attachments', attachmentFields),
+  handleSequences: handleEntity<InvoiceSequence>(db, 'invoice_sequences', invoiceSequencesFields)
 });
 
 const processItems = async (
@@ -302,6 +306,59 @@ const processAttachments = async (
       return r;
     }
   }
+  return { success: true } as Response<number>;
+};
+
+const processSequence = async (
+  db: DatabaseAdapter,
+  handlers: { handleSequences: (data: InvoiceSequence, isUpdate?: boolean) => Promise<Response<number>> },
+  data: { clientId: number; businessId: number; invoiceNumber?: string }
+) => {
+  const currentSequence = await db.get<InvoiceSequence>(
+    `SELECT * FROM invoice_sequences WHERE "businessId" = ? and "clientId" = ?`,
+    [data.businessId, data.clientId]
+  );
+  if (currentSequence) {
+    const r = await handlers.handleSequences(
+      {
+        id: currentSequence.id,
+        businessId: currentSequence.businessId,
+        clientId: currentSequence.clientId,
+        nextSequence: currentSequence.nextSequence + 1
+      } as InvoiceSequence,
+      true
+    );
+    if (!r.success) {
+      await rollbackOrThrow(db);
+      return r;
+    }
+  } else {
+    const dataSequence = await db.get<{ nextSequence: number }>(
+      `SELECT
+        COALESCE(
+          CAST(? AS INTEGER) + 1,
+          COUNT(*) + 1
+        ) AS "nextSequence"
+      FROM invoices
+      WHERE "businessId" = ?
+      GROUP BY "businessId";`,
+      [data.invoiceNumber ?? null, data.businessId]
+    );
+    if (dataSequence) {
+      const r = await handlers.handleSequences({
+        businessId: data.businessId,
+        clientId: data.clientId,
+        nextSequence: dataSequence.nextSequence
+      } as InvoiceSequence);
+      if (!r.success) {
+        await rollbackOrThrow(db);
+        return r;
+      }
+    } else {
+      await rollbackOrThrow(db);
+    }
+  }
+
   return { success: true } as Response<number>;
 };
 
@@ -424,6 +481,14 @@ const getInvoices = async (db: DatabaseAdapter, options: GetInvoicesOptions) => 
   });
 };
 
+export const getNextSequence = async (db: DatabaseAdapter, data: { businessId: number; clientId: number }) => {
+  const currentSequence = await db.get<InvoiceSequence>(
+    `SELECT * FROM invoice_sequences WHERE "businessId" = ? and "clientId" = ?`,
+    [data.businessId, data.clientId]
+  );
+  return { success: true, data: currentSequence?.nextSequence };
+};
+
 export const getCustomHeaders = async (db: DatabaseAdapter, type: 'invoice' | 'quotation') => {
   const rows = await db.all<{ customField: string | null }>(
     `
@@ -475,7 +540,8 @@ export const addInvoice = async (db: DatabaseAdapter, data: Invoice) => {
     handleInvoiceItemSnapshots,
     handleInvoicePayments,
     handleInvoiceItems,
-    handleAttachments
+    handleAttachments,
+    handleSequences
   } = createInvoiceHandlers(db);
 
   try {
@@ -574,6 +640,17 @@ export const addInvoice = async (db: DatabaseAdapter, data: Invoice) => {
     const newResult = await getInvoices(db, { id: newId });
 
     await db.run('COMMIT');
+
+    const resultSequence = await processSequence(
+      db,
+      { handleSequences },
+      { clientId: data.clientId, businessId: data.businessId, invoiceNumber: data.invoiceNumber }
+    );
+    if (!resultSequence.success) {
+      await rollbackOrThrow(db);
+      return { success: false, key: result.key };
+    }
+
     return { success: true, data: newResult.length > 0 ? newResult[0] : newResult };
   } catch (error) {
     await rollbackOrThrow(db);
@@ -593,7 +670,8 @@ export const updateInvoice = async (db: DatabaseAdapter, data: Invoice) => {
     handleInvoiceCurrencySnapshots,
     handleInvoiceCustomization,
     handleInvoiceItems,
-    handleInvoiceItemSnapshots
+    handleInvoiceItemSnapshots,
+    handleSequences
   } = createInvoiceHandlers(db);
 
   try {
@@ -729,6 +807,16 @@ export const updateInvoice = async (db: DatabaseAdapter, data: Invoice) => {
     const newResult = await getInvoices(db, { id: data.id });
 
     await db.run('COMMIT');
+
+    const resultSequence = await processSequence(
+      db,
+      { handleSequences },
+      { clientId: data.clientId, businessId: data.businessId }
+    );
+    if (!resultSequence.success) {
+      await rollbackOrThrow(db);
+      return { success: false, key: result.key };
+    }
     return { success: true, data: newResult.length > 0 ? newResult[0] : newResult };
   } catch (error) {
     await rollbackOrThrow(db);
@@ -745,20 +833,39 @@ export const duplicateInvoice = async (
     await db.run('BEGIN');
 
     const original = await db.get('SELECT * FROM invoices WHERE "id" = ?;', [invoiceId]);
-    const lastRow = await db.get('SELECT MAX("id") AS "id" FROM invoices;');
 
-    if (!original || !lastRow) return { success: false };
+    if (!original) return { success: false };
 
-    const maxIDRow = lastRow.id as number;
     let convertedFromQuotationId: number | null = original.convertedFromQuotationId as number | null;
-    let status: string = original.status as string;
+    const status: string = InvoiceStatus.unpaid;
     if (original.invoiceType === 'quotation' && invoiceType === 'invoice') {
       convertedFromQuotationId = original.id as number;
-      status = 'unpaid';
       await db.run(`UPDATE invoices SET "status" = 'closed' WHERE "id" = ?;`, [original.id as number]);
     }
 
-    const newInvoiceNumber = original.invoiceNumber + `-COPY${maxIDRow}`;
+    const handleSequences = handleEntity<InvoiceSequence>(db, 'invoice_sequences', invoiceSequencesFields);
+    const seqRow = await db.get<InvoiceSequence>(
+      `SELECT * FROM invoice_sequences WHERE "businessId" = ? AND "clientId" = ?`,
+      [original.businessId, original.clientId]
+    );
+    if (!seqRow) {
+      await rollbackOrThrow(db);
+      return { success: false };
+    }
+    const r = await handleSequences(
+      {
+        id: seqRow.id,
+        businessId: seqRow.businessId,
+        clientId: seqRow.clientId,
+        nextSequence: seqRow.nextSequence + 1
+      } as InvoiceSequence,
+      true
+    );
+    if (!r.success) {
+      await rollbackOrThrow(db);
+    }
+    const newInvoiceNumber = seqRow.nextSequence.toString();
+
     const insertInvoiceSQL = `
         INSERT INTO invoices (
           "invoiceType", "convertedFromQuotationId", "businessId", "clientId", "currencyId",
@@ -770,7 +877,11 @@ export const duplicateInvoice = async (
         )
         SELECT
           ?, ?, "businessId", "clientId", "currencyId",
-          "issuedAt", "dueDate", ?, "isArchived", ?, "customerNotes",
+          ${getDefaultValue("(datetime('now'))", db.type)},  
+          CASE 
+            WHEN "dueDate" IS NULL THEN NULL
+            ELSE ${getDefaultValue("date('now','start of month','+2 months','-1 day')", db.type)}
+            END, ?, 0, ?, "customerNotes",
           "thanksNotes", "termsConditionNotes", "discountName", "language", 
           "discountType", "discountAmountCents", "discountPercent", "shippingFeeCents",
           "invoicePrefix", "invoiceSuffix", "taxName", "taxRate", "taxType", "signatureData",
@@ -902,11 +1013,7 @@ export const duplicateInvoice = async (
     await db.run('COMMIT');
     return { success: true, data: duplicated.length > 0 ? duplicated[0] : duplicated };
   } catch (error) {
-    try {
-      await db.run('ROLLBACK');
-    } catch {
-      throw new Error(`ROLLBACK failed`);
-    }
+    await rollbackOrThrow(db);
     return { success: false, ...mapDatabaseError(error, db.type) };
   }
 };

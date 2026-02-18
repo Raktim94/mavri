@@ -11,6 +11,14 @@ import type { TableRowStyle } from '../enums/tableRowStyle';
 import type { InvoiceItemTaxType, InvoiceTaxType } from '../enums/taxType';
 import type { SortOrder } from './sortOrder';
 
+export interface InvoiceSequence {
+  id?: number;
+  businessId?: number;
+  clientId?: number;
+  nextSequence: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
 export interface InvoiceItemSnapshots {
   parentInvoiceItemId: number;
   id?: number;

@@ -360,6 +360,11 @@ export const webApi = () => {
     deleteBank: (id: number) => apiDelete<Response<unknown>>(`/api/banks/${id}`),
     addBatchBank: (data: BankAdd[]) => apiPost<Response<BankAdd[]>>('/api/bnaks/batch', data),
 
+    getNextSequence: async (data: { businessId: number; clientId: number }) =>
+      apiGet<Response<number | undefined>>('/api/invoices/sequence', {
+        businessId: data.businessId.toString(),
+        client: data.clientId.toString()
+      }),
     getCustomHeaders: async (type: InvoiceType) =>
       apiGet<Response<CustomFieldMeta[]>>('/api/invoices/headers', { type: type }),
     getAllInvoices: async (type?: InvoiceType, filter?: FilterData[]) => {

@@ -113,6 +113,8 @@ export const getDefaultValue = (sqliteExpr: string, dbType: DatabaseType) => {
         return "NOW() - INTERVAL '60 days'";
       case "datetime('now', '-90 days')":
         return "NOW() - INTERVAL '90 days'";
+      case "date('now','start of month','+2 months','-1 day')":
+        return "DATE_TRUNC('month', NOW()) + INTERVAL '2 month' - INTERVAL '1 day'";
       case "(datetime('now'))":
         return 'NOW()';
       case "datetime('now')":
