@@ -27,16 +27,13 @@ const LanguageSelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
             </Typography>
           }
           secondary={
-            invoiceForm?.invoiceCurrencySnapshot?.currencyCode &&
-            invoiceForm?.invoiceCurrencySnapshot?.currencySymbol && (
-              <Typography
-                component="div"
-                variant="body2"
-                sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}
-              >
-                {invoiceForm.language && LANGUAGE_ITEMS[invoiceForm.language].label}
-              </Typography>
-            )
+            <Typography
+              component="div"
+              variant="body2"
+              sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}
+            >
+              {invoiceForm?.language && LANGUAGE_ITEMS[invoiceForm.language].label}
+            </Typography>
           }
           disableTypography
           sx={{ m: 0 }}

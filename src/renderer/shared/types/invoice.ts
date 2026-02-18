@@ -473,4 +473,6 @@ export interface InvoiceInfo {
   dueDate?: string;
   invoicePrefix?: string;
   invoiceSuffix?: string;
+  businessId?: number;
+  clientId?: number;
 }

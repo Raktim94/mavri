@@ -4,11 +4,13 @@ import { useTranslation } from 'react-i18next';
 import { Datepicker } from '../../../../shared/components/inputs/datepicker/Datepicker';
 import { PageHeader } from '../../../../shared/components/layout/pageHeader/PageHeader';
 import { InvoiceType } from '../../../../shared/enums/invoiceType';
+import { useGetNextSequence } from '../../../../shared/hooks/invoices/useGetNextSequence';
 import { useForm } from '../../../../shared/hooks/useForm';
 import type { InvoiceInfo } from '../../../../shared/types/invoice';
+import type { Response } from '../../../../shared/types/response';
 import { validators } from '../../../../shared/utils/validatorFunctions';
-import { useAppSelector } from '../../../../state/configureStore';
-import { selectSettings } from '../../../../state/pageSlice';
+import { useAppDispatch, useAppSelector } from '../../../../state/configureStore';
+import { addToast, selectSettings } from '../../../../state/pageSlice';
 
 interface Props {
   isOpen: boolean;
@@ -24,7 +26,7 @@ const InvoiceInformationDropdownComponent: FC<Props> = ({ isOpen, onClose, onOpe
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
   const { form, setForm, update } = useForm<InvoiceInfo>({
-    issuedAt: information?.issuedAt,
+    issuedAt: information?.issuedAt ?? new Date().toISOString(),
     invoiceNumber: information?.invoiceNumber ?? '',
     dueDate: information?.dueDate ?? '',
     invoicePrefix: information.id ? (information?.invoicePrefix ?? '') : (storeSettings?.invoicePrefix ?? ''),
@@ -35,6 +37,30 @@ const InvoiceInformationDropdownComponent: FC<Props> = ({ isOpen, onClose, onOpe
     invoiceNumber: false
   });
   const [isFormValid, setIsFormValid] = useState(false);
+  const dispatch = useAppDispatch();
+
+  const { execute: retrieveSequence } = useGetNextSequence({
+    seqData: {
+      businessId: information.businessId ?? -1,
+      clientId: information.clientId ?? -1
+    },
+    immediate: false,
+    onDone: (data: Response<number | undefined>) => {
+      if (!data.success) {
+        if (data.message) dispatch(addToast({ message: data.message, severity: 'error' }));
+        else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
+      }
+
+      if (
+        data.data != undefined &&
+        (form.invoiceNumber == undefined || form.invoiceNumber === '') &&
+        form.invoiceNumber !== data.data.toString()
+      ) {
+        update('invoiceNumber', data.data.toString());
+        validateField('invoiceNumber', data.data.toString());
+      }
+    }
+  });
 
   const validateField = (field: keyof typeof errors, value: string) => {
     if (!validators.required(value) && (field === 'invoiceNumber' || field === 'issuedAt')) {
@@ -45,8 +71,16 @@ const InvoiceInformationDropdownComponent: FC<Props> = ({ isOpen, onClose, onOpe
   };
 
   useEffect(() => {
+    if (form.invoiceNumber == undefined || form.invoiceNumber === '') {
+      retrieveSequence();
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [information.businessId, information.clientId]);
+
+  useEffect(() => {
     setForm({
-      issuedAt: information?.issuedAt,
+      issuedAt: information?.issuedAt ?? new Date().toISOString(),
       invoiceNumber: information?.invoiceNumber ?? '',
       dueDate: information?.dueDate,
       invoicePrefix: information.id ? (information?.invoicePrefix ?? '') : (storeSettings?.invoicePrefix ?? ''),

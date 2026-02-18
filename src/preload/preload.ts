@@ -96,6 +96,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   addCurrency: (data: CurrencyAdd) => ipcRenderer.invoke('add-currency', data),
   addBatchCurrency: (data: CurrencyAdd[]) => ipcRenderer.invoke('batch-add-currency', data),
 
+  getNextSequence: (data: { businessId: number; clientId: number }) => ipcRenderer.invoke('get-next-sequence', data),
   getCustomHeaders: (type: InvoiceType) => ipcRenderer.invoke('get-custom-headers', type),
   getAllInvoices: (type?: InvoiceType, filter?: FilterData[]) => ipcRenderer.invoke('get-all-invoices', type, filter),
   deleteInvoice: (id: number) => ipcRenderer.invoke('delete-invoice', id),

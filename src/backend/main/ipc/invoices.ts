@@ -4,6 +4,7 @@ import type { DatabaseAdapter } from '../../shared/types/DatabaseAdapter';
 import type { Invoice } from '../../shared/types/invoice';
 
 export const initInvoicesHandlers = (db: DatabaseAdapter) => {
+  ipcMain.handle('get-next-sequence', async (_event, data) => invoicesService.getNextSequence(db, data));
   ipcMain.handle('get-custom-headers', async (_event, type) => invoicesService.getCustomHeaders(db, type));
   ipcMain.handle('get-all-invoices', async (_event, type, filter) => invoicesService.getAllInvoices(db, type, filter));
   ipcMain.handle('delete-invoice', async (_event, id: number) => invoicesService.deleteInvoice(db, id));

@@ -89,7 +89,9 @@ const InvoiceFormComponent: FC<Props> = ({
       invoiceNumber: invoiceForm?.invoiceNumber,
       dueDate: invoiceForm?.dueDate,
       invoicePrefix: invoiceForm?.invoicePrefix,
-      invoiceSuffix: invoiceForm?.invoiceSuffix
+      invoiceSuffix: invoiceForm?.invoiceSuffix,
+      businessId: invoiceForm?.businessId,
+      clientId: invoiceForm?.clientId
     }),
     [
       invoiceForm?.id,
@@ -98,7 +100,9 @@ const InvoiceFormComponent: FC<Props> = ({
       invoiceForm?.invoiceNumber,
       invoiceForm?.dueDate,
       invoiceForm?.invoicePrefix,
-      invoiceForm?.invoiceSuffix
+      invoiceForm?.invoiceSuffix,
+      invoiceForm?.businessId,
+      invoiceForm?.clientId
     ]
   );
 
