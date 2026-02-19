@@ -2,12 +2,12 @@ import { Box, FormControl, FormControlLabel, FormLabel, Grid, Radio, RadioGroup,
 import { MuiColorInput } from 'mui-color-input';
 import { useCallback, useEffect, useRef, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SizeType } from '../../../enums/sizeType';
-import { useForm } from '../../../hooks/useForm';
-import type { CustomizationFormBranding } from '../../../types/invoice';
-import { toDataUrl, toUint8Array } from '../../../utils/dataUrlFunctions';
-import { UploadImage } from '../../inputs/uploadImage/UploadImage';
-import { TabPanel } from '../tabPanel/TabPanel';
+import { SizeType } from '../../../../enums/sizeType';
+import { useForm } from '../../../../hooks/useForm';
+import type { CustomizationFormBranding } from '../../../../types/invoice';
+import { toDataUrl, toUint8Array } from '../../../../utils/dataUrlFunctions';
+import { UploadImage } from '../../../inputs/uploadImage/UploadImage';
+import { TabPanel } from '../../tabPanel/TabPanel';
 
 interface Props {
   value: number;

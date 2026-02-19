@@ -10,14 +10,14 @@ import {
 } from '@mui/material';
 import { useEffect, useRef, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FONT_ITEMS_ARRAY } from '../../../../state/constant';
-import { FontFamily } from '../../../enums/fontFamily';
-import { LayoutType } from '../../../enums/layoutType';
-import { PageFormat } from '../../../enums/pageFormat';
-import { SizeType } from '../../../enums/sizeType';
-import { useForm } from '../../../hooks/useForm';
-import type { CustomizationFormPageSetup } from '../../../types/invoice';
-import { TabPanel } from '../tabPanel/TabPanel';
+import { FONT_ITEMS_ARRAY } from '../../../../../state/constant';
+import { FontFamily } from '../../../../enums/fontFamily';
+import { LayoutType } from '../../../../enums/layoutType';
+import { PageFormat } from '../../../../enums/pageFormat';
+import { SizeType } from '../../../../enums/sizeType';
+import { useForm } from '../../../../hooks/useForm';
+import type { CustomizationFormPageSetup } from '../../../../types/invoice';
+import { TabPanel } from '../../tabPanel/TabPanel';
 
 interface Props {
   value: number;

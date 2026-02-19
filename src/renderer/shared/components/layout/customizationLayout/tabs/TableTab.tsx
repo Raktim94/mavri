@@ -17,13 +17,13 @@ import {
 } from '@mui/material';
 import { useEffect, useMemo, useRef, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import { TableHeaderStyle } from '../../../enums/tableHeaderStyle';
-import { TableRowStyle } from '../../../enums/tableRowStyle';
-import { useForm } from '../../../hooks/useForm';
-import type { CustomizationFormTable } from '../../../types/invoice';
-import type { SortOrder } from '../../../types/sortOrder';
-import { SortableItem } from '../../lists/sortableItem/SortableItem';
-import { TabPanel } from '../tabPanel/TabPanel';
+import { TableHeaderStyle } from '../../../../enums/tableHeaderStyle';
+import { TableRowStyle } from '../../../../enums/tableRowStyle';
+import { useForm } from '../../../../hooks/useForm';
+import type { CustomizationFormTable } from '../../../../types/invoice';
+import type { SortOrder } from '../../../../types/sortOrder';
+import { SortableItem } from '../../../lists/sortableItem/SortableItem';
+import { TabPanel } from '../../tabPanel/TabPanel';
 
 interface Props {
   value: number;

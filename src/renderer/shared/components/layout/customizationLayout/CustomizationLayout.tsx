@@ -11,10 +11,10 @@ import type {
   CustomizationFormTypographyLabels
 } from '../../../types/invoice';
 import { a11yProps } from '../../../utils/generalFunctions';
-import { BrandingTab } from './BrandingTab';
-import { PageSetupTab } from './PageSetupTab';
-import { TableTab } from './TableTab';
-import { TypographyLabelsTab } from './TypographyLabelsTab';
+import { BrandingTab } from './tabs/BrandingTab';
+import { PageSetupTab } from './tabs/PageSetupTab';
+import { TableTab } from './tabs/TableTab';
+import { TypographyLabelsTab } from './tabs/TypographyLabelsTab';
 
 interface Props {
   renderCustomTop?: () => ReactNode;
