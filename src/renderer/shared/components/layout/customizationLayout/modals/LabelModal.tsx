@@ -1,8 +1,8 @@
 import { Dialog, DialogContent, TextField, Typography } from '@mui/material';
 import { useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { PDFText } from '../../../types/pdfText';
-import { ModalAppBar } from '../modalAppBar/ModalAppBar';
+import type { PDFText } from '../../../../types/pdfText';
+import { ModalAppBar } from '../../modalAppBar/ModalAppBar';
 
 interface Props {
   isOpen: boolean;

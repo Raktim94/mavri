@@ -57,7 +57,9 @@ export const StyleProfilesPage = () => {
       isArchived: false,
       showQuantity: true,
       showUnit: true,
-      showRowNo: true
+      showRowNo: true,
+      fieldSortOrders: `{"total":0,"no":1,"item":2,"unit":3,"quantity":4,"unitCost":5}`,
+      pdfTexts: `{"billTo":"Billing","invoiceNo":"Number"}`
     }
   ];
   const filters: Filter[] = [

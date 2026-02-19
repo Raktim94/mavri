@@ -487,7 +487,7 @@
   "settingsMenuItems": {
     "descriptions": {
       "about": "Sužinokite daugiau apie šią programą, jos funkcijas.",
-      "buyMeCoffee": "Jei šis projektas jums naudingas, apsvarstykite galimybę jį paremti",
+      "buyMeCoffee": "Invoice Builder prižiūri vienas kūrėjas. Jūsų parama padeda tęsti atnaujinimus ir diegti naujas funkcijas! Tapkite vienu iš pirmųjų rėmėjų ir pamatykite savo vardą programėlėje",
       "customizeInvoice": "Sąskaitos numerio priešdėlis (pvz.: INV), priesagas.",
       "darkMode": "Perjunkite tarp šviesios ir tamsios temų.",
       "export": "Eksportuokite savo duomenis atsarginei kopijai arba naudoti kitose programose.",
@@ -499,9 +499,12 @@
       "turnQuotes": "Įjunkti arba išjungti pasiūlymų kūrimo funkciją",
       "turnReports": "Įjunkti arba išjungti ataskaitų teikimo funkciją",
       "turnStyleProfiles": "Įjungti arba išjungti stiliaus profilių funkciją",
-      "tutorial": "Peržiūrėkite gidą, kaip naudotis programa"
+      "tutorial": "Peržiūrėkite gidą, kaip naudotis programa",
+      "wallOfFame": "Peržiūrėkite rėmėjus, kurie prisidėjo prie programėlės kūrimo"
     },
     "importConfirmText": "Ar tikrai norite importuoti šį JSON failą? Šis veiksmas ištrins dabartinę duomenų bazę ir ją pakeis duomenimis iš atsarginės kopijos. Šio veiksmo atšaukti nebus galima.",
+    "supportDesc": "Tapkite pirmuoju rėmėju ir jūsų vardas bus rodomas čia!",
+    "supportText": "Kol kas nėra rėmėjų",
     "titles": {
       "about": "Apie",
       "buyMeCoffee": "Nupirk man kavos",
@@ -517,7 +520,8 @@
       "turnQuotes": "Pasiūlymai",
       "turnReports": "Ataskaitos",
       "turnStyleProfiles": "Stiliaus profiliai",
-      "tutorial": "Pamoka"
+      "tutorial": "Instrukcija",
+      "wallOfFame": "Garbės siena"
     },
     "updateConfirmText": "Nauja versija ({{newVersion}}) paruošta. Perkrauti dabar, kad atnaujintumėte iš {{currentVersion}}? Atšaukę, atnaujinimas bus kitą kartą paleidus programą."
   },

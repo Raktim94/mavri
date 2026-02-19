@@ -487,7 +487,7 @@
   "settingsMenuItems": {
     "descriptions": {
       "about": "Learn more about this app, its features.",
-      "buyMeCoffee": "If you find this project helpful, consider supporting it",
+      "buyMeCoffee": "Invoice Builder is maintained by a single developer. Your support keeps updates coming and new features rolling out! Be one of the first supporters and see your name in the app",
       "customizeInvoice": "Invoice number prefix e.g.: INV, suffix.",
       "darkMode": "Switch between light and dark themes.",
       "export": "Export your data for backup or to use in other applications.",
@@ -499,9 +499,12 @@
       "turnQuotes": "Enable or disable quote creation feature",
       "turnReports": "Enable or disable reporting feature",
       "turnStyleProfiles": "Enable or disable style profile feature",
-      "tutorial": "Checkout guide on how to use application"
+      "tutorial": "Checkout guide on how to use application",
+      "wallOfFame": "View the supporters who have contributed to the app"
     },
     "importConfirmText": "Are you sure you want to import this JSON file? This action will erase your current database and replace it with the data from the backup. This cannot be undone.",
+    "supportDesc": "Be the first to support this project and have your name displayed here!",
+    "supportText": "No supporters yet",
     "titles": {
       "about": "About",
       "buyMeCoffee": "Buy me coffee",
@@ -517,7 +520,8 @@
       "turnQuotes": "Quotes",
       "turnReports": "Reports",
       "turnStyleProfiles": "Style profiles",
-      "tutorial": "Tutorial"
+      "tutorial": "Tutorial",
+      "wallOfFame": "Wall of Fame"
     },
     "updateConfirmText": "A new version ({{newVersion}}) is ready. Restart now to update from {{currentVersion}}? You can cancel and update will apply on next launch."
   },

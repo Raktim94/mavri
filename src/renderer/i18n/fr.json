@@ -487,7 +487,7 @@
   "settingsMenuItems": {
     "descriptions": {
       "about": "En savoir plus sur cette application et ses fonctionnalités.",
-      "buyMeCoffee": "Si vous trouvez ce projet utile, pensez à le soutenir",
+      "buyMeCoffee": "Invoice Builder est maintenu par un développeur indépendant. Votre soutien permet de continuer les mises à jour et d’ajouter de nouvelles fonctionnalités ! Soyez l’un des premiers contributeurs et voyez votre nom apparaître dans l’application",
       "customizeInvoice": "Préfixe de numéro de facture (ex. : INV), suffixe.",
       "darkMode": "Basculer entre les thèmes clair et sombre.",
       "export": "Exportez vos données pour sauvegarde ou utilisation ailleurs.",
@@ -499,9 +499,12 @@
       "turnQuotes": "Activer ou désactiver la création de devis",
       "turnReports": "Activer ou désactiver les rapports",
       "turnStyleProfiles": "Activer ou désactiver la fonction des profils de style",
-      "tutorial": "Consultez le guide d’utilisation"
+      "tutorial": "Consultez le guide d’utilisation",
+      "wallOfFame": "Découvrez les contributeurs qui ont soutenu le développement de l’application"
     },
     "importConfirmText": "Êtes-vous sûr de vouloir importer ce fichier JSON ? Cette action effacera votre base actuelle et la remplacera par les données de la sauvegarde. Cette action est irréversible.",
+    "supportDesc": "Soyez le premier à soutenir ce projet et votre nom sera affiché ici !",
+    "supportText": "Aucun soutien pour le moment",
     "titles": {
       "about": "À propos",
       "buyMeCoffee": "Offrez-moi un café",
@@ -517,7 +520,8 @@
       "turnQuotes": "Devis",
       "turnReports": "Rapports",
       "turnStyleProfiles": "Profils de style",
-      "tutorial": "Tutoriel"
+      "tutorial": "Tutoriel",
+      "wallOfFame": "Tableau d'honneur"
     },
     "updateConfirmText": "Une nouvelle version ({{newVersion}}) est prête. Redémarrer maintenant pour mettre à jour depuis {{currentVersion}} ? Vous pouvez annuler et la mise à jour s’appliquera au prochain lancement."
   },

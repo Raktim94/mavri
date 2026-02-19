@@ -56,13 +56,18 @@ const isPDFText = (value: unknown): value is PDFText => {
 
   type PdfTextKey = (typeof PDF_TEXT_KEYS)[number];
 
-  if (!isRecord(value)) return false;
+  let parsed = value;
+  if (typeof value === 'string') {
+    parsed = JSON.parse(value);
+  }
 
-  for (const key of Object.keys(value)) {
+  if (!isRecord(parsed)) return false;
+
+  for (const key of Object.keys(parsed)) {
     if (!PDF_TEXT_KEYS.includes(key as PdfTextKey)) {
       return false;
     }
-    if (typeof value[key] !== 'string') {
+    if (typeof parsed[key] !== 'string') {
       return false;
     }
   }
@@ -170,7 +175,7 @@ export const isStyleProfileFromData = (data: unknown): data is StyleProfileFromD
 
   if (typeof d.name !== 'string') return false;
 
-  if (d.pdfText !== undefined && d.pdfText !== null && d.pdfText !== '' && !isPDFText(d.pdfText)) {
+  if (d.pdfTexts !== undefined && d.pdfTexts !== null && d.pdfTexts !== '' && !isPDFText(d.pdfTexts)) {
     return false;
   }
 
@@ -643,7 +648,7 @@ export const isInvoiceCustomizationFromData = (data: unknown): data is InvoiceCu
 
   const d = data as Record<string, unknown>;
 
-  if (d.pdfText !== undefined && d.pdfText !== null && d.pdfText !== '' && !isPDFText(d.pdfText)) {
+  if (d.pdfTexts !== undefined && d.pdfTexts !== null && d.pdfTexts !== '' && !isPDFText(d.pdfTexts)) {
     return false;
   }
 

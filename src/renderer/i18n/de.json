@@ -487,7 +487,7 @@
   "settingsMenuItems": {
     "descriptions": {
       "about": "Erfahren Sie mehr über diese App und ihre Funktionen.",
-      "buyMeCoffee": "Wenn Sie dieses Projekt hilfreich finden, unterstützen Sie es bitte",
+      "buyMeCoffee": "Invoice Builder wird von einem einzelnen Entwickler gepflegt. Deine Unterstützung sorgt dafür, dass Updates und neue Funktionen weiterentwickelt werden! Sei einer der ersten Unterstützer und sieh deinen Namen in der App",
       "customizeInvoice": "Rechnungsnummer-Präfix z.B.: INV, Suffix.",
       "darkMode": "Zwischen hellem und dunklem Design wechseln.",
       "export": "Exportieren Sie Ihre Daten zur Sicherung oder zur Verwendung in anderen Anwendungen.",
@@ -499,9 +499,12 @@
       "turnQuotes": "Angebotserstellung aktivieren oder deaktivieren",
       "turnReports": "Berichtsfunktion aktivieren oder deaktivieren",
       "turnStyleProfiles": "Style-Profil-Funktion aktivieren oder deaktivieren",
-      "tutorial": "Anleitung zur Verwendung der Anwendung ansehen"
+      "tutorial": "Anleitung zur Verwendung der Anwendung ansehen",
+      "wallOfFame": "Sehen Sie die Unterstützer, die zur Entwicklung der App beigetragen haben"
     },
     "importConfirmText": "Sind Sie sicher, dass Sie diese JSON-Datei importieren möchten? Diese Aktion löscht Ihre aktuelle Datenbank und ersetzt sie durch die Daten aus dem Backup. Dies kann nicht rückgängig gemacht werden.",
+    "supportDesc": "Sei der Erste, der dieses Projekt unterstützt, und dein Name wird hier angezeigt!",
+    "supportText": "Noch keine Unterstützer",
     "titles": {
       "about": "Über",
       "buyMeCoffee": "Kauf mir einen Kaffee",
@@ -517,7 +520,8 @@
       "turnQuotes": "Angebote",
       "turnReports": "Berichte",
       "turnStyleProfiles": "Stilprofile",
-      "tutorial": "Anleitung"
+      "tutorial": "Anleitung",
+      "wallOfFame": "Ruhmeshalle"
     },
     "updateConfirmText": "Eine neue Version ({{newVersion}}) ist verfügbar. Jetzt neu starten, um von {{currentVersion}} zu aktualisieren? Sie können abbrechen und das Update wird beim nächsten Start angewendet."
   },
