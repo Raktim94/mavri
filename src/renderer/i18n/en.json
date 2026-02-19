@@ -522,7 +522,7 @@
       "turnReports": "Reports",
       "turnStyleProfiles": "Style profiles",
       "tutorial": "Tutorial",
-      "wallOfFame": "Wall of Fame"
+      "wallOfFame": "Wall of fame"
     },
     "updateConfirmText": "A new version ({{newVersion}}) is ready. Restart now to update from {{currentVersion}}? You can cancel and update will apply on next launch."
   },
