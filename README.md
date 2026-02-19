@@ -381,5 +381,12 @@ See the [LICENSE](LICENSE) file for details.
 
 ## ☕ Support
 
-If you find this project helpful, consider supporting it on [Buy Me a Coffee](https://www.buymeacoffee.com/evaldizi)!  
-Your support helps maintain and improve the project.
+Invoice Builder is maintained by a single developer. Your support helps keep updates coming and new features rolling out!
+
+Want to be a part of this project’s journey? You can support it here: [Buy Me a Coffee](https://www.buymeacoffee.com/evaldizi)
+
+### 💖 Supporters
+
+_No supporters yet - maybe you’ll be the first!_
+
+Every contribution counts, even a small one, and your name will appear here as a supporter of Invoice Builder.
