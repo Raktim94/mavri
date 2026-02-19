@@ -123,7 +123,7 @@ export const Menu: FC<Props> = ({
     }
   ];
 
-  const appManagement = [
+  const appBackup = [
     {
       items: [
         {
@@ -141,7 +141,14 @@ export const Menu: FC<Props> = ({
           isSelected: false,
           isToggle: false,
           onClick: onExportJSON
-        },
+        }
+      ]
+    }
+  ];
+
+  const githubLinks = [
+    {
+      items: [
         {
           text: t('settingsMenuItems.titles.share'),
           description: t('settingsMenuItems.descriptions.share'),
@@ -150,6 +157,16 @@ export const Menu: FC<Props> = ({
           isToggle: false,
           onClick: () => {
             getApi().openUrl('https://github.com/piratuks/invoice-builder');
+          }
+        },
+        {
+          text: t('settingsMenuItems.titles.tutorial'),
+          description: t('settingsMenuItems.descriptions.tutorial'),
+          icon: <PolicyIcon />,
+          isSelected: false,
+          isToggle: false,
+          onClick: () => {
+            getApi().openUrl('https://github.com/piratuks/invoice-builder/blob/main/TUTORIAL.md');
           }
         },
         {
@@ -173,16 +190,6 @@ export const Menu: FC<Props> = ({
           }
         },
         {
-          text: t('settingsMenuItems.titles.tutorial'),
-          description: t('settingsMenuItems.descriptions.tutorial'),
-          icon: <PolicyIcon />,
-          isSelected: false,
-          isToggle: false,
-          onClick: () => {
-            getApi().openUrl('https://github.com/piratuks/invoice-builder/blob/main/TUTORIAL.md');
-          }
-        },
-        {
           text: t('settingsMenuItems.titles.about'),
           description: t('settingsMenuItems.descriptions.about'),
           icon: <InfoIcon />,
@@ -191,7 +198,36 @@ export const Menu: FC<Props> = ({
           onClick: () => {
             getApi().openUrl('https://github.com/piratuks/invoice-builder/blob/main/TERMS-OF-USE.md');
           }
-        },
+        }
+      ]
+    }
+  ];
+
+  const appUpdater = [
+    {
+      items: [
+        ...(!isWebMode()
+          ? [
+              {
+                text: t('settingsMenuItems.titles.checkForUpdate'),
+                description: updateMessage,
+                icon: <AutorenewIcon />,
+                isToggle: false,
+                isSelected: false,
+                onClick: () => {
+                  dispatch(setUpdateMessage(t('common.checking')));
+                  getApi().checkForUpdates();
+                }
+              }
+            ]
+          : [])
+      ]
+    }
+  ];
+
+  const appPromotion = [
+    {
+      items: [
         {
           text: t('settingsMenuItems.titles.buyMeCoffee'),
           description: t('settingsMenuItems.descriptions.buyMeCoffee'),
@@ -209,22 +245,7 @@ export const Menu: FC<Props> = ({
           isToggle: false,
           isSelected: MenuItemSettings.WallOfFame === selectedMenu,
           onClick: () => onSelected(MenuItemSettings.WallOfFame)
-        },
-        ...(!isWebMode()
-          ? [
-              {
-                text: t('settingsMenuItems.titles.checkForUpdate'),
-                description: updateMessage,
-                icon: <AutorenewIcon />,
-                isToggle: false,
-                isSelected: false,
-                onClick: () => {
-                  dispatch(setUpdateMessage(t('common.checking')));
-                  getApi().checkForUpdates();
-                }
-              }
-            ]
-          : [])
+        }
       ]
     }
   ];
@@ -255,7 +276,24 @@ export const Menu: FC<Props> = ({
           </Card>
           <Card>
             <CardContent>
-              <MenuList useTooltip={false} items={appManagement} showText={true} />
+              <MenuList useTooltip={false} items={appBackup} showText={true} />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent>
+              <MenuList useTooltip={false} items={githubLinks} showText={true} />
+            </CardContent>
+          </Card>
+          {!isWebMode() && (
+            <Card>
+              <CardContent>
+                <MenuList useTooltip={false} items={appUpdater} showText={true} />
+              </CardContent>
+            </Card>
+          )}
+          <Card>
+            <CardContent>
+              <MenuList useTooltip={false} items={appPromotion} showText={true} />
             </CardContent>
           </Card>
         </Box>
