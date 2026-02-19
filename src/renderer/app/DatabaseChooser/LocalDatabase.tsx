@@ -105,7 +105,6 @@ export const LocalDatabase: FC<Props> = ({ onDatabaseRead }) => {
       saveDbList(newList);
       setIsInitializing(true);
       initDB();
-      console.log('asdasd');
     },
     [savedDbs, initDB, saveDbList]
   );
