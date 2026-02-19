@@ -273,7 +273,7 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
                     PDF_STYLES.textEnd,
                     {
                       borderLeft: rowStyle.borderCell,
-                      ...(visibleColumns.length - 1 && { borderRight: rowStyle.borderCell })
+                      ...(visibleColumns.length - 1 === index && { borderRight: rowStyle.borderCell })
                     }
                   ]}
                 >
@@ -300,7 +300,7 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
                     PDF_STYLES.textEnd,
                     {
                       borderLeft: rowStyle.borderCell,
-                      ...(visibleColumns.length - 1 && { borderRight: rowStyle.borderCell })
+                      ...(visibleColumns.length - 1 === index && { borderRight: rowStyle.borderCell })
                     }
                   ]}
                 >
@@ -327,7 +327,7 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
                     PDF_STYLES.textEnd,
                     {
                       borderLeft: rowStyle.borderCell,
-                      ...(visibleColumns.length - 1 && { borderRight: rowStyle.borderCell })
+                      ...(visibleColumns.length - 1 === index && { borderRight: rowStyle.borderCell })
                     }
                   ]}
                 >
@@ -356,7 +356,7 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
                     { textAlign: field.alignment },
                     {
                       borderLeft: rowStyle.borderCell,
-                      ...(visibleColumns.length - 1 && { borderRight: rowStyle.borderCell })
+                      ...(visibleColumns.length - 1 === index && { borderRight: rowStyle.borderCell })
                     }
                   ]}
                 >
@@ -412,7 +412,7 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
                         sizes['rowNo'],
                         {
                           borderLeft: rowStyle.borderCell,
-                          ...(visibleColumns.length - 1 && { borderRight: rowStyle.borderCell })
+                          ...(visibleColumns.length - 1 === index && { borderRight: rowStyle.borderCell })
                         }
                       ]}
                     >
@@ -437,7 +437,7 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
                         sizes['item'],
                         {
                           borderLeft: rowStyle.borderCell,
-                          ...(visibleColumns.length - 1 && { borderRight: rowStyle.borderCell })
+                          ...(visibleColumns.length - 1 === index && { borderRight: rowStyle.borderCell })
                         }
                       ]}
                     >
@@ -477,7 +477,7 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
                         PDF_STYLES.textEnd,
                         {
                           borderLeft: rowStyle.borderCell,
-                          ...(visibleColumns.length - 1 && { borderRight: rowStyle.borderCell })
+                          ...(visibleColumns.length - 1 === index && { borderRight: rowStyle.borderCell })
                         }
                       ]}
                     >
@@ -503,7 +503,7 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
                         PDF_STYLES.textEnd,
                         {
                           borderLeft: rowStyle.borderCell,
-                          ...(visibleColumns.length - 1 && { borderRight: rowStyle.borderCell })
+                          ...(visibleColumns.length - 1 === index && { borderRight: rowStyle.borderCell })
                         }
                       ]}
                     >
@@ -529,7 +529,7 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
                         PDF_STYLES.textEnd,
                         {
                           borderLeft: rowStyle.borderCell,
-                          ...(visibleColumns.length - 1 && { borderRight: rowStyle.borderCell })
+                          ...(visibleColumns.length - 1 === index && { borderRight: rowStyle.borderCell })
                         }
                       ]}
                     >
@@ -555,7 +555,7 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
                         PDF_STYLES.textEnd,
                         {
                           borderLeft: rowStyle.borderCell,
-                          ...(visibleColumns.length - 1 && { borderRight: rowStyle.borderCell })
+                          ...(visibleColumns.length - 1 === index && { borderRight: rowStyle.borderCell })
                         }
                       ]}
                     >
@@ -583,7 +583,7 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
                         { textAlign: field.alignment },
                         {
                           borderLeft: rowStyle.borderCell,
-                          ...(visibleColumns.length - 1 && { borderRight: rowStyle.borderCell })
+                          ...(visibleColumns.length - 1 === index && { borderRight: rowStyle.borderCell })
                         }
                       ]}
                     >

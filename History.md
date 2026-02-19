@@ -1,5 +1,12 @@
 # Invoice Builder
 
+## 2026-02-19, version 2.1.1
+
+Bug Fixes
+
+- Hotfix for customization dropdown. Removing visible overlay when dropdown is open
+- Fixing "Bordered" table layout. Some borders were overlapping
+
 ## 2026-02-19, version 2.1.0
 
 New features & improvements
