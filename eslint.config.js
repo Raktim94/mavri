@@ -41,7 +41,9 @@ export default [
       '@typescript-eslint/no-var-requires': 'off',
       '@typescript-eslint/no-empty-function': 'off',
       'react/react-in-jsx-scope': 'off',
-      'no-case-declarations': 'off'
+      'no-case-declarations': 'off',
+      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/purity': 'off'
     },
 
     settings: {
