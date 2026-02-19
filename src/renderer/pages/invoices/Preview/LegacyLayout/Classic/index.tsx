@@ -95,6 +95,11 @@ const ClassicLayoutComponent: FC<Props> = ({
           termsConditionsLabel: pdfTexts.termsConditions
         }}
       />
+      <SignatureInfo
+        invoiceForm={invoiceForm}
+        signatureUrl={signatureUrl}
+        authorisedSignatoryLabel={pdfTexts.authorisedSignatoryLabel}
+      />
       <PageCounterInfo
         invoiceForm={invoiceForm}
         labels={{
@@ -102,7 +107,6 @@ const ClassicLayoutComponent: FC<Props> = ({
           pageLabel: pdfTexts.page
         }}
       />
-      <SignatureInfo invoiceForm={invoiceForm} signatureUrl={signatureUrl} />
     </Page>
   );
 };

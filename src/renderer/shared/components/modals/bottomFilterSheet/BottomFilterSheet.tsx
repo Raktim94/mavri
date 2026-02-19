@@ -39,6 +39,9 @@ export const BottomFilterSheet: FC<Props> = ({ filters, onFilter = () => {}, sel
   const remainingFilters = useMemo(() => filters.filter(f => !f.isGroup), [filters]);
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
 
+  const onOpen = () => setIsOpen(true);
+  const onClose = () => setIsOpen(false);
+
   const getDateRange = (type: FilterType): [string | undefined, string | undefined] => {
     const value = selectedFilter.find(f => f.type === type)?.value;
 
@@ -82,9 +85,6 @@ export const BottomFilterSheet: FC<Props> = ({ filters, onFilter = () => {}, sel
     <T extends string | number | symbol>(type: FilterType) =>
     (_event: React.SyntheticEvent, newValue: CustomOption<T> | null) =>
       updateFilter(type, newValue?.value as string);
-
-  const onOpen = () => setIsOpen(true);
-  const onClose = () => setIsOpen(false);
 
   const onSelectedFilter = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;

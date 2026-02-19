@@ -35,7 +35,8 @@ export const usePdfTexts = (
       unitLabel: tt('common.unit'),
       qtyLabel: tt('common.qty'),
       unitCostLabel: tt('common.unitCost'),
-      totalLabel: tt('common.total')
+      totalLabel: tt('common.total'),
+      authorisedSignatoryLabel: tt('common.authorisedSignatory')
     };
   }, [tt]);
 };

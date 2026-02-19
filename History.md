@@ -2,6 +2,10 @@
 
 ## [DATE], version 2.2.0
 
+New features & improvements
+
+- Updated signature representation and added a customizable "Authorised signatory" label
+
 ## 2026-02-19, version 2.1.1
 
 Bug Fixes

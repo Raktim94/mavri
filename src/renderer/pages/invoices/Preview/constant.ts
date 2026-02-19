@@ -122,9 +122,6 @@ export const PDF_STYLES = StyleSheet.create({
   },
   attachment: { width: '100%', height: '90%', objectFit: 'contain' },
   signature: {
-    position: 'absolute',
-    bottom: '10',
-    left: '10',
     width: '100px',
     objectFit: 'contain'
   },

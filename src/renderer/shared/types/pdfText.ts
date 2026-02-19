@@ -25,4 +25,5 @@ export interface PDFText {
   unitLabel?: string;
   qtyLabel?: string;
   unitCostLabel?: string;
+  authorisedSignatoryLabel?: string;
 }
