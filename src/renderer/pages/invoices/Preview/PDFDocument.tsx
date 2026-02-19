@@ -245,6 +245,11 @@ const PDFDocumentComponent: FC<Props> = ({
             <PaymentInfo invoiceForm={invoiceForm} paymentInfoLabel={pdfTexts.paymentInfo} qrCodeUrl={qrCodeUrl} />
           </View>
 
+          <SignatureInfo
+            invoiceForm={invoiceForm}
+            signatureUrl={signatureUrl}
+            authorisedSignatoryLabel={pdfTexts.authorisedSignatoryLabel}
+          />
           <PageCounterInfo
             invoiceForm={invoiceForm}
             labels={{
@@ -252,7 +257,6 @@ const PDFDocumentComponent: FC<Props> = ({
               pageLabel: pdfTexts.page
             }}
           />
-          <SignatureInfo invoiceForm={invoiceForm} signatureUrl={signatureUrl} />
         </Page>
       )}
 
@@ -275,7 +279,6 @@ const PDFDocumentComponent: FC<Props> = ({
               pageLabel: pdfTexts.page
             }}
           />
-          <SignatureInfo invoiceForm={invoiceForm} signatureUrl={signatureUrl} />
         </Page>
       ))}
     </Document>

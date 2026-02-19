@@ -51,7 +51,8 @@ const isPDFText = (value: unknown): value is PDFText => {
     'itemLabel',
     'unitLabel',
     'qtyLabel',
-    'unitCostLabel'
+    'unitCostLabel',
+    'authorisedSignatoryLabel'
   ] as const;
 
   type PdfTextKey = (typeof PDF_TEXT_KEYS)[number];

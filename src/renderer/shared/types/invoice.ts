@@ -51,6 +51,7 @@ export interface PdfTexts {
   unitLabel: string;
   qtyLabel: string;
   unitCostLabel: string;
+  authorisedSignatoryLabel: string;
 }
 
 export interface AttachmentURL {
