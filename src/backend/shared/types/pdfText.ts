@@ -1,0 +1,28 @@
+export interface PDFText {
+  billTo?: string;
+  quoteNo?: string;
+  invoiceNo?: string;
+  date?: string;
+  dueDate?: string;
+  customerNote?: string;
+  termsConditions?: string;
+  of?: string;
+  page?: string;
+  paymentInfo?: string;
+  pdfINVOICE?: string;
+  pdfQUOTE?: string;
+  subTotalLabel?: string;
+  discountLabel?: string;
+  incLabel?: string;
+  taxLabel?: string;
+  taxExclusivePerItemLabel?: string;
+  taxInclusivePerItemLabel?: string;
+  shippingFeeLabel?: string;
+  totalLabel?: string;
+  paidLabel?: string;
+  balanceDueLabel?: string;
+  itemLabel?: string;
+  unitLabel?: string;
+  qtyLabel?: string;
+  unitCostLabel?: string;
+}

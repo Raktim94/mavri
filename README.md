@@ -82,6 +82,7 @@ If you value **privacy, portability, and control**, this app is built for you.
 - Custom header sections and custom values in the PDF item table
 - Ability to reorder all columns/headers in the PDF item table
 - Ability to include QR codes for payment into PDF
+- Ability to customize invoice / quote labels to custom text
 
 ### Reports
 

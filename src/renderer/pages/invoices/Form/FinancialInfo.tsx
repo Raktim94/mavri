@@ -194,7 +194,7 @@ const FinancialInfoComponent: FC<Props> = ({
           variant="body1"
           sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}
         >
-          {t('invoices.total')}
+          {t('common.total')}
         </Typography>
         {invoiceForm?.invoiceType === InvoiceType.invoice && (
           <Typography

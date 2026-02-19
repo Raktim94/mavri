@@ -15,7 +15,7 @@ interface PropsLabels {
   qtyLabel: string;
   unitCostLabel: string;
   totalLabel: string;
-  itemTaxLabel: (data: { rate?: number; amount: string }) => string;
+  taxLabel: string;
 }
 interface Props {
   invoiceForm?: InvoiceFromData;
@@ -23,7 +23,7 @@ interface Props {
   labels: PropsLabels;
 }
 const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) => {
-  const { itemLabel, unitLabel, qtyLabel, unitCostLabel, totalLabel, itemTaxLabel } = labels;
+  const { itemLabel, unitLabel, qtyLabel, unitCostLabel, totalLabel, taxLabel } = labels;
 
   const format = useMemo(
     () => (invoiceForm ? createCurrencyFormatter(storeSettings!, invoiceForm) : (n: number) => String(n)),
@@ -462,7 +462,7 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
                             }
                           ]}
                         >
-                          {itemTaxLabel({ rate: taxRate, amount: formattedTax })}
+                          {`${taxLabel}(${taxRate}%): ${formattedTax}`}
                         </Text>
                       )}
                     </View>

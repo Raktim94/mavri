@@ -105,6 +105,7 @@ const InvoicesPreviewComponent: FC<Props> = ({ onSaveProfile = () => {}, setInvo
       showUnit: invoiceForm?.invoiceCustomization?.showUnit,
       showRowNo: invoiceForm?.invoiceCustomization?.showRowNo,
       fieldSortOrders: invoiceForm?.invoiceCustomization?.fieldSortOrders,
+      pdfTexts: invoiceForm?.invoiceCustomization?.pdfTexts,
       customField: customFieldHeaders
     };
   }, [invoiceForm?.invoiceCustomization, customFieldHeaders]);
@@ -113,6 +114,7 @@ const InvoicesPreviewComponent: FC<Props> = ({ onSaveProfile = () => {}, setInvo
     <Box sx={{ height: '100%' }}>
       <PreviewCore invoiceForm={invoiceForm} />
       <CustomizationDropdown
+        language={invoiceForm?.language}
         data={customizationData}
         isOpen={isDropdownOpenCustomization}
         onClose={() => handleOnClose(setIsDropdownOpenCustomization)}

@@ -38,7 +38,8 @@ export const StyleProfilesPage = () => {
     'showQuantity',
     'showUnit',
     'showRowNo',
-    'fieldSortOrders'
+    'fieldSortOrders',
+    'pdfTexts'
   ];
   const excelFileName = 'style_profiles';
   const excelTemplateData: Rows = [

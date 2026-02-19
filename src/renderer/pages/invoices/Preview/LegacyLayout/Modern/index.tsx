@@ -61,8 +61,8 @@ const ModernLayoutComponent: FC<Props> = ({
           unitLabel: pdfTexts.unitLabel,
           qtyLabel: pdfTexts.qtyLabel,
           unitCostLabel: pdfTexts.unitCostLabel,
-          totalLabel: pdfTexts.totalLabel2,
-          itemTaxLabel: pdfTexts.itemTaxLabel
+          totalLabel: pdfTexts.totalLabel,
+          taxLabel: pdfTexts.taxLabel
         }}
       />
       <View
@@ -76,18 +76,15 @@ const ModernLayoutComponent: FC<Props> = ({
           storeSettings={storeSettings}
           labels={{
             subTotalLabel: pdfTexts.subTotalLabel,
-            discountPrctLabel: pdfTexts.discountPrctLabel,
             discountLabel: pdfTexts.discountLabel,
-            taxExclusiveLabel: pdfTexts.taxExclusiveLabel,
-            taxInclusiveLabel: pdfTexts.taxInclusiveLabel,
-            taxRateLabel: pdfTexts.taxRateLabel,
+            incLabel: pdfTexts.incLabel,
+            taxLabel: pdfTexts.taxLabel,
             taxExclusivePerItemLabel: pdfTexts.taxExclusivePerItemLabel,
             taxInclusivePerItemLabel: pdfTexts.taxInclusivePerItemLabel,
             shippingFeeLabel: pdfTexts.shippingFeeLabel,
-            totalLabel: pdfTexts.totalLabel1,
+            totalLabel: pdfTexts.totalLabel,
             paidLabel: pdfTexts.paidLabel,
-            balanceDueLabel: pdfTexts.balanceDueLabel,
-            taxLabel: pdfTexts.taxLabel
+            balanceDueLabel: pdfTexts.balanceDueLabel
           }}
         />
       </View>

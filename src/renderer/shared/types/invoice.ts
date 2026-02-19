@@ -11,6 +11,7 @@ import type { SizeType } from '../enums/sizeType';
 import type { TableHeaderStyle } from '../enums/tableHeaderStyle';
 import type { TableRowStyle } from '../enums/tableRowStyle';
 import type { InvoiceItemTaxType, InvoiceTaxType } from '../enums/taxType';
+import type { PDFText } from './pdfText';
 import type { SortOrder } from './sortOrder';
 
 export interface CustomFieldMeta {
@@ -37,24 +38,19 @@ export interface PdfTexts {
   pdfINVOICE: string;
   pdfQUOTE: string;
   subTotalLabel: string;
-  discountPrctLabel: string;
   discountLabel: string;
-  taxExclusiveLabel: string;
-  taxInclusiveLabel: string;
-  taxRateLabel: string;
+  incLabel: string;
+  taxLabel: string;
   taxExclusivePerItemLabel: string;
   taxInclusivePerItemLabel: string;
   shippingFeeLabel: string;
-  totalLabel1: string;
+  totalLabel: string;
   paidLabel: string;
   balanceDueLabel: string;
-  taxLabel: string;
   itemLabel: string;
   unitLabel: string;
   qtyLabel: string;
   unitCostLabel: string;
-  totalLabel2: string;
-  itemTaxLabel: (data: { rate?: number; amount: string }) => string;
 }
 
 export interface AttachmentURL {
@@ -167,6 +163,7 @@ export interface InvoiceCustomizationMeta {
   showUnit?: boolean;
   showRowNo?: boolean;
   fieldSortOrders: SortOrder;
+  pdfTexts?: PDFText;
 }
 
 export interface InvoiceCustomization extends InvoiceCustomizationMeta {
@@ -177,6 +174,41 @@ export interface InvoiceCustomization extends InvoiceCustomizationMeta {
 export interface InvoiceCustomizationWeb extends InvoiceCustomizationMeta {
   watermarkFileData?: string;
   paidWatermarkFileData?: string;
+}
+
+export interface CustomizationFormPageSetup {
+  pageFormat?: PageFormat;
+  layout?: LayoutType;
+  fontSize?: SizeType;
+  fontFamily?: FontFamily;
+}
+
+export interface CustomizationFormBranding {
+  color?: string;
+  logoSize?: SizeType;
+  watermarkFileName?: string;
+  watermarkFileType?: string;
+  watermarkFileSize?: number;
+  watermarkFileData?: Uint8Array;
+  paidWatermarkFileName?: string;
+  paidWatermarkFileType?: string;
+  paidWatermarkFileSize?: number;
+  paidWatermarkFileData?: Uint8Array;
+}
+
+export interface CustomizationFormTable {
+  tableHeaderStyle?: TableHeaderStyle;
+  tableRowStyle?: TableRowStyle;
+  showQuantity?: boolean;
+  showUnit?: boolean;
+  showRowNo?: boolean;
+  fieldSortOrders?: SortOrder;
+  customField?: CustomField[];
+}
+
+export interface CustomizationFormTypographyLabels {
+  pdfTexts?: PDFText;
+  labelUpperCase?: boolean;
 }
 
 export interface CustomizationForm {
@@ -201,6 +233,7 @@ export interface CustomizationForm {
   showUnit?: boolean;
   showRowNo?: boolean;
   fieldSortOrders?: SortOrder;
+  pdfTexts?: PDFText;
   customField?: CustomField[];
 }
 

@@ -244,7 +244,8 @@ const InvoiceFormComponent: FC<Props> = ({
             showQuantity: data.showQuantity,
             showUnit: data.showUnit,
             showRowNo: data.showRowNo,
-            fieldSortOrders: data.fieldSortOrders
+            fieldSortOrders: data.fieldSortOrders,
+            pdfTexts: data.pdfTexts
           }
         });
       });

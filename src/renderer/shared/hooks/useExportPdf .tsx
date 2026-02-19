@@ -1,6 +1,6 @@
 import { pdf } from '@react-pdf/renderer';
 import { parseISO } from 'date-fns';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { PDFDocument } from '../../pages/invoices/Preview/PDFDocument';
 import { MONTH_NAMES } from '../../state/constant';
 import { InvoiceType } from '../enums/invoiceType';
@@ -101,7 +101,19 @@ export const getWatermarkPaidUrl = async (invoiceForm?: InvoiceFromData) => {
 
 export const useExportPdf = (data: { invoiceForm?: InvoiceFromData; storeSettings?: Settings }) => {
   const { invoiceForm, storeSettings } = data;
-  const pdfTexts = usePdfTexts(invoiceForm);
+
+  const pdfTextsDefaults = usePdfTexts({
+    labelUpperCase: invoiceForm?.invoiceCustomization?.labelUpperCase,
+    language: invoiceForm?.language
+  });
+  const pdfTexts = useMemo(() => {
+    const customLabels = invoiceForm?.invoiceCustomization?.pdfTexts || {};
+
+    return {
+      ...pdfTextsDefaults,
+      ...customLabels
+    };
+  }, [invoiceForm, pdfTextsDefaults]);
 
   const exportPdf = useCallback(async () => {
     if (!invoiceForm) return;

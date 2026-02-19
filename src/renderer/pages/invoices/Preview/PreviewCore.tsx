@@ -1,5 +1,5 @@
 import { PDFViewer } from '@react-pdf/renderer';
-import { memo, useEffect, useState, type FC } from 'react';
+import { memo, useEffect, useMemo, useState, type FC } from 'react';
 import {
   getAttachmentsUrl,
   getLogoUrl,
@@ -26,7 +26,18 @@ const PreviewCoreComponent: FC<Props> = ({ invoiceForm }) => {
   const [signatureUrl, setSignatureUrl] = useState<string | undefined>();
   const [qrCodeUrl, setQrCodeUrl] = useState<string | undefined>();
   const [loading, setLoading] = useState(true);
-  const pdfTexts = usePdfTexts(invoiceForm);
+  const pdfTextsDefaults = usePdfTexts({
+    labelUpperCase: invoiceForm?.invoiceCustomization?.labelUpperCase,
+    language: invoiceForm?.language
+  });
+  const pdfTexts = useMemo(() => {
+    const customLabels = invoiceForm?.invoiceCustomization?.pdfTexts || {};
+
+    return {
+      ...pdfTextsDefaults,
+      ...customLabels
+    };
+  }, [invoiceForm, pdfTextsDefaults]);
 
   useEffect(() => {
     let cancelled = false;

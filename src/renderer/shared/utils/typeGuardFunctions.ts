@@ -12,9 +12,94 @@ import type {
   InvoiceFromData
 } from '../types/invoice';
 import type { ItemFromData } from '../types/item';
+import type { PDFText } from '../types/pdfText';
+import type { SortOrder } from '../types/sortOrder';
 import type { StyleProfileFromData } from '../types/styleProfiles';
 import type { UnitFromData } from '../types/unit';
 import { validators } from './validatorFunctions';
+
+const currencyFormatValues = new Set<CurrencyFormat>(Object.values(CurrencyFormat));
+
+const isValidCurrencyFormat = (value: unknown): value is CurrencyFormat => {
+  return typeof value === 'string' && currencyFormatValues.has(value as CurrencyFormat);
+};
+
+const isPDFText = (value: unknown): value is PDFText => {
+  const PDF_TEXT_KEYS = [
+    'billTo',
+    'quoteNo',
+    'invoiceNo',
+    'date',
+    'dueDate',
+    'customerNote',
+    'termsConditions',
+    'of',
+    'page',
+    'paymentInfo',
+    'pdfINVOICE',
+    'pdfQUOTE',
+    'subTotalLabel',
+    'discountLabel',
+    'incLabel',
+    'taxLabel',
+    'taxExclusivePerItemLabel',
+    'taxInclusivePerItemLabel',
+    'shippingFeeLabel',
+    'totalLabel',
+    'paidLabel',
+    'balanceDueLabel',
+    'itemLabel',
+    'unitLabel',
+    'qtyLabel',
+    'unitCostLabel'
+  ] as const;
+
+  type PdfTextKey = (typeof PDF_TEXT_KEYS)[number];
+
+  if (!isRecord(value)) return false;
+
+  for (const key of Object.keys(value)) {
+    if (!PDF_TEXT_KEYS.includes(key as PdfTextKey)) {
+      return false;
+    }
+    if (typeof value[key] !== 'string') {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === 'object' && value !== null;
+};
+
+const isSortOrder = (value: unknown): value is SortOrder => {
+  const SORT_ORDER_KEYS = ['no', 'item', 'unit', 'quantity', 'unitCost', 'total'] as const;
+  type SortOrderKey = (typeof SORT_ORDER_KEYS)[number];
+
+  let parsed = value;
+  if (typeof value === 'string') {
+    parsed = JSON.parse(value);
+  }
+
+  if (!isRecord(parsed)) return false;
+
+  const record: Record<string, unknown> = parsed;
+
+  for (const key of Object.keys(record)) {
+    if (!SORT_ORDER_KEYS.includes(key as SortOrderKey)) {
+      return false;
+    }
+  }
+  for (const key of SORT_ORDER_KEYS) {
+    if (typeof record[key] !== 'number') {
+      return false;
+    }
+  }
+
+  return true;
+};
 
 export const isBankFromData = (data: unknown): data is BankFromData => {
   if (typeof data !== 'object' || data === null) return false;
@@ -85,14 +170,19 @@ export const isStyleProfileFromData = (data: unknown): data is StyleProfileFromD
 
   if (typeof d.name !== 'string') return false;
 
+  if (d.pdfText !== undefined && d.pdfText !== null && d.pdfText !== '' && !isPDFText(d.pdfText)) {
+    return false;
+  }
+
   if (
     d.fieldSortOrders !== undefined &&
     d.fieldSortOrders !== null &&
     d.fieldSortOrders !== '' &&
-    typeof d.fieldSortOrders !== 'string' &&
-    typeof d.fieldSortOrders !== 'object'
-  )
+    !isSortOrder(d.fieldSortOrders)
+  ) {
     return false;
+  }
+
   if (d.id !== undefined && d.id !== null && d.id !== '' && typeof d.id !== 'number') return false;
 
   if (d.isArchived !== undefined && d.isArchived !== null && d.isArchived !== '' && typeof d.isArchived !== 'boolean')
@@ -382,12 +472,6 @@ export const isClientFromData = (data: unknown): data is ClientFromData => {
   return true;
 };
 
-const currencyFormatValues = new Set<CurrencyFormat>(Object.values(CurrencyFormat));
-
-const isValidCurrencyFormat = (value: unknown): value is CurrencyFormat => {
-  return typeof value === 'string' && currencyFormatValues.has(value as CurrencyFormat);
-};
-
 export const isCurrencyFromData = (data: unknown): data is CurrencyFromData => {
   if (typeof data !== 'object' || data === null) return false;
 
@@ -559,12 +643,15 @@ export const isInvoiceCustomizationFromData = (data: unknown): data is InvoiceCu
 
   const d = data as Record<string, unknown>;
 
+  if (d.pdfText !== undefined && d.pdfText !== null && d.pdfText !== '' && !isPDFText(d.pdfText)) {
+    return false;
+  }
+
   if (
     d.fieldSortOrders !== undefined &&
     d.fieldSortOrders !== null &&
     d.fieldSortOrders !== '' &&
-    typeof d.fieldSortOrders !== 'string' &&
-    typeof d.fieldSortOrders !== 'object'
+    !isSortOrder(d.fieldSortOrders)
   )
     return false;
   if (d.id !== undefined && d.id !== null && d.id !== '' && typeof d.id !== 'number') return false;

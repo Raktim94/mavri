@@ -110,7 +110,9 @@ export const PDF_STYLES = StyleSheet.create({
     paddingTop: 10
   },
   tableCol: {
-    padding: 6
+    padding: 6,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis'
   },
   tableCellHeader: {
     fontWeight: 'bold'
