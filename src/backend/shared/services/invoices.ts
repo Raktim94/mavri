@@ -104,7 +104,8 @@ const invoiceCustomizationFields: (keyof InvoiceCustomization)[] = [
   'showQuantity',
   'showUnit',
   'showRowNo',
-  'fieldSortOrders'
+  'fieldSortOrders',
+  'pdfTexts'
 ];
 const invoiceFields: (keyof Invoice)[] = [
   'invoiceType',
@@ -471,6 +472,10 @@ const getInvoices = async (db: DatabaseAdapter, options: GetInvoicesOptions) => 
       invoiceCustomization: specificCustomization
         ? {
             ...specificCustomization,
+            pdfTexts:
+              specificCustomization.pdfTexts && typeof specificCustomization.pdfTexts === 'string'
+                ? JSON.parse(specificCustomization.pdfTexts)
+                : specificCustomization.pdfTexts,
             fieldSortOrders:
               specificCustomization.fieldSortOrders && typeof specificCustomization.fieldSortOrders === 'string'
                 ? JSON.parse(specificCustomization.fieldSortOrders)
@@ -570,7 +575,8 @@ export const addInvoice = async (db: DatabaseAdapter, data: Invoice) => {
       const ibs = await handleInvoiceCustomization({
         ...data.invoiceCustomization,
         parentInvoiceId: newId,
-        fieldSortOrders: JSON.stringify(data.invoiceCustomization.fieldSortOrders)
+        fieldSortOrders: JSON.stringify(data.invoiceCustomization.fieldSortOrders),
+        pdfTexts: JSON.stringify(data.invoiceCustomization.pdfTexts)
       });
       if (!ibs.success) {
         await rollbackOrThrow(db);
@@ -702,7 +708,8 @@ export const updateInvoice = async (db: DatabaseAdapter, data: Invoice) => {
         {
           ...data.invoiceCustomization,
           parentInvoiceId: data.id,
-          fieldSortOrders: JSON.stringify(data.invoiceCustomization.fieldSortOrders)
+          fieldSortOrders: JSON.stringify(data.invoiceCustomization.fieldSortOrders),
+          pdfTexts: JSON.stringify(data.invoiceCustomization.pdfTexts)
         },
         data.invoiceCustomization.id != undefined
       );
@@ -972,7 +979,8 @@ export const duplicateInvoice = async (
       'showQuantity',
       'showUnit',
       'showRowNo',
-      'fieldSortOrders'
+      'fieldSortOrders',
+      'pdfTexts'
     ]);
     await duplicateSnapshot('invoice_style_profile_snapshots', ['styleProfileName']);
 

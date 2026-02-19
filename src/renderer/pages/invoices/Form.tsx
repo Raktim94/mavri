@@ -112,7 +112,8 @@ const InvoiceFormComponent: FC<Props> = ({
             showQuantity: true,
             showUnit: true,
             showRowNo: true,
-            fieldSortOrders: DEFAULT_TABLE_FIELD_SORT_ORDERS
+            fieldSortOrders: DEFAULT_TABLE_FIELD_SORT_ORDERS,
+            pdfTexts: undefined
           }
         });
       }

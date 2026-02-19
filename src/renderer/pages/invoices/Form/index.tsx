@@ -244,7 +244,8 @@ const InvoiceFormComponent: FC<Props> = ({
             showQuantity: data.showQuantity,
             showUnit: data.showUnit,
             showRowNo: data.showRowNo,
-            fieldSortOrders: data.fieldSortOrders
+            fieldSortOrders: data.fieldSortOrders,
+            pdfTexts: data.pdfTexts
           }
         });
       });
@@ -871,7 +872,6 @@ const InvoiceFormComponent: FC<Props> = ({
         onOpen={() => handleOnOpen(setMoreActionDropdown)}
         onDelete={() => {
           handleOnClose(setMoreActionDropdown);
-          setInvoiceForm(undefined);
           if (invoiceForm?.id !== undefined) handleDelete(invoiceForm.id);
         }}
         onDuplicate={() => {

@@ -1,9 +1,12 @@
 import { useMemo } from 'react';
-import type { InvoiceFromData, PdfTexts } from '../types/invoice';
+import type { Language } from '../enums/language';
+import type { PdfTexts } from '../types/invoice';
 import { useUppercaseTranslation } from './useUppercaseTranslation';
 
-export const usePdfTexts = (invoiceForm?: InvoiceFromData): PdfTexts => {
-  const { tt } = useUppercaseTranslation(invoiceForm?.invoiceCustomization?.labelUpperCase, invoiceForm?.language);
+export const usePdfTexts = (
+  data: { labelUpperCase?: boolean; language?: Language } | undefined = undefined
+): PdfTexts => {
+  const { tt } = useUppercaseTranslation(data?.labelUpperCase, data?.language);
 
   return useMemo(() => {
     return {
@@ -20,40 +23,19 @@ export const usePdfTexts = (invoiceForm?: InvoiceFromData): PdfTexts => {
       pdfINVOICE: tt('invoices.pdfINVOICE'),
       pdfQUOTE: tt('invoices.pdfQUOTE'),
       subTotalLabel: tt('invoices.subTotal'),
-      discountPrctLabel: tt('invoices.discountPrct', {
-        prct: invoiceForm?.discountPercent
-      }),
       discountLabel: tt('invoices.discount'),
-      taxExclusiveLabel: tt('invoices.taxExclusive', {
-        name: invoiceForm?.taxName,
-        prct: invoiceForm?.taxRate
-      }),
-      taxInclusiveLabel: tt('invoices.taxInclusive', {
-        name: invoiceForm?.taxName,
-        prct: invoiceForm?.taxRate
-      }),
-      taxRateLabel: tt('invoices.taxInclusivePlaceholder', {
-        prct: invoiceForm?.taxRate
-      }),
+      incLabel: tt('invoices.inc'),
+      taxLabel: tt('invoices.taxLabel'),
       taxExclusivePerItemLabel: tt('invoices.taxExclusivePerItem'),
       taxInclusivePerItemLabel: tt('invoices.taxInclusivePerItem'),
       shippingFeeLabel: tt('invoices.shippingFee'),
-      totalLabel1: tt('invoices.total'),
       paidLabel: tt('invoices.paid'),
       balanceDueLabel: tt('invoices.balanceDue'),
-      taxLabel: tt('invoices.tax', {
-        prct: invoiceForm?.taxRate ?? 0
-      }),
       itemLabel: tt('common.item'),
       unitLabel: tt('common.unit'),
       qtyLabel: tt('common.qty'),
       unitCostLabel: tt('common.unitCost'),
-      totalLabel2: tt('common.total'),
-      itemTaxLabel: ({ rate, amount }) =>
-        tt('invoices.itemTax', {
-          rate,
-          amount
-        })
+      totalLabel: tt('common.total')
     };
-  }, [invoiceForm?.discountPercent, invoiceForm?.taxName, invoiceForm?.taxRate, tt]);
+  }, [tt]);
 };

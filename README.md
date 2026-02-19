@@ -26,12 +26,12 @@ Your data stays on your machine in a database file you own.
 
 Invoice Builder is designed for freelancers, contractors, and small businesses who want:
 
-- **Full ownership of their data** — no cloud lock‑in
-- **Offline access** — works anywhere, anytime
-- **A predictable, transparent tool** — no subscriptions, no hidden sync
-- **Cross-platform support** — macOS, Windows & Linux
-- **Import/export freedom** — JSON, XLSX, full database backups
-- **Highly customizable PDFs** — branding, layout, colors, typography
+- **Full ownership of their data** - no cloud lock‑in
+- **Offline access** - works anywhere, anytime
+- **A predictable, transparent tool** - no subscriptions, no hidden sync
+- **Cross-platform support** - macOS, Windows & Linux
+- **Import/export freedom** - JSON, XLSX, full database backups
+- **Highly customizable PDFs** - branding, layout, colors, typography
 
 If you value **privacy, portability, and control**, this app is built for you.
 
@@ -82,6 +82,7 @@ If you value **privacy, portability, and control**, this app is built for you.
 - Custom header sections and custom values in the PDF item table
 - Ability to reorder all columns/headers in the PDF item table
 - Ability to include QR codes for payment into PDF
+- Ability to customize invoice / quote labels to custom text
 
 ### Reports
 
@@ -335,14 +336,14 @@ VITE_API_URL={url} Backend webserver URL when running without Electron (Web/Dock
 
 ### 🛠️ Core Stack
 
-- **Docker** — containerization for self‑hosting and reproducible deployments
-- **Electron** — cross-platform desktop framework
-- **SQLite** — lightweight, reliable embedded database
-- **TypeScript** — safer, maintainable code
-- **React** — UI framework
-- **MUI** — styling and UI components
-- **exceljs** — XLSX import/export
-- **@react-pdf/renderer** — PDF generation
+- **Docker** - containerization for self‑hosting and reproducible deployments
+- **Electron** - cross-platform desktop framework
+- **SQLite** - lightweight, reliable embedded database
+- **TypeScript** - safer, maintainable code
+- **React** - UI framework
+- **MUI** - styling and UI components
+- **exceljs** - XLSX import/export
+- **@react-pdf/renderer** - PDF generation
 
 ### 🗂️ Database Schema
 
@@ -350,7 +351,7 @@ VITE_API_URL={url} Backend webserver URL when running without Electron (Web/Dock
 
 ### 🤝 Contributing Guidelines
 
-Contributions of all kinds are welcome — bug reports, feature ideas, documentation improvements, and pull requests.  
+Contributions of all kinds are welcome - bug reports, feature ideas, documentation improvements, and pull requests.  
 Please open an issue before starting major work to ensure alignment.
 
 - Report issues or features [here](https://github.com/piratuks/invoice-builder/issues)
@@ -380,5 +381,12 @@ See the [LICENSE](LICENSE) file for details.
 
 ## ☕ Support
 
-If you find this project helpful, consider supporting it on [Buy Me a Coffee](https://www.buymeacoffee.com/evaldizi)!  
-Your support helps maintain and improve the project.
+Invoice Builder is maintained by a single developer. Your support helps keep updates coming and new features rolling out!
+
+Want to be a part of this project’s journey? You can support it here: [Buy Me a Coffee](https://www.buymeacoffee.com/evaldizi)
+
+### 💖 Supporters
+
+_No supporters yet - maybe you’ll be the first!_
+
+Every contribution counts, even a small one, and your name will appear here as a supporter of Invoice Builder.

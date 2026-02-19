@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { CustomizationLayout } from '../../../../shared/components/layout/customizationLayout/CustomizationLayout';
 import { PageHeader } from '../../../../shared/components/layout/pageHeader/PageHeader';
 import { FontFamily } from '../../../../shared/enums/fontFamily';
+import type { Language } from '../../../../shared/enums/language';
 import { useForm } from '../../../../shared/hooks/useForm';
 import type { CustomizationForm } from '../../../../shared/types/invoice';
 import type { StyleProfileFromData } from '../../../../shared/types/styleProfiles';
@@ -14,13 +15,22 @@ import { ProfileNameSetter } from '../../Form/Modals/ProfileNameSetter';
 
 interface Props {
   isOpen: boolean;
+  language?: Language;
   onClose?: () => void;
   onOpen?: () => void;
   onClick?: (data: CustomizationForm) => void;
   onSaveProfile?: (data: StyleProfileFromData) => void;
   data?: CustomizationForm;
 }
-const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onSaveProfile, onClose, onOpen, onClick }) => {
+const CustomizationDropdownComponent: FC<Props> = ({
+  isOpen,
+  data,
+  language,
+  onSaveProfile,
+  onClose,
+  onOpen,
+  onClick
+}) => {
   const { t } = useTranslation();
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
@@ -57,18 +67,19 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onSaveProfile
                 tableRowStyle: data?.tableRowStyle,
                 pageFormat: data?.pageFormat,
                 labelUpperCase: data?.labelUpperCase ?? false,
-                watermarkFileName: data?.watermarkFileName ?? undefined,
-                watermarkFileType: data?.watermarkFileType ?? undefined,
-                watermarkFileSize: data?.watermarkFileSize ?? undefined,
-                watermarkFileData: data?.watermarkFileData ?? undefined,
-                paidWatermarkFileName: data?.paidWatermarkFileName ?? undefined,
-                paidWatermarkFileType: data?.paidWatermarkFileType ?? undefined,
-                paidWatermarkFileSize: data?.paidWatermarkFileSize ?? undefined,
-                paidWatermarkFileData: data?.paidWatermarkFileData ?? undefined,
+                watermarkFileName: data?.watermarkFileName,
+                watermarkFileType: data?.watermarkFileType,
+                watermarkFileSize: data?.watermarkFileSize,
+                watermarkFileData: data?.watermarkFileData,
+                paidWatermarkFileName: data?.paidWatermarkFileName,
+                paidWatermarkFileType: data?.paidWatermarkFileType,
+                paidWatermarkFileSize: data?.paidWatermarkFileSize,
+                paidWatermarkFileData: data?.paidWatermarkFileData,
                 showQuantity: data?.showQuantity ?? true,
                 showUnit: data?.showUnit ?? true,
                 showRowNo: data?.showRowNo ?? true,
-                fieldSortOrders: data?.fieldSortOrders ?? DEFAULT_TABLE_FIELD_SORT_ORDERS
+                fieldSortOrders: data?.fieldSortOrders ?? DEFAULT_TABLE_FIELD_SORT_ORDERS,
+                pdfTexts: data?.pdfTexts
               });
             } else {
               onSaveProfile?.({
@@ -83,18 +94,19 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onSaveProfile
                 tableRowStyle: form?.tableRowStyle,
                 pageFormat: form?.pageFormat,
                 labelUpperCase: form?.labelUpperCase ?? false,
-                watermarkFileName: form?.watermarkFileName ?? undefined,
-                watermarkFileType: form?.watermarkFileType ?? undefined,
-                watermarkFileSize: form?.watermarkFileSize ?? undefined,
-                watermarkFileData: form?.watermarkFileData ?? undefined,
-                paidWatermarkFileName: form?.paidWatermarkFileName ?? undefined,
-                paidWatermarkFileType: form?.paidWatermarkFileType ?? undefined,
-                paidWatermarkFileSize: form?.paidWatermarkFileSize ?? undefined,
-                paidWatermarkFileData: form?.paidWatermarkFileData ?? undefined,
+                watermarkFileName: form?.watermarkFileName,
+                watermarkFileType: form?.watermarkFileType,
+                watermarkFileSize: form?.watermarkFileSize,
+                watermarkFileData: form?.watermarkFileData,
+                paidWatermarkFileName: form?.paidWatermarkFileName,
+                paidWatermarkFileType: form?.paidWatermarkFileType,
+                paidWatermarkFileSize: form?.paidWatermarkFileSize,
+                paidWatermarkFileData: form?.paidWatermarkFileData,
                 showQuantity: form?.showQuantity ?? true,
                 showUnit: form?.showUnit ?? true,
                 showRowNo: form?.showRowNo ?? true,
-                fieldSortOrders: form?.fieldSortOrders ?? DEFAULT_TABLE_FIELD_SORT_ORDERS
+                fieldSortOrders: form?.fieldSortOrders ?? DEFAULT_TABLE_FIELD_SORT_ORDERS,
+                pdfTexts: form?.pdfTexts
               });
             }
             setIsProfileModalOpen(false);
@@ -144,7 +156,7 @@ const CustomizationDropdownComponent: FC<Props> = ({ isOpen, data, onSaveProfile
               }}
             />
           </Box>
-          <CustomizationLayout data={data} onChange={handleChange} />
+          <CustomizationLayout language={language} data={data} onChange={handleChange} />
         </SwipeableDrawer>
       )}
     </>

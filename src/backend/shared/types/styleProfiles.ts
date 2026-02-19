@@ -4,6 +4,7 @@ import type { PageFormat } from '../enums/pageFormat';
 import type { SizeType } from '../enums/sizeType';
 import type { TableHeaderStyle } from '../enums/tableHeaderStyle';
 import type { TableRowStyle } from '../enums/tableRowStyle';
+import type { PDFText } from './pdfText';
 import type { SortOrder } from './sortOrder';
 
 export interface StyleProfile {
@@ -35,4 +36,5 @@ export interface StyleProfile {
   showUnit: boolean;
   showRowNo: boolean;
   fieldSortOrders: SortOrder | string;
+  pdfTexts?: PDFText | string;
 }

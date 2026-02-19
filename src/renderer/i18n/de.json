@@ -171,14 +171,15 @@
     "invalidForm": "Formular ist ungültig. Bitte füllen Sie die erforderlichen Felder aus",
     "invalidPhone": "Ungültiges Telefonnummernformat",
     "invoice": "Rechnung",
-    "invoiceNo": "Rechnung",
+    "invoiceNo": "Rechnungsnr.",
     "invoiceNumber": "Rechnungsnummer",
     "invoicePrefix": "Rechnungspräfix",
     "invoiceSuffix": "Rechnungssuffix",
     "invoices": "Rechnungen",
     "issuedAt": "Ausgestellt am",
     "item": "Artikel",
-    "labelsUpperCase": "Großbuchstaben für Beschriftungen",
+    "label": "Bezeichnung",
+    "labelsUpperCase": "Standard-beschriftungen in grossbuchstaben verwenden",
     "large": "Groß",
     "lastUpdate": "Zuletzt aktualisiert",
     "layout": "Layout",
@@ -210,7 +211,7 @@
     "qrCode": "QR-Code",
     "qty": "Menge",
     "quote": "Angebot",
-    "quoteNo": "Angebot",
+    "quoteNo": "Angebotsnr.",
     "quoteNumber": "Angebotsnummer",
     "quotePrefix": "Angebotspräfix",
     "quoteSuffix": "Angebotssuffix",
@@ -222,6 +223,7 @@
     "search": "Suchen...",
     "selectFilterType": "Filtertyp auswählen",
     "selectImage": "Bilddatei auswählen",
+    "setLabel": "Bezeichnung anpassen",
     "setPassword": "Passwort erneut eingeben",
     "shortName": "Kurzname",
     "shortNameHelper": "Maximal 2 Zeichen",
@@ -366,6 +368,7 @@
     },
     "fixed": "Fest",
     "fixedFee": "Festgebühr",
+    "inc": "inkl.",
     "inclusive": "Inklusiv (aktivieren, wenn Preise bereits Steuern enthalten)",
     "invoiceInfo": "Rechnungsinformationen",
     "issuedAt": "Datum: {{date}}",
@@ -400,9 +403,9 @@
     "taxInclusive": "{{name}} (inkl. {{prct}}%)",
     "taxInclusivePerItem": "Steuer inkl. (pro Artikel)",
     "taxInclusivePlaceholder": "Steuer (inkl. {{prct}}%)",
+    "taxLabel": "Steuer",
     "termsConditions": "Allgemeine Geschäftsbedingungen",
     "thankNote": "Dankesnotiz",
-    "total": "Gesamt",
     "type": "Typ"
   },
   "items": {
@@ -484,7 +487,7 @@
   "settingsMenuItems": {
     "descriptions": {
       "about": "Erfahren Sie mehr über diese App und ihre Funktionen.",
-      "buyMeCoffee": "Wenn Sie dieses Projekt hilfreich finden, unterstützen Sie es bitte",
+      "buyMeCoffee": "Invoice Builder wird von einem einzelnen Entwickler gepflegt. Deine Unterstützung sorgt dafür, dass Updates und neue Funktionen weiterentwickelt werden! Sei einer der ersten Unterstützer und sieh deinen Namen in der App",
       "customizeInvoice": "Rechnungsnummer-Präfix z.B.: INV, Suffix.",
       "darkMode": "Zwischen hellem und dunklem Design wechseln.",
       "export": "Exportieren Sie Ihre Daten zur Sicherung oder zur Verwendung in anderen Anwendungen.",
@@ -496,9 +499,12 @@
       "turnQuotes": "Angebotserstellung aktivieren oder deaktivieren",
       "turnReports": "Berichtsfunktion aktivieren oder deaktivieren",
       "turnStyleProfiles": "Style-Profil-Funktion aktivieren oder deaktivieren",
-      "tutorial": "Anleitung zur Verwendung der Anwendung ansehen"
+      "tutorial": "Anleitung zur Verwendung der Anwendung ansehen",
+      "wallOfFame": "Sehen Sie die Unterstützer, die zur Entwicklung der App beigetragen haben"
     },
     "importConfirmText": "Sind Sie sicher, dass Sie diese JSON-Datei importieren möchten? Diese Aktion löscht Ihre aktuelle Datenbank und ersetzt sie durch die Daten aus dem Backup. Dies kann nicht rückgängig gemacht werden.",
+    "supportDesc": "Sei der Erste, der dieses Projekt unterstützt, und dein Name wird hier angezeigt!",
+    "supportText": "Noch keine Unterstützer",
     "titles": {
       "about": "Über",
       "buyMeCoffee": "Kauf mir einen Kaffee",
@@ -514,7 +520,8 @@
       "turnQuotes": "Angebote",
       "turnReports": "Berichte",
       "turnStyleProfiles": "Stilprofile",
-      "tutorial": "Anleitung"
+      "tutorial": "Anleitung",
+      "wallOfFame": "Ruhmeshalle"
     },
     "updateConfirmText": "Eine neue Version ({{newVersion}}) ist verfügbar. Jetzt neu starten, um von {{currentVersion}} zu aktualisieren? Sie können abbrechen und das Update wird beim nächsten Start angewendet."
   },

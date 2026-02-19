@@ -4,6 +4,7 @@ import type { PageFormat } from '../enums/pageFormat';
 import type { SizeType } from '../enums/sizeType';
 import type { TableHeaderStyle } from '../enums/tableHeaderStyle';
 import type { TableRowStyle } from '../enums/tableRowStyle';
+import type { PDFText } from './pdfText';
 import type { SortOrder } from './sortOrder';
 
 export interface StyleProfileMeta {
@@ -33,6 +34,7 @@ export interface StyleProfileMeta {
   showUnit: boolean;
   showRowNo: boolean;
   fieldSortOrders: SortOrder;
+  pdfTexts?: PDFText;
 }
 
 export interface StyleProfile extends StyleProfileMeta {
@@ -67,6 +69,7 @@ export interface StyleProfileAddMeta {
   showUnit: boolean;
   showRowNo: boolean;
   fieldSortOrders: SortOrder;
+  pdfTexts?: PDFText;
 }
 
 export interface StyleProfileAdd extends StyleProfileAddMeta {
@@ -112,4 +115,5 @@ export interface StyleProfileFromData {
   showUnit: boolean;
   showRowNo: boolean;
   fieldSortOrders: SortOrder;
+  pdfTexts?: PDFText;
 }

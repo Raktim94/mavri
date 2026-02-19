@@ -27,7 +27,7 @@ All information you enter remains **local** and under your control.
 
 ## 2. Local Data Storage Only
 
-All data—including invoices, clients, businesses, items, settings, and reports—is stored:
+All data-including invoices, clients, businesses, items, settings, and reports-is stored:
 
 - **only on your computer**
 - **only in the local application directory, database or docker container**

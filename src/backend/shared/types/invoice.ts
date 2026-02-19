@@ -10,6 +10,7 @@ import type { SizeType } from '../enums/sizeType';
 import type { TableHeaderStyle } from '../enums/tableHeaderStyle';
 import type { TableRowStyle } from '../enums/tableRowStyle';
 import type { InvoiceItemTaxType, InvoiceTaxType } from '../enums/taxType';
+import type { PDFText } from './pdfText';
 import type { SortOrder } from './sortOrder';
 
 export interface InvoiceSequence {
@@ -115,6 +116,7 @@ export interface InvoiceCustomization {
   showUnit: boolean;
   showRowNo: boolean;
   fieldSortOrders: SortOrder | string;
+  pdfTexts?: PDFText | string;
 }
 
 export interface Invoice {

@@ -1,12 +1,13 @@
 # Invoice Builder
 
-## [DATE], version 2.1.0
+## 2026-02-19, version 2.1.0
 
 New features & improvements
 
 - Automatically prefill issue date
 - Automatically prefill invoice numbers
 - Font family selection added. Supported fonts: Helvetica, Times-Roman, Courier, Roboto, Inter
+- Ability to customize invoice / quote labels to custom text
 
 ## 2026-02-13, version 2.0.2
 

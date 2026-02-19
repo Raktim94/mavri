@@ -29,7 +29,8 @@ const styleProfileFields: (keyof StyleProfile)[] = [
   'showQuantity',
   'showUnit',
   'showRowNo',
-  'fieldSortOrders'
+  'fieldSortOrders',
+  'pdfTexts'
 ];
 
 export const getAllStyleProfiles = async (
@@ -58,7 +59,9 @@ export const getAllStyleProfiles = async (
           fieldSortOrders:
             profile.fieldSortOrders && typeof profile.fieldSortOrders === 'string'
               ? JSON.parse(profile.fieldSortOrders)
-              : profile.fieldSortOrders
+              : profile.fieldSortOrders,
+          pdfTexts:
+            profile.pdfTexts && typeof profile.pdfTexts === 'string' ? JSON.parse(profile.pdfTexts) : profile.pdfTexts
         };
       })
     : result.data;
@@ -82,7 +85,8 @@ export const addStyleProfile = async (
   });
   const result = await handle({
     ...data,
-    fieldSortOrders: JSON.stringify(data.fieldSortOrders)
+    fieldSortOrders: JSON.stringify(data.fieldSortOrders),
+    pdfTexts: JSON.stringify(data.pdfTexts)
   });
   result.data = result.data
     ? {
@@ -90,7 +94,11 @@ export const addStyleProfile = async (
         fieldSortOrders:
           result.data.fieldSortOrders && typeof result.data.fieldSortOrders === 'string'
             ? JSON.parse(result.data.fieldSortOrders)
-            : result.data.fieldSortOrders
+            : result.data.fieldSortOrders,
+        pdfTexts:
+          result.data.pdfTexts && typeof result.data.pdfTexts === 'string'
+            ? JSON.parse(result.data.pdfTexts)
+            : result.data.pdfTexts
       }
     : result.data;
   return result;
@@ -111,14 +119,25 @@ export const updateStyleProfile = async (
             THEN i."id" END)
         `
   });
-  const result = await handle({ ...data, fieldSortOrders: JSON.stringify(data.fieldSortOrders) }, true);
+  const result = await handle(
+    {
+      ...data,
+      fieldSortOrders: JSON.stringify(data.fieldSortOrders),
+      pdfTexts: JSON.stringify(data.pdfTexts)
+    },
+    true
+  );
   result.data = result.data
     ? {
         ...result.data,
         fieldSortOrders:
           result.data.fieldSortOrders && typeof result.data.fieldSortOrders === 'string'
             ? JSON.parse(result.data.fieldSortOrders)
-            : result.data.fieldSortOrders
+            : result.data.fieldSortOrders,
+        pdfTexts:
+          result.data.pdfTexts && typeof result.data.pdfTexts === 'string'
+            ? JSON.parse(result.data.pdfTexts)
+            : result.data.pdfTexts
       }
     : result.data;
   return result;
@@ -151,7 +170,8 @@ export const batchAddStyleProfile = async (db: DatabaseAdapter, data: StyleProfi
       const result = await handle({
         ...row,
         fieldSortOrders:
-          typeof row.fieldSortOrders === 'string' ? row.fieldSortOrders : JSON.stringify(row.fieldSortOrders)
+          typeof row.fieldSortOrders === 'string' ? row.fieldSortOrders : JSON.stringify(row.fieldSortOrders),
+        pdfTexts: typeof row.pdfTexts === 'string' ? row.pdfTexts : JSON.stringify(row.pdfTexts)
       });
       if (!result.success) {
         try {

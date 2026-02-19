@@ -76,6 +76,7 @@ export const LocalDatabase: FC<Props> = ({ onDatabaseRead }) => {
     immediate: false,
     onDone: (data: Response<unknown>) => {
       if (!data.success) {
+        setSelectedPath(null);
         if (data.message) dispatch(addToast({ message: data.message, severity: 'error' }));
         else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
       } else {
@@ -104,6 +105,7 @@ export const LocalDatabase: FC<Props> = ({ onDatabaseRead }) => {
       saveDbList(newList);
       setIsInitializing(true);
       initDB();
+      console.log('asdasd');
     },
     [savedDbs, initDB, saveDbList]
   );

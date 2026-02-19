@@ -11,18 +11,15 @@ import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './constant';
 
 interface PropsLabels {
   subTotalLabel: string;
-  discountPrctLabel: string;
   discountLabel: string;
-  taxExclusiveLabel: string;
-  taxInclusiveLabel: string;
-  taxRateLabel: string;
+  incLabel: string;
+  taxLabel: string;
   taxExclusivePerItemLabel: string;
   taxInclusivePerItemLabel: string;
   shippingFeeLabel: string;
   totalLabel: string;
   paidLabel: string;
   balanceDueLabel: string;
-  taxLabel: string;
 }
 interface Props {
   invoiceForm?: InvoiceFromData;
@@ -45,18 +42,15 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels 
   } = useMemo(() => getFinancialData({ storeSettings, invoiceForm: invoiceForm }), [storeSettings, invoiceForm]);
   const {
     subTotalLabel,
-    discountPrctLabel,
     discountLabel,
-    taxExclusiveLabel,
-    taxInclusiveLabel,
-    taxRateLabel,
+    incLabel,
+    taxLabel,
     taxExclusivePerItemLabel,
     taxInclusivePerItemLabel,
     shippingFeeLabel,
     totalLabel,
     paidLabel,
-    balanceDueLabel,
-    taxLabel
+    balanceDueLabel
   } = labels;
 
   const hasPerItemTaxExclusive = useMemo(
@@ -71,7 +65,7 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels 
 
   return (
     <View style={PDF_STYLES.w50}>
-      {(discountAmount > 0 || totalTax > 0 || shippingAmount > 0) && (
+      {(discountAmount > 0 || Math.abs(totalTax) > 0 || shippingAmount > 0) && (
         <View style={[PDF_STYLES.row, PDF_STYLES.pb5]}>
           <View style={PDF_STYLES.flexGrow} />
           <View style={[PDF_STYLES.row, PDF_STYLES.w100, PDF_STYLES.textEnd]}>
@@ -116,7 +110,8 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels 
               ]}
             >
               <Text>
-                {invoiceForm?.discountType === DiscountType.percentage && discountPrctLabel}
+                {invoiceForm?.discountType === DiscountType.percentage &&
+                  `${discountLabel} (${invoiceForm?.discountPercent}%)`}
 
                 {invoiceForm?.discountType !== DiscountType.percentage && discountLabel}
               </Text>
@@ -137,7 +132,7 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels 
         </View>
       )}
 
-      {totalTax > 0 && (
+      {Math.abs(totalTax) > 0 && (
         <View style={[PDF_STYLES.row, PDF_STYLES.pb5]}>
           <View style={PDF_STYLES.flexGrow} />
           <View style={[PDF_STYLES.row, PDF_STYLES.w100, PDF_STYLES.textEnd]}>
@@ -153,12 +148,19 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels 
               <Text>
                 {(invoiceForm?.taxType === InvoiceTaxType.deducted ||
                   invoiceForm?.taxType === InvoiceTaxType.exclusive) &&
-                  (invoiceForm.taxName ? taxExclusiveLabel : taxLabel)}
+                  (invoiceForm.taxName
+                    ? `${invoiceForm?.taxName} (${invoiceForm?.taxRate}%)`
+                    : `${taxLabel} (${invoiceForm?.taxRate ?? 0}%)`)}
                 {invoiceForm?.taxType === InvoiceTaxType.inclusive &&
-                  (invoiceForm.taxName ? taxInclusiveLabel : taxRateLabel)}
+                  (invoiceForm.taxName
+                    ? `${invoiceForm?.taxName} (${incLabel} ${invoiceForm?.taxRate}%)`
+                    : `${taxLabel} (${incLabel} ${invoiceForm?.taxRate}%)`)}
                 {hasPerItemTaxExclusive && taxExclusivePerItemLabel}
                 {hasPerItemTaxInclusive && taxInclusivePerItemLabel}
-                {!hasPerItemTaxExclusive && !hasPerItemTaxInclusive && !invoiceForm?.taxType && taxLabel}
+                {!hasPerItemTaxExclusive &&
+                  !hasPerItemTaxInclusive &&
+                  !invoiceForm?.taxType &&
+                  `${taxLabel} (${invoiceForm?.taxRate ?? 0}%)`}
               </Text>
             </View>
             <View
@@ -208,7 +210,7 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels 
         </View>
       )}
 
-      {(discountAmount > 0 || totalTax > 0 || shippingAmount > 0) && (
+      {(discountAmount > 0 || Math.abs(totalTax) > 0 || shippingAmount > 0) && (
         <View style={[PDF_STYLES.row, PDF_STYLES.pt5, PDF_STYLES.pb5]}>
           <View style={PDF_STYLES.flexGrow} />
           <View style={[PDF_STYLES.border, PDF_STYLES.w100, PDF_STYLES.textEnd]} />

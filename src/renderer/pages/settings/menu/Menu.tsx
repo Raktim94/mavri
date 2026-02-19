@@ -3,6 +3,7 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import CoffeeIcon from '@mui/icons-material/Coffee';
 import ColorLensIcon from '@mui/icons-material/ColorLens';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import InfoIcon from '@mui/icons-material/Info';
 import PolicyIcon from '@mui/icons-material/Policy';
 import ReceiptIcon from '@mui/icons-material/Receipt';
@@ -201,6 +202,14 @@ export const Menu: FC<Props> = ({
             getApi().openUrl('https://www.buymeacoffee.com/evaldizi');
           }
         },
+        {
+          text: t('settingsMenuItems.titles.wallOfFame'),
+          description: t('settingsMenuItems.descriptions.wallOfFame'),
+          icon: <EmojiEventsIcon />,
+          isToggle: false,
+          isSelected: MenuItemSettings.WallOfFame === selectedMenu,
+          onClick: () => onSelected(MenuItemSettings.WallOfFame)
+        },
         ...(!isWebMode()
           ? [
               {
@@ -222,7 +231,7 @@ export const Menu: FC<Props> = ({
 
   return (
     <>
-      <Grid size={{ xs: 12, md: 4 }} component="div">
+      <Grid size={{ xs: 12, md: 4 }} component="div" sx={{ position: 'relative', height: '100%', overflow: 'auto' }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
           <Typography
             variant="h5"
