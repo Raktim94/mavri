@@ -451,6 +451,7 @@
     "reports": "Ataskaitos",
     "settings": "Nustatymai",
     "styleProfiles": "Stiliaus profiliai",
+    "templates": "Šablonai",
     "units": "Vienetai"
   },
   "quotes": {
@@ -503,6 +504,7 @@
       "turnQuotes": "Įjunkti arba išjungti pasiūlymų kūrimo funkciją",
       "turnReports": "Įjunkti arba išjungti ataskaitų teikimo funkciją",
       "turnStyleProfiles": "Įjungti arba išjungti stiliaus profilių funkciją",
+      "turnTemplates": "Įjunkti arba išjungti šablonų funkciją",
       "tutorial": "Peržiūrėkite gidą, kaip naudotis programa",
       "wallOfFame": "Peržiūrėkite rėmėjus, kurie prisidėjo prie programėlės kūrimo"
     },
@@ -524,6 +526,7 @@
       "turnQuotes": "Pasiūlymai",
       "turnReports": "Ataskaitos",
       "turnStyleProfiles": "Stiliaus profiliai",
+      "turnTemplates": "Šablonai",
       "tutorial": "Instrukcija",
       "wallOfFame": "Garbės siena"
     },

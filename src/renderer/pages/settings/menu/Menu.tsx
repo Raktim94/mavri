@@ -3,6 +3,7 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import CoffeeIcon from '@mui/icons-material/Coffee';
 import ColorLensIcon from '@mui/icons-material/ColorLens';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import InfoIcon from '@mui/icons-material/Info';
 import PolicyIcon from '@mui/icons-material/Policy';
@@ -28,6 +29,7 @@ interface Props {
   toggleQuotes?: (value: boolean) => void;
   toggleReports?: (value: boolean) => void;
   toggleStyleProfiles?: (value: boolean) => void;
+  toggleTemplates?: (value: boolean) => void;
   onExportJSON?: () => void;
   onImportJSON?: () => void;
 }
@@ -37,6 +39,7 @@ export const Menu: FC<Props> = ({
   toggleQuotes = () => {},
   toggleReports = () => {},
   toggleStyleProfiles = () => {},
+  toggleTemplates = () => {},
   onModeChange = () => {},
   onExportJSON = () => {},
   onImportJSON = () => {}
@@ -117,6 +120,17 @@ export const Menu: FC<Props> = ({
           checked: storeSettings?.styleProfilesON ?? true,
           onChange: () => {
             toggleStyleProfiles(!storeSettings?.styleProfilesON);
+          }
+        },
+        {
+          text: t('settingsMenuItems.titles.turnTemplates'),
+          description: t('settingsMenuItems.descriptions.turnTemplates'),
+          icon: <ContentCopyIcon />,
+          isToggle: true,
+          isSelected: false,
+          checked: storeSettings?.templatesON ?? true,
+          onChange: () => {
+            toggleTemplates(!storeSettings?.templatesON);
           }
         }
       ]

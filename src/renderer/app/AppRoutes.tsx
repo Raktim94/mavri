@@ -5,6 +5,7 @@ import { BusinessesPage } from '../pages/businesses';
 import { CategoriesPage } from '../pages/categories';
 import { ClientsPage } from '../pages/clients';
 import { CurrenciesPage } from '../pages/currencies';
+import { DocTemplatePage } from '../pages/docTemplates';
 import { InvoicesPage } from '../pages/invoices';
 import { ItemsPage } from '../pages/items';
 import { QuotesPage } from '../pages/quotes';
@@ -30,6 +31,7 @@ export const AppRoutes: FC = () => {
       <Route path="quotes" element={<QuotesPage />} />
       <Route path="reports" element={<ReportsPage />} />
       <Route path="banks" element={<BanksPage />} />
+      <Route path="templates" element={<DocTemplatePage />} />
       <Route path="*" element={<Navigate to="/invoices" replace />} />
     </Routes>
   );

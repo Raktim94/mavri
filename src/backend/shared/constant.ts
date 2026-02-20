@@ -6,6 +6,7 @@ export const BOOLEAN_FIELDS = [
   'quotesON',
   'reportsON',
   'styleProfilesON',
+  'templatesON',
   'isArchived',
   'labelUpperCase',
   'showQuantity',

@@ -451,6 +451,7 @@
     "reports": "Rapports",
     "settings": "Paramètres",
     "styleProfiles": "Profils de style",
+    "templates": "Modèles",
     "units": "Unités"
   },
   "quotes": {
@@ -503,6 +504,7 @@
       "turnQuotes": "Activer ou désactiver la création de devis",
       "turnReports": "Activer ou désactiver les rapports",
       "turnStyleProfiles": "Activer ou désactiver la fonction des profils de style",
+      "turnTemplates": "Activer ou désactiver la fonctionnalité modèles",
       "tutorial": "Consultez le guide d’utilisation",
       "wallOfFame": "Découvrez les contributeurs qui ont soutenu le développement de l’application"
     },
@@ -524,6 +526,7 @@
       "turnQuotes": "Devis",
       "turnReports": "Rapports",
       "turnStyleProfiles": "Profils de style",
+      "turnTemplates": "Modèles",
       "tutorial": "Tutoriel",
       "wallOfFame": "Tableau d'honneur"
     },

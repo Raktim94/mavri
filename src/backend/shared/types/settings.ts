@@ -15,6 +15,7 @@ export interface Settings {
   shouldIncludeBusinessName: boolean;
   quotesON: boolean;
   styleProfilesON: boolean;
+  templatesON: boolean;
   reportsON: boolean;
   createdAt: string;
   updatedAt: string;

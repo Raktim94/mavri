@@ -451,6 +451,7 @@
     "reports": "Berichte",
     "settings": "Einstellungen",
     "styleProfiles": "Stilprofile",
+    "templates": "Vorlagen",
     "units": "Einheiten"
   },
   "quotes": {
@@ -503,6 +504,7 @@
       "turnQuotes": "Angebotserstellung aktivieren oder deaktivieren",
       "turnReports": "Berichtsfunktion aktivieren oder deaktivieren",
       "turnStyleProfiles": "Style-Profil-Funktion aktivieren oder deaktivieren",
+      "turnTemplates": "Aktivieren oder Deaktivieren der Vorlagen-Funktion",
       "tutorial": "Anleitung zur Verwendung der Anwendung ansehen",
       "wallOfFame": "Sehen Sie die Unterstützer, die zur Entwicklung der App beigetragen haben"
     },
@@ -524,6 +526,7 @@
       "turnQuotes": "Angebote",
       "turnReports": "Berichte",
       "turnStyleProfiles": "Stilprofile",
+      "turnTemplates": "Vorlagen",
       "tutorial": "Anleitung",
       "wallOfFame": "Ruhmeshalle"
     },

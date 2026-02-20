@@ -451,6 +451,7 @@
     "reports": "Reports",
     "settings": "Settings",
     "styleProfiles": "Style Profiles",
+    "templates": "Templates",
     "units": "Units"
   },
   "quotes": {
@@ -503,6 +504,7 @@
       "turnQuotes": "Enable or disable quote creation feature",
       "turnReports": "Enable or disable reporting feature",
       "turnStyleProfiles": "Enable or disable style profile feature",
+      "turnTemplates": "Enable or disable the templates feature",
       "tutorial": "Checkout guide on how to use application",
       "wallOfFame": "View the supporters who have contributed to the app"
     },
@@ -524,6 +526,7 @@
       "turnQuotes": "Quotes",
       "turnReports": "Reports",
       "turnStyleProfiles": "Style profiles",
+      "turnTemplates": "Templates",
       "tutorial": "Tutorial",
       "wallOfFame": "Wall of fame"
     },

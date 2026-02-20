@@ -1,4 +1,5 @@
 export enum InvoiceType {
   quotation = 'quotation',
-  invoice = 'invoice'
+  invoice = 'invoice',
+  template = 'template'
 }

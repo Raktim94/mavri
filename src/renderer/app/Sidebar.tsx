@@ -14,6 +14,7 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import CategoryIcon from '@mui/icons-material/Category';
 import ColorLensIcon from '@mui/icons-material/ColorLens';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import ScaleIcon from '@mui/icons-material/Scale';
 import { Box, Divider, Drawer, IconButton, Tooltip, Typography } from '@mui/material';
@@ -27,7 +28,6 @@ import { MenuList } from '../shared/components/lists/menuList/MenuList';
 import type { MenuItem } from '../shared/types/menuItem';
 import { useAppDispatch, useAppSelector } from '../state/configureStore';
 import { selectSettings, selectVersion, setVersion } from '../state/pageSlice';
-
 const DRAWER_WIDTH = 240;
 const COLLAPSED_WIDTH = 60;
 
@@ -83,6 +83,20 @@ export const Sidebar: FC = () => {
                 icon: <ReceiptIcon />,
                 path: '/quotes',
                 group: 'Documents',
+                isToggle: false,
+                minHeight: 50,
+                isSelected: isSelected,
+                onClick: onClickNavigate
+              }
+            ]
+          : []),
+        ...(storeSettings?.templatesON
+          ? [
+              {
+                text: t('menuItems.templates'),
+                icon: <ContentCopyIcon />,
+                path: '/templates',
+                group: 'Templates',
                 isToggle: false,
                 minHeight: 50,
                 isSelected: isSelected,
