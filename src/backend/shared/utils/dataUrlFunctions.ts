@@ -4,6 +4,7 @@ import type { Business } from '../types/business';
 import type { EntityWithCounts } from '../types/entityWithCounts';
 import type { Invoice, InvoiceBankSnapshots, InvoiceBusinessSnapshots, InvoiceCustomization } from '../types/invoice';
 import type { StyleProfile } from '../types/styleProfiles';
+import type { Template } from '../types/template';
 import { fromBase64 } from './generalFunctions';
 
 export const decodeLogo = <T extends { logo?: unknown }>(data: T) => ({
@@ -16,6 +17,22 @@ export const encodeLogo = (data?: (Business & EntityWithCounts) | null) => {
   const buf = data.logo as Buffer | null;
   return { ...data, logo: buf ? buf.toString('base64') : null };
 };
+
+export const encodeTemplate = (data?: Template | null) => {
+  if (!data) return data;
+  const buf = data.signatureData as Buffer | null;
+  return { ...data, signatureData: buf ? buf.toString('base64') : null };
+};
+
+export const decodeTemplate = <T extends { signatureData?: unknown }>(data: T) => ({
+  ...data,
+  signatureData: data.signatureData ? fromBase64(data.signatureData as string) : null
+});
+
+export const encodeResultTemplate = (result: Response<Template[] | Template>) => ({
+  ...result,
+  data: Array.isArray(result.data) ? result.data.map(encodeTemplate) : encodeTemplate(result.data)
+});
 
 export const encodeResultBusiness = (
   result: Response<(Business & EntityWithCounts)[] | (Business & EntityWithCounts)>

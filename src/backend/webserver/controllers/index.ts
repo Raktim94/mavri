@@ -9,6 +9,7 @@ import { initInvoicesController } from './invoices';
 import { initItemsController } from './items';
 import { initSettingsController } from './settings';
 import { initStyleProfilesController } from './styleProfiles';
+import { initTemplatesController } from './templates';
 import { initUnitsController } from './units';
 
 export const initControllers = (app: Express) => {
@@ -23,4 +24,5 @@ export const initControllers = (app: Express) => {
   initUnitsController(app);
   initCurrenciesController(app);
   initBanksController(app);
+  initTemplatesController(app);
 };

@@ -11,6 +11,7 @@ import { initInvoicesHandlers } from './invoices';
 import { initItemsHandlers } from './items';
 import { initSettingsHandlers } from './settings';
 import { initStyleProfilesHandlers } from './styleProfiles';
+import { initTemplatesHandlers } from './templates';
 import { initUnitsHandlers } from './units';
 
 export const initIpcHandler = (db: DatabaseAdapter, mainWindow: BrowserWindow) => {
@@ -32,4 +33,5 @@ export const initIpcHandler = (db: DatabaseAdapter, mainWindow: BrowserWindow) =
   initSettingsHandlers(db);
   initUnitsHandlers(db);
   initBanksHandlers(db);
+  initTemplatesHandlers(db);
 };
