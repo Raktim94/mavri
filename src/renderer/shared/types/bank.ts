@@ -8,6 +8,8 @@ export interface BankMeta {
   branchCode?: string;
   type?: string;
   routingNumber?: string;
+  accountHolder?: string;
+  sortOrder?: string;
   upiCode?: string;
   qrCodeFileSize?: number;
   qrCodeFileType?: string;
@@ -36,6 +38,8 @@ export interface BankAddMeta {
   branchCode?: string;
   type?: string;
   routingNumber?: string;
+  accountHolder?: string;
+  sortOrder?: string;
   upiCode?: string;
   qrCodeFileSize?: number;
   qrCodeFileType?: string;
@@ -69,6 +73,8 @@ export interface BankFromData {
   branchCode?: string;
   type?: string;
   routingNumber?: string;
+  accountHolder?: string;
+  sortOrder?: string;
   upiCode?: string;
   qrCode?: Uint8Array;
   qrCodeFileSize?: number;

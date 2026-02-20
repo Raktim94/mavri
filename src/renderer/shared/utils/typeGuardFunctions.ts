@@ -148,6 +148,14 @@ export const isBankFromData = (data: unknown): data is BankFromData => {
     if (typeof d.routingNumber !== 'string') return false;
   }
 
+  if (d.sortOrder !== undefined && d.sortOrder !== null && d.sortOrder !== '') {
+    if (typeof d.sortOrder !== 'string') return false;
+  }
+
+  if (d.accountHolder !== undefined && d.accountHolder !== null && d.accountHolder !== '') {
+    if (typeof d.accountHolder !== 'string') return false;
+  }
+
   if (d.type !== undefined && d.type !== null && d.type !== '') {
     if (typeof d.type !== 'string') return false;
   }
@@ -520,6 +528,8 @@ export const isInvoiceBankSnapshotFromData = (data: unknown): data is InvoiceBus
     'branchCode',
     'type',
     'routingNumber',
+    'sortOrder',
+    'accountHolder',
     'upiCode',
     'qrCodeFileType',
     'qrCodeFileName'

@@ -24,6 +24,16 @@ const PaymentInfoComponent: FC<Props> = ({ invoiceForm, qrCodeUrl, paymentInfoLa
       </Text>
       <View style={[PDF_STYLES.alignStart, PDF_STYLES.gap4, PDF_STYLES.row]}>
         <View style={[PDF_STYLES.alignStart, PDF_STYLES.gap4]}>
+          {invoiceForm?.invoiceBankSnapshot?.accountHolder && (
+            <Text
+              style={[
+                PDF_STYLES.businessText,
+                { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].businessText }
+              ]}
+            >
+              {invoiceForm?.invoiceBankSnapshot?.accountHolder}
+            </Text>
+          )}
           {invoiceForm?.invoiceBankSnapshot?.bankName && (
             <Text
               style={[
@@ -34,14 +44,14 @@ const PaymentInfoComponent: FC<Props> = ({ invoiceForm, qrCodeUrl, paymentInfoLa
               {invoiceForm?.invoiceBankSnapshot?.bankName}
             </Text>
           )}
-          {invoiceForm?.invoiceBankSnapshot?.address && (
+          {invoiceForm?.invoiceBankSnapshot?.sortOrder && (
             <Text
               style={[
                 PDF_STYLES.businessText,
                 { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].businessText }
               ]}
             >
-              {invoiceForm?.invoiceBankSnapshot?.address}
+              {invoiceForm?.invoiceBankSnapshot?.sortOrder}
             </Text>
           )}
           {invoiceForm?.invoiceBankSnapshot?.accountNumber && (
@@ -54,7 +64,7 @@ const PaymentInfoComponent: FC<Props> = ({ invoiceForm, qrCodeUrl, paymentInfoLa
               {invoiceForm?.invoiceBankSnapshot?.accountNumber}
             </Text>
           )}
-          {invoiceForm?.invoiceBankSnapshot?.branchCode && (
+          {invoiceForm?.invoiceBankSnapshot?.swiftCode && (
             <Text
               style={[
                 PDF_STYLES.businessText,
@@ -82,6 +92,16 @@ const PaymentInfoComponent: FC<Props> = ({ invoiceForm, qrCodeUrl, paymentInfoLa
               ]}
             >
               {invoiceForm?.invoiceBankSnapshot?.branchCode}
+            </Text>
+          )}
+          {invoiceForm?.invoiceBankSnapshot?.address && (
+            <Text
+              style={[
+                PDF_STYLES.businessText,
+                { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].businessText }
+              ]}
+            >
+              {invoiceForm?.invoiceBankSnapshot?.address}
             </Text>
           )}
           {invoiceForm?.invoiceBankSnapshot?.upiCode && (

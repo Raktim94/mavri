@@ -15,6 +15,8 @@ const bankFields: (keyof Bank)[] = [
   'branchCode',
   'type',
   'routingNumber',
+  'accountHolder',
+  'sortOrder',
   'upiCode',
   'qrCode',
   'qrCodeFileSize',

@@ -2,7 +2,20 @@ export const validators = {
   email: (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
   phone: (v: string) => /^\+[1-9]\d{6,14}$/.test(v),
   required: (v: string) => v.trim() !== '',
-  iban: (v: string) => /^[A-Z]{2}[0-9A-Z]{6,32}$/.test(v.replace(/\s+/g, '').toUpperCase()),
+  sortCode: (v: string) => {
+    if (!v) return false;
+
+    const cleaned = v.replace(/[\s-]/g, '');
+
+    return /^\d{6}$/.test(cleaned);
+  },
+  accountNumber: (v: string) => {
+    if (!v) return false;
+
+    const cleaned = v.replace(/\s+/g, '');
+
+    return /^[A-Z0-9\\-]{4,34}$/i.test(cleaned);
+  },
   swift: (v: string) => /^[A-Z0-9]{8}([A-Z0-9]{3})?$/.test(v.toUpperCase()),
   routingNumber: (v: string) => /^\d{9}$/.test(v),
   branchCode: (v: string) => v === '' || /^\d{3,6}$/.test(v),

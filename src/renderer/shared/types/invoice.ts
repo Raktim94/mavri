@@ -122,6 +122,8 @@ export interface InvoiceBankSnapshotsMeta {
   branchCode?: string;
   type?: string;
   routingNumber?: string;
+  accountHolder?: string;
+  sortOrder?: string;
   upiCode?: string;
   qrCodeFileSize?: number;
   qrCodeFileType?: string;
