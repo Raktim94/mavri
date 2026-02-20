@@ -116,6 +116,7 @@
     "noItem": "Pasirinkite klientą, kad pamatytumėte detales."
   },
   "common": {
+    "templates": "Šablonai",
     "accountHolder": "Sąskaitos savininkas",
     "accountNumber": "Sąskaitos numeris",
     "accountNumberInvalid": "Sąskaitos numeris turi būti 4–34 simbolių ilgio ir gali sudaryti tik raidės, skaičiai arba brūkšneliai.",
@@ -451,7 +452,7 @@
     "reports": "Ataskaitos",
     "settings": "Nustatymai",
     "styleProfiles": "Stiliaus profiliai",
-    "templates": "Šablonai",
+    "templates": "Išankstiniai šablonai",
     "units": "Vienetai"
   },
   "quotes": {

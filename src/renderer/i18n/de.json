@@ -116,6 +116,7 @@
     "noItem": "Kunde auswählen, um Details anzuzeigen."
   },
   "common": {
+    "templates": "Vorlagen",
     "accountHolder": "Kontoinhaber",
     "accountNumber": "Kontonummer",
     "accountNumberInvalid": "Die Kontonummer muss 4–34 Zeichen lang sein und darf nur Buchstaben, Zahlen oder Bindestriche enthalten.",
@@ -451,7 +452,7 @@
     "reports": "Berichte",
     "settings": "Einstellungen",
     "styleProfiles": "Stilprofile",
-    "templates": "Vorlagen",
+    "templates": "Voreinstellungen",
     "units": "Einheiten"
   },
   "quotes": {

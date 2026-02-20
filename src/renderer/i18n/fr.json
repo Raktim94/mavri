@@ -116,6 +116,7 @@
     "noItem": "Sélectionnez un client pour afficher les détails."
   },
   "common": {
+    "templates": "Modèles",
     "accountHolder": "Titulaire du compte",
     "accountNumber": "Numéro de compte",
     "accountNumberInvalid": "Le numéro de compte doit contenir 4 à 34 caractères et uniquement des lettres, des chiffres ou des tirets.",
@@ -451,7 +452,7 @@
     "reports": "Rapports",
     "settings": "Paramètres",
     "styleProfiles": "Profils de style",
-    "templates": "Modèles",
+    "templates": "Préréglages",
     "units": "Unités"
   },
   "quotes": {

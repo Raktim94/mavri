@@ -116,6 +116,7 @@
     "noItem": "Selected a client to view details."
   },
   "common": {
+    "templates": "Templates",
     "accountHolder": "Account holder",
     "accountNumber": "Account number",
     "accountNumberInvalid": "Account number must be 4–34 characters and contain only letters, numbers, or hyphens",
@@ -451,7 +452,7 @@
     "reports": "Reports",
     "settings": "Settings",
     "styleProfiles": "Style Profiles",
-    "templates": "Templates",
+    "templates": "Presets",
     "units": "Units"
   },
   "quotes": {
