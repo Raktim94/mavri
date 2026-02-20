@@ -191,6 +191,8 @@ const InvoiceFormComponent: FC<Props> = ({
             branchCode: data.branchCode,
             type: data.type,
             routingNumber: data.routingNumber,
+            sortOrder: data.sortOrder,
+            accountHolder: data.accountHolder,
             qrCode: data.qrCode ?? undefined,
             qrCodeFileSize: data.qrCodeFileSize,
             qrCodeFileType: data.qrCodeFileType,

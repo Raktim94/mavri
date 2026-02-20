@@ -116,8 +116,9 @@
     "noItem": "Pasirinkite klientą, kad pamatytumėte detales."
   },
   "common": {
+    "accountHolder": "Sąskaitos savininkas",
     "accountNumber": "Sąskaitos numeris",
-    "accountNumberInvalid": "IBAN turi prasidėti dviem raidėmis ir būti sudarytas iš 6–32 raidinių skaitmeninių simbolių",
+    "accountNumberInvalid": "Sąskaitos numeris turi būti 4–34 simbolių ilgio ir gali sudaryti tik raidės, skaičiai arba brūkšneliai.",
     "addDB": "Pridėti duomenų bazę",
     "additional": "Papildoma informacija",
     "address": "Adresas",
@@ -234,6 +235,8 @@
     "signature": "Parašas",
     "small": "Mažas",
     "sortBy": "Rūšiuoti pagal",
+    "sortCodeInvalid": "Rūšiavimo kodą turi sudaryti 6 skaitmenys (su arba be brūkšnelių, pvz., 123456 arba 12-34-56).",
+    "sortOrder": "Rūšiavimo kodas",
     "ssl": "SSL",
     "status": "Statusas",
     "stripped": "Dryžuotas",

@@ -116,8 +116,9 @@
     "noItem": "Sélectionnez un client pour afficher les détails."
   },
   "common": {
+    "accountHolder": "Titulaire du compte",
     "accountNumber": "Numéro de compte",
-    "accountNumberInvalid": "L’IBAN doit commencer par deux lettres et contenir 6 à 32 caractères alphanumériques",
+    "accountNumberInvalid": "Le numéro de compte doit contenir 4 à 34 caractères et uniquement des lettres, des chiffres ou des tirets.",
     "addDB": "Ajouter une base de données",
     "additional": "Supplémentaire",
     "address": "Adresse",
@@ -234,6 +235,8 @@
     "signature": "Signature",
     "small": "Petit",
     "sortBy": "Trier par",
+    "sortCodeInvalid": "Le code guichet doit contenir 6 chiffres (avec ou sans tirets, par ex. 123456 ou 12-34-56).",
+    "sortOrder": "Code guichet",
     "ssl": "SSL",
     "status": "Statut",
     "stripped": "Rayé",

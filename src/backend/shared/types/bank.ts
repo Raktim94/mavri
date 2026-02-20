@@ -8,6 +8,8 @@ export interface Bank {
   branchCode?: string;
   type?: string;
   routingNumber?: string;
+  accountHolder?: string;
+  sortOrder?: string;
   upiCode?: string;
   qrCode?: Uint8Array;
   qrCodeFileSize?: number;

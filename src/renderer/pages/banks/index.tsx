@@ -26,6 +26,8 @@ export const BanksPage: FC = () => {
     'address',
     'branchCode',
     'routingNumber',
+    'accountHolder',
+    'sortOrder',
     'type',
     'upiCode',
     'qrCodeFileSize',
@@ -33,6 +35,7 @@ export const BanksPage: FC = () => {
     'qrCodeFileName',
     'isArchived'
   ];
+
   const excelFileName = 'banks';
   const excelTemplateData: Rows = [
     {
@@ -45,7 +48,9 @@ export const BanksPage: FC = () => {
       routingNumber: null,
       type: 'Business Current Account',
       upiCode: null,
-      isArchived: false
+      isArchived: false,
+      accountHolder: 'Tom Hanks',
+      sortOrder: null
     },
     {
       name: 'Stripe Payout Account',
@@ -57,7 +62,9 @@ export const BanksPage: FC = () => {
       routingNumber: '026009593',
       type: 'Checking',
       upiCode: null,
-      isArchived: false
+      isArchived: false,
+      accountHolder: 'Tom Hanks',
+      sortOrder: null
     },
     {
       name: 'Personal UPI Wallet',
@@ -69,7 +76,9 @@ export const BanksPage: FC = () => {
       routingNumber: null,
       type: 'Savings Account',
       upiCode: 'rahul.verma@okhdfcbank',
-      isArchived: false
+      isArchived: false,
+      accountHolder: 'Tom Hanks',
+      sortOrder: null
     }
   ];
   const filters: Filter[] = [

@@ -24,16 +24,20 @@ export const Form: FC<Props> = ({ handleChange = () => {}, bank }) => {
     branchCode: bank?.branchCode ?? '',
     type: bank?.type ?? '',
     routingNumber: bank?.routingNumber ?? '',
+    accountHolder: bank?.accountHolder ?? '',
+    sortOrder: bank?.sortOrder ?? '',
     upiCode: bank?.upiCode ?? '',
     qrCodeFileSize: bank?.qrCodeFileSize,
     qrCodeFileType: bank?.qrCodeFileType,
     qrCodeFileName: bank?.qrCodeFileName,
     isArchived: bank?.isArchived ?? false
   });
+
   const [errors, setErrors] = useState({
     name: false,
     accountNumber: false,
     swiftCode: false,
+    sortOrder: false,
     branchCode: false,
     routingNumber: false,
     upiCode: false
@@ -64,9 +68,11 @@ export const Form: FC<Props> = ({ handleChange = () => {}, bank }) => {
   const validateField = (field: keyof typeof errors, value: string) => {
     if (!validators.required(value) && field === 'name') {
       setErrors(e => ({ ...e, [field]: true }));
-    } else if (value !== '' && !validators.iban(value) && field === 'accountNumber') {
+    } else if (value !== '' && !validators.accountNumber(value) && field === 'accountNumber') {
       setErrors(e => ({ ...e, [field]: true }));
     } else if (value !== '' && !validators.swift(value) && field === 'swiftCode') {
+      setErrors(e => ({ ...e, [field]: true }));
+    } else if (value !== '' && !validators.sortCode(value) && field === 'sortOrder') {
       setErrors(e => ({ ...e, [field]: true }));
     } else if (value !== '' && !validators.branchCode(value) && field === 'branchCode') {
       setErrors(e => ({ ...e, [field]: true }));
@@ -91,6 +97,8 @@ export const Form: FC<Props> = ({ handleChange = () => {}, bank }) => {
       branchCode: bank?.branchCode ?? '',
       type: bank?.type ?? '',
       routingNumber: bank?.routingNumber ?? '',
+      accountHolder: bank?.accountHolder ?? '',
+      sortOrder: bank?.sortOrder ?? '',
       upiCode: bank?.upiCode ?? '',
       qrCodeFileSize: bank?.qrCodeFileSize,
       qrCodeFileType: bank?.qrCodeFileType,
@@ -109,6 +117,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, bank }) => {
       !errors.name &&
       !errors.accountNumber &&
       !errors.swiftCode &&
+      !errors.sortOrder &&
       !errors.branchCode &&
       !errors.routingNumber &&
       !errors.upiCode;
@@ -133,6 +142,16 @@ export const Form: FC<Props> = ({ handleChange = () => {}, bank }) => {
           onChange={e => {
             update('name', e.target.value);
             validateField('name', e.target.value);
+          }}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, md: 6 }}>
+        <TextField
+          label={t('common.accountHolder')}
+          fullWidth
+          value={form.accountHolder}
+          onChange={e => {
+            update('accountHolder', e.target.value);
           }}
         />
       </Grid>
@@ -184,6 +203,19 @@ export const Form: FC<Props> = ({ handleChange = () => {}, bank }) => {
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
         <TextField
+          label={t('common.sortOrder')}
+          fullWidth
+          value={form.sortOrder}
+          error={errors.sortOrder}
+          helperText={errors.sortOrder ? t('common.sortCodeInvalid') : ''}
+          onChange={e => {
+            update('sortOrder', e.target.value);
+            validateField('sortOrder', e.target.value);
+          }}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, md: 6 }}>
+        <TextField
           label={t('common.address')}
           fullWidth
           value={form.address}
@@ -211,7 +243,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, bank }) => {
           fullWidth
           value={form.routingNumber}
           error={errors.routingNumber}
-          helperText={errors.routingNumber ? t('common.fieldRequiroutingNumberInvalidred') : ''}
+          helperText={errors.routingNumber ? t('common.routingNumberInvalid') : ''}
           onChange={e => {
             update('routingNumber', e.target.value);
             validateField('routingNumber', e.target.value);

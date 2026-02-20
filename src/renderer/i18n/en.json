@@ -116,8 +116,9 @@
     "noItem": "Selected a client to view details."
   },
   "common": {
+    "accountHolder": "Account holder",
     "accountNumber": "Account number",
-    "accountNumberInvalid": "IBAN must start with two letters and contain 6–32 alphanumeric characters",
+    "accountNumberInvalid": "Account number must be 4–34 characters and contain only letters, numbers, or hyphens",
     "addDB": "Add Database",
     "additional": "Additional",
     "address": "Address",
@@ -234,6 +235,8 @@
     "signature": "Signature",
     "small": "Small",
     "sortBy": "Sort by",
+    "sortCodeInvalid": "Sort code must be 6 digits (with or without dashes, e.g., 123456 or 12-34-56)",
+    "sortOrder": "Sort order",
     "ssl": "SSL",
     "status": "Status",
     "stripped": "Stripped",
