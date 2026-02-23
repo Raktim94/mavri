@@ -116,7 +116,6 @@
     "noItem": "Selected a client to view details."
   },
   "common": {
-    "templates": "Templates",
     "accountHolder": "Account holder",
     "accountNumber": "Account number",
     "accountNumberInvalid": "Account number must be 4–34 characters and contain only letters, numbers, or hyphens",
@@ -210,6 +209,7 @@
     "phone": "Phone",
     "phoneHelper": "Enter phone number in international format",
     "port": "Port",
+    "presets": "Presets",
     "progress": "Progress: {{prct}}%",
     "qrCode": "QR code",
     "qty": "Qty",
@@ -248,6 +248,7 @@
     "tableItem": "Item",
     "tableRowNo": "Row number",
     "tableRowStyle": "Table row style",
+    "templates": "Templates",
     "testConnection": "Test connection",
     "testConnectionFailed": "Connection has not been established",
     "testConnectionSuccess": "Connection established",
@@ -448,12 +449,23 @@
     "currencies": "Currencies",
     "invoices": "Invoices",
     "items": "Items",
+    "presets": "Presets",
     "quotes": "Quotes",
     "reports": "Reports",
     "settings": "Settings",
     "styleProfiles": "Style Profiles",
-    "templates": "Presets",
     "units": "Units"
+  },
+  "presets": {
+    "add": "Add preset",
+    "filter": {
+      "activeDesc": "Presets that are not archived",
+      "activeText": "Active presets",
+      "allText": "All presets",
+      "archivedDesc": "Presets that have been archived",
+      "archivedText": "Archived presets"
+    },
+    "noItem": "Selected a preset to view details."
   },
   "quotes": {
     "filter": {
@@ -502,10 +514,10 @@
       "privacyPolicy": "Feel free to go through our privacy policy.",
       "share": "Share this app with your friends.",
       "support": "Report bugs or suggest improvements via GitHub.",
+      "turnPresets": "Enable or disable the presets feature",
       "turnQuotes": "Enable or disable quote creation feature",
       "turnReports": "Enable or disable reporting feature",
       "turnStyleProfiles": "Enable or disable style profile feature",
-      "turnTemplates": "Enable or disable the templates feature",
       "tutorial": "Checkout guide on how to use application",
       "wallOfFame": "View the supporters who have contributed to the app"
     },
@@ -524,10 +536,10 @@
       "privacyPolicy": "Privacy policy",
       "share": "Share App",
       "support": "Support",
+      "turnPresets": "Presets",
       "turnQuotes": "Quotes",
       "turnReports": "Reports",
       "turnStyleProfiles": "Style profiles",
-      "turnTemplates": "Templates",
       "tutorial": "Tutorial",
       "wallOfFame": "Wall of fame"
     },

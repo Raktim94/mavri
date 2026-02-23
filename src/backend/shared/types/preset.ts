@@ -1,4 +1,4 @@
-export interface Template {
+export interface Preset {
   id?: number;
   name: string;
   businessId?: number;

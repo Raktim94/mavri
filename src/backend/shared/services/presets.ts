@@ -1,13 +1,13 @@
 import type { DatabaseAdapter } from '../types/DatabaseAdapter';
 import type { EntityWithId } from '../types/entityWithId';
 import type { FilterData } from '../types/invoiceFilter';
+import type { Preset } from '../types/preset';
 import type { Response } from '../types/response';
-import type { Template } from '../types/template';
 import { getDefaultValue } from '../utils/dbHelper';
 import { mapDatabaseError } from '../utils/errorFunctions';
 import { getWhereClauseFromFilters } from '../utils/filterFunctions';
 
-const templateFields: (keyof Template)[] = [
+const presetFields: (keyof Preset)[] = [
   'name',
   'businessId',
   'clientId',
@@ -25,7 +25,7 @@ const templateFields: (keyof Template)[] = [
   'isArchived'
 ];
 
-type GetTemplatesOptions = {
+type GetPresetsOptions = {
   id?: number;
   filter?: FilterData[];
 };
@@ -67,7 +67,7 @@ const handleEntity =
     }
   };
 
-const getTemplates = async (db: DatabaseAdapter, options: GetTemplatesOptions) => {
+const getPresets = async (db: DatabaseAdapter, options: GetPresetsOptions) => {
   const { id, filter } = options;
 
   const whereClause = filter
@@ -84,36 +84,36 @@ const getTemplates = async (db: DatabaseAdapter, options: GetTemplatesOptions) =
         SELECT
           t.*,
           sp."name" as "styleProfileName",
-          b."name" as "bankName",
+          ba."name" as "bankName",
           cur."code" as "currencyCode",
           cur."symbol" as "currencySymbol",
           cl."name" as "clientName",
-          b."name" as "businessName",
-        FROM templates t
+          bu."name" as "businessName"
+        FROM presets t
         LEFT JOIN style_profiles sp ON sp."id" = t."styleProfilesId"
-        LEFT JOIN banks b ON b."id" = t."bankId"
+        LEFT JOIN banks ba ON ba."id" = t."bankId"
         LEFT JOIN currencies cur ON cur."id" = t."currencyId"
-        LEFT JOIN clients cl ON cl."id" = t."clientId",
-        LEFT JOIN businesses b ON b."id" = t."businessId"
+        LEFT JOIN clients cl ON cl."id" = t."clientId"
+        LEFT JOIN businesses bu ON bu."id" = t."businessId"
         ${whereSql}
-        ORDER BY it."createdAt" DESC
+        ORDER BY t."createdAt" DESC
       `;
-  const templates = await db.all<Template>(sql);
+  const presets = await db.all<Preset>(sql);
 
-  return templates;
+  return presets;
 };
 
-export const getAllTemplates = async (db: DatabaseAdapter, filter?: FilterData[]): Promise<Response<Template[]>> => {
-  const templates = await getTemplates(db, { filter });
+export const getAllPresets = async (db: DatabaseAdapter, filter?: FilterData[]): Promise<Response<Preset[]>> => {
+  const presets = await getPresets(db, { filter });
 
-  return { success: true, data: templates };
+  return { success: true, data: presets };
 };
 
-export const addTemplate = async (db: DatabaseAdapter, data: Template): Promise<Response<Template>> => {
+export const addPreset = async (db: DatabaseAdapter, data: Preset): Promise<Response<Preset>> => {
   try {
     await db.run('BEGIN');
 
-    const handle = handleEntity<Template>(db, 'templates', templateFields);
+    const handle = handleEntity<Preset>(db, 'presets', presetFields);
     const result = await handle(data);
 
     if (!result.success || !result.data) {
@@ -124,7 +124,7 @@ export const addTemplate = async (db: DatabaseAdapter, data: Template): Promise<
     await db.run('COMMIT');
 
     const newId = result.data;
-    const newResult = await getTemplates(db, { id: newId });
+    const newResult = await getPresets(db, { id: newId });
 
     return { success: true, data: newResult.length > 0 ? newResult[0] : undefined };
   } catch (error) {
@@ -133,11 +133,11 @@ export const addTemplate = async (db: DatabaseAdapter, data: Template): Promise<
   }
 };
 
-export const updateTemplate = async (db: DatabaseAdapter, data: Template): Promise<Response<Template>> => {
+export const updatePreset = async (db: DatabaseAdapter, data: Preset): Promise<Response<Preset>> => {
   try {
     await db.run('BEGIN');
 
-    const handle = handleEntity<Template>(db, 'templates', templateFields);
+    const handle = handleEntity<Preset>(db, 'presets', presetFields);
     const result = await handle(data, true);
 
     if (!result.success || !result.data) {
@@ -148,7 +148,7 @@ export const updateTemplate = async (db: DatabaseAdapter, data: Template): Promi
     await db.run('COMMIT');
 
     const newId = result.data;
-    const newResult = await getTemplates(db, { id: newId });
+    const newResult = await getPresets(db, { id: newId });
 
     return { success: true, data: newResult.length > 0 ? newResult[0] : undefined };
   } catch (error) {
@@ -157,17 +157,17 @@ export const updateTemplate = async (db: DatabaseAdapter, data: Template): Promi
   }
 };
 
-export const deleteTemplate = async (db: DatabaseAdapter, id: number) => {
+export const deletePreset = async (db: DatabaseAdapter, id: number) => {
   try {
-    await db.run('DELETE FROM templates WHERE "id" = ?;', [id]);
+    await db.run('DELETE FROM presets WHERE "id" = ?;', [id]);
     return { success: true };
   } catch (error) {
     return { success: false, ...mapDatabaseError(error, db.type) };
   }
 };
 
-export const batchAddTemplate = async (db: DatabaseAdapter, data: Template[]) => {
-  const handle = handleEntity<Template>(db, 'templates', templateFields);
+export const batchAddPreset = async (db: DatabaseAdapter, data: Preset[]) => {
+  const handle = handleEntity<Preset>(db, 'presets', presetFields);
   try {
     await db.run('BEGIN');
     for (const row of data) {

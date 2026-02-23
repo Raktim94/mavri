@@ -30,8 +30,8 @@ import {
   decodeInvoiceCustomizationImport,
   decodeInvoiceImport,
   decodeLogo,
+  decodePreset,
   decodeStyleProfile,
-  decodeTemplate,
   encodeBank,
   encodeInvoiceAttachment,
   encodeInvoiceBankSnapshotExport,
@@ -39,15 +39,15 @@ import {
   encodeInvoiceCustomizationExport,
   encodeInvoiceExport,
   encodeLogo,
-  encodeStyleProfile,
-  encodeTemplate
+  encodePreset,
+  encodeStyleProfile
 } from '../utils/dataUrlFunctions';
 import { convertBooleanFieldsToInt, toDbValue } from '../utils/dbHelper';
 import { mapDatabaseError } from '../utils/errorFunctions';
 
 export const exportAllData = async (db: DatabaseAdapter) => {
   try {
-    const templates = await db.all<Bank>('SELECT * FROM templates');
+    const presets = await db.all<Bank>('SELECT * FROM presets');
     const invoiceSequences = await db.all<Bank>('SELECT * FROM invoice_sequences');
     const banks = await db.all<Bank>('SELECT * FROM banks');
     const styleProfiles = await db.all<StyleProfile>('SELECT * FROM style_profiles');
@@ -72,7 +72,7 @@ export const exportAllData = async (db: DatabaseAdapter) => {
     const invoicePayments = await db.all<InvoicePayment>('SELECT * FROM invoice_payments');
     const attachments = await db.all<InvoiceAttachment>('SELECT * FROM attachments');
 
-    const templatesModified = templates.map(encodeTemplate);
+    const presetsModified = presets.map(encodePreset);
     const attachmentsModified = attachments.map(encodeInvoiceAttachment);
     const businessesModified = businesses.map(encodeLogo);
     const styleProfilesModified = styleProfiles.map(encodeStyleProfile);
@@ -83,7 +83,7 @@ export const exportAllData = async (db: DatabaseAdapter) => {
     const invoiceCustomizationsModified = invoiceCustomizations.map(encodeInvoiceCustomizationExport);
 
     const payload = {
-      templates: templatesModified,
+      presets: presetsModified,
       settings: settingsRow ?? null,
       businesses: businessesModified,
       clients,
@@ -180,7 +180,7 @@ export const importAllData = async (db: DatabaseAdapter, parsed: Record<string, 
 
     await runInTransaction(async () => {
       const deleteOrder = [
-        'templates',
+        'presets',
         'invoice_sequences',
         'invoice_style_profile_snapshots',
         'invoice_customizations',
@@ -208,7 +208,7 @@ export const importAllData = async (db: DatabaseAdapter, parsed: Record<string, 
       }
 
       const tableDataMap: Record<string, string> = {
-        templates: 'templates',
+        presets: 'presets',
         currencies: 'currencies',
         units: 'units',
         categories: 'categories',
@@ -259,8 +259,8 @@ export const importAllData = async (db: DatabaseAdapter, parsed: Record<string, 
       if (Array.isArray(parsedMut.invoiceCustomizations)) {
         parsedMut.invoiceCustomizations = parsedMut.invoiceCustomizations.map(decodeInvoiceCustomizationImport);
       }
-      if (Array.isArray(parsedMut.templates)) {
-        parsedMut.businesses = parsedMut.templates.map(decodeTemplate);
+      if (Array.isArray(parsedMut.presets)) {
+        parsedMut.businesses = parsedMut.presets.map(decodePreset);
       }
 
       for (const [table, key] of Object.entries(tableDataMap)) {

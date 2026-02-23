@@ -29,7 +29,7 @@ interface Props {
   toggleQuotes?: (value: boolean) => void;
   toggleReports?: (value: boolean) => void;
   toggleStyleProfiles?: (value: boolean) => void;
-  toggleTemplates?: (value: boolean) => void;
+  togglePresets?: (value: boolean) => void;
   onExportJSON?: () => void;
   onImportJSON?: () => void;
 }
@@ -39,7 +39,7 @@ export const Menu: FC<Props> = ({
   toggleQuotes = () => {},
   toggleReports = () => {},
   toggleStyleProfiles = () => {},
-  toggleTemplates = () => {},
+  togglePresets = () => {},
   onModeChange = () => {},
   onExportJSON = () => {},
   onImportJSON = () => {}
@@ -123,14 +123,14 @@ export const Menu: FC<Props> = ({
           }
         },
         {
-          text: t('settingsMenuItems.titles.turnTemplates'),
-          description: t('settingsMenuItems.descriptions.turnTemplates'),
+          text: t('settingsMenuItems.titles.turnPresets'),
+          description: t('settingsMenuItems.descriptions.turnPresets'),
           icon: <ContentCopyIcon />,
           isToggle: true,
           isSelected: false,
-          checked: storeSettings?.templatesON ?? true,
+          checked: storeSettings?.presetsON ?? true,
           onChange: () => {
-            toggleTemplates(!storeSettings?.templatesON);
+            togglePresets(!storeSettings?.presetsON);
           }
         }
       ]

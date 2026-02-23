@@ -116,7 +116,6 @@
     "noItem": "Sélectionnez un client pour afficher les détails."
   },
   "common": {
-    "templates": "Modèles",
     "accountHolder": "Titulaire du compte",
     "accountNumber": "Numéro de compte",
     "accountNumberInvalid": "Le numéro de compte doit contenir 4 à 34 caractères et uniquement des lettres, des chiffres ou des tirets.",
@@ -210,6 +209,7 @@
     "phone": "Téléphone",
     "phoneHelper": "Entrez le numéro au format international",
     "port": "Port",
+    "presets": "Préréglages",
     "progress": "Progression : {{prct}}%",
     "qrCode": "Code QR",
     "qty": "Qté",
@@ -248,6 +248,7 @@
     "tableItem": "Élément",
     "tableRowNo": "Numéro de ligne",
     "tableRowStyle": "Style de ligne de tableau",
+    "templates": "Modèles",
     "testConnection": "Tester la connexion",
     "testConnectionFailed": "La connexion n’a pas pu être établie",
     "testConnectionSuccess": "Connexion établie",
@@ -448,12 +449,23 @@
     "currencies": "Devises",
     "invoices": "Factures",
     "items": "Articles",
+    "presets": "Préréglages",
     "quotes": "Devis",
     "reports": "Rapports",
     "settings": "Paramètres",
     "styleProfiles": "Profils de style",
-    "templates": "Préréglages",
     "units": "Unités"
+  },
+  "presets": {
+    "add": "Ajouter un preset",
+    "filter": {
+      "activeDesc": "Presets non archivés",
+      "activeText": "Presets actifs",
+      "allText": "Tous les presets",
+      "archivedDesc": "Presets archivés",
+      "archivedText": "Presets archivés"
+    },
+    "noItem": "Sélectionnez un preset pour afficher les détails."
   },
   "quotes": {
     "filter": {
@@ -502,10 +514,10 @@
       "privacyPolicy": "Consultez notre politique de confidentialité.",
       "share": "Partagez cette application avec vos amis.",
       "support": "Signalez des bugs ou proposez des améliorations via GitHub.",
+      "turnPresets": "Activer ou désactiver la fonctionnalité des presets",
       "turnQuotes": "Activer ou désactiver la création de devis",
       "turnReports": "Activer ou désactiver les rapports",
       "turnStyleProfiles": "Activer ou désactiver la fonction des profils de style",
-      "turnTemplates": "Activer ou désactiver la fonctionnalité modèles",
       "tutorial": "Consultez le guide d’utilisation",
       "wallOfFame": "Découvrez les contributeurs qui ont soutenu le développement de l’application"
     },
@@ -524,10 +536,10 @@
       "privacyPolicy": "Politique de confidentialité",
       "share": "Partager l’application",
       "support": "Support",
+      "turnPresets": "Préréglages",
       "turnQuotes": "Devis",
       "turnReports": "Rapports",
       "turnStyleProfiles": "Profils de style",
-      "turnTemplates": "Modèles",
       "tutorial": "Tutoriel",
       "wallOfFame": "Tableau d'honneur"
     },

@@ -20,6 +20,7 @@ import type {
 } from '../types/invoice';
 import type { Item, ItemAdd, ItemUpdate } from '../types/item';
 import type { PostgresConfig } from '../types/postgresConfig';
+import type { PresetAdd, PresetUpdate, PresetUpdateWeb, PresetWeb } from '../types/preset';
 import type { Response } from '../types/response';
 import type { Settings, SettingsUpdate } from '../types/settings';
 import type {
@@ -48,6 +49,16 @@ const mapBankFromWeb = <T extends BankWeb | BankUpdateWeb>(b: T) => ({
 const mapBankToWeb = async <T extends BankUpdate | BankAdd>(data: T) => ({
   ...data,
   qrCode: await fileToBase64(data.qrCode)
+});
+
+const mapPresetFromWeb = <T extends PresetWeb | PresetUpdateWeb>(b: T) => ({
+  ...b,
+  signatureData: base64ToBytesOrUndef(b.signatureData)
+});
+
+const mapPresetToWeb = async <T extends PresetUpdate | PresetAdd>(data: T) => ({
+  ...data,
+  signatureData: await fileToBase64(data.signatureData)
 });
 
 const mapStyleProfileFromWeb = <T extends StyleProfileWeb | StyleProfileUpdateWeb>(sp: T) => ({
@@ -358,7 +369,37 @@ export const webApi = () => {
       };
     },
     deleteBank: (id: number) => apiDelete<Response<unknown>>(`/api/banks/${id}`),
-    addBatchBank: (data: BankAdd[]) => apiPost<Response<BankAdd[]>>('/api/bnaks/batch', data),
+    addBatchBank: (data: BankAdd[]) => apiPost<Response<BankAdd[]>>('/api/banks/batch', data),
+
+    getAllPresets: async (filter?: FilterData[]) => {
+      const response = await apiGet<Response<PresetWeb[]>>(
+        '/api/presets',
+        filter?.length ? { filter: JSON.stringify(filter) } : undefined
+      );
+
+      return {
+        ...response,
+        data: response.data?.map(mapPresetFromWeb) ?? []
+      };
+    },
+    updatePreset: async (data: PresetUpdate) => {
+      const response = await apiPut<Response<PresetWeb>>('/api/presets', await mapPresetToWeb(data));
+
+      return {
+        ...response,
+        data: response.data && mapPresetFromWeb(response.data)
+      };
+    },
+    addPreset: async (data: PresetAdd) => {
+      const response = await apiPost<Response<PresetWeb>>('/api/presets', await mapPresetToWeb(data));
+
+      return {
+        ...response,
+        data: response.data && mapPresetFromWeb(response.data)
+      };
+    },
+    deletePreset: (id: number) => apiDelete<Response<unknown>>(`/api/presets/${id}`),
+    addBatchPreset: (data: PresetAdd[]) => apiPost<Response<PresetAdd[]>>('/api/presets/batch', data),
 
     getNextSequence: async (data: { businessId: number; clientId: number }) =>
       apiGet<Response<number | undefined>>('/api/invoices/sequence', {

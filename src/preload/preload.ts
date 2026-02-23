@@ -10,6 +10,7 @@ import type { FilterData } from '../renderer/shared/types/filter';
 import type { InvoiceAdd, InvoiceUpdate } from '../renderer/shared/types/invoice';
 import type { ItemAdd, ItemUpdate } from '../renderer/shared/types/item';
 import type { PostgresConfig } from '../renderer/shared/types/postgresConfig';
+import type { Preset, PresetAdd, PresetUpdate } from '../renderer/shared/types/preset';
 import type { SettingsUpdate } from '../renderer/shared/types/settings';
 import type { StyleProfile, StyleProfileAdd, StyleProfileUpdate } from '../renderer/shared/types/styleProfiles';
 import type { UnitAdd, UnitUpdate } from '../renderer/shared/types/unit';
@@ -109,6 +110,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   deleteBank: (id: number) => ipcRenderer.invoke('delete-bank', id),
   addBank: (data: BankAdd) => ipcRenderer.invoke('add-bank', data),
   addBatchBank: (data: Bank[]) => ipcRenderer.invoke('batch-add-bank', data),
+
+  getAllPresets: (filter?: FilterData[]) => ipcRenderer.invoke('get-all-presets', filter),
+  updatePreset: (data: PresetUpdate) => ipcRenderer.invoke('update-preset', data),
+  deletePreset: (id: number) => ipcRenderer.invoke('delete-preset', id),
+  addPreset: (data: PresetAdd) => ipcRenderer.invoke('add-preset', data),
+  addBatchPreset: (data: Preset[]) => ipcRenderer.invoke('batch-add-preset', data),
 
   exportAllData: () => ipcRenderer.invoke('export-all-data'),
   importAllData: () => ipcRenderer.invoke('import-all-data')

@@ -73,7 +73,6 @@ export const Sidebar: FC = () => {
           path: '/invoices',
           isToggle: false,
           minHeight: 50,
-          group: 'Documents',
           isSelected: isSelected,
           onClick: onClickNavigate
         },
@@ -83,7 +82,6 @@ export const Sidebar: FC = () => {
                 text: t('menuItems.quotes'),
                 icon: <ReceiptIcon />,
                 path: '/quotes',
-                group: 'Documents',
                 isToggle: false,
                 minHeight: 50,
                 isSelected: isSelected,
@@ -93,20 +91,19 @@ export const Sidebar: FC = () => {
           : [])
       ]
     },
-    ...(storeSettings?.templatesON || storeSettings?.styleProfilesON
+    ...(storeSettings?.presetsON || storeSettings?.styleProfilesON
       ? [
           {
             groupName: t('common.templates'),
             groupIcon: <ViewModule />,
             isOpen: true,
             items: [
-              ...(storeSettings?.templatesON
+              ...(storeSettings?.presetsON
                 ? [
                     {
-                      text: t('menuItems.templates'),
+                      text: t('menuItems.presets'),
                       icon: <ContentCopyIcon />,
-                      path: '/templates',
-                      group: 'Templates',
+                      path: '/presets',
                       isToggle: false,
                       minHeight: 50,
                       isSelected: isSelected,

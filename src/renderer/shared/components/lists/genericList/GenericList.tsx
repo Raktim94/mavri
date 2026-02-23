@@ -30,7 +30,7 @@ interface GenericListProps<T extends { id: number }> {
   getEmail?: (item: T) => string | undefined;
   getPhone?: (item: T) => string | undefined;
   getAdditional?: (item: T) => string | undefined;
-  getInvoiceCount: (item: T) => number;
+  getInvoiceCount?: (item: T) => number;
   getQuotesCount?: (item: T) => number;
   getIsArchived?: (item: T) => boolean;
 }
@@ -58,7 +58,7 @@ export const GenericList = <T extends { id: number }>({
   const name = getName(item);
   const email = getEmail?.(item);
   const phone = getPhone?.(item);
-  const invoiceCount = getInvoiceCount(item);
+  const invoiceCount = getInvoiceCount?.(item);
   const quotesCount = getQuotesCount?.(item);
   const additional = getAdditional?.(item);
   const isArchived = getIsArchived?.(item);
@@ -203,11 +203,13 @@ export const GenericList = <T extends { id: number }>({
             <Box sx={{ flexGrow: 1 }} />
 
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 2 }}>
-              {!isMobile && (
+              {!isMobile && (invoiceCount !== undefined || (storeSettings?.quotesON && quotesCount !== undefined)) && (
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'end', whiteSpace: 'nowrap' }}>
-                  <Typography variant="body2" sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {invoiceCount} {invoiceCount > 1 ? t('common.invoices') : t('common.invoice')}
-                  </Typography>
+                  {invoiceCount !== undefined && (
+                    <Typography variant="body2" sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {invoiceCount} {invoiceCount > 1 ? t('common.invoices') : t('common.invoice')}
+                    </Typography>
+                  )}
                   {storeSettings?.quotesON && quotesCount !== undefined && (
                     <Typography variant="body2" sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {quotesCount} {quotesCount > 1 ? t('common.quotes') : t('common.quote')}
@@ -239,11 +241,13 @@ export const GenericList = <T extends { id: number }>({
           </Box>
         </Box>
 
-        {isMobile && (
+        {isMobile && (invoiceCount !== undefined || (storeSettings?.quotesON && quotesCount !== undefined)) && (
           <Box sx={{ display: 'flex', flexDirection: 'row', gap: 0.5, whiteSpace: 'nowrap', mt: 2 }}>
-            <Typography variant="body2" sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {invoiceCount} {invoiceCount > 1 ? t('common.invoices') : t('common.invoice')}
-            </Typography>
+            {invoiceCount !== undefined && (
+              <Typography variant="body2" sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {invoiceCount} {invoiceCount > 1 ? t('common.invoices') : t('common.invoice')}
+              </Typography>
+            )}
             {storeSettings?.quotesON && quotesCount !== undefined && (
               <>
                 <Typography variant="body2" sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>

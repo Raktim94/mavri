@@ -23,10 +23,10 @@ import {
   setCustomInvoiseSettings,
   setLanguageDate,
   setMode,
+  setPresets,
   setQuotes,
   setReports,
-  setStyleProfiles,
-  setTemplates
+  setStyleProfiles
 } from '../../state/pageSlice';
 import { CustomizeInvoice } from './content/CustomizeInvoice';
 import { LanguageFormat } from './content/LanguageFormat';
@@ -117,9 +117,9 @@ export const SettingsPage = () => {
     [dispatch]
   );
 
-  const toggleTemplates = useCallback(
+  const togglePresets = useCallback(
     (value: boolean) => {
-      dispatch(setTemplates(value));
+      dispatch(setPresets(value));
     },
     [dispatch]
   );
@@ -232,7 +232,7 @@ export const SettingsPage = () => {
       toggleQuotes={toggleQuotes}
       toggleReports={toggleReports}
       toggleStyleProfiles={toggleStyleProfiles}
-      toggleTemplates={toggleTemplates}
+      togglePresets={togglePresets}
       onExportJSON={exportJSON}
       onImportJSON={importJSONCallback}
     />

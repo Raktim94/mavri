@@ -116,7 +116,6 @@
     "noItem": "Pasirinkite klientą, kad pamatytumėte detales."
   },
   "common": {
-    "templates": "Šablonai",
     "accountHolder": "Sąskaitos savininkas",
     "accountNumber": "Sąskaitos numeris",
     "accountNumberInvalid": "Sąskaitos numeris turi būti 4–34 simbolių ilgio ir gali sudaryti tik raidės, skaičiai arba brūkšneliai.",
@@ -210,6 +209,7 @@
     "phone": "Telefonas",
     "phoneHelper": "Įveskite telefono numerį tarptautiniu formatu",
     "port": "Prievadas",
+    "presets": "Šablonai",
     "progress": "Progresas: {{prct}}%",
     "qrCode": "QR kodas",
     "qty": "Kiekis",
@@ -248,6 +248,7 @@
     "tableItem": "Elementas",
     "tableRowNo": "Eilutės numeris",
     "tableRowStyle": "Lentelės eilučių stilius",
+    "templates": "Ruošiniai",
     "testConnection": "Tikrinti ryšį",
     "testConnectionFailed": "Ryšio užmegzti nepavyko",
     "testConnectionSuccess": "Ryšys užmegztas",
@@ -448,12 +449,23 @@
     "currencies": "Valiutos",
     "invoices": "Sąskaitos",
     "items": "Prekės",
+    "presets": "Šablonai",
     "quotes": "Pasiūlymai",
     "reports": "Ataskaitos",
     "settings": "Nustatymai",
     "styleProfiles": "Stiliaus profiliai",
-    "templates": "Išankstiniai šablonai",
     "units": "Vienetai"
+  },
+  "presets": {
+    "add": "Pridėti šabloną",
+    "filter": {
+      "activeDesc": "Nearchyvuoti šablonai",
+      "activeText": "Aktyvūs šablonai",
+      "allText": "Visi šablonai",
+      "archivedDesc": "Archyvuoti šablonai",
+      "archivedText": "Archyvuoti šablonai"
+    },
+    "noItem": "Pasirinkite šabloną, kad matytumėte detales."
   },
   "quotes": {
     "filter": {
@@ -502,10 +514,10 @@
       "privacyPolicy": "Susipažinkite su mūsų privatumo politika apie tai, kaip tvarkome jūsų duomenis.",
       "share": "Bendrinkite šią programą su draugais.",
       "support": "Praneškite apie klaidas arba siūlykite patobulinimus per GitHub.",
+      "turnPresets": "Įjunkti arba išjungti šablonų funkciją",
       "turnQuotes": "Įjunkti arba išjungti pasiūlymų kūrimo funkciją",
       "turnReports": "Įjunkti arba išjungti ataskaitų teikimo funkciją",
       "turnStyleProfiles": "Įjungti arba išjungti stiliaus profilių funkciją",
-      "turnTemplates": "Įjunkti arba išjungti šablonų funkciją",
       "tutorial": "Peržiūrėkite gidą, kaip naudotis programa",
       "wallOfFame": "Peržiūrėkite rėmėjus, kurie prisidėjo prie programėlės kūrimo"
     },
@@ -524,10 +536,10 @@
       "privacyPolicy": "Privatumo politika",
       "share": "Bendrinti programą",
       "support": "Pagalba",
+      "turnPresets": "Šablonai",
       "turnQuotes": "Pasiūlymai",
       "turnReports": "Ataskaitos",
       "turnStyleProfiles": "Stiliaus profiliai",
-      "turnTemplates": "Šablonai",
       "tutorial": "Instrukcija",
       "wallOfFame": "Garbės siena"
     },

@@ -116,7 +116,6 @@
     "noItem": "Kunde auswählen, um Details anzuzeigen."
   },
   "common": {
-    "templates": "Vorlagen",
     "accountHolder": "Kontoinhaber",
     "accountNumber": "Kontonummer",
     "accountNumberInvalid": "Die Kontonummer muss 4–34 Zeichen lang sein und darf nur Buchstaben, Zahlen oder Bindestriche enthalten.",
@@ -210,6 +209,7 @@
     "phone": "Telefon",
     "phoneHelper": "Telefonnummer im internationalen Format eingeben",
     "port": "Port",
+    "presets": "Voreinstellungen",
     "progress": "Fortschritt: {{prct}}%",
     "qrCode": "QR-Code",
     "qty": "Menge",
@@ -248,6 +248,7 @@
     "tableItem": "Artikel",
     "tableRowNo": "Zeilennummer",
     "tableRowStyle": "Tabellenzeilen-Stil",
+    "templates": "Vorlagen",
     "testConnection": "Verbindung testen",
     "testConnectionFailed": "Verbindung konnte nicht hergestellt werden",
     "testConnectionSuccess": "Verbindung hergestellt",
@@ -448,12 +449,23 @@
     "currencies": "Währungen",
     "invoices": "Rechnungen",
     "items": "Artikel",
+    "presets": "Voreinstellungen",
     "quotes": "Angebote",
     "reports": "Berichte",
     "settings": "Einstellungen",
     "styleProfiles": "Stilprofile",
-    "templates": "Voreinstellungen",
     "units": "Einheiten"
+  },
+  "presets": {
+    "add": "Preset hinzufügen",
+    "filter": {
+      "activeDesc": "Nicht archivierte Presets",
+      "activeText": "Aktive Presets",
+      "allText": "Alle Presets",
+      "archivedDesc": "Archivierte Presets",
+      "archivedText": "Archivierte Presets"
+    },
+    "noItem": "Wählen Sie ein Preset aus, um Details anzuzeigen."
   },
   "quotes": {
     "filter": {
@@ -502,10 +514,10 @@
       "privacyPolicy": "Lesen Sie unsere Datenschutzrichtlinie.",
       "share": "Teilen Sie diese App mit Ihren Freunden.",
       "support": "Fehler melden oder Verbesserungen über GitHub vorschlagen.",
+      "turnPresets": "Die Preset‑Funktion aktivieren oder deaktivieren",
       "turnQuotes": "Angebotserstellung aktivieren oder deaktivieren",
       "turnReports": "Berichtsfunktion aktivieren oder deaktivieren",
       "turnStyleProfiles": "Style-Profil-Funktion aktivieren oder deaktivieren",
-      "turnTemplates": "Aktivieren oder Deaktivieren der Vorlagen-Funktion",
       "tutorial": "Anleitung zur Verwendung der Anwendung ansehen",
       "wallOfFame": "Sehen Sie die Unterstützer, die zur Entwicklung der App beigetragen haben"
     },
@@ -524,10 +536,10 @@
       "privacyPolicy": "Datenschutzrichtlinie",
       "share": "App teilen",
       "support": "Support",
+      "turnPresets": "Voreinstellungen",
       "turnQuotes": "Angebote",
       "turnReports": "Berichte",
       "turnStyleProfiles": "Stilprofile",
-      "turnTemplates": "Vorlagen",
       "tutorial": "Anleitung",
       "wallOfFame": "Ruhmeshalle"
     },

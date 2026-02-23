@@ -5,18 +5,18 @@ import { mapDatabaseError } from '../utils/errorFunctions';
 export const up = async (db: DatabaseAdapter) => {
   try {
     const cols = await getTableColumns(db, 'settings');
-    const colInfo = cols.find(c => c.name === 'templatesON');
+    const colInfo = cols.find(c => c.name === 'presetsON');
     if (colInfo) return;
 
     await db.run(
       `
         ALTER TABLE settings
-        ADD COLUMN "templatesON" INTEGER NOT NULL DEFAULT 1 CHECK ("templatesON" IN (0,1))
+        ADD COLUMN "presetsON" INTEGER NOT NULL DEFAULT 1 CHECK ("presetsON" IN (0,1))
       `
     );
 
     await db.run(
-      `CREATE TABLE IF NOT EXISTS templates (
+      `CREATE TABLE IF NOT EXISTS presets (
         "id" ${getColumnType('INTEGER PRIMARY KEY AUTOINCREMENT', db.type)},
         "name" TEXT NOT NULL UNIQUE,
         "businessId" INTEGER,

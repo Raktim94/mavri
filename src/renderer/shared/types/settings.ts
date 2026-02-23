@@ -15,7 +15,7 @@ export interface Settings {
   shouldIncludeBusinessName: boolean;
   quotesON: boolean;
   styleProfilesON: boolean;
-  templatesON: boolean;
+  presetsON: boolean;
   reportsON: boolean;
   createdAt: string;
   updatedAt: string;
@@ -33,6 +33,6 @@ export interface SettingsUpdate {
   shouldIncludeBusinessName?: boolean;
   quotesON?: boolean;
   styleProfilesON?: boolean;
-  templatesON?: boolean;
+  presetsON?: boolean;
   reportsON?: boolean;
 }
