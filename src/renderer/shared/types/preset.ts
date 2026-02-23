@@ -77,6 +77,7 @@ export interface PresetFromData {
   thanksNotes?: string;
   termsConditionNotes?: string;
   language?: string;
+  signatureData?: Uint8Array | null;
   signatureSize?: number;
   signatureType?: string;
   signatureName?: string;
