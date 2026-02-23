@@ -144,6 +144,8 @@
     "confirm": "Bestätigen",
     "confirmDelete": "Sind Sie sicher, dass Sie dieses Element löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
     "confirmation": "Bestätigung",
+    "createNew": "Neu erstellen",
+    "createNewFromPreset": "Neu aus Vorlage erstellen",
     "creditCard": "Kreditkarte",
     "currency": "Währung",
     "dark": "Dunkel",
@@ -209,6 +211,7 @@
     "phone": "Telefon",
     "phoneHelper": "Telefonnummer im internationalen Format eingeben",
     "port": "Port",
+    "presets": "Voreinstellungen",
     "progress": "Fortschritt: {{prct}}%",
     "qrCode": "QR-Code",
     "qty": "Menge",
@@ -247,6 +250,7 @@
     "tableItem": "Artikel",
     "tableRowNo": "Zeilennummer",
     "tableRowStyle": "Tabellenzeilen-Stil",
+    "templates": "Vorlagen",
     "testConnection": "Verbindung testen",
     "testConnectionFailed": "Verbindung konnte nicht hergestellt werden",
     "testConnectionSuccess": "Verbindung hergestellt",
@@ -447,11 +451,23 @@
     "currencies": "Währungen",
     "invoices": "Rechnungen",
     "items": "Artikel",
+    "presets": "Voreinstellungen",
     "quotes": "Angebote",
     "reports": "Berichte",
     "settings": "Einstellungen",
     "styleProfiles": "Stilprofile",
     "units": "Einheiten"
+  },
+  "presets": {
+    "add": "Preset hinzufügen",
+    "filter": {
+      "activeDesc": "Nicht archivierte Presets",
+      "activeText": "Aktive Presets",
+      "allText": "Alle Presets",
+      "archivedDesc": "Archivierte Presets",
+      "archivedText": "Archivierte Presets"
+    },
+    "noItem": "Wählen Sie ein Preset aus, um Details anzuzeigen."
   },
   "quotes": {
     "filter": {
@@ -500,6 +516,7 @@
       "privacyPolicy": "Lesen Sie unsere Datenschutzrichtlinie.",
       "share": "Teilen Sie diese App mit Ihren Freunden.",
       "support": "Fehler melden oder Verbesserungen über GitHub vorschlagen.",
+      "turnPresets": "Die Preset‑Funktion aktivieren oder deaktivieren",
       "turnQuotes": "Angebotserstellung aktivieren oder deaktivieren",
       "turnReports": "Berichtsfunktion aktivieren oder deaktivieren",
       "turnStyleProfiles": "Style-Profil-Funktion aktivieren oder deaktivieren",
@@ -521,6 +538,7 @@
       "privacyPolicy": "Datenschutzrichtlinie",
       "share": "App teilen",
       "support": "Support",
+      "turnPresets": "Voreinstellungen",
       "turnQuotes": "Angebote",
       "turnReports": "Berichte",
       "turnStyleProfiles": "Stilprofile",

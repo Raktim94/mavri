@@ -1,14 +1,19 @@
 import { Box, ListItemButton, ListItemText, Typography, useTheme } from '@mui/material';
 import { memo, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { InvoiceFromData } from '../../../shared/types/invoice';
 
 interface Props {
-  invoiceForm?: InvoiceFromData;
+  data?: {
+    currencyCode?: string;
+    currencySymbol?: string;
+  };
+  isRequired?: boolean;
   onEdit: () => void;
 }
 
-const CurrencySelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
+const CurrencySelectorComponent: FC<Props> = ({ data, onEdit, isRequired = true }) => {
+  const { currencyCode, currencySymbol } = data ?? {};
+
   const { t } = useTranslation();
   const theme = useTheme();
 
@@ -22,19 +27,19 @@ const CurrencySelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
               variant="body1"
               sx={{ fontWeight: 600, color: theme.palette.primary.main, overflow: 'hidden', textOverflow: 'ellipsis' }}
             >
-              {t('common.currency').toUpperCase()} *
+              {t('common.currency').toUpperCase()} {isRequired ? '*' : ''}
             </Typography>
           }
           secondary={
-            invoiceForm?.invoiceCurrencySnapshot?.currencyCode &&
-            invoiceForm?.invoiceCurrencySnapshot?.currencySymbol && (
+            currencyCode &&
+            currencySymbol && (
               <Typography
                 component="div"
                 variant="body2"
                 sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}
               >
-                {invoiceForm.invoiceCurrencySnapshot?.currencyCode}&nbsp;/&nbsp;
-                {invoiceForm.invoiceCurrencySnapshot?.currencySymbol}
+                {currencyCode}&nbsp;/&nbsp;
+                {currencySymbol}
               </Typography>
             )
           }

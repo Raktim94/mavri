@@ -13,7 +13,7 @@ export const up = async (db: DatabaseAdapter) => {
         "id" ${getColumnType('INTEGER PRIMARY KEY AUTOINCREMENT', db.type)},
         "businessId" INTEGER NOT NULL,
         "clientId" INTEGER NOT NULL,
-        "nextSequence" INTEGER NOT NULL,
+        "nextSequence" BIGINT NOT NULL,
         "createdAt" ${getColumnType('DATETIME', db.type)} NOT NULL DEFAULT ${getDefaultValue("(datetime('now'))", db.type)},
         "updatedAt" ${getColumnType('DATETIME', db.type)} NOT NULL DEFAULT ${getDefaultValue("(datetime('now'))", db.type)},
         UNIQUE("businessId","clientId")
@@ -26,7 +26,7 @@ export const up = async (db: DatabaseAdapter) => {
       INSERT INTO invoice_sequences ("businessId", "clientId", "nextSequence")
       SELECT
         "businessId", "clientId",  COALESCE(
-          MAX(CAST("invoiceNumber" AS INTEGER)) + 1,
+          MAX(CAST("invoiceNumber" AS BIGINT)) + 1,
           COUNT(*) + 1,
           1
         )

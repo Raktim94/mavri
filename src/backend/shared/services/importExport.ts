@@ -30,6 +30,7 @@ import {
   decodeInvoiceCustomizationImport,
   decodeInvoiceImport,
   decodeLogo,
+  decodePreset,
   decodeStyleProfile,
   encodeBank,
   encodeInvoiceAttachment,
@@ -38,6 +39,7 @@ import {
   encodeInvoiceCustomizationExport,
   encodeInvoiceExport,
   encodeLogo,
+  encodePreset,
   encodeStyleProfile
 } from '../utils/dataUrlFunctions';
 import { convertBooleanFieldsToInt, toDbValue } from '../utils/dbHelper';
@@ -45,6 +47,7 @@ import { mapDatabaseError } from '../utils/errorFunctions';
 
 export const exportAllData = async (db: DatabaseAdapter) => {
   try {
+    const presets = await db.all<Bank>('SELECT * FROM presets');
     const invoiceSequences = await db.all<Bank>('SELECT * FROM invoice_sequences');
     const banks = await db.all<Bank>('SELECT * FROM banks');
     const styleProfiles = await db.all<StyleProfile>('SELECT * FROM style_profiles');
@@ -69,6 +72,7 @@ export const exportAllData = async (db: DatabaseAdapter) => {
     const invoicePayments = await db.all<InvoicePayment>('SELECT * FROM invoice_payments');
     const attachments = await db.all<InvoiceAttachment>('SELECT * FROM attachments');
 
+    const presetsModified = presets.map(item => encodePreset(item, true));
     const attachmentsModified = attachments.map(encodeInvoiceAttachment);
     const businessesModified = businesses.map(encodeLogo);
     const styleProfilesModified = styleProfiles.map(encodeStyleProfile);
@@ -79,6 +83,7 @@ export const exportAllData = async (db: DatabaseAdapter) => {
     const invoiceCustomizationsModified = invoiceCustomizations.map(encodeInvoiceCustomizationExport);
 
     const payload = {
+      presets: presetsModified,
       settings: settingsRow ?? null,
       businesses: businessesModified,
       clients,
@@ -175,6 +180,7 @@ export const importAllData = async (db: DatabaseAdapter, parsed: Record<string, 
 
     await runInTransaction(async () => {
       const deleteOrder = [
+        'presets',
         'invoice_sequences',
         'invoice_style_profile_snapshots',
         'invoice_customizations',
@@ -221,7 +227,8 @@ export const importAllData = async (db: DatabaseAdapter, parsed: Record<string, 
         invoice_items: 'invoiceItems',
         invoice_item_snapshots: 'invoiceItemSnapshots',
         invoice_payments: 'invoicePayments',
-        attachments: 'attachments'
+        attachments: 'attachments',
+        presets: 'presets'
       };
 
       const parsedMut = { ...parsed };
@@ -251,6 +258,9 @@ export const importAllData = async (db: DatabaseAdapter, parsed: Record<string, 
       }
       if (Array.isArray(parsedMut.invoiceCustomizations)) {
         parsedMut.invoiceCustomizations = parsedMut.invoiceCustomizations.map(decodeInvoiceCustomizationImport);
+      }
+      if (Array.isArray(parsedMut.presets)) {
+        parsedMut.presets = parsedMut.presets.map(item => decodePreset(item, true));
       }
 
       for (const [table, key] of Object.entries(tableDataMap)) {

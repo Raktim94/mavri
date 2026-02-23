@@ -7,6 +7,7 @@ import { ClientsPage } from '../pages/clients';
 import { CurrenciesPage } from '../pages/currencies';
 import { InvoicesPage } from '../pages/invoices';
 import { ItemsPage } from '../pages/items';
+import { PresetsPage } from '../pages/presets';
 import { QuotesPage } from '../pages/quotes';
 import { ReportsPage } from '../pages/reports';
 import { SettingsPage } from '../pages/settings';
@@ -30,6 +31,7 @@ export const AppRoutes: FC = () => {
       <Route path="quotes" element={<QuotesPage />} />
       <Route path="reports" element={<ReportsPage />} />
       <Route path="banks" element={<BanksPage />} />
+      <Route path="presets" element={<PresetsPage />} />
       <Route path="*" element={<Navigate to="/invoices" replace />} />
     </Routes>
   );

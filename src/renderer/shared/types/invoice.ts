@@ -297,7 +297,7 @@ export interface InvoiceItem {
 }
 
 export interface InvoiceCurrencySnapshots {
-  parentInvoiceId: number;
+  parentInvoiceId?: number;
   id?: number;
   currencyCode: string;
   currencySymbol: string;

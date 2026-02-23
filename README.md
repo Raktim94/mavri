@@ -103,8 +103,9 @@ If you value **privacy, portability, and control**, this app is built for you.
 - Invoice/quote number prefix & suffix
 - File name customization for exported PDFs
 - Light & dark mode
-- Enable/disable reports and quotes
+- Enable/disable reports, style profiles, presets and quotes
 - Check for updates via GitHub releases
+- Presets: Predefine default Invoice/Quote data (e.g., business, client, currency, bank, style profile, notes, language, signature) to streamline document creation
 
 ## 🖥️ Supported Platforms
 

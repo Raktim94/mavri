@@ -106,6 +106,35 @@ const InvoiceFormComponent: FC<Props> = ({
     ]
   );
 
+  const businessFormData = useMemo(
+    () => ({
+      businessLogo: invoiceForm?.invoiceBusinessSnapshot?.businessLogo,
+      businessFileType: invoiceForm?.invoiceBusinessSnapshot?.businessFileType,
+      businessName: invoiceForm?.invoiceBusinessSnapshot?.businessName,
+      businessShortName: invoiceForm?.invoiceBusinessSnapshot?.businessShortName
+    }),
+    [invoiceForm?.invoiceBusinessSnapshot]
+  );
+
+  const signatureFormData = useMemo(
+    () => ({
+      signatureData: invoiceForm?.signatureData,
+      signatureName: invoiceForm?.signatureName,
+      signatureSize: invoiceForm?.signatureSize,
+      signatureType: invoiceForm?.signatureType
+    }),
+    [invoiceForm?.signatureData, invoiceForm?.signatureName, invoiceForm?.signatureSize, invoiceForm?.signatureType]
+  );
+
+  const notesFormData = useMemo(
+    () => ({
+      customerNotes: invoiceForm?.customerNotes,
+      thanksNotes: invoiceForm?.thanksNotes,
+      termsConditionNotes: invoiceForm?.termsConditionNotes
+    }),
+    [invoiceForm?.termsConditionNotes, invoiceForm?.thanksNotes, invoiceForm?.customerNotes]
+  );
+
   const customFieldHeaders = useMemo(() => {
     const headers =
       invoiceForm?.invoiceItems
@@ -123,10 +152,6 @@ const InvoiceFormComponent: FC<Props> = ({
 
     return uniqueHeaders;
   }, [invoiceForm?.invoiceItems]);
-
-  const onEdit = (setter: React.Dispatch<React.SetStateAction<boolean>>) => {
-    setter(true);
-  };
 
   const handleOnOpen = useCallback((setter: React.Dispatch<React.SetStateAction<boolean>>) => {
     setter(true);
@@ -735,18 +760,18 @@ const InvoiceFormComponent: FC<Props> = ({
     >
       <Divider flexItem />
       <TopRow
-        onEditBank={() => onEdit(setIsDropdownOpenBanks)}
-        onEditCurrency={() => onEdit(setIsDropdownOpenCurrencies)}
-        onEditLanguage={() => onEdit(setIsDropdownOpenLanguages)}
-        onEditStyleProfile={() => onEdit(setIsDropdownOpenStyleProfile)}
+        onEditBank={() => handleOnOpen(setIsDropdownOpenBanks)}
+        onEditCurrency={() => handleOnOpen(setIsDropdownOpenCurrencies)}
+        onEditLanguage={() => handleOnOpen(setIsDropdownOpenLanguages)}
+        onEditStyleProfile={() => handleOnOpen(setIsDropdownOpenStyleProfile)}
         invoiceForm={invoiceForm}
       />
       <Divider flexItem />
-      <BusinessSelector onEdit={() => onEdit(setIsDropdownOpenBusinesses)} invoiceForm={invoiceForm} />
+      <BusinessSelector onEdit={() => handleOnOpen(setIsDropdownOpenBusinesses)} data={businessFormData} />
       <Divider flexItem />
       <ClientInvoiceRow
-        onEditClients={() => onEdit(setIsDropdownOpenClients)}
-        onEditInvoiceInfo={() => onEdit(setIsDropdownOpenInvoiceInfo)}
+        onEditClients={() => handleOnOpen(setIsDropdownOpenClients)}
+        onEditInvoiceInfo={() => handleOnOpen(setIsDropdownOpenInvoiceInfo)}
         invoiceForm={invoiceForm}
         type={type}
       />
@@ -762,7 +787,7 @@ const InvoiceFormComponent: FC<Props> = ({
 
       {invoiceForm?.invoiceItems && invoiceForm?.invoiceItems?.length > 0 && <Divider flexItem />}
 
-      <ItemSelector onEdit={() => onEdit(setIsDropdownOpenItems)} />
+      <ItemSelector onEdit={() => handleOnOpen(setIsDropdownOpenItems)} />
 
       {invoiceForm?.invoiceItems && invoiceForm?.invoiceItems?.length > 0 && (
         <>
@@ -790,7 +815,7 @@ const InvoiceFormComponent: FC<Props> = ({
           />
           <Divider flexItem />
           <NotesSelector
-            invoiceForm={invoiceForm}
+            data={notesFormData}
             onCustomerNotesChanged={value => {
               startTransition(() => {
                 setInvoiceForm(prev => ({ ...prev, customerNotes: value }));
@@ -807,7 +832,7 @@ const InvoiceFormComponent: FC<Props> = ({
               });
             }}
           />
-          <SignatureSelector invoiceForm={invoiceForm} onEdit={handleSignature} />
+          <SignatureSelector data={signatureFormData} onEdit={handleSignature} />
 
           <Divider flexItem />
 

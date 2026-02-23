@@ -23,6 +23,7 @@ import {
   setCustomInvoiseSettings,
   setLanguageDate,
   setMode,
+  setPresets,
   setQuotes,
   setReports,
   setStyleProfiles
@@ -112,6 +113,13 @@ export const SettingsPage = () => {
   const toggleStyleProfiles = useCallback(
     (value: boolean) => {
       dispatch(setStyleProfiles(value));
+    },
+    [dispatch]
+  );
+
+  const togglePresets = useCallback(
+    (value: boolean) => {
+      dispatch(setPresets(value));
     },
     [dispatch]
   );
@@ -224,6 +232,7 @@ export const SettingsPage = () => {
       toggleQuotes={toggleQuotes}
       toggleReports={toggleReports}
       toggleStyleProfiles={toggleStyleProfiles}
+      togglePresets={togglePresets}
       onExportJSON={exportJSON}
       onImportJSON={importJSONCallback}
     />

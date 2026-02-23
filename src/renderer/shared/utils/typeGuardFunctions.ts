@@ -177,6 +177,72 @@ export const isBankFromData = (data: unknown): data is BankFromData => {
   return true;
 };
 
+export const isPresetFromData = (data: unknown): data is BankFromData => {
+  if (typeof data !== 'object' || data === null) return false;
+
+  const d = data as Record<string, unknown>;
+
+  if (typeof d.name !== 'string') return false;
+
+  if (d.id !== undefined && d.id !== null && d.id !== '' && typeof d.id !== 'number') return false;
+
+  if (d.isArchived !== undefined && d.isArchived !== null && d.isArchived !== '' && typeof d.isArchived !== 'boolean')
+    return false;
+
+  if (d.signatureData !== undefined && d.signatureData !== '' && d.signatureData != null) {
+    const isBlob = d.signatureData instanceof Uint8Array;
+    if (!isBlob) return false;
+  }
+
+  if (d.businessId !== undefined && d.businessId !== null && d.businessId !== '') {
+    if (typeof d.businessId !== 'number') return false;
+  }
+
+  if (d.clientId !== undefined && d.clientId !== null && d.clientId !== '') {
+    if (typeof d.clientId !== 'number') return false;
+  }
+
+  if (d.language !== undefined && d.language !== null && typeof d.language !== 'string') return false;
+
+  if (d.currencyId !== undefined && d.currencyId !== null && d.currencyId !== '') {
+    if (typeof d.currencyId !== 'number') return false;
+  }
+
+  if (d.bankId !== undefined && d.bankId !== null && d.bankId !== '') {
+    if (typeof d.bankId !== 'number') return false;
+  }
+
+  if (d.styleProfilesId !== undefined && d.styleProfilesId !== null && d.styleProfilesId !== '') {
+    if (typeof d.styleProfilesId !== 'number') return false;
+  }
+
+  if (d.customerNotes !== undefined && d.customerNotes !== null && d.customerNotes !== '') {
+    if (typeof d.customerNotes !== 'string') return false;
+  }
+
+  if (d.thanksNotes !== undefined && d.thanksNotes !== null && d.thanksNotes !== '') {
+    if (typeof d.thanksNotes !== 'string') return false;
+  }
+
+  if (d.termsConditionNotes !== undefined && d.termsConditionNotes !== null && d.termsConditionNotes !== '') {
+    if (typeof d.termsConditionNotes !== 'string') return false;
+  }
+
+  if (d.signatureSize !== undefined && d.signatureSize !== null && d.signatureSize !== '') {
+    if (typeof d.signatureSize !== 'number') return false;
+  }
+
+  if (d.signatureType !== undefined && d.signatureType !== null && d.signatureType !== '') {
+    if (typeof d.signatureType !== 'string') return false;
+  }
+
+  if (d.signatureName !== undefined && d.signatureName !== null && d.signatureName !== '') {
+    if (typeof d.signatureName !== 'string') return false;
+  }
+
+  return true;
+};
+
 export const isStyleProfileFromData = (data: unknown): data is StyleProfileFromData => {
   if (typeof data !== 'object' || data === null) return false;
 

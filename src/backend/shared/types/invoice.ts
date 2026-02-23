@@ -151,6 +151,7 @@ export interface Invoice {
   taxType?: InvoiceTaxType;
   invoicePayments: InvoicePayment[];
   invoiceItems: InvoiceItem[];
+  currencyFormat: string;
   invoiceAttachments: InvoiceAttachment[];
   language: Language;
   signatureData?: Uint8Array;

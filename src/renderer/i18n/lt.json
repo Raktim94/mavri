@@ -144,6 +144,8 @@
     "confirm": "Patvirtinti",
     "confirmDelete": "Ar tikrai norite ištrinti šį elementą? Šio veiksmo nebus galima atšaukti.",
     "confirmation": "Patvirtinimas",
+    "createNew": "Sukurti naują",
+    "createNewFromPreset": "Sukurti naują iš šablono",
     "creditCard": "Kredito kortelė",
     "currency": "Valiuta",
     "dark": "Tamsus",
@@ -209,6 +211,7 @@
     "phone": "Telefonas",
     "phoneHelper": "Įveskite telefono numerį tarptautiniu formatu",
     "port": "Prievadas",
+    "presets": "Šablonai",
     "progress": "Progresas: {{prct}}%",
     "qrCode": "QR kodas",
     "qty": "Kiekis",
@@ -247,6 +250,7 @@
     "tableItem": "Elementas",
     "tableRowNo": "Eilutės numeris",
     "tableRowStyle": "Lentelės eilučių stilius",
+    "templates": "Ruošiniai",
     "testConnection": "Tikrinti ryšį",
     "testConnectionFailed": "Ryšio užmegzti nepavyko",
     "testConnectionSuccess": "Ryšys užmegztas",
@@ -447,11 +451,23 @@
     "currencies": "Valiutos",
     "invoices": "Sąskaitos",
     "items": "Prekės",
+    "presets": "Šablonai",
     "quotes": "Pasiūlymai",
     "reports": "Ataskaitos",
     "settings": "Nustatymai",
     "styleProfiles": "Stiliaus profiliai",
     "units": "Vienetai"
+  },
+  "presets": {
+    "add": "Pridėti šabloną",
+    "filter": {
+      "activeDesc": "Nearchyvuoti šablonai",
+      "activeText": "Aktyvūs šablonai",
+      "allText": "Visi šablonai",
+      "archivedDesc": "Archyvuoti šablonai",
+      "archivedText": "Archyvuoti šablonai"
+    },
+    "noItem": "Pasirinkite šabloną, kad matytumėte detales."
   },
   "quotes": {
     "filter": {
@@ -500,6 +516,7 @@
       "privacyPolicy": "Susipažinkite su mūsų privatumo politika apie tai, kaip tvarkome jūsų duomenis.",
       "share": "Bendrinkite šią programą su draugais.",
       "support": "Praneškite apie klaidas arba siūlykite patobulinimus per GitHub.",
+      "turnPresets": "Įjunkti arba išjungti šablonų funkciją",
       "turnQuotes": "Įjunkti arba išjungti pasiūlymų kūrimo funkciją",
       "turnReports": "Įjunkti arba išjungti ataskaitų teikimo funkciją",
       "turnStyleProfiles": "Įjungti arba išjungti stiliaus profilių funkciją",
@@ -521,6 +538,7 @@
       "privacyPolicy": "Privatumo politika",
       "share": "Bendrinti programą",
       "support": "Pagalba",
+      "turnPresets": "Šablonai",
       "turnQuotes": "Pasiūlymai",
       "turnReports": "Ataskaitos",
       "turnStyleProfiles": "Stiliaus profiliai",

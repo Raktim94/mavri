@@ -1,14 +1,14 @@
 import { Box, ListItemButton, ListItemText, Typography } from '@mui/material';
 import { memo, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { InvoiceFromData } from '../../../shared/types/invoice';
 
 interface Props {
-  invoiceForm?: InvoiceFromData;
+  clientName?: string;
+  isRequired?: boolean;
   onEdit: () => void;
 }
 
-const ClientSelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
+const ClientSelectorComponent: FC<Props> = ({ clientName, onEdit, isRequired = true }) => {
   const { t } = useTranslation();
 
   return (
@@ -35,7 +35,7 @@ const ClientSelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
               variant="body1"
               sx={{ fontWeight: 600, color: 'primary.main', overflow: 'hidden', textOverflow: 'ellipsis' }}
             >
-              {t('invoices.billTo').toUpperCase()} *
+              {t('invoices.billTo').toUpperCase()} {isRequired ? '*' : ''}
             </Typography>
           }
           secondary={
@@ -44,7 +44,7 @@ const ClientSelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
               variant="body2"
               sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}
             >
-              {invoiceForm?.invoiceClientSnapshot?.clientName}
+              {clientName}
             </Typography>
           }
           disableTypography

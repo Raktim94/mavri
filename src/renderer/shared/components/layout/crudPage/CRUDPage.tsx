@@ -90,6 +90,7 @@ interface Props<T, TAdd, TUpdate> {
   inlineOnAdd?: boolean;
   showRightSide?: boolean;
   showAddButton?: boolean;
+  onAddClick?: (defaultOnAdd: () => void) => void;
 }
 
 export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
@@ -134,7 +135,8 @@ export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
     inlineOnAdd = false,
     showRightSide = true,
     showAddButton = true,
-    renderCustomButtons = () => null
+    renderCustomButtons = () => null,
+    onAddClick
   } = props;
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
@@ -448,7 +450,18 @@ export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
   }, [totalPages]);
 
   const noItemButton = noItemButtonText && (
-    <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={onAdd}>
+    <Button
+      variant="contained"
+      color="primary"
+      startIcon={<AddIcon />}
+      onClick={() => {
+        if (onAddClick) {
+          onAddClick(onAdd);
+        } else {
+          onAdd();
+        }
+      }}
+    >
       {noItemButtonText}
     </Button>
   );
@@ -607,7 +620,13 @@ export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
           <Fab
             color="primary"
             aria-label={t('ariaLabel.add')}
-            onClick={onAdd}
+            onClick={() => {
+              if (onAddClick) {
+                onAddClick(onAdd);
+              } else {
+                onAdd();
+              }
+            }}
             sx={{
               position: 'absolute',
               bottom: 20,

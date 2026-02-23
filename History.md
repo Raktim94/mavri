@@ -1,12 +1,14 @@
 # Invoice Builder
 
-## [DATE], version 2.2.0
+## 2026-02-23, version 2.2.0
 
 New features & improvements
 
 - Updated signature representation and added a customizable "Authorised signatory" label
 - Loosened bank "Account number" validation to support various international formats
 - Added "Account Holder" and "Sort Code / Sort Order" fields, which are now included in the PDF if provided.
+- Introduced a new Presets menu item, allowing users to predefine Invoice/Quote data
+- Reorganized navigation: Presets and Style Profiles are now grouped under a new Templates section
 
 ## 2026-02-19, version 2.1.1
 

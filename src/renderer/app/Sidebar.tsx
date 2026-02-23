@@ -14,8 +14,10 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import CategoryIcon from '@mui/icons-material/Category';
 import ColorLensIcon from '@mui/icons-material/ColorLens';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import ScaleIcon from '@mui/icons-material/Scale';
+import ViewModule from '@mui/icons-material/ViewModule';
 import { Box, Divider, Drawer, IconButton, Tooltip, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -27,7 +29,6 @@ import { MenuList } from '../shared/components/lists/menuList/MenuList';
 import type { MenuItem } from '../shared/types/menuItem';
 import { useAppDispatch, useAppSelector } from '../state/configureStore';
 import { selectSettings, selectVersion, setVersion } from '../state/pageSlice';
-
 const DRAWER_WIDTH = 240;
 const COLLAPSED_WIDTH = 60;
 
@@ -72,7 +73,6 @@ export const Sidebar: FC = () => {
           path: '/invoices',
           isToggle: false,
           minHeight: 50,
-          group: 'Documents',
           isSelected: isSelected,
           onClick: onClickNavigate
         },
@@ -82,7 +82,6 @@ export const Sidebar: FC = () => {
                 text: t('menuItems.quotes'),
                 icon: <ReceiptIcon />,
                 path: '/quotes',
-                group: 'Documents',
                 isToggle: false,
                 minHeight: 50,
                 isSelected: isSelected,
@@ -92,6 +91,43 @@ export const Sidebar: FC = () => {
           : [])
       ]
     },
+    ...(storeSettings?.presetsON || storeSettings?.styleProfilesON
+      ? [
+          {
+            groupName: t('common.templates'),
+            groupIcon: <ViewModule />,
+            isOpen: true,
+            items: [
+              ...(storeSettings?.presetsON
+                ? [
+                    {
+                      text: t('menuItems.presets'),
+                      icon: <ContentCopyIcon />,
+                      path: '/presets',
+                      isToggle: false,
+                      minHeight: 50,
+                      isSelected: isSelected,
+                      onClick: onClickNavigate
+                    }
+                  ]
+                : []),
+              ...(storeSettings?.styleProfilesON
+                ? [
+                    {
+                      text: t('menuItems.styleProfiles'),
+                      icon: <ColorLensIcon />,
+                      path: '/styleProfiles',
+                      isToggle: false,
+                      minHeight: 50,
+                      isSelected: isSelected,
+                      onClick: onClickNavigate
+                    }
+                  ]
+                : [])
+            ]
+          }
+        ]
+      : []),
     {
       groupName: t('common.data'),
       groupIcon: <TableChart />,
@@ -164,19 +200,6 @@ export const Sidebar: FC = () => {
     },
     {
       items: [
-        ...(storeSettings?.styleProfilesON
-          ? [
-              {
-                text: t('menuItems.styleProfiles'),
-                icon: <ColorLensIcon />,
-                path: '/styleProfiles',
-                isToggle: false,
-                minHeight: 50,
-                isSelected: isSelected,
-                onClick: onClickNavigate
-              }
-            ]
-          : []),
         ...(storeSettings?.reportsON
           ? [
               {

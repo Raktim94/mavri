@@ -1,4 +1,4 @@
-import { useCallback, useState, type FC } from 'react';
+import { useCallback, useMemo, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CRUDPage } from '../../shared/components/layout/crudPage/CRUDPage';
 import { FilterType } from '../../shared/enums/filterType';
@@ -13,12 +13,15 @@ import { useInvoiceUpdate } from '../../shared/hooks/invoices/useInvoiceUpdate';
 import type { Row } from '../../shared/types/excel';
 import type { Filter, FilterData } from '../../shared/types/filter';
 import type { Invoice, InvoiceAdd, InvoiceItem, InvoiceUpdate } from '../../shared/types/invoice';
+import type { Preset } from '../../shared/types/preset';
 import type { Response } from '../../shared/types/response';
 import { exportExcel } from '../../shared/utils/fileFunctions';
 import { createCommonFilters } from '../../shared/utils/filterSortFunctions';
 import { isInvoiceFromData } from '../../shared/utils/typeGuardFunctions';
 import { useAppSelector } from '../../state/configureStore';
-import { selectBusinessesSnapshotsOptions, selectClientsSnapshotsOptions } from '../../state/pageSlice';
+import { selectBusinessesSnapshotsOptions, selectClientsSnapshotsOptions, selectSettings } from '../../state/pageSlice';
+import { NewActionDropdown } from './Dropdowns/NewActionDropdown';
+import { PresetDropdown } from './Dropdowns/PresetsDropdown';
 import { Form } from './Form';
 import { EditPreviewToggle } from './Form/EditPreviewToggle';
 import { List } from './List';
@@ -30,6 +33,7 @@ export const InvoicesPage: FC<Props> = ({ type }) => {
   const { t } = useTranslation();
   const clientsOptions = useAppSelector(selectClientsSnapshotsOptions);
   const businessesOptions = useAppSelector(selectBusinessesSnapshotsOptions);
+  const settings = useAppSelector(selectSettings);
   const filters: Filter[] = [
     ...createCommonFilters({
       t,
@@ -216,70 +220,116 @@ export const InvoicesPage: FC<Props> = ({ type }) => {
     [type]
   );
   const [mode, setMode] = useState<InvoiceFormMode>(InvoiceFormMode.edit);
+  const [isAddDropdownOpen, setIsAddDropdownOpen] = useState(false);
+  const [isPresetDropdownOpen, setIsPresetDropdownOpen] = useState(false);
+  const [openDefaultAdd, setOpenDefaultAdd] = useState<(() => void) | null>(null);
+  const [selectedPreset, setSelectedPreset] = useState<Preset | undefined>(undefined);
+  const isPresetsEnabled = useMemo(() => settings?.presetsON, [settings]);
 
   return (
-    <CRUDPage<Invoice, InvoiceAdd, InvoiceUpdate>
-      renderCustomButtons={() => {
-        return <EditPreviewToggle mode={mode} setMode={setMode} />;
-      }}
-      title={type === InvoiceType.quotation ? t('common.quote') : t('common.invoice')}
-      filters={filters}
-      showOnlyExport={true}
-      inlineOnAdd={true}
-      useRetrieve={useInvoicesCRUDRetrieve}
-      useAdd={useInvoiceCRUDAdd}
-      useUpdate={useInvoiceCRUDUpdate}
-      useDuplicate={useInvoiceCRUDDuplicate}
-      useDelete={useInvoiceDelete}
-      searchField={'invoiceNumber'}
-      sortOptions={[
-        { label: t('common.status'), value: 'status' },
-        { label: t('common.issuedAt'), value: 'issuedAt' },
-        {
-          label: type === InvoiceType.quotation ? t('common.quoteNumber') : t('common.invoiceNumber'),
-          value: 'invoiceNumber'
-        },
-        { label: t('common.lastUpdate'), value: 'updatedAt' }
-      ]}
-      noItemButtonText={type === InvoiceType.quotation ? t('invoices.addQuote') : t('invoices.addInvoice')}
-      noItemText={type === InvoiceType.quotation ? t('invoices.noItemQuote') : t('invoices.noItemInvoice')}
-      leftTitle={type === InvoiceType.quotation ? t('menuItems.quotes') : t('menuItems.invoices')}
-      exportExcelHandler={exportInvoices}
-      validateAndNormalize={async data => {
-        if (!isInvoiceFromData(data)) return;
-        return data;
-      }}
-      renderListItem={(item, selectedItem, onEdit) => (
-        <List
-          key={item.id}
-          item={item}
-          isSelected={item.id === selectedItem?.id}
-          onEdit={(editItem: Invoice) => onEdit(editItem)}
-        />
-      )}
-      form={({ item, onChange, onDelete, onDuplicate }) => (
-        <Form
-          invoice={item}
-          type={type}
-          mode={mode}
-          handleDuplicate={(id, invoiceType) => {
-            setCurrType(invoiceType);
-            if (onDuplicate) onDuplicate(id);
-          }}
-          handleChange={d => {
-            if (isInvoiceFromData(d.invoice)) {
-              onChange({
-                changedData: d.invoice,
-                isFormValid: d.isFormValid,
-                description: d.description
-              });
-            }
-          }}
-          handleDelete={id => {
-            if (onDelete) onDelete(id);
-          }}
-        />
-      )}
-    />
+    <>
+      <CRUDPage<Invoice, InvoiceAdd, InvoiceUpdate>
+        renderCustomButtons={() => {
+          return <EditPreviewToggle mode={mode} setMode={setMode} />;
+        }}
+        title={type === InvoiceType.quotation ? t('common.quote') : t('common.invoice')}
+        filters={filters}
+        showOnlyExport={true}
+        inlineOnAdd={true}
+        useRetrieve={useInvoicesCRUDRetrieve}
+        useAdd={useInvoiceCRUDAdd}
+        useUpdate={useInvoiceCRUDUpdate}
+        useDuplicate={useInvoiceCRUDDuplicate}
+        useDelete={useInvoiceDelete}
+        searchField={'invoiceNumber'}
+        sortOptions={[
+          { label: t('common.status'), value: 'status' },
+          { label: t('common.issuedAt'), value: 'issuedAt' },
+          {
+            label: type === InvoiceType.quotation ? t('common.quoteNumber') : t('common.invoiceNumber'),
+            value: 'invoiceNumber'
+          },
+          { label: t('common.lastUpdate'), value: 'updatedAt' }
+        ]}
+        noItemButtonText={type === InvoiceType.quotation ? t('invoices.addQuote') : t('invoices.addInvoice')}
+        noItemText={type === InvoiceType.quotation ? t('invoices.noItemQuote') : t('invoices.noItemInvoice')}
+        leftTitle={type === InvoiceType.quotation ? t('menuItems.quotes') : t('menuItems.invoices')}
+        exportExcelHandler={exportInvoices}
+        onAddClick={defaultOnAdd => {
+          if (!isPresetsEnabled) {
+            defaultOnAdd();
+            return;
+          }
+
+          setOpenDefaultAdd(() => defaultOnAdd);
+          setIsAddDropdownOpen(true);
+        }}
+        validateAndNormalize={async data => {
+          if (!isInvoiceFromData(data)) return;
+          return data;
+        }}
+        renderListItem={(item, selectedItem, onEdit) => (
+          <List
+            key={item.id}
+            item={item}
+            isSelected={item.id === selectedItem?.id}
+            onEdit={(editItem: Invoice) => onEdit(editItem)}
+          />
+        )}
+        form={({ item, onChange, onDelete, onDuplicate }) => (
+          <Form
+            invoice={item}
+            type={type}
+            mode={mode}
+            preset={selectedPreset}
+            handleDuplicate={(id, invoiceType) => {
+              setCurrType(invoiceType);
+              if (onDuplicate) onDuplicate(id);
+            }}
+            handleChange={d => {
+              if (isInvoiceFromData(d.invoice)) {
+                onChange({
+                  changedData: d.invoice,
+                  isFormValid: d.isFormValid,
+                  description: d.description
+                });
+              }
+            }}
+            handleDelete={id => {
+              if (onDelete) onDelete(id);
+            }}
+          />
+        )}
+      />
+
+      <NewActionDropdown
+        isOpen={isAddDropdownOpen}
+        onClose={() => setIsAddDropdownOpen(false)}
+        onOpen={() => setIsAddDropdownOpen(true)}
+        onNew={() => {
+          setIsAddDropdownOpen(false);
+          if (openDefaultAdd) {
+            openDefaultAdd();
+          }
+        }}
+        onNewFromPreset={() => {
+          setIsAddDropdownOpen(false);
+          setIsPresetDropdownOpen(true);
+        }}
+      />
+
+      <PresetDropdown
+        isOpen={isPresetDropdownOpen}
+        onClose={() => setIsPresetDropdownOpen(false)}
+        onOpen={() => setIsPresetDropdownOpen(true)}
+        onClick={data => {
+          setIsPresetDropdownOpen(false);
+          if (openDefaultAdd) {
+            openDefaultAdd();
+          }
+          setSelectedPreset({ ...data });
+        }}
+      />
+    </>
   );
 };

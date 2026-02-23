@@ -144,6 +144,8 @@
     "confirm": "Confirmer",
     "confirmDelete": "Êtes-vous sûr de vouloir supprimer cet élément ? Cette action est irréversible.",
     "confirmation": "Confirmation",
+    "createNew": "Créer nouveau",
+    "createNewFromPreset": "Créer à partir d’un modèle",
     "creditCard": "Carte de crédit",
     "currency": "Devise",
     "dark": "Sombre",
@@ -209,6 +211,7 @@
     "phone": "Téléphone",
     "phoneHelper": "Entrez le numéro au format international",
     "port": "Port",
+    "presets": "Préréglages",
     "progress": "Progression : {{prct}}%",
     "qrCode": "Code QR",
     "qty": "Qté",
@@ -247,6 +250,7 @@
     "tableItem": "Élément",
     "tableRowNo": "Numéro de ligne",
     "tableRowStyle": "Style de ligne de tableau",
+    "templates": "Modèles",
     "testConnection": "Tester la connexion",
     "testConnectionFailed": "La connexion n’a pas pu être établie",
     "testConnectionSuccess": "Connexion établie",
@@ -447,11 +451,23 @@
     "currencies": "Devises",
     "invoices": "Factures",
     "items": "Articles",
+    "presets": "Préréglages",
     "quotes": "Devis",
     "reports": "Rapports",
     "settings": "Paramètres",
     "styleProfiles": "Profils de style",
     "units": "Unités"
+  },
+  "presets": {
+    "add": "Ajouter un preset",
+    "filter": {
+      "activeDesc": "Presets non archivés",
+      "activeText": "Presets actifs",
+      "allText": "Tous les presets",
+      "archivedDesc": "Presets archivés",
+      "archivedText": "Presets archivés"
+    },
+    "noItem": "Sélectionnez un preset pour afficher les détails."
   },
   "quotes": {
     "filter": {
@@ -500,6 +516,7 @@
       "privacyPolicy": "Consultez notre politique de confidentialité.",
       "share": "Partagez cette application avec vos amis.",
       "support": "Signalez des bugs ou proposez des améliorations via GitHub.",
+      "turnPresets": "Activer ou désactiver la fonctionnalité des presets",
       "turnQuotes": "Activer ou désactiver la création de devis",
       "turnReports": "Activer ou désactiver les rapports",
       "turnStyleProfiles": "Activer ou désactiver la fonction des profils de style",
@@ -521,6 +538,7 @@
       "privacyPolicy": "Politique de confidentialité",
       "share": "Partager l’application",
       "support": "Support",
+      "turnPresets": "Préréglages",
       "turnQuotes": "Devis",
       "turnReports": "Rapports",
       "turnStyleProfiles": "Profils de style",

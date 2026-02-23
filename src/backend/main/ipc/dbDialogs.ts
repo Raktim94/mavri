@@ -63,7 +63,12 @@ const resetIPCHandlers = () => {
     'update-bank',
     'delete-bank',
     'batch-add-bank',
-    'get-all-banks'
+    'get-all-banks',
+    'add-preset',
+    'update-preset',
+    'delete-preset',
+    'batch-add-preset',
+    'get-all-presets'
   ];
 
   handlers.forEach(handler => ipcMain.removeHandler(handler));

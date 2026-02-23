@@ -12,6 +12,7 @@ import { TableHeaderStyle } from '../../shared/enums/tableHeaderStyle';
 import { TableRowStyle } from '../../shared/enums/tableRowStyle';
 import { useStyleProfileAdd } from '../../shared/hooks/styleProfiles/useStyleProfileAdd';
 import type { Invoice, InvoiceFromData } from '../../shared/types/invoice';
+import type { Preset } from '../../shared/types/preset';
 import type { Response } from '../../shared/types/response';
 import type { StyleProfileAdd, StyleProfileFromData } from '../../shared/types/styleProfiles';
 import { useAppDispatch } from '../../state/configureStore';
@@ -27,6 +28,7 @@ interface Props {
   handleChange?: (data: { invoice: InvoiceFromData; isFormValid: boolean; description?: string }) => void;
   handleDelete?: (id: number) => void;
   handleDuplicate?: (id: number, invoiceType: InvoiceType) => void;
+  preset?: Preset;
 }
 const InvoiceFormComponent: FC<Props> = ({
   type,
@@ -34,7 +36,8 @@ const InvoiceFormComponent: FC<Props> = ({
   handleChange = () => {},
   invoice,
   handleDelete = () => {},
-  handleDuplicate = () => {}
+  handleDuplicate = () => {},
+  preset
 }) => {
   const [invoiceForm, setInvoiceForm] = useState<InvoiceFromData | undefined>(undefined);
   const [isFormValid, setIsFormValid] = useState(false);
@@ -128,6 +131,128 @@ const InvoiceFormComponent: FC<Props> = ({
     },
     [setNewStyleProfile]
   );
+
+  useEffect(() => {
+    if (!preset) return;
+    startTransition(() => {
+      setInvoiceForm(current => {
+        if (!current) return current;
+
+        return {
+          ...current,
+          businessId: preset.businessId,
+          invoiceBusinessSnapshot: preset.businessName
+            ? {
+                ...current?.invoiceBusinessSnapshot,
+                parentInvoiceId: current?.id,
+                businessName: preset.businessName,
+                businessAddress: preset.businessAddress,
+                businessRole: preset.businessRole,
+                businessShortName: preset.businessShortName!,
+                businessEmail: preset.businessEmail,
+                businessPhone: preset.businessPhone,
+                businessAdditional: preset.businessAdditional,
+                businessLogo: preset.businessLogo,
+                businessFileSize: preset.businessFileSize,
+                businessFileType: preset.businessFileType,
+                businessFileName: preset.businessFileName,
+                businessVatCode: preset.businessVatCode
+              }
+            : undefined,
+          clientId: preset.clientId,
+          invoiceClientSnapshot: preset.clientName
+            ? {
+                ...current?.invoiceClientSnapshot,
+                parentInvoiceId: current?.id,
+                clientName: preset.clientName,
+                clientAddress: preset.clientAddress,
+                clientEmail: preset.clientEmail,
+                clientPhone: preset.clientPhone,
+                clientCode: preset.clientCode,
+                clientAdditional: preset.clientAdditional,
+                clientVatCode: preset.clientVatCode
+              }
+            : undefined,
+          bankId: preset.bankId,
+          invoiceBankSnapshot: preset.bankLabel
+            ? {
+                ...current?.invoiceBankSnapshot,
+                parentInvoiceId: current?.id,
+                name: preset.bankLabel,
+                bankName: preset.bankName,
+                accountNumber: preset.accountNumber,
+                swiftCode: preset.swiftCode,
+                address: preset.address,
+                branchCode: preset.branchCode,
+                type: preset.type,
+                routingNumber: preset.routingNumber,
+                sortOrder: preset.sortOrder,
+                accountHolder: preset.accountHolder,
+                qrCode: preset.qrCode,
+                qrCodeFileSize: preset.qrCodeFileSize,
+                qrCodeFileType: preset.qrCodeFileType,
+                qrCodeFileName: preset.qrCodeFileName
+              }
+            : undefined,
+          currencyFormat: preset.currencyFormat,
+          currencyId: preset.currencyId,
+          invoiceCurrencySnapshot: preset.currencyCode
+            ? {
+                ...current?.invoiceCurrencySnapshot,
+                parentInvoiceId: current.id,
+                currencyCode: preset.currencyCode,
+                currencySymbol: preset.currencySymbol!,
+                currencySubunit: preset.currencySubunit!
+              }
+            : undefined,
+          styleProfilesId: preset.styleProfilesId,
+          invoiceStyleProfileSnapshot: preset.styleProfileName
+            ? {
+                ...current?.invoiceStyleProfileSnapshot,
+                parentInvoiceId: current.id,
+                styleProfileName: preset.styleProfileName
+              }
+            : undefined,
+          invoiceCustomization: preset.styleProfileName
+            ? {
+                ...current?.invoiceCustomization,
+                parentInvoiceId: current.id,
+                color: preset.styleProfileColor,
+                logoSize: preset.styleProfileLogoSize,
+                fontSize: preset.styleProfileFontSize,
+                fontFamily: preset.styleProfileFontFamily,
+                layout: preset.styleProfileLayout,
+                tableHeaderStyle: preset.styleProfileTableHeaderStyle,
+                tableRowStyle: preset.styleProfileTableRowStyle,
+                pageFormat: preset.styleProfilePageFormat,
+                labelUpperCase: preset.styleProfileLabelUpperCase,
+                watermarkFileName: preset.styleProfileWatermarkFileName,
+                watermarkFileType: preset.styleProfileWatermarkFileType,
+                watermarkFileSize: preset.styleProfileWatermarkFileSize,
+                watermarkFileData: preset.styleProfileWatermarkFileData,
+                paidWatermarkFileName: preset.styleProfilePaidWatermarkFileName,
+                paidWatermarkFileType: preset.styleProfilePaidWatermarkFileType,
+                paidWatermarkFileSize: preset.styleProfilePaidWatermarkFileSize,
+                paidWatermarkFileData: preset.styleProfilePaidWatermarkFileData,
+                showQuantity: preset.styleProfileShowQuantity,
+                showUnit: preset.styleProfileShowUnit,
+                showRowNo: preset.styleProfileShowRowNo,
+                fieldSortOrders: preset.styleProfileFieldSortOrders ?? DEFAULT_TABLE_FIELD_SORT_ORDERS,
+                pdfTexts: preset.styleProfilePdfTexts
+              }
+            : undefined,
+          customerNotes: preset.customerNotes ?? current.customerNotes,
+          thanksNotes: preset.thanksNotes ?? current.thanksNotes,
+          termsConditionNotes: preset.termsConditionNotes ?? current.termsConditionNotes,
+          language: preset.language ?? current.language,
+          signatureData: preset.signatureData ?? current.signatureData,
+          signatureSize: preset.signatureSize ?? current.signatureSize,
+          signatureType: preset.signatureType ?? current.signatureType,
+          signatureName: preset.signatureName ?? current.signatureName
+        };
+      });
+    });
+  }, [preset, startTransition]);
 
   useEffect(() => {
     if (newStyleProfile && newRowStyleProfile && invoiceForm) {

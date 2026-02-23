@@ -141,7 +141,10 @@ export const ServerDatabase: FC<Props> = ({ onDatabaseRead }) => {
         <>
           <PasswordSetter
             isOpen={isDBPasswordModalOpen}
-            onCancel={() => setIsDBPasswordModalOpen(false)}
+            onCancel={() => {
+              setIsDBPasswordModalOpen(false);
+              setConnection(undefined);
+            }}
             onSave={(password: string) => {
               if (connection)
                 setConnection({

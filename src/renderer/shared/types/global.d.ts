@@ -13,6 +13,7 @@ import type { FilterData } from './filter';
 import type { CustomFieldMeta, Invoice, InvoiceAdd, InvoiceUpdate } from './invoice';
 import type { Item, ItemAdd, ItemUpdate } from './item';
 import type { PostgresConfig } from './postgresConfig';
+import type { Preset, PresetAdd, PresetUpdate } from './preset';
 import type { Response } from './response';
 import type { StyleProfile, StyleProfileAdd, StyleProfileUpdate } from './styleProfiles';
 import type { Unit, UnitAdd, UnitUpdate } from './unit';
@@ -102,6 +103,12 @@ declare global {
       deleteBank: (id: number) => Promise<Response<unknown>>;
       addBank: (data: BankAdd) => Promise<Response<Bank>>;
       addBatchBank: (data: BankAdd[]) => Promise<Response<Bank[]>>;
+
+      getAllPresets: (filter?: FilterData[]) => Promise<Response<Preset[]>>;
+      updatePreset: (data: PresetUpdate) => Promise<Response<Preset>>;
+      deletePreset: (id: number) => Promise<Response<unknown>>;
+      addPreset: (data: PresetAdd) => Promise<Response<Preset>>;
+      addBatchPreset: (data: PresetAdd[]) => Promise<Response<Preset[]>>;
 
       exportAllData: () => Promise<Response<ExportMeta>>;
       importAllData: () => Promise<Response<unknown>>;

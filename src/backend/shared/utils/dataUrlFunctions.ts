@@ -3,6 +3,8 @@ import type { Bank } from '../types/bank';
 import type { Business } from '../types/business';
 import type { EntityWithCounts } from '../types/entityWithCounts';
 import type { Invoice, InvoiceBankSnapshots, InvoiceBusinessSnapshots, InvoiceCustomization } from '../types/invoice';
+import type { Preset } from '../types/preset';
+
 import type { StyleProfile } from '../types/styleProfiles';
 import { fromBase64 } from './generalFunctions';
 
@@ -16,6 +18,62 @@ export const encodeLogo = (data?: (Business & EntityWithCounts) | null) => {
   const buf = data.logo as Buffer | null;
   return { ...data, logo: buf ? buf.toString('base64') : null };
 };
+
+export const encodePreset = (data?: Preset | null, skip: boolean = false) => {
+  if (!data) return data;
+  const bufSignature = data.signatureData as Buffer | null;
+  const bufLogo = data.businessLogo as Buffer | null;
+  const bufQrCode = data.qrCode as Buffer | null;
+  const bufWatermarkFileData = data.styleProfileWatermarkFileData as Buffer | null;
+  const bufPaidWatermarkFileData = data.styleProfilePaidWatermarkFileData as Buffer | null;
+  return {
+    ...data,
+    signatureData: bufSignature ? bufSignature.toString('base64') : null,
+    ...(!skip
+      ? {
+          businessLogo: bufLogo ? bufLogo.toString('base64') : null,
+          qrCode: bufQrCode ? bufQrCode.toString('base64') : null,
+          styleProfileWatermarkFileData: bufWatermarkFileData ? bufWatermarkFileData.toString('base64') : null,
+          styleProfilePaidWatermarkFileData: bufPaidWatermarkFileData
+            ? bufPaidWatermarkFileData.toString('base64')
+            : null
+        }
+      : {})
+  };
+};
+
+export const decodePreset = <
+  T extends {
+    signatureData?: unknown;
+    businessLogo?: unknown;
+    qrCode?: unknown;
+    styleProfilePaidWatermarkFileData?: unknown;
+    styleProfileWatermarkFileData?: unknown;
+  }
+>(
+  data: T,
+  skip: boolean = false
+) => ({
+  ...data,
+  signatureData: data.signatureData ? fromBase64(data.signatureData as string) : null,
+  ...(!skip
+    ? {
+        businessLogo: data.businessLogo ? fromBase64(data.businessLogo as string) : null,
+        qrCode: data.qrCode ? fromBase64(data.qrCode as string) : null,
+        styleProfileWatermarkFileData: data.styleProfileWatermarkFileData
+          ? fromBase64(data.styleProfileWatermarkFileData as string)
+          : null,
+        styleProfilePaidWatermarkFileData: data.styleProfilePaidWatermarkFileData
+          ? fromBase64(data.styleProfilePaidWatermarkFileData as string)
+          : null
+      }
+    : {})
+});
+
+export const encodeResultPreset = (result: Response<Preset[] | Preset>) => ({
+  ...result,
+  data: Array.isArray(result.data) ? result.data.map(item => encodePreset(item)) : encodePreset(result.data)
+});
 
 export const encodeResultBusiness = (
   result: Response<(Business & EntityWithCounts)[] | (Business & EntityWithCounts)>

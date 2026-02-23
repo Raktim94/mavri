@@ -211,6 +211,63 @@ You can:
 
 ![Banks import/export](tutorial/banks_page_5.jpg)
 
+## Presets screen
+
+The **Presets** screen allows you to **create, read, update, and delete (CRUD)** preset data.
+
+You can also:
+
+- **Filter** presets by various criteria
+- **Import** and **export** presets via XLSX
+
+### Adding a Preset
+
+Click the **Add** button at the bottom to open a modal where you can:
+
+- Enter preset information
+
+![Presets creation](tutorial/presets_page_1.jpg)
+
+### Editing/Deleting a Preset
+
+Once presets are added, select one from the list to edit it on the right side.
+
+You can also:
+
+- **Search presets by name**
+- **Delete a preset** by clicking the red trash icon
+
+![Presets list](tutorial/presets_page_2.jpg)
+
+### Filters
+
+Presets have filters to control what is displayed. By default:
+
+- **Active**: shows all presets except archived
+
+The **archived flag** can be toggled during creation or editing. This flag only affects filtering and does not delete the preset.
+
+![Presets filters](tutorial/presets_page_3.jpg)
+
+### Sorting
+
+Presets can be sorted by:
+
+- Name
+- Last updated date
+
+![Presets sort](tutorial/presets_page_4.jpg)
+
+### Import & Export
+
+You can:
+
+- Export presets to XLSX
+- Import presets from XLSX
+- Download a XLSX template for preset import
+
+![Presets import/export](tutorial/presets_page_5.jpg)
+
 ## Clients screen
 
 The **Clients** screen allows you to **create, read, update, and delete (CRUD)** client data. You can also **filter**, **import**, and **export** clients via XLSX.
@@ -576,7 +633,9 @@ You can also:
 
 ### Adding a Quote
 
-Click the **Add** button at the bottom to open the right-hand pane, where you can enter quote details.
+Click the **Add** button at the bottom to open the right-hand pane, where you can enter quote details. If [Presets screen](#presets-screen) are enabled then you will have to choose either create new or from preset.
+
+![Quote creation](tutorial/quote_page_111.jpg)
 
 - **Required information:**
   - Currency
@@ -801,7 +860,9 @@ You can also:
 
 ### Adding a Invoice
 
-Click the **Add** button at the bottom to open the right-hand pane, where you can enter invoice details.
+Click the **Add** button at the bottom to open the right-hand pane, where you can enter invoice details. If [Presets screen](#presets-screen) are enabled then you will have to choose either create new or from preset.
+
+![Invoice creation](tutorial/invoice_page_11.jpg)
 
 - **Required information:**
   - Currency

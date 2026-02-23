@@ -77,6 +77,13 @@ export const pageSlice = createSlice({
         isDarkMode: action.payload
       };
     },
+    setPresets: (state, action: PayloadAction<boolean>) => {
+      if (!state.settings) return;
+      state.settings = {
+        ...state.settings,
+        presetsON: action.payload
+      };
+    },
     setStyleProfiles: (state, action: PayloadAction<boolean>) => {
       if (!state.settings) return;
       state.settings = {
@@ -164,6 +171,7 @@ export const {
   setQuotes,
   setReports,
   setStyleProfiles,
+  setPresets,
   setVersion,
   setNewVersion,
   setUpdateMessage,

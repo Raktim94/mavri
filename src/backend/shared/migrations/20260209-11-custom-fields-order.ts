@@ -1,9 +1,14 @@
 import { DatabaseType } from '../enums/databaseType';
 import type { DatabaseAdapter } from '../types/DatabaseAdapter';
+import { getTableColumns } from '../utils/dbHelper';
 import { mapDatabaseError } from '../utils/errorFunctions';
 
 export const up = async (db: DatabaseAdapter) => {
   try {
+    const cols = await getTableColumns(db, 'style_profiles');
+    const colInfo = cols.find(c => c.name === 'fieldSortOrders');
+    if (colInfo) return;
+
     if (db.type === DatabaseType.sqlite) {
       await db.run(`      
         UPDATE invoice_items
