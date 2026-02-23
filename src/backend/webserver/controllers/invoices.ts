@@ -6,7 +6,7 @@ import { parseFilter, requireDB } from '../utils/functions';
 
 export const initInvoicesController = (app: Express) => {
   app.get('/api/invoices/sequence', requireDB, async (req: Request, res: Response) => {
-    const data = req.query.data as unknown as { businessId: number; clientId: number };
+    const data = req.query as unknown as { businessId: number; clientId: number };
     const result = await invoicesService.getNextSequence(dbInstance!, data);
     res.json(result);
   });

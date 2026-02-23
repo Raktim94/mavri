@@ -72,7 +72,7 @@ export const exportAllData = async (db: DatabaseAdapter) => {
     const invoicePayments = await db.all<InvoicePayment>('SELECT * FROM invoice_payments');
     const attachments = await db.all<InvoiceAttachment>('SELECT * FROM attachments');
 
-    const presetsModified = presets.map(encodePreset);
+    const presetsModified = presets.map(item => encodePreset(item, true));
     const attachmentsModified = attachments.map(encodeInvoiceAttachment);
     const businessesModified = businesses.map(encodeLogo);
     const styleProfilesModified = styleProfiles.map(encodeStyleProfile);
@@ -208,7 +208,6 @@ export const importAllData = async (db: DatabaseAdapter, parsed: Record<string, 
       }
 
       const tableDataMap: Record<string, string> = {
-        presets: 'presets',
         currencies: 'currencies',
         units: 'units',
         categories: 'categories',
@@ -228,7 +227,8 @@ export const importAllData = async (db: DatabaseAdapter, parsed: Record<string, 
         invoice_items: 'invoiceItems',
         invoice_item_snapshots: 'invoiceItemSnapshots',
         invoice_payments: 'invoicePayments',
-        attachments: 'attachments'
+        attachments: 'attachments',
+        presets: 'presets'
       };
 
       const parsedMut = { ...parsed };
@@ -260,7 +260,7 @@ export const importAllData = async (db: DatabaseAdapter, parsed: Record<string, 
         parsedMut.invoiceCustomizations = parsedMut.invoiceCustomizations.map(decodeInvoiceCustomizationImport);
       }
       if (Array.isArray(parsedMut.presets)) {
-        parsedMut.businesses = parsedMut.presets.map(decodePreset);
+        parsedMut.presets = parsedMut.presets.map(item => decodePreset(item, true));
       }
 
       for (const [table, key] of Object.entries(tableDataMap)) {

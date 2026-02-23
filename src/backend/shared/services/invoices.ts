@@ -328,7 +328,7 @@ const processSequence = async (
         id: currentSequence.id,
         businessId: currentSequence.businessId,
         clientId: currentSequence.clientId,
-        nextSequence: currentSequence.nextSequence + 1
+        nextSequence: Number(currentSequence.nextSequence) + 1
       } as InvoiceSequence,
       true
     );
@@ -340,7 +340,7 @@ const processSequence = async (
     const dataSequence = await db.get<{ nextSequence: number }>(
       `SELECT
         COALESCE(
-          CAST(? AS INTEGER) + 1,
+          CAST(? AS BIGINT) + 1,
           COUNT(*) + 1
         ) AS "nextSequence"
       FROM invoices
@@ -867,7 +867,7 @@ export const duplicateInvoice = async (
         id: seqRow.id,
         businessId: seqRow.businessId,
         clientId: seqRow.clientId,
-        nextSequence: seqRow.nextSequence + 1
+        nextSequence: Number(seqRow.nextSequence) + 1
       } as InvoiceSequence,
       true
     );

@@ -413,7 +413,7 @@ export const webApi = () => {
     getNextSequence: async (data: { businessId: number; clientId: number }) =>
       apiGet<Response<number | undefined>>('/api/invoices/sequence', {
         businessId: data.businessId.toString(),
-        client: data.clientId.toString()
+        clientId: data.clientId.toString()
       }),
     getCustomHeaders: async (type: InvoiceType) =>
       apiGet<Response<CustomFieldMeta[]>>('/api/invoices/headers', { type: type }),
