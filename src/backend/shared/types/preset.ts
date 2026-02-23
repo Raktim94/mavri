@@ -1,3 +1,5 @@
+import type { Language } from '../enums/language';
+
 export interface Preset {
   id?: number;
   name: string;
@@ -15,7 +17,7 @@ export interface Preset {
   customerNotes?: string;
   thanksNotes?: string;
   termsConditionNotes?: string;
-  language?: string;
+  language?: Language;
   signatureData?: Uint8Array;
   signatureSize?: number;
   signatureType?: string;

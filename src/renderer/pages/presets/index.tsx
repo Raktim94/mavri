@@ -104,6 +104,7 @@ export const PresetsPage: FC = () => {
       useUpdate={usePresetCRUDUpdate}
       useDelete={usePresetDelete}
       searchField={'name'}
+      inlineOnAdd={true}
       sortOptions={[
         { label: t('common.name'), value: 'name' },
         { label: t('common.lastUpdate'), value: 'updatedAt' }

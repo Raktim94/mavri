@@ -1,15 +1,16 @@
 import { Box, ListItemButton, ListItemText, Typography, useTheme } from '@mui/material';
 import { memo, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { InvoiceFromData } from '../../../shared/types/invoice';
+import type { Language } from '../../../shared/enums/language';
 import { LANGUAGE_ITEMS } from '../../../state/constant';
 
 interface Props {
-  invoiceForm?: InvoiceFromData;
+  language?: Language;
+  isRequired?: boolean;
   onEdit: () => void;
 }
 
-const LanguageSelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
+const LanguageSelectorComponent: FC<Props> = ({ onEdit, isRequired = true, language }) => {
   const { t } = useTranslation();
   const theme = useTheme();
 
@@ -23,7 +24,7 @@ const LanguageSelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
               variant="body1"
               sx={{ fontWeight: 600, color: theme.palette.primary.main, overflow: 'hidden', textOverflow: 'ellipsis' }}
             >
-              {t('languageFormat.language').toUpperCase()} *
+              {t('languageFormat.language').toUpperCase()} {isRequired ? '*' : ''}
             </Typography>
           }
           secondary={
@@ -32,7 +33,7 @@ const LanguageSelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
               variant="body2"
               sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}
             >
-              {invoiceForm?.language && LANGUAGE_ITEMS[invoiceForm.language].label}
+              {language && LANGUAGE_ITEMS[language].label}
             </Typography>
           }
           disableTypography

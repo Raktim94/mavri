@@ -1,31 +1,32 @@
 import { Box, ListItemButton, ListItemText, Typography } from '@mui/material';
 import { memo, useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { InvoiceFromData } from '../../../shared/types/invoice';
 import { toDataUrl } from '../../../shared/utils/dataUrlFunctions';
 
 interface Props {
-  invoiceForm?: InvoiceFromData;
+  data?: {
+    businessLogo?: Uint8Array<ArrayBufferLike>;
+    businessFileType?: string;
+    businessName?: string;
+    businessShortName?: string;
+  };
+  isRequired?: boolean;
   onEdit: () => void;
 }
 
-const BusinessSelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
+const BusinessSelectorComponent: FC<Props> = ({ data, onEdit, isRequired = true }) => {
+  const { businessLogo, businessFileType, businessName, businessShortName } = data ?? {};
+
   const { t } = useTranslation();
 
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
-      const url =
-        invoiceForm && invoiceForm?.invoiceBusinessSnapshot?.businessLogo
-          ? await toDataUrl(
-              invoiceForm?.invoiceBusinessSnapshot?.businessLogo,
-              invoiceForm.invoiceBusinessSnapshot?.businessFileType
-            )
-          : null;
+      const url = businessLogo ? await toDataUrl(businessLogo, businessFileType) : null;
       setLogoUrl(url);
     })();
-  }, [invoiceForm]);
+  }, [businessLogo, businessFileType]);
 
   return (
     <ListItemButton
@@ -60,7 +61,7 @@ const BusinessSelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
               variant="body1"
               sx={{ fontWeight: 600, color: 'primary.main', overflow: 'hidden', textOverflow: 'ellipsis' }}
             >
-              {t('businesses.title').toUpperCase()} *
+              {t('businesses.title').toUpperCase()} {isRequired ? '*' : ''}
             </Typography>
           }
           secondary={
@@ -69,7 +70,7 @@ const BusinessSelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
               variant="body2"
               sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}
             >
-              {invoiceForm?.invoiceBusinessSnapshot?.businessName}
+              {businessName}
             </Typography>
           }
           disableTypography
@@ -82,7 +83,7 @@ const BusinessSelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
             alt={t('invoices.businessLogo')}
             style={{ width: '60px', height: '60px', objectFit: 'contain' }}
           />
-        ) : (
+        ) : businessShortName ? (
           <Box
             sx={{
               width: '60px',
@@ -96,9 +97,9 @@ const BusinessSelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
               overflow: 'hidden'
             }}
           >
-            {invoiceForm?.invoiceBusinessSnapshot?.businessShortName}
+            {businessShortName}
           </Box>
-        )}
+        ) : null}
       </Box>
     </ListItemButton>
   );

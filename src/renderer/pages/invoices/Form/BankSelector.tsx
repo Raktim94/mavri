@@ -1,14 +1,13 @@
 import { Box, ListItemButton, ListItemText, Typography } from '@mui/material';
 import { memo, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { InvoiceFromData } from '../../../shared/types/invoice';
 
 interface Props {
-  invoiceForm?: InvoiceFromData;
+  name?: string;
   onEdit: () => void;
 }
 
-const BankSelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
+const BankSelectorComponent: FC<Props> = ({ name, onEdit }) => {
   const { t } = useTranslation();
 
   return (
@@ -35,13 +34,15 @@ const BankSelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
               </Typography>
             }
             secondary={
-              <Typography
-                component="div"
-                variant="body2"
-                sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}
-              >
-                {invoiceForm?.invoiceBankSnapshot?.name}
-              </Typography>
+              name && (
+                <Typography
+                  component="div"
+                  variant="body2"
+                  sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}
+                >
+                  {name}
+                </Typography>
+              )
             }
             disableTypography
             sx={{ m: 0 }}

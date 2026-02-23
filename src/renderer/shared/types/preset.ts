@@ -1,3 +1,5 @@
+import type { Language } from '../enums/language';
+
 export interface PresetMeta {
   id: number;
   name: string;
@@ -15,7 +17,7 @@ export interface PresetMeta {
   customerNotes?: string;
   thanksNotes?: string;
   termsConditionNotes?: string;
-  language?: string;
+  language?: Language;
   signatureSize?: number;
   signatureType?: string;
   signatureName?: string;
@@ -42,7 +44,7 @@ export interface PresetAddMeta {
   customerNotes?: string;
   thanksNotes?: string;
   termsConditionNotes?: string;
-  language?: string;
+  language?: Language;
   signatureSize?: number;
   signatureType?: string;
   signatureName?: string;
@@ -69,17 +71,23 @@ export interface PresetFromData {
   id?: number;
   name: string;
   businessId?: number;
+  businessName?: string;
   clientId?: number;
+  clientName?: string;
   currencyId?: number;
+  currencyCode?: string;
+  currencySymbol?: string;
   bankId?: number;
+  bankName?: string;
   styleProfilesId?: number;
+  styleProfileName?: string;
+  language?: Language;
+  isArchived: boolean;
   customerNotes?: string;
   thanksNotes?: string;
   termsConditionNotes?: string;
-  language?: string;
   signatureData?: Uint8Array | null;
   signatureSize?: number;
   signatureType?: string;
   signatureName?: string;
-  isArchived: boolean;
 }

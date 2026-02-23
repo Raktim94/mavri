@@ -4,7 +4,6 @@ import NoteIcon from '@mui/icons-material/Note';
 import { Box, IconButton, ListItemButton, ListItemText, Tooltip, Typography } from '@mui/material';
 import { memo, useCallback, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { InvoiceFromData } from '../../../shared/types/invoice';
 import { NoteDropdown } from './Dropdowns/NoteDropdown';
 
 enum NoteFormType {
@@ -18,17 +17,22 @@ interface NoteForm {
   type: NoteFormType;
 }
 interface Props {
-  invoiceForm?: InvoiceFromData;
+  data: {
+    customerNotes?: string;
+    thanksNotes?: string;
+    termsConditionNotes?: string;
+  };
   onCustomerNotesChanged: (value?: string) => void;
   onThanksNotesChanged: (value?: string) => void;
   onTermsConditionsNotesChanged: (value?: string) => void;
 }
 const NotesSelectorComponent: FC<Props> = ({
-  invoiceForm,
+  data,
   onCustomerNotesChanged,
   onThanksNotesChanged,
   onTermsConditionsNotesChanged
 }) => {
+  const { customerNotes, thanksNotes, termsConditionNotes } = data;
   const { t } = useTranslation();
 
   const [isDropdownOpenNotes, setIsDropdownOpenNotes] = useState<boolean>(false);
@@ -46,19 +50,19 @@ const NotesSelectorComponent: FC<Props> = ({
     {
       type: NoteFormType.customer,
       label: t('invoices.customerNote'),
-      value: invoiceForm?.customerNotes,
+      value: customerNotes,
       icon: <NoteIcon fontSize="small" />
     },
     {
       type: NoteFormType.thankyou,
       label: t('invoices.thankNote'),
-      value: invoiceForm?.thanksNotes,
+      value: thanksNotes,
       icon: <FavoriteIcon fontSize="small" />
     },
     {
       type: NoteFormType.termsconditions,
       label: t('invoices.termsConditions'),
-      value: invoiceForm?.termsConditionNotes,
+      value: termsConditionNotes,
       icon: <ArticleIcon fontSize="small" />
     }
   ];

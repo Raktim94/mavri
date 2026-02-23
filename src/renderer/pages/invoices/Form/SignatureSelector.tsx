@@ -3,15 +3,22 @@ import { Box, IconButton, ListItemButton, ListItemText, Tooltip, Typography } fr
 import { memo, useCallback, useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { UploadImage } from '../../../shared/components/inputs/uploadImage/UploadImage';
-import type { InvoiceFromData, SignatureForm } from '../../../shared/types/invoice';
+import type { SignatureForm } from '../../../shared/types/invoice';
 import { toDataUrl } from '../../../shared/utils/dataUrlFunctions';
 import { SignatureDropdown } from './Dropdowns/SignatureDropdown';
 
 interface Props {
-  invoiceForm?: InvoiceFromData;
+  data?: {
+    signatureData?: Uint8Array<ArrayBufferLike>;
+    signatureType?: string;
+    signatureSize?: number;
+    signatureName?: string;
+  };
   onEdit: (data: SignatureForm) => void;
 }
-const SignatureSelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
+const SignatureSelectorComponent: FC<Props> = ({ data, onEdit }) => {
+  const { signatureData, signatureType, signatureSize, signatureName } = data ?? {};
+
   const { t } = useTranslation();
 
   const [isDropdownOpenSignature, setIsDropdownOpenSignature] = useState<boolean>(false);
@@ -40,24 +47,22 @@ const SignatureSelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
   }, []);
 
   useEffect(() => {
-    if (!invoiceForm?.signatureData) {
+    if (!signatureData) {
       setSignatureUrl(undefined);
     } else {
       (async () => {
-        const url = invoiceForm.signatureData
-          ? await toDataUrl(invoiceForm.signatureData, invoiceForm?.signatureType)
-          : undefined;
+        const url = signatureData ? await toDataUrl(signatureData, signatureType) : undefined;
         setSignatureUrl(url);
       })();
     }
 
     setFormData({
-      data: invoiceForm?.signatureData,
-      size: invoiceForm?.signatureSize,
-      type: invoiceForm?.signatureType,
-      name: invoiceForm?.signatureName
+      data: signatureData,
+      size: signatureSize,
+      type: signatureType,
+      name: signatureName
     });
-  }, [invoiceForm]);
+  }, [signatureData, signatureSize, signatureType, signatureName]);
 
   return (
     <>
@@ -67,6 +72,7 @@ const SignatureSelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
         }}
         sx={{
           pt: 2,
+          pb: 2,
           pl: 2,
           pr: 2,
           width: '100%',

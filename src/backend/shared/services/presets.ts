@@ -116,7 +116,7 @@ export const addPreset = async (db: DatabaseAdapter, data: Preset): Promise<Resp
     const handle = handleEntity<Preset>(db, 'presets', presetFields);
     const result = await handle(data);
 
-    if (!result.success || !result.data) {
+    if (!result.success || result.data == undefined) {
       await rollbackOrThrow(db);
       return { success: false, key: result.key };
     }
@@ -140,7 +140,7 @@ export const updatePreset = async (db: DatabaseAdapter, data: Preset): Promise<R
     const handle = handleEntity<Preset>(db, 'presets', presetFields);
     const result = await handle(data, true);
 
-    if (!result.success || !result.data) {
+    if (!result.success || result.data == undefined) {
       await rollbackOrThrow(db);
       return { success: false, key: result.key };
     }

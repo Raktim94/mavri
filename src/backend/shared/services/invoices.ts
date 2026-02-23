@@ -557,7 +557,7 @@ export const addInvoice = async (db: DatabaseAdapter, data: Invoice) => {
 
     const result = await handleInvoice(data);
 
-    if (!result.success || !result.data) {
+    if (!result.success || result.data == undefined) {
       await rollbackOrThrow(db);
       return { success: false, key: result.key };
     }

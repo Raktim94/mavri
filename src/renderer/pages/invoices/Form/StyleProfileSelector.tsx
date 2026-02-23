@@ -1,14 +1,13 @@
 import { Box, ListItemButton, ListItemText, Typography, useTheme } from '@mui/material';
 import { memo, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { InvoiceFromData } from '../../../shared/types/invoice';
 
 interface Props {
-  invoiceForm?: InvoiceFromData;
+  name?: string;
   onEdit: () => void;
 }
 
-const StyleProfileSelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
+const StyleProfileSelectorComponent: FC<Props> = ({ name, onEdit }) => {
   const { t } = useTranslation();
   const theme = useTheme();
 
@@ -26,13 +25,13 @@ const StyleProfileSelectorComponent: FC<Props> = ({ invoiceForm, onEdit }) => {
             </Typography>
           }
           secondary={
-            invoiceForm?.invoiceStyleProfileSnapshot?.styleProfileName && (
+            name && (
               <Typography
                 component="div"
                 variant="body2"
                 sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}
               >
-                {invoiceForm?.invoiceStyleProfileSnapshot?.styleProfileName}
+                {name}
               </Typography>
             )
           }
