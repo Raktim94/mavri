@@ -20,6 +20,8 @@ export const BrandingTab: FC<Props> = ({ data, value, onChange }) => {
   const lastEmittedRef = useRef<CustomizationFormBranding | undefined>(data);
   const [watermarkUrl, setWatermarkUrl] = useState<string | undefined>(undefined);
   const [watermarkPaidUrl, setWatermarkPaidUrl] = useState<string | undefined>(undefined);
+  const [colorInput, setColorInput] = useState<string>(form.color ?? '');
+  const colorDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const onUploadPaidWatermark = async (file?: Blob, filename?: string) => {
     if (file) {
@@ -88,6 +90,18 @@ export const BrandingTab: FC<Props> = ({ data, value, onChange }) => {
   }, [data, setForm, updateUrl]);
 
   useEffect(() => {
+    setColorInput(form.color ?? '');
+  }, [form.color]);
+
+  useEffect(() => {
+    return () => {
+      if (colorDebounceRef.current) {
+        clearTimeout(colorDebounceRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     if (!form) return;
     let isChanged = false;
     try {
@@ -110,11 +124,20 @@ export const BrandingTab: FC<Props> = ({ data, value, onChange }) => {
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, md: 6 }}>
           <MuiColorInput
-            value={form.color ?? ''}
+            value={colorInput}
             label={t('common.color')}
             format="hex"
             onChange={(_e, newValue) => {
-              update('color', newValue.hex);
+              const hex = typeof newValue === 'string' ? newValue : newValue.hex;
+              setColorInput(hex);
+
+              if (colorDebounceRef.current) {
+                clearTimeout(colorDebounceRef.current);
+              }
+
+              colorDebounceRef.current = setTimeout(() => {
+                update('color', hex);
+              }, 150);
             }}
           />
         </Grid>

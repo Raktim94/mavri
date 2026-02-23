@@ -51,7 +51,16 @@ const mapBankToWeb = async <T extends BankUpdate | BankAdd>(data: T) => ({
   qrCode: await fileToBase64(data.qrCode)
 });
 
-const mapPresetFromWeb = <T extends PresetWeb | PresetUpdateWeb>(b: T) => ({
+const mapPresetFromWeb2 = <T extends PresetWeb>(b: T) => ({
+  ...b,
+  signatureData: base64ToBytesOrUndef(b.signatureData),
+  businessLogo: base64ToBytesOrUndef(b.businessLogo),
+  qrCode: base64ToBytesOrUndef(b.qrCode),
+  styleProfileWatermarkFileData: base64ToBytesOrUndef(b.styleProfileWatermarkFileData),
+  styleProfilePaidWatermarkFileData: base64ToBytesOrUndef(b.styleProfilePaidWatermarkFileData)
+});
+
+const mapPresetFromWeb1 = <T extends PresetUpdateWeb>(b: T) => ({
   ...b,
   signatureData: base64ToBytesOrUndef(b.signatureData)
 });
@@ -379,7 +388,7 @@ export const webApi = () => {
 
       return {
         ...response,
-        data: response.data?.map(mapPresetFromWeb) ?? []
+        data: response.data?.map(mapPresetFromWeb2) ?? []
       };
     },
     updatePreset: async (data: PresetUpdate) => {
@@ -387,7 +396,7 @@ export const webApi = () => {
 
       return {
         ...response,
-        data: response.data && mapPresetFromWeb(response.data)
+        data: response.data && mapPresetFromWeb1(response.data)
       };
     },
     addPreset: async (data: PresetAdd) => {
@@ -395,7 +404,7 @@ export const webApi = () => {
 
       return {
         ...response,
-        data: response.data && mapPresetFromWeb(response.data)
+        data: response.data && mapPresetFromWeb1(response.data)
       };
     },
     deletePreset: (id: number) => apiDelete<Response<unknown>>(`/api/presets/${id}`),

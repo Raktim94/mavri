@@ -9,9 +9,13 @@ export const BOOLEAN_FIELDS = [
   'presetsON',
   'isArchived',
   'labelUpperCase',
+  'styleProfileLabelUpperCase',
   'showQuantity',
   'showUnit',
-  'showRowNo'
+  'showRowNo',
+  'styleProfileShowQuantity',
+  'styleProfileShowUnit',
+  'styleProfileShowRowNo'
 ] as const;
 
 export const DATE_FIELDS = ['appliedAt', 'createdAt', 'updatedAt', 'issuedAt', 'dueDate', 'paidAt'] as const;

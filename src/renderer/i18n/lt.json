@@ -144,6 +144,8 @@
     "confirm": "Patvirtinti",
     "confirmDelete": "Ar tikrai norite ištrinti šį elementą? Šio veiksmo nebus galima atšaukti.",
     "confirmation": "Patvirtinimas",
+    "createNew": "Sukurti naują",
+    "createNewFromPreset": "Sukurti naują iš šablono",
     "creditCard": "Kredito kortelė",
     "currency": "Valiuta",
     "dark": "Tamsus",

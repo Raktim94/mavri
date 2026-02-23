@@ -144,6 +144,8 @@
     "confirm": "Confirm",
     "confirmDelete": "Are you sure you want to delete this item? This action cannot be undone.",
     "confirmation": "Confirmation",
+    "createNew": "Create new",
+    "createNewFromPreset": "Create new from preset",
     "creditCard": "Credit card",
     "currency": "Currency",
     "dark": "Dark",

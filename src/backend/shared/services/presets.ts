@@ -83,12 +83,68 @@ const getPresets = async (db: DatabaseAdapter, options: GetPresetsOptions) => {
   const sql = `
         SELECT
           t.*,
-          sp."name" as "styleProfileName",
-          ba."name" as "bankName",
+          bu."name" as "businessName",
+          bu."address" as "businessAddress",
+          bu."role" as "businessRole",
+          bu."shortName" as "businessShortName",
+          bu."email" as "businessEmail",
+          bu."phone" as "businessPhone",
+          bu."additional" as "businessAdditional",
+          bu."logo" as "businessLogo",
+          bu."fileSize" as "businessFileSize",
+          bu."fileSize" as "businessFileSize",
+          bu."fileType" as "businessFileType",
+          bu."fileName" as "businessFileName",
+          bu."vatCode" as "businessVatCode",
+          cl."name" as "clientName",
+          cl."address" as "clientAddress",
+          cl."email" as "clientEmail",
+          cl."phone" as "clientPhone",
+          cl."code" as "clientCode",
+          cl."additional" as "clientAdditional",
+          cl."vatCode" as "clientVatCode",
           cur."code" as "currencyCode",
           cur."symbol" as "currencySymbol",
-          cl."name" as "clientName",
-          bu."name" as "businessName"
+          cur."subunit" as "currencySubunit",
+          cur."format" as "currencyFormat",
+          ba."name" as "bankLabel",
+          ba."bankName" as "bankName",
+          ba."accountNumber" as "accountNumber",
+          ba."swiftCode" as "swiftCode",
+          ba."address" as "address",
+          ba."branchCode" as "branchCode",
+          ba."type" as "type",
+          ba."routingNumber" as "routingNumber",
+          ba."accountHolder" as "accountHolder",
+          ba."sortOrder" as "sortOrder",
+          ba."upiCode" as "upiCode",
+          ba."qrCodeFileSize" as "qrCodeFileSize",
+          ba."qrCodeFileType" as "qrCodeFileType",
+          ba."qrCodeFileName" as "qrCodeFileName",
+          ba."qrCode" as "qrCode",
+          sp."name" as "styleProfileName",
+          sp."color" as "styleProfileColor",
+          sp."logoSize" as "styleProfileLogoSize",
+          sp."fontSize" as "styleProfileFontSize",
+          sp."fontFamily" as "styleProfileFontFamily",
+          sp."layout" as "styleProfileLayout",
+          sp."tableHeaderStyle" as "styleProfileTableHeaderStyle",
+          sp."tableRowStyle" as "styleProfileTableRowStyle",
+          sp."pageFormat" as "styleProfilePageFormat",
+          sp."labelUpperCase" as "styleProfileLabelUpperCase",
+          sp."showQuantity" as "styleProfileShowQuantity",
+          sp."showUnit" as "styleProfileShowUnit",
+          sp."showRowNo" as "styleProfileShowRowNo",
+          sp."fieldSortOrders" as "styleProfileFieldSortOrders",          
+          sp."pdfTexts" as "styleProfilePdfTexts",       
+          sp."watermarkFileName" as "styleProfileWatermarkFileName",
+          sp."watermarkFileType" as "styleProfileWatermarkFileType",
+          sp."watermarkFileSize" as "styleProfileWatermarkFileSize",
+          sp."watermarkFileData" as "styleProfileWatermarkFileData",
+          sp."paidWatermarkFileName" as "styleProfilePaidWatermarkFileName",
+          sp."paidWatermarkFileType" as "styleProfilePaidWatermarkFileType",
+          sp."paidWatermarkFileSize" as "styleProfilePaidWatermarkFileSize",
+          sp."paidWatermarkFileData" as "styleProfilePaidWatermarkFileData"                 
         FROM presets t
         LEFT JOIN style_profiles sp ON sp."id" = t."styleProfilesId"
         LEFT JOIN banks ba ON ba."id" = t."bankId"
@@ -99,8 +155,21 @@ const getPresets = async (db: DatabaseAdapter, options: GetPresetsOptions) => {
         ORDER BY t."createdAt" DESC
       `;
   const presets = await db.all<Preset>(sql);
+  const final = presets.map(preset => {
+    return {
+      ...preset,
+      styleProfileFieldSortOrders:
+        preset.styleProfileFieldSortOrders && typeof preset.styleProfileFieldSortOrders === 'string'
+          ? JSON.parse(preset.styleProfileFieldSortOrders)
+          : preset.styleProfileFieldSortOrders,
+      styleProfilePdfTexts:
+        preset.styleProfilePdfTexts && typeof preset.styleProfilePdfTexts === 'string'
+          ? JSON.parse(preset.styleProfilePdfTexts)
+          : preset.styleProfilePdfTexts
+    };
+  });
 
-  return presets;
+  return final;
 };
 
 export const getAllPresets = async (db: DatabaseAdapter, filter?: FilterData[]): Promise<Response<Preset[]>> => {

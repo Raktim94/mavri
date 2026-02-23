@@ -144,6 +144,8 @@
     "confirm": "Bestätigen",
     "confirmDelete": "Sind Sie sicher, dass Sie dieses Element löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
     "confirmation": "Bestätigung",
+    "createNew": "Neu erstellen",
+    "createNewFromPreset": "Neu aus Vorlage erstellen",
     "creditCard": "Kreditkarte",
     "currency": "Währung",
     "dark": "Dunkel",
