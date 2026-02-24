@@ -167,7 +167,6 @@ No account required.
 >
 > This is normal for newly published apps and does **not** indicate a security issue.  
 > Simply choose **Keep anyway / Save anyway** to proceed with the download.
-
 > 🐧 **Linux package warning**
 >
 > On some Linux distributions (Ubuntu, Linux Mint, etc.), you may see messages such as:
@@ -177,7 +176,6 @@ No account required.
 >
 > This warning appears because the app is not distributed via the default system repositories.  
 > If you downloaded the package directly from the official GitHub Releases page, it is safe to proceed.
-
 > 🍎 **macOS Gatekeeper warning**
 >
 > Because this app is **unsigned**, macOS may display a message like:
@@ -192,6 +190,7 @@ No account required.
 >
 > 1. Open **Terminal**.
 > 2. Run the following command:
+>
 >    ```bash
 >     sudo xattr -rd com.apple.quarantine "/Applications/Invoice Builder.app"
 >    ```
@@ -211,7 +210,7 @@ No account required.
 
 ## 📘 Tutorial
 
-Detailed tutorials and usage guides are available [here](TUTORIAL.md)
+Detailed tutorials and usage guides are available here: [TUTORIAL](TUTORIAL.md)
 
 ## 🧠 Data Model & Snapshots
 
@@ -301,7 +300,7 @@ VITE_API_URL={url} Backend webserver URL when running without Electron (Web/Dock
 
 ### 📁 Project Structure
 
-```
+```bash
 /src
   /backend          – Electron + Webserver
     /main           – Electron main process
@@ -355,7 +354,7 @@ VITE_API_URL={url} Backend webserver URL when running without Electron (Web/Dock
 Contributions of all kinds are welcome - bug reports, feature ideas, documentation improvements, and pull requests.  
 Please open an issue before starting major work to ensure alignment.
 
-- Report issues or features [here](https://github.com/piratuks/invoice-builder/issues)
+- Report issues or features here: [ISSUES/FEATURES](https://github.com/piratuks/invoice-builder/issues)
 - Feature requests and discussions are welcome
 - Please follow [guidelines](CONTRIBUTING.md)
 
