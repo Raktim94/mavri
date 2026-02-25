@@ -1,5 +1,11 @@
 # Invoice Builder
 
+## [DATE], version 2.3.0
+
+New features & improvements
+
+- Official Docker prebuilt image published
+
 ## 2026-02-23, version 2.2.0
 
 New features & improvements

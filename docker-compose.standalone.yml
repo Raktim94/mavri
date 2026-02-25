@@ -23,12 +23,16 @@ services:
       - '3001:3001'
     environment:
       - SERVICE=all
-      - PORT=${PORT}
       - NODE_ENV=docker
       - DB_DIRECTORY=/data
-      - DEV_SERVER_URL=${DEV_SERVER_URL}
-      - FE_SERVER_URL=${FE_SERVER_URL}
-      - MIGRATIONS_PATH=${MIGRATIONS_PATH}
+        # Backend webserver port
+      - PORT=3000
+        # Backend webserver host
+      - DEV_SERVER_URL=0.0.0.0
+      # Frontend webserver URL
+      - FE_SERVER_URLhttp://localhost:3001
+      # Path to migration files in docker volume
+      - MIGRATIONS_PATH=/app/dist-be/backend/server/shared/migrations
       # nginx proxies /api/* to localhost (same container)
       - BACKEND_HOST=localhost
       - BACKEND_PORT=3000

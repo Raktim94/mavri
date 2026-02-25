@@ -175,18 +175,14 @@ docker pull ghcr.io/piratuks/invoice-builder:latest
 The default setup runs backend and frontend as separate containers from the same image.
 
 ```bash
-# Copy and fill in environment variables
-cp .env.docker.example .env.docker
-docker compose --env-file .env.docker pull
-docker compose --env-file .env.docker up -d
+docker compose pull
+docker compose up -d
 ```
 
 | Container  | Port | Role                         |
 | ---------- | ---- | ---------------------------- |
 | `backend`  | 3000 | Node.js REST API + SQLite/PG |
 | `frontend` | 3001 | Static SPA served by `serve` |
-
-See [Environment Variables](#environment-variables) for the required `.env.docker` values.
 
 ---
 
@@ -195,7 +191,7 @@ See [Environment Variables](#environment-variables) for the required `.env.docke
 Run both backend and frontend in one container using `SERVICE=all`:
 
 ```bash
-docker compose -f docker-compose.standalone.yml --env-file .env.docker up -d
+docker compose -f docker-compose.standalone.yml up -d
 ```
 
 | Port | Role                         |
@@ -211,12 +207,12 @@ If you prefer to build the image from source:
 
 ```bash
 # Two-container build
-docker compose --env-file .env.docker up -d --build
-docker compose --env-file .env.docker up -d
+docker compose up -d --build
+docker compose up -d
 
 # Or single container
 docker build -t invoice-builder .
-docker compose -f docker-compose.standalone.yml --env-file .env.docker up -d
+docker compose -f docker-compose.standalone.yml up -d
 ```
 
 ## 📦 Installation
@@ -331,7 +327,7 @@ npm run dev:react
 npm run dev:webserver
 ```
 
-### ⚙️ Environment Variables <a id="environment-variables"></a>
+### ⚙️ Environment Variables
 
 - .env.development
 
@@ -351,16 +347,6 @@ VITE_API_URL={url} Backend webserver URL when running without Electron (Web/Dock
 
 ```env
 VITE_API_URL={url} Backend webserver URL when running without Electron (Web/Docker mode)
-```
-
-- .env.docker
-
-```env
-  PORT={port} Backend webserver port when running Docker mode
-  DEV_SERVER_URL={url} Backend webserver host when running Docker mode
-  FE_SERVER_URL={url} Frontend webserver URL when running Docker mode
-  MIGRATIONS_PATH={url} Path to migration files in docker volume when running Docker mode
-  VITE_API_URL={url} Backend full url when running Docker mode
 ```
 
 - other (Some configuration values are not controlled through .env files and instead live directly in the codebase)
