@@ -5,7 +5,7 @@ import { mapDatabaseError } from '../utils/errorFunctions';
 export const up = async (db: DatabaseAdapter) => {
   try {
     const cols = await getTableColumns(db, 'settings');
-    const colInfo = cols.find(c => c.name === 'presetsON');
+    const colInfo = cols.find(c => c.name === 'ublON');
     if (colInfo) return;
 
     await db.run(
@@ -89,6 +89,7 @@ export const up = async (db: DatabaseAdapter) => {
       `
     );
   } catch (error) {
+    console.log(error);
     return { success: false, ...mapDatabaseError(error, db.type) };
   }
 };

@@ -14,7 +14,6 @@ import type { Invoice } from '../../types/invoice';
 import { formatDate, splitAddress, xmlEscape } from './helperFunctions';
 import {
   getBalanceDueCents,
-  getInvoiceItemAmountCents,
   getInvoiceItemTaxCents,
   getInvoiceTaxCents,
   getItemTotalAmountCents,
@@ -48,7 +47,7 @@ export function generateUBLInvoiceXML(invoice: Invoice): string {
   }
 
   const header = [
-    `<cbc:CustomizationID>urn:cen.eu:en16931:2017</cbc:CustomizationID>`,
+    `<cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0</cbc:CustomizationID>`,
     `<cbc:ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:3.0</cbc:ProfileID>`,
     `<cbc:ID>${xmlEscape(invoice.invoiceNumber)}</cbc:ID>`,
     `<cbc:IssueDate>${issueDate}</cbc:IssueDate>`,
@@ -215,13 +214,15 @@ export function generateUBLInvoiceXML(invoice: Invoice): string {
 
   const lines = invoice.invoiceItems
     .map((item, idx) => {
-      const unitPrice = getInvoiceItemAmountCents(item) / invoice.invoiceCurrencySnapshot!.currencySubunit;
+      const unitPrice =
+        Number(item.invoiceItemSnapshot!.unitPriceCents) / invoice.invoiceCurrencySnapshot!.currencySubunit;
       const lineTotal =
         getItemTotalAmountCents(item, item.taxType !== InvoiceItemTaxType.inclusive) /
         invoice.invoiceCurrencySnapshot!.currencySubunit;
       const rate = item.taxRate ?? 0;
       const taxCatId = rate > 0 ? 'S' : 'Z';
 
+      if (!item.invoiceItemSnapshot) return '';
       return `
     <cac:InvoiceLine>
       <cbc:ID>${idx + 1}</cbc:ID>

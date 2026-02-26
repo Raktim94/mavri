@@ -32,7 +32,7 @@ export const getSubTotalAmountCents = (invoiceItems: InvoiceItem[], includeTax: 
 
 export const getInvoiceItemAmountCents = (invoiceItem: InvoiceItem): number => {
   return getTotalUnitPrice({
-    unitPrice: Number(invoiceItem.invoiceItemSnapshot.unitPriceCents),
+    unitPrice: Number(invoiceItem.invoiceItemSnapshot!.unitPriceCents),
     quantity: invoiceItem.quantity
   });
 };

@@ -209,7 +209,7 @@ export interface InvoiceItem {
   id: number;
   parentInvoiceId: number;
   itemId: number;
-  invoiceItemSnapshot: InvoiceItemSnapshots;
+  invoiceItemSnapshot?: InvoiceItemSnapshots;
   quantity: string;
   customField?: CustomField | string;
   createdAt: string;
