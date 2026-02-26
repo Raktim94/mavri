@@ -10,6 +10,9 @@ export interface Business {
   website?: string;
   additional?: string;
   vatCode?: string;
+  peppolEndpointId?: string;
+  countryCode?: string;
+  peppolEndpointSchemeId?: string;
   // Legacy payment info. New payment info is via Bank
   paymentInformation?: string;
   isArchived: boolean;

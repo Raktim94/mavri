@@ -187,7 +187,10 @@ const InvoiceFormComponent: FC<Props> = ({
             businessFileSize: data.fileSize,
             businessFileType: data.fileType,
             businessFileName: data.fileName,
-            businessVatCode: data.vatCode
+            businessVatCode: data.vatCode,
+            businessCountryCode: data.countryCode,
+            businessPeppolEndpointId: data.peppolEndpointId,
+            businessPeppolEndpointSchemeId: data.peppolEndpointSchemeId
           }
         });
       });
@@ -366,7 +369,10 @@ const InvoiceFormComponent: FC<Props> = ({
             clientPhone: data.phone,
             clientCode: data.code,
             clientAdditional: data.additional,
-            clientVatCode: data.vatCode
+            clientVatCode: data.vatCode,
+            clientCountryCode: data.countryCode,
+            clientPeppolEndpointId: data.peppolEndpointId,
+            clientPeppolEndpointSchemeId: data.peppolEndpointSchemeId
           }
         });
       });

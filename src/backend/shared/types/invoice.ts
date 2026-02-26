@@ -47,6 +47,9 @@ export interface InvoiceClientSnapshots {
   clientCode?: string;
   clientAdditional?: string;
   clientVatCode?: string;
+  clientPeppolEndpointId?: string;
+  clientCountryCode?: string;
+  clientPeppolEndpointSchemeId?: string;
 }
 
 export interface InvoiceBankSnapshots {
@@ -86,6 +89,9 @@ export interface InvoiceBusinessSnapshots {
   businessFileType?: string;
   businessFileName?: string;
   businessVatCode?: string;
+  businessPeppolEndpointId?: string;
+  businessCountryCode?: string;
+  businessPeppolEndpointSchemeId?: string;
 }
 
 export interface InvoiceStyleProfileSnapshots {

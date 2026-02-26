@@ -16,6 +16,9 @@ const clientFields: (keyof Client)[] = [
   'additional',
   'description',
   'vatCode',
+  'peppolEndpointId',
+  'countryCode',
+  'peppolEndpointSchemeId',
   'isArchived'
 ];
 

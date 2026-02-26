@@ -33,7 +33,10 @@ export const BusinessesPage = () => {
     'isArchived',
     'fileSize',
     'fileType',
-    'fileName'
+    'fileName',
+    'peppolEndpointId',
+    'countryCode',
+    'peppolEndpointSchemeId'
   ];
   const excelFileName = 'businesses';
   const excelTemplateData: Rows = [
@@ -48,6 +51,9 @@ export const BusinessesPage = () => {
       additional: 'AC',
       description: 'Some description',
       isArchived: false,
+      peppolEndpointId: '0192',
+      countryCode: 'GB',
+      peppolEndpointSchemeId: '123456785',
       // Legacy payment info. New payment info is via Bank
       paymentInformation:
         '`Cardholder Name: John Doe; Card Type: Visa; Card Number: 4111 1111 1111 1111; Expiration Date: 12/2026; CVV: 123; Billing Address: 123 Main Street, Apt 4B, Springfield, IL 62704; Payment Method: Credit Card; Transaction ID: TXN1234567890; Payment Status: Completed; Amount Paid: $250.00 USD; Currency: USD; Payment Date: 2025-11-17`'
@@ -60,7 +66,10 @@ export const BusinessesPage = () => {
       phone: '+14155552671',
       website: 'https://beta.com',
       additional: 'BI',
-      isArchived: true
+      isArchived: true,
+      peppolEndpointId: '0192',
+      countryCode: 'GB',
+      peppolEndpointSchemeId: '123456785'
     }
   ];
   const filters: Filter[] = [

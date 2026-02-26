@@ -8,6 +8,9 @@ export interface Client {
   code?: string;
   additional?: string;
   vatCode?: string;
+  peppolEndpointId?: string;
+  countryCode?: string;
+  peppolEndpointSchemeId?: string;
   invoiceCount: number;
   quotesCount: number;
   createdAt: string;
@@ -25,6 +28,9 @@ export interface ClientAdd {
   code?: string;
   additional?: string;
   vatCode?: string;
+  peppolEndpointId?: string;
+  countryCode?: string;
+  peppolEndpointSchemeId?: string;
   description?: string;
   isArchived: boolean;
 }
@@ -43,6 +49,9 @@ export interface ClientFromData {
   code?: string;
   additional?: string;
   vatCode?: string;
+  peppolEndpointId?: string;
+  countryCode?: string;
+  peppolEndpointSchemeId?: string;
   description?: string;
   isArchived: boolean;
 }

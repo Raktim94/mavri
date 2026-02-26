@@ -32,13 +32,19 @@ export const Form: FC<Props> = ({ handleChange = () => {}, business }) => {
     fileType: business?.fileType,
     fileName: business?.fileName,
     description: business?.description ?? '',
+    peppolEndpointSchemeId: business?.peppolEndpointSchemeId ?? '',
+    peppolEndpointId: business?.peppolEndpointId ?? '',
+    countryCode: business?.countryCode ?? '',
     isArchived: business?.isArchived ?? false
   });
   const [errors, setErrors] = useState({
     email: false,
     phone: false,
     name: false,
-    shortName: false
+    shortName: false,
+    peppolEndpointSchemeId: false,
+    peppolEndpointId: false,
+    countryCode: false
   });
   const [logoUrl, setLogoUrl] = useState<string | undefined>(undefined);
 
@@ -63,6 +69,12 @@ export const Form: FC<Props> = ({ handleChange = () => {}, business }) => {
       setErrors(e => ({ ...e, [field]: true }));
     } else if (field === 'email') {
       setErrors(e => ({ ...e, email: value !== '' && !validators.email(value) }));
+    } else if (field === 'peppolEndpointSchemeId') {
+      setErrors(e => ({ ...e, peppolEndpointSchemeId: value !== '' && !validators.peppolEndpointSchemeId(value) }));
+    } else if (field === 'peppolEndpointId') {
+      setErrors(e => ({ ...e, peppolEndpointId: value !== '' && !validators.peppolEndpointId(value) }));
+    } else if (field === 'countryCode') {
+      setErrors(e => ({ ...e, countryCode: value !== '' && !validators.countryCode(value) }));
     } else if (field === 'phone') {
       setErrors(e => ({ ...e, phone: value !== '' && !validators.phone(value) }));
     } else {
@@ -89,6 +101,9 @@ export const Form: FC<Props> = ({ handleChange = () => {}, business }) => {
       fileType: business?.fileType,
       fileName: business?.fileName,
       description: business?.description ?? '',
+      peppolEndpointSchemeId: business?.peppolEndpointSchemeId ?? '',
+      peppolEndpointId: business?.peppolEndpointId ?? '',
+      countryCode: business?.countryCode ?? '',
       isArchived: business?.isArchived ?? false
     });
 
@@ -105,7 +120,10 @@ export const Form: FC<Props> = ({ handleChange = () => {}, business }) => {
       !errors.email &&
       !errors.phone &&
       !errors.name &&
-      !errors.shortName;
+      !errors.shortName &&
+      !errors.countryCode &&
+      !errors.peppolEndpointId &&
+      !errors.peppolEndpointSchemeId;
 
     handleChange({
       business: form,
@@ -224,6 +242,52 @@ export const Form: FC<Props> = ({ handleChange = () => {}, business }) => {
           rows={5}
           value={form.vatCode}
           onChange={e => update('vatCode', e.target.value)}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, md: 6 }}>
+        <TextField
+          label={t('common.peppolEndpointId')}
+          fullWidth
+          value={form.peppolEndpointId}
+          error={errors.peppolEndpointId}
+          helperText={errors.phone ? t('common.invalidPeppolEndpointId') : t('common.peppolEndpointIdHelper')}
+          onChange={e => {
+            update('peppolEndpointId', e.target.value);
+            validateField('peppolEndpointId', e.target.value);
+          }}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, md: 6 }}>
+        <TextField
+          label={t('common.peppolEndpointSchemeId')}
+          fullWidth
+          value={form.peppolEndpointSchemeId}
+          error={errors.peppolEndpointSchemeId}
+          helperText={
+            errors.phone ? t('common.invalidPeppolEndpointSchemeId') : t('common.peppolEndpointSchemeIdHelper')
+          }
+          onChange={e => {
+            update('peppolEndpointSchemeId', e.target.value);
+            validateField('peppolEndpointSchemeId', e.target.value);
+          }}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, md: 6 }}>
+        <TextField
+          label={t('common.countryCode')}
+          fullWidth
+          value={form.countryCode}
+          error={errors.countryCode}
+          helperText={errors.phone ? t('common.invalidCountryCode') : t('common.countryCodeHelper')}
+          onChange={e => {
+            update('countryCode', e.target.value);
+            validateField('countryCode', e.target.value);
+          }}
+          slotProps={{
+            htmlInput: {
+              maxLength: 2
+            }
+          }}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 12 }}>

@@ -91,6 +91,13 @@ export const pageSlice = createSlice({
         styleProfilesON: action.payload
       };
     },
+    setEInvoiceUBL: (state, action: PayloadAction<boolean>) => {
+      if (!state.settings) return;
+      state.settings = {
+        ...state.settings,
+        ublON: action.payload
+      };
+    },
     setQuotes: (state, action: PayloadAction<boolean>) => {
       if (!state.settings) return;
       state.settings = {
@@ -171,6 +178,7 @@ export const {
   setQuotes,
   setReports,
   setStyleProfiles,
+  setEInvoiceUBL,
   setPresets,
   setVersion,
   setNewVersion,

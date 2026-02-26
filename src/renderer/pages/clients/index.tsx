@@ -28,7 +28,10 @@ export const ClientsPage: FC = () => {
     'description',
     'additional',
     'vatCode',
-    'isArchived'
+    'isArchived',
+    'peppolEndpointId',
+    'countryCode',
+    'peppolEndpointSchemeId'
   ];
   const excelFileName = 'clients';
   const excelTemplateData: Rows = [
@@ -41,7 +44,10 @@ export const ClientsPage: FC = () => {
       code: 'A001',
       description: 'Some description',
       vatCode: 'VAT DE123456789',
-      isArchived: false
+      isArchived: false,
+      peppolEndpointId: '0192',
+      countryCode: 'GB',
+      peppolEndpointSchemeId: '123456785'
     },
     {
       name: 'Jane Smith',
@@ -50,7 +56,10 @@ export const ClientsPage: FC = () => {
       email: 'jane.smith@email.com',
       phone: '+14155552671',
       code: 'B002',
-      isArchived: false
+      isArchived: false,
+      peppolEndpointId: '0192',
+      countryCode: 'GB',
+      peppolEndpointSchemeId: '123456785'
     }
   ];
   const filters: Filter[] = [
