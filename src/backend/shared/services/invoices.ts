@@ -1,4 +1,5 @@
 import type { Response } from '../../shared/types/response';
+import type { EInvoice } from '../enums/einvoice';
 import { InvoiceStatus } from '../enums/invoiceStatus';
 import type { DatabaseAdapter } from '../types/DatabaseAdapter';
 import type { EntityWithId } from '../types/entityWithId';
@@ -20,6 +21,7 @@ import type {
 } from '../types/invoice';
 import type { FilterData } from '../types/invoiceFilter';
 import { getDefaultValue } from '../utils/dbHelper';
+import { generateInvoiceXML } from '../utils/einvoice/xmlProfiles';
 import { mapDatabaseError } from '../utils/errorFunctions';
 import { getWhereClauseFromFilters } from '../utils/filterFunctions';
 
@@ -493,6 +495,20 @@ const getInvoices = async (db: DatabaseAdapter, options: GetInvoicesOptions) => 
       invoiceStyleProfileSnapshot: invoiceStyleProfileSnapshots.find(p => p.parentInvoiceId === invoice.id)
     };
   });
+};
+
+export const getInvoiceXML = async (db: DatabaseAdapter, data: { invoiceId: number; einvoice: EInvoice }) => {
+  const { invoiceId, einvoice } = data;
+  const invoiceResult = await getInvoices(db, { id: invoiceId });
+
+  if (invoiceResult.length <= 0) {
+    throw new Error('Invoice not found');
+  }
+
+  const invoice = invoiceResult[0];
+  const xmlData = generateInvoiceXML(einvoice, invoice);
+
+  return { success: true, data: xmlData };
 };
 
 export const getNextSequence = async (db: DatabaseAdapter, data: { businessId: number; clientId: number }) => {

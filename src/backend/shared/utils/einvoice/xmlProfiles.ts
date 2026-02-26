@@ -1,3 +1,4 @@
+import { EInvoice } from '../../enums/einvoice';
 import type { Invoice } from '../../types/invoice';
 import { generateUBLInvoiceXML } from './ubl';
 
@@ -10,9 +11,9 @@ export interface XMLProfile {
 }
 
 // Built-in providers map. Keep keys lowercase.
-const PROFILES: Record<string, XMLProfile> = {
+const PROFILES: Record<EInvoice, XMLProfile> = {
   ubl21: {
-    id: 'ubl21',
+    id: EInvoice.ubl21,
     name: 'UBL 2.1 (PEPPOL BIS Billing 3.0)',
     mediaType: 'application/xml',
     fileExtension: 'xml',
@@ -24,9 +25,8 @@ export const listXMLProfiles = (): XMLProfile[] => {
   return Object.values(PROFILES);
 };
 
-export const getXMLProfile = (id: keyof typeof PROFILES): XMLProfile => {
-  const key = id.toLowerCase();
-  return PROFILES[key];
+export const getXMLProfile = (id: EInvoice): XMLProfile => {
+  return PROFILES[id];
 };
 
 export const generateInvoiceXML = (

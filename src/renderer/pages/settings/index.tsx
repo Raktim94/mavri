@@ -21,6 +21,7 @@ import {
   addToast,
   selectSettings,
   setCustomInvoiseSettings,
+  setEInvoiceUBL,
   setLanguageDate,
   setMode,
   setPresets,
@@ -120,6 +121,13 @@ export const SettingsPage = () => {
   const togglePresets = useCallback(
     (value: boolean) => {
       dispatch(setPresets(value));
+    },
+    [dispatch]
+  );
+
+  const toggleUBL = useCallback(
+    (value: boolean) => {
+      dispatch(setEInvoiceUBL(value));
     },
     [dispatch]
   );
@@ -233,6 +241,7 @@ export const SettingsPage = () => {
       toggleReports={toggleReports}
       toggleStyleProfiles={toggleStyleProfiles}
       togglePresets={togglePresets}
+      toggleUBL={toggleUBL}
       onExportJSON={exportJSON}
       onImportJSON={importJSONCallback}
     />

@@ -31,6 +31,7 @@ interface Props {
   toggleReports?: (value: boolean) => void;
   toggleStyleProfiles?: (value: boolean) => void;
   togglePresets?: (value: boolean) => void;
+  toggleUBL?: (value: boolean) => void;
   onExportJSON?: () => void;
   onImportJSON?: () => void;
 }
@@ -41,6 +42,7 @@ export const Menu: FC<Props> = ({
   toggleReports = () => {},
   toggleStyleProfiles = () => {},
   togglePresets = () => {},
+  toggleUBL = () => {},
   onModeChange = () => {},
   onExportJSON = () => {},
   onImportJSON = () => {}
@@ -142,7 +144,7 @@ export const Menu: FC<Props> = ({
           isSelected: false,
           checked: storeSettings?.ublON ?? true,
           onChange: () => {
-            togglePresets(!storeSettings?.ublON);
+            toggleUBL(!storeSettings?.ublON);
           }
         }
       ]

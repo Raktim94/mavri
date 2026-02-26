@@ -34,7 +34,7 @@ export interface SettingsUpdate {
   shouldIncludeBusinessName?: boolean;
   quotesON?: boolean;
   styleProfilesON?: boolean;
-  ublON: boolean;
+  ublON?: boolean;
   presetsON?: boolean;
   reportsON?: boolean;
 }

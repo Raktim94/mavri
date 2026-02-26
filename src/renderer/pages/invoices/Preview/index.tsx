@@ -3,7 +3,7 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { Box, Fab, Tooltip } from '@mui/material';
 import { memo, useCallback, useMemo, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useExportPdf } from '../../../shared/hooks/useExportPdf ';
+import { useExportPdf } from '../../../shared/hooks/useExportPdf';
 import type { CustomField, CustomizationForm, InvoiceFromData } from '../../../shared/types/invoice';
 import type { SortOrder } from '../../../shared/types/sortOrder';
 import type { StyleProfileFromData } from '../../../shared/types/styleProfiles';
@@ -122,10 +122,10 @@ const InvoicesPreviewComponent: FC<Props> = ({ onSaveProfile = () => {}, setInvo
         onClick={handleOnClickCustomization}
         onSaveProfile={onSaveProfile}
       />
-      <Tooltip title={t('ariaLabel.export')}>
+      <Tooltip title={t('common.exportPDF')}>
         <Fab
           color="error"
-          aria-label={t('ariaLabel.export')}
+          aria-label={t('common.exportPDF')}
           onClick={exportPdf}
           sx={{
             position: 'fixed',

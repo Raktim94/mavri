@@ -7,7 +7,7 @@ import {
   getSignatureUrls,
   getWatermarkPaidUrl,
   getWatermarkUrl
-} from '../../../shared/hooks/useExportPdf ';
+} from '../../../shared/hooks/useExportPdf';
 import { usePdfTexts } from '../../../shared/hooks/usePdfTexts';
 import type { AttachmentURL, InvoiceFromData } from '../../../shared/types/invoice';
 import { useAppSelector } from '../../../state/configureStore';

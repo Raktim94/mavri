@@ -1,4 +1,5 @@
 import AddCircleIcon from '@mui/icons-material/AddCircle';
+import CodeIcon from '@mui/icons-material/Code';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
@@ -9,6 +10,7 @@ import {
   ListItemIcon,
   ListItemText,
   SwipeableDrawer,
+  Tooltip,
   Typography,
   useMediaQuery,
   useTheme
@@ -16,27 +18,38 @@ import {
 import { memo, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '../../../../shared/components/layout/pageHeader/PageHeader';
+import { InvoiceType } from '../../../../shared/enums/invoiceType';
+import { useAppSelector } from '../../../../state/configureStore';
+import { selectSettings } from '../../../../state/pageSlice';
 
 interface Props {
   isOpen: boolean;
   onClose?: () => void;
   onOpen?: () => void;
-  onExport?: () => void;
+  onExportPDF?: () => void;
+  onExportPDFUBL?: () => void;
+  onExportUBLXML?: () => void;
   onDelete?: () => void;
   onDuplicate?: () => void;
   onMakeInvoice?: () => void;
   showDelete?: boolean;
   showDuplicate?: boolean;
   showMakeInvoice?: boolean;
+  isPDFReady?: boolean;
+  type: InvoiceType;
 }
 const MoreActionDropdownComponent: FC<Props> = ({
   isOpen,
   showDelete = true,
   showDuplicate = true,
   showMakeInvoice = true,
+  isPDFReady = false,
+  type,
   onClose,
   onOpen,
-  onExport,
+  onExportPDF,
+  onExportPDFUBL,
+  onExportUBLXML,
   onDelete,
   onDuplicate,
   onMakeInvoice
@@ -44,6 +57,7 @@ const MoreActionDropdownComponent: FC<Props> = ({
   const { t } = useTranslation();
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
+  const storeSettings = useAppSelector(selectSettings);
 
   return (
     <>
@@ -110,7 +124,7 @@ const MoreActionDropdownComponent: FC<Props> = ({
               </ListItemButton>
             )}
             <ListItemButton
-              onClick={onExport}
+              onClick={onExportPDF}
               sx={{
                 width: '100%',
                 borderRadius: 1,
@@ -131,7 +145,7 @@ const MoreActionDropdownComponent: FC<Props> = ({
                       variant="body1"
                       sx={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis' }}
                     >
-                      {t('common.export')}
+                      {t('common.exportPDF')}
                     </Typography>
                   }
                   disableTypography
@@ -140,6 +154,104 @@ const MoreActionDropdownComponent: FC<Props> = ({
                 />
               </ListItem>
             </ListItemButton>
+            {storeSettings?.ublON && (
+              <>
+                <Tooltip
+                  title={
+                    !isPDFReady
+                      ? t('common.tooltipPDFXML', {
+                          type: type === InvoiceType.invoice ? t('common.invoice') : t('common.quote')
+                        })
+                      : ''
+                  }
+                  disableHoverListener={isPDFReady}
+                  disableFocusListener={isPDFReady}
+                  disableTouchListener={isPDFReady}
+                >
+                  <Box>
+                    <ListItemButton
+                      onClick={onExportPDFUBL}
+                      disabled={!isPDFReady}
+                      sx={{
+                        width: '100%',
+                        borderRadius: 1,
+                        display: 'flex',
+                        justifyContent: 'start',
+                        alignItems: 'start',
+                        flexDirection: 'column'
+                      }}
+                    >
+                      <ListItem sx={{ p: 0 }}>
+                        <ListItemIcon sx={{ minWidth: 'auto', mr: 1 }}>
+                          <PictureAsPdfIcon color="error" />
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={
+                            <Typography
+                              component="div"
+                              variant="body1"
+                              sx={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis' }}
+                            >
+                              {t('common.exportPDFEmbeddedUBL')}
+                            </Typography>
+                          }
+                          disableTypography
+                          sx={{ m: 0 }}
+                          slotProps={{ primary: { sx: { fontWeight: 600, m: 0 } } }}
+                        />
+                      </ListItem>
+                    </ListItemButton>
+                  </Box>
+                </Tooltip>
+                <Tooltip
+                  title={
+                    !isPDFReady
+                      ? t('common.tooltipXML', {
+                          type: type === InvoiceType.invoice ? t('common.invoice') : t('common.quote')
+                        })
+                      : ''
+                  }
+                  disableHoverListener={isPDFReady}
+                  disableFocusListener={isPDFReady}
+                  disableTouchListener={isPDFReady}
+                >
+                  <Box>
+                    <ListItemButton
+                      onClick={onExportUBLXML}
+                      disabled={!isPDFReady}
+                      sx={{
+                        width: '100%',
+                        borderRadius: 1,
+                        display: 'flex',
+                        justifyContent: 'start',
+                        alignItems: 'start',
+                        flexDirection: 'column'
+                      }}
+                    >
+                      <ListItem sx={{ p: 0 }}>
+                        <ListItemIcon sx={{ minWidth: 'auto', mr: 1 }}>
+                          <CodeIcon color="primary" />
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={
+                            <Typography
+                              component="div"
+                              variant="body1"
+                              sx={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis' }}
+                            >
+                              {t('common.exportUBLXML')}
+                            </Typography>
+                          }
+                          disableTypography
+                          sx={{ m: 0 }}
+                          slotProps={{ primary: { sx: { fontWeight: 600, m: 0 } } }}
+                        />
+                      </ListItem>
+                    </ListItemButton>
+                  </Box>
+                </Tooltip>
+              </>
+            )}
             {showDuplicate && (
               <ListItemButton
                 onClick={onDuplicate}
