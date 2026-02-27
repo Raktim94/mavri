@@ -3,8 +3,6 @@
 //
 // Scope: Generate a standards-aligned subset that covers all mandatory
 // fields and commonly required recommended fields for successful exchange.
-// If certain optional identifiers (like PEPPOL endpoint IDs) are not
-// configured, the XML remains valid but omits those elements.
 // https://docs.peppol.eu/poacc/billing/3.0/
 // https://peppolvalidator.com/
 
