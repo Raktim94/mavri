@@ -174,6 +174,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, business }) => {
         <TextField
           label={t('common.address')}
           fullWidth
+          helperText={t('common.addressHelper')}
           value={form.address}
           onChange={e => update('address', e.target.value)}
         />

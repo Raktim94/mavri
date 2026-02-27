@@ -122,6 +122,7 @@
     "addDB": "Add Database",
     "additional": "Additional",
     "address": "Address",
+    "addressHelper": "Please use the following format (otherwise e-invoice data may be incorrect): Street, City, Region Postal Code, Country",
     "amount": "Amount",
     "and": "and",
     "archived": "Archived",

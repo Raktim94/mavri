@@ -7,36 +7,49 @@ export const splitAddress = (
   street?: string;
   city?: string;
   postalZone?: string;
+  country?: string;
+  region?: string;
   countryCode?: string;
 } => {
-  // Best-effort parse: expect lines like "Street, City, Region Postal, COUNTRY"
-  // We keep it simple: first comma -> street; last token with 2-3 uppercase -> country code if matches.
   if (!addr) return {};
-  const parts = addr
-    .split(',')
-    .map(s => s.trim())
-    .filter(Boolean);
-  const out: {
-    street?: string;
-    city?: string;
-    postalZone?: string;
-    countryCode?: string;
-  } = {};
-  if (parts.length > 0) out.street = parts[0];
-  if (parts.length > 1) out.city = parts[1];
-  if (parts.length > 2) {
-    // Try to find a postal code in the remainder (any 3-10 alnum token)
-    const rest = parts.slice(2).join(' ');
-    const m = rest.match(/([A-Z0-9\- ]{3,10})$/i);
-    if (m) out.postalZone = m[1].trim();
+
+  const parts = addr.split(',').map(p => p.trim());
+
+  const country = parts.pop();
+  let postal = null;
+
+  const postalRegex = /\b[A-Z]{0,2}-?\d{4,6}\b/;
+  if (parts.length > 0) {
+    const last = parts[parts.length - 1];
+    const match = last?.match(postalRegex);
+
+    if (match && match[0]) {
+      postal = match[0];
+      parts.pop();
+    }
   }
-  // Country code heuristic: last 2 letters token
-  const last = parts[parts.length - 1] || '';
-  const cc = last.trim().toUpperCase();
-  if (/^[A-Z]{2,3}$/.test(cc)) {
-    out.countryCode = cc.length === 3 ? cc.slice(0, 2) : cc;
+
+  let street = null;
+  for (let i = 0; i < parts.length; i++) {
+    if (/\d/.test(parts[i])) {
+      street = parts.splice(i, 1)[0];
+      break;
+    }
   }
-  return out;
+
+  let countryCode = null;
+  if (country && /^[A-Z]{2,3}$/.test(country)) {
+    countryCode = country.length === 3 ? country.slice(0, 2) : undefined;
+  }
+
+  return {
+    street: street ?? undefined,
+    city: parts[0] ?? undefined,
+    region: parts.slice(1).join(', ') ?? undefined,
+    postalZone: postal ?? undefined,
+    country: country ?? undefined,
+    countryCode: countryCode ?? undefined
+  };
 };
 
 type Maybe<T> = T | undefined | null;

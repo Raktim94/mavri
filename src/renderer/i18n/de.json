@@ -122,6 +122,7 @@
     "addDB": "Datenbank hinzufügen",
     "additional": "Zusätzlich",
     "address": "Adresse",
+    "addressHelper": "Bitte verwenden Sie folgendes Format (ansonsten können die E‑Rechnungsdaten fehlerhaft sein): Straße, Stadt, Region Postleitzahl, Land",
     "amount": "Betrag",
     "and": "und",
     "archived": "Archiviert",

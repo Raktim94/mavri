@@ -135,6 +135,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, client }) => {
           label={t('common.address')}
           fullWidth
           value={form.address}
+          helperText={t('common.addressHelper')}
           onChange={e => update('address', e.target.value)}
         />
       </Grid>

@@ -122,6 +122,7 @@
     "addDB": "Ajouter une base de données",
     "additional": "Supplémentaire",
     "address": "Adresse",
+    "addressHelper": "Veuillez utiliser le format suivant (sinon les données de la facture électronique peuvent être incorrectes) : Rue, Ville, Région Code postal, Pays",
     "amount": "Montant",
     "and": "et",
     "archived": "Archivé",
