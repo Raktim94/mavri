@@ -8,6 +8,7 @@ import { InvoiceType } from '../../../shared/enums/invoiceType';
 import type { Language } from '../../../shared/enums/language';
 import { useGetEInvoiceXML } from '../../../shared/hooks/invoices/useGetEInvoiceXML';
 import { useExportPdf } from '../../../shared/hooks/useExportPdf';
+import { useExportPdfWithXml } from '../../../shared/hooks/useExportPdfWithXml';
 import { useExportXML } from '../../../shared/hooks/useExportXML';
 import type { Bank } from '../../../shared/types/bank';
 import type { Business } from '../../../shared/types/business';
@@ -89,6 +90,8 @@ const InvoiceFormComponent: FC<Props> = ({
     { invoiceId: number; einvoice: EInvoice; type: 'singleFile' | 'embeddedFile' } | undefined
   >(undefined);
   const { exportXML } = useExportXML({ invoiceForm, storeSettings });
+  const { exportPdfWithXml } = useExportPdfWithXml({ invoiceForm, storeSettings });
+
   const dispatch = useAppDispatch();
   const { execute: retrieveXML } = useGetEInvoiceXML({
     params: xmlData,
@@ -101,9 +104,8 @@ const InvoiceFormComponent: FC<Props> = ({
 
       if (xmlData && data.data && xmlData.type === 'singleFile') {
         exportXML(data.data, xmlData?.einvoice);
-      }
-      if (xmlData && data.data && xmlData.type === 'embeddedFile') {
-        // exportXML(data.data, xmlData?.einvoice);
+      } else if (xmlData && data.data && xmlData.type === 'embeddedFile') {
+        exportPdfWithXml(data.data, xmlData?.einvoice);
       }
     }
   });

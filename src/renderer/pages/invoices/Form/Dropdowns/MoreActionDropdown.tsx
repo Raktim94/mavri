@@ -157,13 +157,7 @@ const MoreActionDropdownComponent: FC<Props> = ({
             {storeSettings?.ublON && type === InvoiceType.invoice && (
               <>
                 <Tooltip
-                  title={
-                    !isPDFReady
-                      ? t('common.tooltipPDFXML', {
-                          type: t('common.invoice')
-                        })
-                      : ''
-                  }
+                  title={!isPDFReady ? t('common.tooltipPDFXML') : ''}
                   disableHoverListener={isPDFReady}
                   disableFocusListener={isPDFReady}
                   disableTouchListener={isPDFReady}
@@ -204,13 +198,7 @@ const MoreActionDropdownComponent: FC<Props> = ({
                   </Box>
                 </Tooltip>
                 <Tooltip
-                  title={
-                    !isPDFReady
-                      ? t('common.tooltipXML', {
-                          type: t('common.invoice')
-                        })
-                      : ''
-                  }
+                  title={!isPDFReady ? t('common.tooltipXML') : ''}
                   disableHoverListener={isPDFReady}
                   disableFocusListener={isPDFReady}
                   disableTouchListener={isPDFReady}

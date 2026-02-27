@@ -116,7 +116,6 @@
     "noItem": "Pasirinkite klientą, kad pamatytumėte detales."
   },
   "common": {
-    "buyerReference": "Pirkėjo nuoroda",
     "accountHolder": "Sąskaitos savininkas",
     "accountNumber": "Sąskaitos numeris",
     "accountNumberInvalid": "Sąskaitos numeris turi būti 4–34 simbolių ilgio ir gali sudaryti tik raidės, skaičiai arba brūkšneliai.",
@@ -133,6 +132,7 @@
     "branchCode": "Filialo kodas",
     "branchCodeInvalid": "Filialo kodas turi būti 3–6 raidiniai skaitmeniniai simboliai",
     "branding": "Prekės ženklas",
+    "buyerReference": "Pirkėjo nuoroda",
     "cancel": "Atšaukti",
     "cash": "Grynieji",
     "category": "Kategorija",
@@ -269,8 +269,8 @@
     "testConnectionSuccess": "Ryšys užmegztas",
     "text": "Tekstas",
     "to": "Iki",
-    "tooltipPDFXML": "Prieš eksportuojant PDF (su įterptu XML), {{type}} turi būti sukurtas",
-    "tooltipXML": "Prieš eksportuojant XML, {{type}} turi būti sukurtas",
+    "tooltipPDFXML": "Išsaugokite sąskaitą prieš eksportuodami PDF (su įterptu XML). Įsitikinkite, kad visi pakeitimai išsaugoti",
+    "tooltipXML": "Išsaugokite sąskaitą prieš eksportuodami XML failą. Įsitikinkite, kad visi pakeitimai išsaugoti",
     "total": "Suma",
     "type": "Tipas",
     "typographyLabels": "Tipografija ir žymės",

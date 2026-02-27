@@ -116,7 +116,6 @@
     "noItem": "Sélectionnez un client pour afficher les détails."
   },
   "common": {
-    "buyerReference": "Référence acheteur",
     "accountHolder": "Titulaire du compte",
     "accountNumber": "Numéro de compte",
     "accountNumberInvalid": "Le numéro de compte doit contenir 4 à 34 caractères et uniquement des lettres, des chiffres ou des tirets.",
@@ -133,6 +132,7 @@
     "branchCode": "Code de succursale",
     "branchCodeInvalid": "Le code de succursale doit comporter 3 à 6 caractères alphanumériques",
     "branding": "Image de marque",
+    "buyerReference": "Référence acheteur",
     "cancel": "Annuler",
     "cash": "Espèces",
     "category": "Catégorie",
@@ -269,8 +269,8 @@
     "testConnectionSuccess": "Connexion établie",
     "text": "Texte",
     "to": "À",
-    "tooltipPDFXML": "{{type}} doit être créé avant d’exporter le PDF (avec XML intégré)",
-    "tooltipXML": "{{type}} doit être créé avant d’exporter le XML",
+    "tooltipPDFXML": "Enregistrez la facture avant d’exporter le PDF (avec XML intégré). Assurez-vous que toutes les modifications sont enregistrées",
+    "tooltipXML": "Enregistrez la facture avant d’exporter le fichier XML. Assurez-vous que toutes les modifications sont enregistrées",
     "total": "Total",
     "type": "Type",
     "typographyLabels": "Typographie et libellés",

@@ -6,29 +6,34 @@ import { InvoiceType } from '../enums/invoiceType';
 import type { InvoiceFromData } from '../types/invoice';
 import type { Settings } from '../types/settings';
 
+export const getXMLFilename = (invoiceForm: InvoiceFromData, einvoice: EInvoice, storeSettings: Settings) => {
+  const xmlType = `_${einvoice}`;
+  const hasInvoicePart = invoiceForm.invoicePrefix || invoiceForm.invoiceNumber || invoiceForm.invoiceSuffix;
+  const subTypeName = invoiceForm.invoiceType === InvoiceType.invoice ? 'Invoice' : 'Quote';
+  const invoiceNumber = `${hasInvoicePart ? '_' : ''}${invoiceForm.invoicePrefix ?? ''}${invoiceForm.invoiceNumber ?? ''}${invoiceForm.invoiceSuffix ?? ''}`;
+  const issuedAtDate = invoiceForm?.issuedAt ? parseISO(invoiceForm.issuedAt) : undefined;
+  const year = issuedAtDate && storeSettings?.shouldIncludeYear ? `_${issuedAtDate.getFullYear()}` : '';
+  const month = issuedAtDate && storeSettings?.shouldIncludeMonth ? `_${MONTH_NAMES[issuedAtDate.getMonth()]}` : '';
+  const businessName = storeSettings?.shouldIncludeBusinessName
+    ? `${invoiceForm?.invoiceBusinessSnapshot?.businessName ? invoiceForm?.invoiceBusinessSnapshot?.businessName.trim().replaceAll(' ', '_') + '_' : ''}`
+    : '';
+
+  return `${businessName}${subTypeName}${invoiceNumber}${year}${month}${xmlType}.xml`;
+};
+
 export const useExportXML = (data: { invoiceForm?: InvoiceFromData; storeSettings?: Settings }) => {
   const { invoiceForm, storeSettings } = data;
 
   const exportXML = useCallback(
     async (xml: Uint8Array, einvoice: EInvoice) => {
-      if (!invoiceForm) return;
+      if (!invoiceForm || !storeSettings) return;
 
       const blob = new Blob([new Uint8Array(xml)], { type: 'application/xml' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
 
-      const xmlType = `_${einvoice}`;
-      const hasInvoicePart = invoiceForm.invoicePrefix || invoiceForm.invoiceNumber || invoiceForm.invoiceSuffix;
-      const subTypeName = invoiceForm.invoiceType === InvoiceType.invoice ? 'Invoice' : 'Quote';
-      const invoiceNumber = `${hasInvoicePart ? '_' : ''}${invoiceForm.invoicePrefix ?? ''}${invoiceForm.invoiceNumber ?? ''}${invoiceForm.invoiceSuffix ?? ''}`;
-      const issuedAtDate = invoiceForm?.issuedAt ? parseISO(invoiceForm.issuedAt) : undefined;
-      const year = issuedAtDate && storeSettings?.shouldIncludeYear ? `_${issuedAtDate.getFullYear()}` : '';
-      const month = issuedAtDate && storeSettings?.shouldIncludeMonth ? `_${MONTH_NAMES[issuedAtDate.getMonth()]}` : '';
-      const businessName = storeSettings?.shouldIncludeBusinessName
-        ? `${invoiceForm?.invoiceBusinessSnapshot?.businessName ? invoiceForm?.invoiceBusinessSnapshot?.businessName.trim().replaceAll(' ', '_') + '_' : ''}`
-        : '';
       a.href = url;
-      a.download = `${businessName}${subTypeName}${invoiceNumber}${year}${month}${xmlType}.xml`;
+      a.download = getXMLFilename(invoiceForm, einvoice, storeSettings);
       a.click();
 
       URL.revokeObjectURL(url);

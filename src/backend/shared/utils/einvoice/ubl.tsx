@@ -9,7 +9,7 @@
 import { DateFormat } from '../../enums/dateFormat';
 import { InvoiceItemTaxType } from '../../enums/taxType';
 import type { Invoice } from '../../types/invoice';
-import { formatDate, splitAddress, xmlEscape } from './helperFunctions';
+import { formatDate, formatXml, splitAddress, xmlEscape } from './helperFunctions';
 import {
   getBalanceDueCents,
   getDiscountAmountCents,
@@ -253,9 +253,6 @@ export function generateUBLInvoiceXML(invoice: Invoice): string {
         <cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>
       </cac:TaxCategory>
     </cac:TaxSubtotal>
-
-
-
      ${
        shippingAmount > 0
          ? `
@@ -326,17 +323,19 @@ export function generateUBLInvoiceXML(invoice: Invoice): string {
     })
     .join('');
 
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
-  xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
-  xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
-  <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
-  ${header}
-  ${supplierParty}
-  ${customerParty}
-  ${paymentMeans}
-  ${taxTotal}
-  ${legalMonetaryTotal}
-  ${lines}
-</Invoice>`;
+  const raw = `<?xml version="1.0" encoding="UTF-8"?>
+      <Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+        xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+        xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+        <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+        ${header}
+        ${supplierParty}
+        ${customerParty}
+        ${paymentMeans}
+        ${taxTotal}
+        ${legalMonetaryTotal}
+        ${lines}
+      </Invoice>`;
+
+  return formatXml(raw);
 }

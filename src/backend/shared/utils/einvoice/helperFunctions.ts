@@ -61,3 +61,32 @@ export const formatDate = (date: string | Date, pattern: DateFormat) => {
 
   return format(d, pattern);
 };
+
+// Lightweight XML formatter to produce consistent indentation
+export const formatXml = (xml: string): string => {
+  xml = xml.trim();
+  xml = xml.replace(/>\s*</g, '>\n<');
+  const lines = xml.split('\n');
+  let indent = 0;
+  const formatted = lines
+    .map(line => line.trim())
+    .filter(Boolean)
+    .map(line => {
+      const closingTag = /^<\/[^>]+>/;
+      const openingTag = /^<[^\\/?][^>]*>$/;
+      const selfClosing = /<[^>]+\/>$/;
+      const declaration = /^<\?/;
+      if (closingTag.test(line)) {
+        indent = Math.max(indent - 1, 0);
+      }
+      const pad = '  '.repeat(indent);
+      const out = pad + line;
+      if (openingTag.test(line) && !selfClosing.test(line) && !declaration.test(line)) {
+        indent++;
+      }
+      return out;
+    })
+    .join('\n');
+
+  return formatted;
+};

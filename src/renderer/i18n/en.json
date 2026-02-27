@@ -116,7 +116,6 @@
     "noItem": "Selected a client to view details."
   },
   "common": {
-    "buyerReference": "Buyer reference",
     "accountHolder": "Account holder",
     "accountNumber": "Account number",
     "accountNumberInvalid": "Account number must be 4–34 characters and contain only letters, numbers, or hyphens",
@@ -133,6 +132,7 @@
     "branchCode": "Branch code",
     "branchCodeInvalid": "Branch code must be 3–6 alphanumeric characters",
     "branding": "Branding",
+    "buyerReference": "Buyer reference",
     "cancel": "Cancel",
     "cash": "Cash",
     "category": "Category",
@@ -269,8 +269,8 @@
     "testConnectionSuccess": "Connection established",
     "text": "Text",
     "to": "To",
-    "tooltipPDFXML": "{{type}} must be created before exporting PDF (with embedded XML)",
-    "tooltipXML": "{{type}} must be created before exporting XML",
+    "tooltipPDFXML": "Save the invoice before exporting the PDF (with embedded XML). Make sure all changes are saved",
+    "tooltipXML": "Save the invoice before exporting the XML file. Make sure all changes are saved",
     "total": "Total",
     "type": "Type",
     "typographyLabels": "Typography & Labels",
