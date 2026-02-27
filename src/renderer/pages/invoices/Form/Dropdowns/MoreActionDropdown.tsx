@@ -154,13 +154,13 @@ const MoreActionDropdownComponent: FC<Props> = ({
                 />
               </ListItem>
             </ListItemButton>
-            {storeSettings?.ublON && (
+            {storeSettings?.ublON && type === InvoiceType.invoice && (
               <>
                 <Tooltip
                   title={
                     !isPDFReady
                       ? t('common.tooltipPDFXML', {
-                          type: type === InvoiceType.invoice ? t('common.invoice') : t('common.quote')
+                          type: t('common.invoice')
                         })
                       : ''
                   }
@@ -207,7 +207,7 @@ const MoreActionDropdownComponent: FC<Props> = ({
                   title={
                     !isPDFReady
                       ? t('common.tooltipXML', {
-                          type: type === InvoiceType.invoice ? t('common.invoice') : t('common.quote')
+                          type: t('common.invoice')
                         })
                       : ''
                   }

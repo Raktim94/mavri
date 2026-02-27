@@ -14,11 +14,13 @@ import type { Invoice } from '../../types/invoice';
 import { formatDate, splitAddress, xmlEscape } from './helperFunctions';
 import {
   getBalanceDueCents,
+  getDiscountAmountCents,
   getInvoiceItemTaxCents,
   getInvoiceTaxCents,
   getItemTotalAmountCents,
   getSubTotalAmountCents,
   getTotalAmountAfterDiscountCents,
+  getTotalAmountCents,
   getTotalAmountPaidCents
 } from './invoiceFunctions';
 
@@ -33,6 +35,32 @@ const decimals = (n: number): string => {
 export function generateUBLInvoiceXML(invoice: Invoice): string {
   if (!invoice.invoiceCurrencySnapshot || !invoice.invoiceBusinessSnapshot || !invoice.invoiceClientSnapshot)
     throw new Error('Invoice is not supported for UBL 2.1 XML compliant with PEPPOL BIS Billing 3.0');
+  if (
+    !invoice.invoiceBusinessSnapshot.businessPeppolEndpointId ||
+    !invoice.invoiceBusinessSnapshot.businessPeppolEndpointSchemeId
+  )
+    throw new Error(
+      'Invoice is not supported for UBL 2.1 XML compliant with PEPPOL BIS Billing 3.0. Invoice is missing Peppol Endpoint ID and Schema ID for business'
+    );
+  if (
+    !invoice.invoiceClientSnapshot.clientPeppolEndpointId ||
+    !invoice.invoiceClientSnapshot.clientPeppolEndpointSchemeId
+  )
+    throw new Error(
+      'Invoice is not supported for UBL 2.1 XML compliant with PEPPOL BIS Billing 3.0. Invoice is missing Peppol Endpoint ID and Schema ID for client'
+    );
+  if (!invoice.invoiceClientSnapshot.clientBuyerReference)
+    throw new Error(
+      'Invoice is not supported for UBL 2.1 XML compliant with PEPPOL BIS Billing 3.0. Invoice is missing buyer reference for client'
+    );
+  if (!invoice.invoiceClientSnapshot.clientCountryCode)
+    throw new Error(
+      'Invoice is not supported for UBL 2.1 XML compliant with PEPPOL BIS Billing 3.0. Invoice is missing country for client'
+    );
+  if (!invoice.invoiceBusinessSnapshot.businessCountryCode)
+    throw new Error(
+      'Invoice is not supported for UBL 2.1 XML compliant with PEPPOL BIS Billing 3.0. Invoice is missing country for business'
+    );
 
   const issueDate = formatDate(invoice.issuedAt ?? new Date(), DateFormat.yyyyMMddDash);
   const dueDate = invoice.dueDate ? formatDate(invoice.dueDate, DateFormat.yyyyMMddDash) : undefined;
@@ -46,20 +74,55 @@ export function generateUBLInvoiceXML(invoice: Invoice): string {
     buyerAddress.countryCode = invoice.invoiceClientSnapshot.clientCountryCode.toUpperCase();
   }
 
+  const discountAmount = getDiscountAmountCents(invoice) / invoice.invoiceCurrencySnapshot!.currencySubunit;
+  const shippingAmount = Number(invoice.shippingFeeCents) / invoice.invoiceCurrencySnapshot!.currencySubunit;
+  const noteText = [invoice.thanksNotes, invoice.customerNotes, invoice.termsConditionNotes]
+    .filter(Boolean)
+    .join(' | ');
+
   const header = [
     `<cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0</cbc:CustomizationID>`,
-    `<cbc:ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:3.0</cbc:ProfileID>`,
+    `<cbc:ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0</cbc:ProfileID>`,
     `<cbc:ID>${xmlEscape(invoice.invoiceNumber)}</cbc:ID>`,
     `<cbc:IssueDate>${issueDate}</cbc:IssueDate>`,
     dueDate ? `<cbc:DueDate>${dueDate}</cbc:DueDate>` : '',
     `<cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>`,
-    invoice.thanksNotes ? `<cbc:Note>${xmlEscape(invoice.thanksNotes)}</cbc:Note>` : '',
-    invoice.customerNotes ? `<cbc:Note>${xmlEscape(invoice.customerNotes)}</cbc:Note>` : '',
-    invoice.termsConditionNotes ? `<cbc:Note>${xmlEscape(invoice.termsConditionNotes)}</cbc:Note>` : '',
-    `<cbc:DocumentCurrencyCode>${xmlEscape(invoice.invoiceCurrencySnapshot.currencyCode)}</cbc:DocumentCurrencyCode>`
+    noteText ? `<cbc:Note>${xmlEscape(noteText)}</cbc:Note>` : '',
+    `<cbc:DocumentCurrencyCode>${xmlEscape(invoice.invoiceCurrencySnapshot.currencyCode)}</cbc:DocumentCurrencyCode>`,
+    `<cbc:BuyerReference>${invoice.invoiceClientSnapshot.clientBuyerReference}</cbc:BuyerReference>`,
+    discountAmount > 0
+      ? `
+        <cac:AllowanceCharge>
+          <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+          <cbc:AllowanceChargeReason>Flat discount fee</cbc:AllowanceChargeReason>
+          <cbc:Amount currencyID="${xmlEscape(invoice.invoiceCurrencySnapshot.currencyCode)}">${discountAmount}</cbc:Amount>
+          <cac:TaxCategory>
+            <cbc:ID>S</cbc:ID>
+            <cbc:Percent>${decimals(invoice.taxRate ?? 0)}</cbc:Percent>
+            <cac:TaxScheme>
+              <cbc:ID>VAT</cbc:ID>
+            </cac:TaxScheme>
+          </cac:TaxCategory>
+        </cac:AllowanceCharge>`
+      : ``,
+    shippingAmount > 0
+      ? `
+        <cac:AllowanceCharge>
+          <cbc:ChargeIndicator>true</cbc:ChargeIndicator>
+          <cbc:AllowanceChargeReason>Flat shipping fee</cbc:AllowanceChargeReason>
+          <cbc:Amount currencyID="${xmlEscape(invoice.invoiceCurrencySnapshot.currencyCode)}">${shippingAmount}</cbc:Amount>
+          <cac:TaxCategory>
+            <cbc:ID>Z</cbc:ID>
+            <cbc:Percent>0.00</cbc:Percent>
+            <cac:TaxScheme>
+              <cbc:ID>VAT</cbc:ID>
+            </cac:TaxScheme>
+          </cac:TaxCategory>
+        </cac:AllowanceCharge>`
+      : ``
   ]
     .filter(Boolean)
-    .join('');
+    .join('\n');
 
   const supplierParty = `
   <cac:AccountingSupplierParty>
@@ -70,7 +133,7 @@ export function generateUBLInvoiceXML(invoice: Invoice): string {
         ${sellerAddress.street ? `<cbc:StreetName>${xmlEscape(sellerAddress.street)}</cbc:StreetName>` : ''}
         ${sellerAddress.city ? `<cbc:CityName>${xmlEscape(sellerAddress.city)}</cbc:CityName>` : ''}
         ${sellerAddress.postalZone ? `<cbc:PostalZone>${xmlEscape(sellerAddress.postalZone)}</cbc:PostalZone>` : ''}
-        <cac:Country><cbc:IdentificationCode>${xmlEscape(sellerAddress.countryCode || 'US')}</cbc:IdentificationCode></cac:Country>
+        <cac:Country><cbc:IdentificationCode>${xmlEscape(sellerAddress.countryCode)}</cbc:IdentificationCode></cac:Country>
       </cac:PostalAddress>
       ${invoice.invoiceBusinessSnapshot.businessVatCode ? `<cac:PartyTaxScheme><cbc:CompanyID>${xmlEscape(invoice.invoiceBusinessSnapshot.businessVatCode)}</cbc:CompanyID><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme>` : ''}
       <cac:PartyLegalEntity>
@@ -95,11 +158,14 @@ export function generateUBLInvoiceXML(invoice: Invoice): string {
     <cac:Party>
       ${invoice.invoiceClientSnapshot.clientPeppolEndpointId ? `<cbc:EndpointID${invoice.invoiceClientSnapshot.clientPeppolEndpointSchemeId ? ` schemeID="${xmlEscape(invoice.invoiceClientSnapshot.clientPeppolEndpointSchemeId)}"` : ''}>${xmlEscape(invoice.invoiceClientSnapshot.clientPeppolEndpointId)}</cbc:EndpointID>` : ''}
       <cac:PartyName><cbc:Name>${xmlEscape(buyer.clientName)}</cbc:Name></cac:PartyName>
+      <cac:PartyLegalEntity>
+        <cbc:RegistrationName>${xmlEscape(buyer.clientName)}</cbc:RegistrationName>
+      </cac:PartyLegalEntity>
       <cac:PostalAddress>
         ${buyerAddress.street ? `<cbc:StreetName>${xmlEscape(buyerAddress.street)}</cbc:StreetName>` : ''}
         ${buyerAddress.city ? `<cbc:CityName>${xmlEscape(buyerAddress.city)}</cbc:CityName>` : ''}
         ${buyerAddress.postalZone ? `<cbc:PostalZone>${xmlEscape(buyerAddress.postalZone)}</cbc:PostalZone>` : ''}
-        <cac:Country><cbc:IdentificationCode>${xmlEscape(buyerAddress.countryCode || 'US')}</cbc:IdentificationCode></cac:Country>
+        <cac:Country><cbc:IdentificationCode>${xmlEscape(buyerAddress.countryCode)}</cbc:IdentificationCode></cac:Country>
       </cac:PostalAddress>
       ${buyer.clientVatCode ? `<cac:PartyTaxScheme><cbc:CompanyID>${xmlEscape(buyer.clientVatCode)}</cbc:CompanyID><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme>` : ''}
       ${
@@ -118,7 +184,6 @@ export function generateUBLInvoiceXML(invoice: Invoice): string {
     ? `
   <cac:PaymentMeans>
     <cbc:PaymentMeansCode>30</cbc:PaymentMeansCode>
-    ${dueDate ? `<cbc:PaymentDueDate>${dueDate}</cbc:PaymentDueDate>` : ''}
     <cac:PayeeFinancialAccount>
       ${invoice.invoiceBankSnapshot.accountNumber ? `<cbc:ID>${xmlEscape(invoice.invoiceBankSnapshot.accountNumber)}</cbc:ID>` : ''}
       ${invoice.invoiceBankSnapshot.accountHolder ? `<cbc:Name>${xmlEscape(invoice.invoiceBankSnapshot.accountHolder)}</cbc:Name>` : ''}
@@ -127,7 +192,6 @@ export function generateUBLInvoiceXML(invoice: Invoice): string {
           ? `
       <cac:FinancialInstitutionBranch>
         ${invoice.invoiceBankSnapshot.swiftCode ? `<cbc:ID>${xmlEscape(invoice.invoiceBankSnapshot.swiftCode)}</cbc:ID>` : ''}
-        ${invoice.invoiceBankSnapshot.bankName ? `<cbc:Name>${xmlEscape(invoice.invoiceBankSnapshot.bankName)}</cbc:Name>` : ''}
       </cac:FinancialInstitutionBranch>`
           : ''
       }
@@ -191,20 +255,40 @@ export function generateUBLInvoiceXML(invoice: Invoice): string {
         <cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>
       </cac:TaxCategory>
     </cac:TaxSubtotal>
+
+
+
+     ${
+       shippingAmount > 0
+         ? `
+            <cac:TaxSubtotal>
+              <cbc:TaxableAmount currencyID="${xmlEscape(invoice.invoiceCurrencySnapshot.currencyCode)}">${shippingAmount}</cbc:TaxableAmount>
+              <cbc:TaxAmount currencyID="${xmlEscape(invoice.invoiceCurrencySnapshot.currencyCode)}">0.00</cbc:TaxAmount>
+              <cac:TaxCategory>
+                <cbc:ID>Z</cbc:ID>
+                <cbc:Percent>0.00</cbc:Percent>
+                <cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>
+              </cac:TaxCategory>
+            </cac:TaxSubtotal>
+          `
+         : ``
+     }
   </cac:TaxTotal>`;
   }
 
   const taxTotal = taxTotalXML;
   const lineExtension =
     getSubTotalAmountCents(invoice.invoiceItems, false) / invoice.invoiceCurrencySnapshot!.currencySubunit;
-  const taxExclusive = getTotalAmountAfterDiscountCents(invoice) / invoice.invoiceCurrencySnapshot!.currencySubunit;
-  const taxAmount = getInvoiceTaxCents(invoice) / invoice.invoiceCurrencySnapshot!.currencySubunit;
-  const taxInclusive = taxExclusive + taxAmount;
+  const taxExclusive =
+    getTotalAmountAfterDiscountCents(invoice) / invoice.invoiceCurrencySnapshot!.currencySubunit + shippingAmount;
+  const taxInclusive = getTotalAmountCents(invoice) / invoice.invoiceCurrencySnapshot!.currencySubunit;
   const prepaid = getTotalAmountPaidCents(invoice.invoicePayments) / invoice.invoiceCurrencySnapshot!.currencySubunit;
   const payable = getBalanceDueCents(invoice) / invoice.invoiceCurrencySnapshot!.currencySubunit;
 
   const legalMonetaryTotal = `
   <cac:LegalMonetaryTotal>
+    ${discountAmount > 0 ? amountTag('AllowanceTotalAmount', discountAmount, invoice.invoiceCurrencySnapshot.currencyCode) : ``}
+    ${shippingAmount > 0 ? amountTag('ChargeTotalAmount', shippingAmount, invoice.invoiceCurrencySnapshot.currencyCode) : ``}
     ${amountTag('LineExtensionAmount', lineExtension, invoice.invoiceCurrencySnapshot.currencyCode)}
     ${amountTag('TaxExclusiveAmount', taxExclusive, invoice.invoiceCurrencySnapshot.currencyCode)}
     ${amountTag('TaxInclusiveAmount', taxInclusive, invoice.invoiceCurrencySnapshot.currencyCode)}
@@ -220,7 +304,8 @@ export function generateUBLInvoiceXML(invoice: Invoice): string {
         getItemTotalAmountCents(item, item.taxType !== InvoiceItemTaxType.inclusive) /
         invoice.invoiceCurrencySnapshot!.currencySubunit;
       const rate = item.taxRate ?? 0;
-      const taxCatId = rate > 0 ? 'S' : 'Z';
+      const taxCatId = hasPerItemTax ? (rate > 0 ? 'S' : 'Z') : getInvoiceTaxCents(invoice) > 0 ? 'S' : 'Z';
+      const linePercent = hasPerItemTax ? decimals(rate) : decimals(invoice.taxRate ?? 0);
 
       if (!item.invoiceItemSnapshot) return '';
       return `
@@ -232,7 +317,7 @@ export function generateUBLInvoiceXML(invoice: Invoice): string {
         <cbc:Name>${xmlEscape(item.invoiceItemSnapshot.itemName)}</cbc:Name>
         <cac:ClassifiedTaxCategory>
           <cbc:ID>${taxCatId}</cbc:ID>
-          <cbc:Percent>${decimals(rate)}</cbc:Percent>
+          <cbc:Percent>${linePercent}</cbc:Percent>
           <cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>
         </cac:ClassifiedTaxCategory>
       </cac:Item>

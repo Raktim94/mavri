@@ -116,6 +116,7 @@
     "noItem": "Selected a client to view details."
   },
   "common": {
+    "buyerReference": "Buyer reference",
     "accountHolder": "Account holder",
     "accountNumber": "Account number",
     "accountNumberInvalid": "Account number must be 4–34 characters and contain only letters, numbers, or hyphens",

@@ -31,7 +31,8 @@ export const ClientsPage: FC = () => {
     'isArchived',
     'peppolEndpointId',
     'countryCode',
-    'peppolEndpointSchemeId'
+    'peppolEndpointSchemeId',
+    'buyerReference'
   ];
   const excelFileName = 'clients';
   const excelTemplateData: Rows = [
@@ -47,7 +48,8 @@ export const ClientsPage: FC = () => {
       isArchived: false,
       peppolEndpointId: '0192',
       countryCode: 'GB',
-      peppolEndpointSchemeId: '123456785'
+      peppolEndpointSchemeId: '123456785',
+      buyerReference: 'Accounting'
     },
     {
       name: 'Jane Smith',
@@ -59,7 +61,8 @@ export const ClientsPage: FC = () => {
       isArchived: false,
       peppolEndpointId: '0192',
       countryCode: 'GB',
-      peppolEndpointSchemeId: '123456785'
+      peppolEndpointSchemeId: '123456785',
+      buyerReference: 'Accounting'
     }
   ];
   const filters: Filter[] = [

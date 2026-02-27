@@ -19,6 +19,7 @@ const clientFields: (keyof Client)[] = [
   'peppolEndpointId',
   'countryCode',
   'peppolEndpointSchemeId',
+  'buyerReference',
   'isArchived'
 ];
 

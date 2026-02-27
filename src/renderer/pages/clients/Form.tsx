@@ -23,6 +23,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, client }) => {
     additional: client?.additional ?? '',
     description: client?.description ?? '',
     peppolEndpointSchemeId: client?.peppolEndpointSchemeId ?? '',
+    buyerReference: client?.buyerReference ?? '',
     peppolEndpointId: client?.peppolEndpointId ?? '',
     countryCode: client?.countryCode ?? '',
     isArchived: client?.isArchived ?? false
@@ -68,6 +69,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, client }) => {
       additional: client?.additional ?? '',
       description: client?.description ?? '',
       peppolEndpointSchemeId: client?.peppolEndpointSchemeId ?? '',
+      buyerReference: client?.buyerReference ?? '',
       peppolEndpointId: client?.peppolEndpointId ?? '',
       countryCode: client?.countryCode ?? '',
       isArchived: client?.isArchived ?? false
@@ -218,6 +220,16 @@ export const Form: FC<Props> = ({ handleChange = () => {}, client }) => {
           onChange={e => {
             update('peppolEndpointSchemeId', e.target.value);
             validateField('peppolEndpointSchemeId', e.target.value);
+          }}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, md: 6 }}>
+        <TextField
+          label={t('common.buyerReference')}
+          fullWidth
+          value={form.buyerReference}
+          onChange={e => {
+            update('buyerReference', e.target.value);
           }}
         />
       </Grid>

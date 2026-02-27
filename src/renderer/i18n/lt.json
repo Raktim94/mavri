@@ -116,6 +116,7 @@
     "noItem": "Pasirinkite klientą, kad pamatytumėte detales."
   },
   "common": {
+    "buyerReference": "Pirkėjo nuoroda",
     "accountHolder": "Sąskaitos savininkas",
     "accountNumber": "Sąskaitos numeris",
     "accountNumberInvalid": "Sąskaitos numeris turi būti 4–34 simbolių ilgio ir gali sudaryti tik raidės, skaičiai arba brūkšneliai.",

@@ -317,6 +317,7 @@ export interface InvoiceClientSnapshots {
   clientPeppolEndpointId?: string;
   clientCountryCode?: string;
   clientPeppolEndpointSchemeId?: string;
+  clientBuyerReference?: string;
 }
 
 export interface InvoiceBusinessSnapshotsMeta {

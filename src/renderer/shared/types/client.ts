@@ -11,6 +11,7 @@ export interface Client {
   peppolEndpointId?: string;
   countryCode?: string;
   peppolEndpointSchemeId?: string;
+  buyerReference?: string;
   invoiceCount: number;
   quotesCount: number;
   createdAt: string;
@@ -31,6 +32,7 @@ export interface ClientAdd {
   peppolEndpointId?: string;
   countryCode?: string;
   peppolEndpointSchemeId?: string;
+  buyerReference?: string;
   description?: string;
   isArchived: boolean;
 }
@@ -52,6 +54,7 @@ export interface ClientFromData {
   peppolEndpointId?: string;
   countryCode?: string;
   peppolEndpointSchemeId?: string;
+  buyerReference?: string;
   description?: string;
   isArchived: boolean;
 }

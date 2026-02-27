@@ -48,7 +48,8 @@ const invoiceClientSnapshotsFields: (keyof InvoiceClientSnapshots)[] = [
   'clientVatCode',
   'clientPeppolEndpointId',
   'clientCountryCode',
-  'clientPeppolEndpointSchemeId'
+  'clientPeppolEndpointSchemeId',
+  'clientBuyerReference'
 ];
 const invoiceBankSnapshotsFields: (keyof InvoiceBankSnapshots)[] = [
   'parentInvoiceId',
@@ -987,6 +988,7 @@ export const duplicateInvoice = async (
       'clientPeppolEndpointId',
       'clientCountryCode',
       'clientPeppolEndpointSchemeId',
+      'clientBuyerReference',
       'clientAdditional'
     ]);
     await duplicateSnapshot('invoice_currency_snapshots', ['currencyCode', 'currencySymbol', 'currencySubunit']);

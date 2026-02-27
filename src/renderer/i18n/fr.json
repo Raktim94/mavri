@@ -116,6 +116,7 @@
     "noItem": "Sélectionnez un client pour afficher les détails."
   },
   "common": {
+    "buyerReference": "Référence acheteur",
     "accountHolder": "Titulaire du compte",
     "accountNumber": "Numéro de compte",
     "accountNumberInvalid": "Le numéro de compte doit contenir 4 à 34 caractères et uniquement des lettres, des chiffres ou des tirets.",

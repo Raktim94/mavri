@@ -10,6 +10,7 @@ export interface Client {
   peppolEndpointId?: string;
   countryCode?: string;
   peppolEndpointSchemeId?: string;
+  buyerReference?: string;
   code?: string;
   description?: string;
   isArchived: boolean;
