@@ -140,105 +140,116 @@ const InvoiceFormComponent: FC<Props> = ({
 
         return {
           ...current,
-          businessId: preset.businessId,
+          businessId: preset.businessId ?? current.businessId,
           invoiceBusinessSnapshot: preset.businessName
             ? {
                 ...current?.invoiceBusinessSnapshot,
                 parentInvoiceId: current?.id,
-                businessName: preset.businessName,
-                businessAddress: preset.businessAddress,
-                businessRole: preset.businessRole,
-                businessShortName: preset.businessShortName!,
-                businessEmail: preset.businessEmail,
-                businessPhone: preset.businessPhone,
-                businessAdditional: preset.businessAdditional,
-                businessLogo: preset.businessLogo,
-                businessFileSize: preset.businessFileSize,
-                businessFileType: preset.businessFileType,
-                businessFileName: preset.businessFileName,
-                businessVatCode: preset.businessVatCode
+                businessName: preset.businessName ?? current.invoiceBusinessSnapshot?.businessName,
+                businessAddress: preset.businessAddress ?? current.invoiceBusinessSnapshot?.businessAddress,
+                businessRole: preset.businessRole ?? current.invoiceBusinessSnapshot?.businessRole,
+                businessShortName: preset.businessShortName! ?? current.invoiceBusinessSnapshot?.businessShortName,
+                businessEmail: preset.businessEmail ?? current.invoiceBusinessSnapshot?.businessEmail,
+                businessPhone: preset.businessPhone ?? current.invoiceBusinessSnapshot?.businessPhone,
+                businessAdditional: preset.businessAdditional ?? current.invoiceBusinessSnapshot?.businessAdditional,
+                businessLogo: preset.businessLogo ?? current.invoiceBusinessSnapshot?.businessLogo,
+                businessFileSize: preset.businessFileSize ?? current.invoiceBusinessSnapshot?.businessFileSize,
+                businessFileType: preset.businessFileType ?? current.invoiceBusinessSnapshot?.businessFileType,
+                businessFileName: preset.businessFileName ?? current.invoiceBusinessSnapshot?.businessFileName,
+                businessVatCode: preset.businessVatCode ?? current.invoiceBusinessSnapshot?.businessVatCode
               }
             : undefined,
-          clientId: preset.clientId,
+          clientId: preset.clientId ?? current.clientId,
           invoiceClientSnapshot: preset.clientName
             ? {
                 ...current?.invoiceClientSnapshot,
                 parentInvoiceId: current?.id,
-                clientName: preset.clientName,
-                clientAddress: preset.clientAddress,
-                clientEmail: preset.clientEmail,
-                clientPhone: preset.clientPhone,
-                clientCode: preset.clientCode,
-                clientAdditional: preset.clientAdditional,
-                clientVatCode: preset.clientVatCode
+                clientName: preset.clientName ?? current.invoiceClientSnapshot?.clientName,
+                clientAddress: preset.clientAddress ?? current.invoiceClientSnapshot?.clientAddress,
+                clientEmail: preset.clientEmail ?? current.invoiceClientSnapshot?.clientEmail,
+                clientPhone: preset.clientPhone ?? current.invoiceClientSnapshot?.clientPhone,
+                clientCode: preset.clientCode ?? current.invoiceClientSnapshot?.clientCode,
+                clientAdditional: preset.clientAdditional ?? current.invoiceClientSnapshot?.clientAdditional,
+                clientVatCode: preset.clientVatCode ?? current.invoiceClientSnapshot?.clientVatCode
               }
             : undefined,
-          bankId: preset.bankId,
+          bankId: preset.bankId ?? current.bankId,
           invoiceBankSnapshot: preset.bankLabel
             ? {
                 ...current?.invoiceBankSnapshot,
                 parentInvoiceId: current?.id,
-                name: preset.bankLabel,
-                bankName: preset.bankName,
-                accountNumber: preset.accountNumber,
-                swiftCode: preset.swiftCode,
-                address: preset.address,
-                branchCode: preset.branchCode,
-                type: preset.type,
-                routingNumber: preset.routingNumber,
-                sortOrder: preset.sortOrder,
-                accountHolder: preset.accountHolder,
-                qrCode: preset.qrCode,
-                qrCodeFileSize: preset.qrCodeFileSize,
-                qrCodeFileType: preset.qrCodeFileType,
-                qrCodeFileName: preset.qrCodeFileName
+                name: preset.bankLabel ?? current.invoiceBankSnapshot?.name,
+                bankName: preset.bankName ?? current.invoiceBankSnapshot?.bankName,
+                accountNumber: preset.accountNumber ?? current.invoiceBankSnapshot?.accountNumber,
+                swiftCode: preset.swiftCode ?? current.invoiceBankSnapshot?.swiftCode,
+                address: preset.address ?? current.invoiceBankSnapshot?.address,
+                branchCode: preset.branchCode ?? current.invoiceBankSnapshot?.branchCode,
+                type: preset.type ?? current.invoiceBankSnapshot?.type,
+                routingNumber: preset.routingNumber ?? current.invoiceBankSnapshot?.routingNumber,
+                sortOrder: preset.sortOrder ?? current.invoiceBankSnapshot?.sortOrder,
+                accountHolder: preset.accountHolder ?? current.invoiceBankSnapshot?.accountHolder,
+                qrCode: preset.qrCode ?? current.invoiceBankSnapshot?.qrCode,
+                qrCodeFileSize: preset.qrCodeFileSize ?? current.invoiceBankSnapshot?.qrCodeFileSize,
+                qrCodeFileType: preset.qrCodeFileType ?? current.invoiceBankSnapshot?.qrCodeFileType,
+                qrCodeFileName: preset.qrCodeFileName ?? current.invoiceBankSnapshot?.qrCodeFileName
               }
             : undefined,
-          currencyFormat: preset.currencyFormat,
-          currencyId: preset.currencyId,
+          currencyFormat: preset.currencyFormat ?? current.currencyFormat,
+          currencyId: preset.currencyId ?? current.currencyId,
           invoiceCurrencySnapshot: preset.currencyCode
             ? {
                 ...current?.invoiceCurrencySnapshot,
                 parentInvoiceId: current.id,
-                currencyCode: preset.currencyCode,
-                currencySymbol: preset.currencySymbol!,
-                currencySubunit: preset.currencySubunit!
+                currencyCode: preset.currencyCode ?? current.invoiceCurrencySnapshot?.currencyCode,
+                currencySymbol: preset.currencySymbol! ?? current.invoiceCurrencySnapshot?.currencySymbol,
+                currencySubunit: preset.currencySubunit! ?? current.invoiceCurrencySnapshot?.currencySubunit
               }
             : undefined,
-          styleProfilesId: preset.styleProfilesId,
+          styleProfilesId: preset.styleProfilesId ?? current.styleProfilesId,
           invoiceStyleProfileSnapshot: preset.styleProfileName
             ? {
                 ...current?.invoiceStyleProfileSnapshot,
                 parentInvoiceId: current.id,
-                styleProfileName: preset.styleProfileName
+                styleProfileName: preset.styleProfileName ?? current.invoiceStyleProfileSnapshot?.styleProfileName
               }
             : undefined,
           invoiceCustomization: preset.styleProfileName
             ? {
                 ...current?.invoiceCustomization,
                 parentInvoiceId: current.id,
-                color: preset.styleProfileColor,
-                logoSize: preset.styleProfileLogoSize,
-                fontSize: preset.styleProfileFontSize,
-                fontFamily: preset.styleProfileFontFamily,
-                layout: preset.styleProfileLayout,
-                tableHeaderStyle: preset.styleProfileTableHeaderStyle,
-                tableRowStyle: preset.styleProfileTableRowStyle,
-                pageFormat: preset.styleProfilePageFormat,
-                labelUpperCase: preset.styleProfileLabelUpperCase,
-                watermarkFileName: preset.styleProfileWatermarkFileName,
-                watermarkFileType: preset.styleProfileWatermarkFileType,
-                watermarkFileSize: preset.styleProfileWatermarkFileSize,
-                watermarkFileData: preset.styleProfileWatermarkFileData,
-                paidWatermarkFileName: preset.styleProfilePaidWatermarkFileName,
-                paidWatermarkFileType: preset.styleProfilePaidWatermarkFileType,
-                paidWatermarkFileSize: preset.styleProfilePaidWatermarkFileSize,
-                paidWatermarkFileData: preset.styleProfilePaidWatermarkFileData,
-                showQuantity: preset.styleProfileShowQuantity,
-                showUnit: preset.styleProfileShowUnit,
-                showRowNo: preset.styleProfileShowRowNo,
-                fieldSortOrders: preset.styleProfileFieldSortOrders ?? DEFAULT_TABLE_FIELD_SORT_ORDERS,
-                pdfTexts: preset.styleProfilePdfTexts
+                color: preset.styleProfileColor ?? current.invoiceCustomization?.color,
+                logoSize: preset.styleProfileLogoSize ?? current.invoiceCustomization?.logoSize,
+                fontSize: preset.styleProfileFontSize ?? current.invoiceCustomization?.fontSize,
+                fontFamily: preset.styleProfileFontFamily ?? current.invoiceCustomization?.fontFamily,
+                layout: preset.styleProfileLayout ?? current.invoiceCustomization?.layout,
+                tableHeaderStyle: preset.styleProfileTableHeaderStyle ?? current.invoiceCustomization?.tableHeaderStyle,
+                tableRowStyle: preset.styleProfileTableRowStyle ?? current.invoiceCustomization?.tableRowStyle,
+                pageFormat: preset.styleProfilePageFormat ?? current.invoiceCustomization?.pageFormat,
+                labelUpperCase: preset.styleProfileLabelUpperCase ?? current.invoiceCustomization?.labelUpperCase,
+                watermarkFileName:
+                  preset.styleProfileWatermarkFileName ?? current.invoiceCustomization?.watermarkFileName,
+                watermarkFileType:
+                  preset.styleProfileWatermarkFileType ?? current.invoiceCustomization?.watermarkFileType,
+                watermarkFileSize:
+                  preset.styleProfileWatermarkFileSize ?? current.invoiceCustomization?.watermarkFileSize,
+                watermarkFileData:
+                  preset.styleProfileWatermarkFileData ?? current.invoiceCustomization?.watermarkFileData,
+                paidWatermarkFileName:
+                  preset.styleProfilePaidWatermarkFileName ?? current.invoiceCustomization?.paidWatermarkFileName,
+                paidWatermarkFileType:
+                  preset.styleProfilePaidWatermarkFileType ?? current.invoiceCustomization?.paidWatermarkFileType,
+                paidWatermarkFileSize:
+                  preset.styleProfilePaidWatermarkFileSize ?? current.invoiceCustomization?.paidWatermarkFileSize,
+                paidWatermarkFileData:
+                  preset.styleProfilePaidWatermarkFileData ?? current.invoiceCustomization?.paidWatermarkFileData,
+                showQuantity: preset.styleProfileShowQuantity ?? current.invoiceCustomization?.showQuantity,
+                showUnit: preset.styleProfileShowUnit ?? current.invoiceCustomization?.showUnit,
+                showRowNo: preset.styleProfileShowRowNo ?? current.invoiceCustomization?.showRowNo,
+                fieldSortOrders:
+                  preset.styleProfileFieldSortOrders ??
+                  current.invoiceCustomization?.fieldSortOrders ??
+                  DEFAULT_TABLE_FIELD_SORT_ORDERS,
+                pdfTexts: preset.styleProfilePdfTexts ?? current.invoiceCustomization?.pdfTexts
               }
             : undefined,
           customerNotes: preset.customerNotes ?? current.customerNotes,
