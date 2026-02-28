@@ -6,6 +6,12 @@ New features & improvements
 
 - Official Docker prebuilt image published
 
+## 2026-02-28, version 2.2.1
+
+Bug Fixes
+
+- Fixed an issue that could prevent invoice creation when using presets that include a style profile without a default font family set
+
 ## 2026-02-23, version 2.2.0
 
 New features & improvements
