@@ -7,7 +7,6 @@
 // https://peppolvalidator.com/
 
 import { DateFormat } from '../../enums/dateFormat';
-import { InvoiceItemTaxType } from '../../enums/taxType';
 import type { Invoice } from '../../types/invoice';
 import { formatDate, formatXml, splitAddress, xmlEscape } from './helperFunctions';
 import {
@@ -15,7 +14,6 @@ import {
   getDiscountAmountCents,
   getInvoiceItemTaxCents,
   getInvoiceTaxCents,
-  getItemTotalAmountCents,
   getItemTotalAmountCentsBeforeTaxCents,
   getTotalAmountBeforeTaxCents,
   getTotalAmountCents,
@@ -31,6 +29,94 @@ const decimals2 = (n: number): string => {
 };
 const decimals4 = (n: number): string => {
   return (Math.round(n * 10000) / 10000).toFixed(4);
+};
+
+const getXMLShippingTaxTotal = (invoice: Invoice) => {
+  const shippingAmount = Number(invoice.shippingFeeCents) / invoice.invoiceCurrencySnapshot!.currencySubunit;
+  const taxTotalXML = `
+        ${
+          shippingAmount > 0
+            ? `
+                <cac:TaxSubtotal>
+                  <cbc:TaxableAmount currencyID="${xmlEscape(invoice.invoiceCurrencySnapshot!.currencyCode)}">${shippingAmount}</cbc:TaxableAmount>
+                  <cbc:TaxAmount currencyID="${xmlEscape(invoice.invoiceCurrencySnapshot!.currencyCode)}">0.00</cbc:TaxAmount>
+                  <cac:TaxCategory>
+                    <cbc:ID>Z</cbc:ID>
+                    <cbc:Percent>0.00</cbc:Percent>
+                    <cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>
+                  </cac:TaxCategory>
+                </cac:TaxSubtotal>
+              `
+            : ``
+        }`;
+  return taxTotalXML;
+};
+
+const getXMLInvoiceTaxTotal = (invoice: Invoice) => {
+  const taxableAmount = getTotalAmountBeforeTaxCents(invoice) / invoice.invoiceCurrencySnapshot!.currencySubunit;
+  const taxAmount = getInvoiceTaxCents(invoice) / invoice.invoiceCurrencySnapshot!.currencySubunit;
+  const rate = invoice.taxRate ?? 0;
+  const shippingTotalTax = getXMLShippingTaxTotal(invoice);
+  const taxTotalXML = `
+      <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="${xmlEscape(invoice.invoiceCurrencySnapshot!.currencyCode)}">${decimals2(taxAmount)}</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+          <cbc:TaxableAmount currencyID="${xmlEscape(invoice.invoiceCurrencySnapshot!.currencyCode)}">${decimals2(taxableAmount)}</cbc:TaxableAmount>
+          <cbc:TaxAmount currencyID="${xmlEscape(invoice.invoiceCurrencySnapshot!.currencyCode)}">${decimals2(taxAmount)}</cbc:TaxAmount>
+          <cac:TaxCategory>
+            <cbc:ID>${Math.abs(taxAmount) > 0 ? 'S' : 'Z'}</cbc:ID>
+            <cbc:Percent>${decimals2(rate)}</cbc:Percent>
+            <cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>
+          </cac:TaxCategory>
+        </cac:TaxSubtotal>
+        ${shippingTotalTax}
+      </cac:TaxTotal>`;
+  return taxTotalXML;
+};
+
+const getXMLInvoiceItemTaxTotal = (invoice: Invoice) => {
+  const taxSubtotals = invoice.invoiceItems.reduce((acc: Record<number, { taxable: number; tax: number }>, item) => {
+    const rate = item.taxRate ?? 0;
+    const taxable =
+      getItemTotalAmountCentsBeforeTaxCents(item, {
+        taxRate: invoice.taxRate,
+        taxType: invoice.taxType
+      }) / invoice.invoiceCurrencySnapshot!.currencySubunit;
+    const tax = getInvoiceItemTaxCents(item) / invoice.invoiceCurrencySnapshot!.currencySubunit;
+
+    if (!acc[rate]) acc[rate] = { taxable: 0, tax: 0 };
+    acc[rate].taxable += taxable;
+    acc[rate].tax += tax;
+
+    return acc;
+  }, {});
+
+  const subtotalsXML = Object.entries(taxSubtotals)
+    .map(
+      ([rate, values]) => `
+        <cac:TaxSubtotal>
+          <cbc:TaxableAmount currencyID="${xmlEscape(invoice.invoiceCurrencySnapshot!.currencyCode)}">${decimals2(values.taxable)}</cbc:TaxableAmount>
+          <cbc:TaxAmount currencyID="${xmlEscape(invoice.invoiceCurrencySnapshot!.currencyCode)}">${decimals2(values.tax)}</cbc:TaxAmount>
+          <cac:TaxCategory>
+            <cbc:ID>${values.tax > 0 ? 'S' : 'Z'}</cbc:ID>
+            <cbc:Percent>${decimals2(Number(rate))}</cbc:Percent>
+            <cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>
+          </cac:TaxCategory>
+        </cac:TaxSubtotal>
+      `
+    )
+    .join('');
+
+  const totalTax = Object.values(taxSubtotals).reduce((sum, s) => sum + s.tax, 0);
+  const shippingTotalTax = getXMLShippingTaxTotal(invoice);
+
+  const taxTotalXML = `
+      <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="${xmlEscape(invoice.invoiceCurrencySnapshot!.currencyCode)}">${decimals2(totalTax)}</cbc:TaxAmount>
+        ${subtotalsXML}
+        ${shippingTotalTax}
+      </cac:TaxTotal>`;
+  return taxTotalXML;
 };
 
 const getXMLHeader = (invoice: Invoice) => {
@@ -185,6 +271,87 @@ const getXMLPaymentMeans = (invoice: Invoice) => {
   return paymentMeans;
 };
 
+const getXMLLegalMonetaryTotal = (invoice: Invoice) => {
+  const discountAmount = getDiscountAmountCents(invoice) / invoice.invoiceCurrencySnapshot!.currencySubunit;
+  const shippingAmount = Number(invoice.shippingFeeCents) / invoice.invoiceCurrencySnapshot!.currencySubunit;
+
+  const lineExtension =
+    getTotalAmountBeforeTaxCents(invoice, { reduceDiscount: false }) / invoice.invoiceCurrencySnapshot!.currencySubunit;
+  const taxExclusive =
+    getTotalAmountBeforeTaxCents(invoice) / invoice.invoiceCurrencySnapshot!.currencySubunit + shippingAmount;
+  const taxInclusive = getTotalAmountCents(invoice) / invoice.invoiceCurrencySnapshot!.currencySubunit;
+  const prepaid = getTotalAmountPaidCents(invoice.invoicePayments) / invoice.invoiceCurrencySnapshot!.currencySubunit;
+  const payable = getBalanceDueCents(invoice) / invoice.invoiceCurrencySnapshot!.currencySubunit;
+
+  const legalMonetaryTotal = `
+  <cac:LegalMonetaryTotal>
+    ${discountAmount > 0 ? amountTag('AllowanceTotalAmount', discountAmount, invoice.invoiceCurrencySnapshot!.currencyCode) : ``}
+    ${shippingAmount > 0 ? amountTag('ChargeTotalAmount', shippingAmount, invoice.invoiceCurrencySnapshot!.currencyCode) : ``}
+    ${amountTag('LineExtensionAmount', lineExtension, invoice.invoiceCurrencySnapshot!.currencyCode)}
+    ${amountTag('TaxExclusiveAmount', taxExclusive, invoice.invoiceCurrencySnapshot!.currencyCode)}
+    ${amountTag('TaxInclusiveAmount', taxInclusive, invoice.invoiceCurrencySnapshot!.currencyCode)}
+    ${prepaid > 0 ? amountTag('PrepaidAmount', prepaid, invoice.invoiceCurrencySnapshot!.currencyCode) : ''}
+    ${amountTag('PayableAmount', payable, invoice.invoiceCurrencySnapshot!.currencyCode)}
+  </cac:LegalMonetaryTotal>`;
+
+  return legalMonetaryTotal;
+};
+
+const getXMLLines = (invoice: Invoice, hasPerItemTax: boolean) => {
+  const rawLineNets = invoice.invoiceItems.map(item => {
+    const raw = getItemTotalAmountCentsBeforeTaxCents(item, {
+      taxRate: invoice.taxRate,
+      taxType: invoice.taxType
+    });
+
+    return Math.trunc(raw);
+  });
+
+  const invoiceNetCents = getTotalAmountBeforeTaxCents(invoice, { reduceDiscount: false });
+  const sumRaw = rawLineNets.reduce((a, b) => a + b, 0);
+  const diff = invoiceNetCents - sumRaw;
+
+  if (diff !== 0) {
+    rawLineNets[rawLineNets.length - 1] += diff;
+  }
+
+  const linesXML = invoice.invoiceItems
+    .map((item, idx) => {
+      const lineTotal = rawLineNets[idx] / invoice.invoiceCurrencySnapshot!.currencySubunit;
+      const quantity = Number(item.quantity);
+      const unitPrice = lineTotal / quantity;
+      const invoiceTaxAmount = getInvoiceTaxCents(invoice);
+
+      const rate = item.taxRate ?? 0;
+      const taxCatId = hasPerItemTax ? (rate > 0 ? 'S' : 'Z') : Math.abs(invoiceTaxAmount) > 0 ? 'S' : 'Z';
+
+      const linePercent = hasPerItemTax ? decimals2(rate) : decimals2(invoice.taxRate ?? 0);
+
+      return `
+        <cac:InvoiceLine>
+          <cbc:ID>${idx + 1}</cbc:ID>
+          <cbc:InvoicedQuantity unitCode="EA">${decimals2(quantity)}</cbc:InvoicedQuantity>
+          <cbc:LineExtensionAmount currencyID="${xmlEscape(invoice.invoiceCurrencySnapshot!.currencyCode)}">${decimals2(lineTotal)}</cbc:LineExtensionAmount>
+          <cac:Item>
+            <cbc:Name>${xmlEscape(item.invoiceItemSnapshot!.itemName)}</cbc:Name>
+            <cac:ClassifiedTaxCategory>
+              <cbc:ID>${taxCatId}</cbc:ID>
+              <cbc:Percent>${linePercent}</cbc:Percent>
+              <cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>
+            </cac:ClassifiedTaxCategory>
+          </cac:Item>
+          <cac:Price>
+            <cbc:PriceAmount currencyID="${xmlEscape(invoice.invoiceCurrencySnapshot!.currencyCode)}">
+              ${decimals4(unitPrice)}
+            </cbc:PriceAmount>
+          </cac:Price>
+        </cac:InvoiceLine>`;
+    })
+    .join('');
+
+  return linesXML;
+};
+
 export function generateUBLInvoiceXML(invoice: Invoice): string {
   if (!invoice.invoiceCurrencySnapshot || !invoice.invoiceBusinessSnapshot || !invoice.invoiceClientSnapshot)
     throw new Error('Invoice is not supported for UBL 2.1 XML compliant with PEPPOL BIS Billing 3.0');
@@ -215,150 +382,14 @@ export function generateUBLInvoiceXML(invoice: Invoice): string {
       'Invoice is not supported for UBL 2.1 XML compliant with PEPPOL BIS Billing 3.0. Invoice is missing country for business'
     );
 
-  const discountAmount = getDiscountAmountCents(invoice) / invoice.invoiceCurrencySnapshot!.currencySubunit;
-  const shippingAmount = Number(invoice.shippingFeeCents) / invoice.invoiceCurrencySnapshot!.currencySubunit;
-
   const hasPerItemTax = invoice.invoiceItems?.some(item => !!item.taxType);
   let taxTotalXML = '';
   if (hasPerItemTax) {
-    const taxSubtotals = invoice.invoiceItems.reduce((acc: Record<number, { taxable: number; tax: number }>, item) => {
-      const rate = item.taxRate ?? 0;
-      const taxable =
-        getItemTotalAmountCents(item, item.taxType !== InvoiceItemTaxType.inclusive) /
-        invoice.invoiceCurrencySnapshot!.currencySubunit;
-      const tax = getInvoiceItemTaxCents(item) / invoice.invoiceCurrencySnapshot!.currencySubunit;
-
-      if (!acc[rate]) acc[rate] = { taxable: 0, tax: 0 };
-      acc[rate].taxable += taxable;
-      acc[rate].tax += tax;
-
-      return acc;
-    }, {});
-
-    const subtotalsXML = Object.entries(taxSubtotals)
-      .map(
-        ([rate, values]) => `
-    <cac:TaxSubtotal>
-      <cbc:TaxableAmount currencyID="${xmlEscape(invoice.invoiceCurrencySnapshot!.currencyCode)}">${decimals2(values.taxable)}</cbc:TaxableAmount>
-      <cbc:TaxAmount currencyID="${xmlEscape(invoice.invoiceCurrencySnapshot!.currencyCode)}">${decimals2(values.tax)}</cbc:TaxAmount>
-      <cac:TaxCategory>
-        <cbc:ID>${values.tax > 0 ? 'S' : 'Z'}</cbc:ID>
-        <cbc:Percent>${decimals2(Number(rate))}</cbc:Percent>
-        <cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>
-      </cac:TaxCategory>
-    </cac:TaxSubtotal>`
-      )
-      .join('');
-
-    const totalTax = Object.values(taxSubtotals).reduce((sum, s) => sum + s.tax, 0);
-
-    taxTotalXML = `
-  <cac:TaxTotal>
-    <cbc:TaxAmount currencyID="${xmlEscape(invoice.invoiceCurrencySnapshot.currencyCode)}">${decimals2(totalTax)}</cbc:TaxAmount>
-    ${subtotalsXML}
-  </cac:TaxTotal>`;
+    taxTotalXML = getXMLInvoiceItemTaxTotal(invoice);
   } else if (invoice.taxType) {
-    const taxableAmount = getTotalAmountBeforeTaxCents(invoice) / invoice.invoiceCurrencySnapshot!.currencySubunit;
-    const taxAmount = getInvoiceTaxCents(invoice) / invoice.invoiceCurrencySnapshot!.currencySubunit;
-    const rate = invoice.taxRate ?? 0;
-
-    taxTotalXML = `
-  <cac:TaxTotal>
-    <cbc:TaxAmount currencyID="${xmlEscape(invoice.invoiceCurrencySnapshot.currencyCode)}">${decimals2(taxAmount)}</cbc:TaxAmount>
-    <cac:TaxSubtotal>
-      <cbc:TaxableAmount currencyID="${xmlEscape(invoice.invoiceCurrencySnapshot.currencyCode)}">${decimals2(taxableAmount)}</cbc:TaxableAmount>
-      <cbc:TaxAmount currencyID="${xmlEscape(invoice.invoiceCurrencySnapshot.currencyCode)}">${decimals2(taxAmount)}</cbc:TaxAmount>
-      <cac:TaxCategory>
-        <cbc:ID>${taxAmount > 0 ? 'S' : 'Z'}</cbc:ID>
-        <cbc:Percent>${decimals2(rate)}</cbc:Percent>
-        <cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>
-      </cac:TaxCategory>
-    </cac:TaxSubtotal>
-     ${
-       shippingAmount > 0
-         ? `
-            <cac:TaxSubtotal>
-              <cbc:TaxableAmount currencyID="${xmlEscape(invoice.invoiceCurrencySnapshot.currencyCode)}">${shippingAmount}</cbc:TaxableAmount>
-              <cbc:TaxAmount currencyID="${xmlEscape(invoice.invoiceCurrencySnapshot.currencyCode)}">0.00</cbc:TaxAmount>
-              <cac:TaxCategory>
-                <cbc:ID>Z</cbc:ID>
-                <cbc:Percent>0.00</cbc:Percent>
-                <cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>
-              </cac:TaxCategory>
-            </cac:TaxSubtotal>
-          `
-         : ``
-     }
-  </cac:TaxTotal>`;
+    taxTotalXML = getXMLInvoiceTaxTotal(invoice);
   }
-
   const taxTotal = taxTotalXML;
-  const lineExtension = getTotalAmountBeforeTaxCents(invoice, false) / invoice.invoiceCurrencySnapshot!.currencySubunit;
-  const taxExclusive =
-    getTotalAmountBeforeTaxCents(invoice) / invoice.invoiceCurrencySnapshot!.currencySubunit + shippingAmount;
-  const taxInclusive = getTotalAmountCents(invoice) / invoice.invoiceCurrencySnapshot!.currencySubunit;
-  const prepaid = getTotalAmountPaidCents(invoice.invoicePayments) / invoice.invoiceCurrencySnapshot!.currencySubunit;
-  const payable = getBalanceDueCents(invoice) / invoice.invoiceCurrencySnapshot!.currencySubunit;
-
-  const legalMonetaryTotal = `
-  <cac:LegalMonetaryTotal>
-    ${discountAmount > 0 ? amountTag('AllowanceTotalAmount', discountAmount, invoice.invoiceCurrencySnapshot.currencyCode) : ``}
-    ${shippingAmount > 0 ? amountTag('ChargeTotalAmount', shippingAmount, invoice.invoiceCurrencySnapshot.currencyCode) : ``}
-    ${amountTag('LineExtensionAmount', lineExtension, invoice.invoiceCurrencySnapshot.currencyCode)}
-    ${amountTag('TaxExclusiveAmount', taxExclusive, invoice.invoiceCurrencySnapshot.currencyCode)}
-    ${amountTag('TaxInclusiveAmount', taxInclusive, invoice.invoiceCurrencySnapshot.currencyCode)}
-    ${prepaid > 0 ? amountTag('PrepaidAmount', prepaid, invoice.invoiceCurrencySnapshot.currencyCode) : ''}
-    ${amountTag('PayableAmount', payable, invoice.invoiceCurrencySnapshot.currencyCode)}
-  </cac:LegalMonetaryTotal>`;
-
-  const rawLineNets = invoice.invoiceItems.map(item => {
-    const raw = getItemTotalAmountCentsBeforeTaxCents(item, {
-      taxRate: invoice.taxRate,
-      taxType: invoice.taxType
-    });
-
-    return Math.trunc(raw);
-  });
-
-  const invoiceNetCents = getTotalAmountBeforeTaxCents(invoice, false);
-  const sumRaw = rawLineNets.reduce((a, b) => a + b, 0);
-  const diff = invoiceNetCents - sumRaw;
-
-  if (diff !== 0) {
-    rawLineNets[rawLineNets.length - 1] += diff;
-  }
-  const lines = invoice.invoiceItems
-    .map((item, idx) => {
-      const lineTotal = rawLineNets[idx] / invoice.invoiceCurrencySnapshot!.currencySubunit;
-      const quantity = Number(item.quantity);
-      const unitPrice = lineTotal / quantity;
-
-      const rate = item.taxRate ?? 0;
-      const taxCatId = hasPerItemTax ? (rate > 0 ? 'S' : 'Z') : getInvoiceTaxCents(invoice) > 0 ? 'S' : 'Z';
-
-      const linePercent = hasPerItemTax ? decimals2(rate) : decimals2(invoice.taxRate ?? 0);
-
-      return `
-    <cac:InvoiceLine>
-      <cbc:ID>${idx + 1}</cbc:ID>
-      <cbc:InvoicedQuantity unitCode="EA">${decimals2(quantity)}</cbc:InvoicedQuantity>
-      <cbc:LineExtensionAmount currencyID="${xmlEscape(invoice.invoiceCurrencySnapshot!.currencyCode)}">${decimals2(lineTotal)}</cbc:LineExtensionAmount>
-      <cac:Item>
-        <cbc:Name>${xmlEscape(item.invoiceItemSnapshot!.itemName)}</cbc:Name>
-        <cac:ClassifiedTaxCategory>
-          <cbc:ID>${taxCatId}</cbc:ID>
-          <cbc:Percent>${linePercent}</cbc:Percent>
-          <cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>
-        </cac:ClassifiedTaxCategory>
-      </cac:Item>
-      <cac:Price>
-        <cbc:PriceAmount currencyID="${xmlEscape(invoice.invoiceCurrencySnapshot!.currencyCode)}">
-          ${decimals4(unitPrice)}
-        </cbc:PriceAmount>
-      </cac:Price>
-    </cac:InvoiceLine>`;
-    })
-    .join('');
 
   const raw = `<?xml version="1.0" encoding="UTF-8"?>
       <Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
@@ -370,8 +401,8 @@ export function generateUBLInvoiceXML(invoice: Invoice): string {
         ${getXMLBuyer(invoice)}
         ${getXMLPaymentMeans(invoice)}
         ${taxTotal}
-        ${legalMonetaryTotal}
-        ${lines}
+        ${getXMLLegalMonetaryTotal(invoice)}
+        ${getXMLLines(invoice, hasPerItemTax)}
       </Invoice>`;
 
   return formatXml(raw);

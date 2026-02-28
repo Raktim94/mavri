@@ -13,12 +13,6 @@ export const getDiscountAmountCents = (invoice: Invoice): number => {
   return (subTotalCents * invoice.discountPercent) / 100;
 };
 
-export const getSubTotalAmountCents = (invoiceItems: InvoiceItem[], includeTax: boolean = true): number => {
-  if (!invoiceItems || invoiceItems.length === 0) return 0;
-
-  return invoiceItems.reduce((sum, item) => sum + getItemTotalAmountCents(item, includeTax), 0);
-};
-
 export const getTotalAmountPaidCents = (invoicePayments: InvoicePayment[]): number => {
   if (!invoicePayments || invoicePayments.length === 0) {
     return 0;
@@ -26,19 +20,6 @@ export const getTotalAmountPaidCents = (invoicePayments: InvoicePayment[]): numb
 
   const totalCents = invoicePayments.reduce((sum, p) => sum + Number(p.amountCents), 0);
   return totalCents;
-};
-
-export const getItemTotalAmountCents = (invoiceItem: InvoiceItem, includeTax: boolean = true): number => {
-  const amountCents = getInvoiceItemAmountCents(invoiceItem);
-
-  if (includeTax) {
-    const taxAmountCents = getInvoiceItemTaxCents(invoiceItem);
-    if (invoiceItem.taxType !== InvoiceItemTaxType.inclusive) return amountCents + taxAmountCents;
-
-    return amountCents;
-  }
-
-  return amountCents;
 };
 
 export const getItemTotalAmountCentsBeforeTaxCents = (
@@ -63,15 +44,18 @@ export const getItemTotalAmountCentsBeforeTaxCents = (
   return amountCents;
 };
 
-export const getTotalAmountBeforeTaxCents = (invoice: Invoice, reduceDiscount: boolean = true): number => {
-  const amountCents = reduceDiscount
-    ? getTotalAmountAfterDiscountCents(invoice)
-    : getSubTotalAmountCents(invoice.invoiceItems, false);
+export const getTotalAmountBeforeTaxCents = (
+  invoice: Invoice,
+  options?: { taxRate?: number; taxType?: InvoiceTaxType | undefined; reduceDiscount: boolean }
+): number => {
+  const { taxRate = 0, taxType, reduceDiscount = true } = options ?? {};
+  const amountCents = getSubTotalAmountCentsBeforeTaxCents(invoice.invoiceItems, { taxRate, taxType });
+  const discountCents = reduceDiscount ? getDiscountAmountCents(invoice) : 0;
+
   const taxAmountCents = getInvoiceTaxCents(invoice);
+  if (invoice.taxType === InvoiceTaxType.inclusive) return amountCents - taxAmountCents - discountCents;
 
-  if (invoice.taxType === InvoiceTaxType.inclusive) return amountCents - taxAmountCents;
-
-  return amountCents;
+  return amountCents - discountCents;
 };
 
 export const getTotalAmountCents = (invoice: Invoice): number => {
@@ -99,6 +83,15 @@ export const getInvoiceTaxCents = (invoice: Invoice): number => {
 export const getInvoiceItemTaxCents = (invoiceItem: InvoiceItem): number => {
   const amountCents = getInvoiceItemAmountCents(invoiceItem);
   return getUnitTax({ unitPrice: amountCents, taxType: invoiceItem.taxType, taxRate: invoiceItem.taxRate });
+};
+
+const getSubTotalAmountCentsBeforeTaxCents = (
+  invoiceItems: InvoiceItem[],
+  invoiceTaxInfo: { taxRate: number; taxType: InvoiceTaxType | undefined }
+): number => {
+  if (!invoiceItems || invoiceItems.length === 0) return 0;
+
+  return invoiceItems.reduce((sum, item) => sum + getItemTotalAmountCentsBeforeTaxCents(item, invoiceTaxInfo), 0);
 };
 
 const getInvoiceItemAmountCents = (invoiceItem: InvoiceItem): number => {
@@ -151,4 +144,23 @@ const getInvoiceTax = (data: { unitPrice: number; taxType?: InvoiceTaxType; taxR
   }
 
   return 0;
+};
+
+const getSubTotalAmountCents = (invoiceItems: InvoiceItem[], includeTax: boolean = true): number => {
+  if (!invoiceItems || invoiceItems.length === 0) return 0;
+
+  return invoiceItems.reduce((sum, item) => sum + getItemTotalAmountCents(item, includeTax), 0);
+};
+
+const getItemTotalAmountCents = (invoiceItem: InvoiceItem, includeTax: boolean = true): number => {
+  const amountCents = getInvoiceItemAmountCents(invoiceItem);
+
+  if (includeTax) {
+    const taxAmountCents = getInvoiceItemTaxCents(invoiceItem);
+    if (invoiceItem.taxType !== InvoiceItemTaxType.inclusive) return amountCents + taxAmountCents;
+
+    return amountCents;
+  }
+
+  return amountCents;
 };
