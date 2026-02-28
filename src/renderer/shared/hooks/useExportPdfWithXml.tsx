@@ -1,19 +1,9 @@
-import { pdf } from '@react-pdf/renderer';
 import { PDFDocument as PdfLibDocument } from 'pdf-lib';
 import { useCallback, useMemo } from 'react';
-import { PDFDocument } from '../../pages/invoices/Preview/PDFDocument';
 import type { EInvoice } from '../enums/einvoice';
 import type { InvoiceFromData } from '../types/invoice';
 import type { Settings } from '../types/settings';
-import {
-  getAttachmentsUrl,
-  getLogoUrl,
-  getPDFFilename,
-  getQRCodeUrls,
-  getSignatureUrls,
-  getWatermarkPaidUrl,
-  getWatermarkUrl
-} from './useExportPdf';
+import { createPdfBlob, getPDFFilename } from './useExportPdf';
 import { getXMLFilename } from './useExportXML';
 import { usePdfTexts } from './usePdfTexts';
 
@@ -38,26 +28,7 @@ export const useExportPdfWithXml = (data: { invoiceForm?: InvoiceFromData; store
     async (xml: Uint8Array, einvoice: EInvoice) => {
       if (!invoiceForm || !storeSettings) return;
 
-      const logoUrl = await getLogoUrl(invoiceForm);
-      const attachmentUrls = await getAttachmentsUrl(invoiceForm);
-      const watermarkUrl = await getWatermarkUrl(invoiceForm);
-      const watermarkPaidUrl = await getWatermarkPaidUrl(invoiceForm);
-      const signatureUrl = await getSignatureUrls(invoiceForm);
-      const qrCodeUrl = await getQRCodeUrls(invoiceForm);
-
-      const blob = await pdf(
-        <PDFDocument
-          invoiceForm={invoiceForm}
-          storeSettings={storeSettings}
-          logoUrl={logoUrl}
-          qrCodeUrl={qrCodeUrl}
-          attachmentUrls={attachmentUrls}
-          pdfTexts={pdfTexts}
-          watermarkUrl={watermarkUrl}
-          watermarkPaidUrl={watermarkPaidUrl}
-          signatureUrl={signatureUrl}
-        />
-      ).toBlob();
+      const blob = await createPdfBlob(invoiceForm, storeSettings, pdfTexts);
 
       const pdfBytes = new Uint8Array(await blob.arrayBuffer());
 
