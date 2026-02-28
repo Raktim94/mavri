@@ -423,6 +423,7 @@ Please open an issue before starting major work to ensure alignment.
 
 | Version | Status                |
 | ------- | --------------------- |
+| v2.2.1  | ✅ Actively supported |
 | v2.2.0  | ✅ Actively supported |
 | v2.1.1  | ✅ Actively supported |
 | v2.1.0  | ✅ Actively supported |
