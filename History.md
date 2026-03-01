@@ -6,6 +6,12 @@ New features & improvements
 
 - Official Docker prebuilt image published
 
+## 2026-03-01, version 2.2.2
+
+Bug Fixes
+
+- Fixed an issue that could prevent invoice creation when using docker and not providing "Bank"
+
 ## 2026-02-28, version 2.2.1
 
 Bug Fixes
