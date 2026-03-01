@@ -164,7 +164,7 @@ export const decodeInvoice = <T extends Record<string, unknown>>(invoice: T) => 
 
 export const decodeInvoiceBankSnapshotImport = (invoiceB: InvoiceBankSnapshots) => ({
   ...invoiceB,
-  qrCode: invoiceB.qrCode ? fromBase64(invoiceB.qrCode) : null
+  qrCode: invoiceB?.qrCode ? fromBase64(invoiceB.qrCode) : null
 });
 
 export const decodeInvoiceBusinessSnapshotImport = (invoiceBS: InvoiceBusinessSnapshots) => ({
