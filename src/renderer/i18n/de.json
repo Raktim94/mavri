@@ -396,6 +396,7 @@
     "inclusive": "Inklusiv (aktivieren, wenn Preise bereits Steuern enthalten)",
     "invoiceInfo": "Rechnungsinformationen",
     "issuedAt": "Datum: {{date}}",
+    "itemDiscount": "Rabatt: {{amount}}",
     "itemTax": "Steuer({{rate}}%): {{amount}}",
     "markAsClosed": "Als abgeschlossen markieren",
     "markAsPaid": "Als bezahlt markieren",

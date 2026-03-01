@@ -396,6 +396,7 @@
     "inclusive": "Įskaičiuota (įjunkite, jei kainos jau apima mokestį)",
     "invoiceInfo": "Sąskaitos informacija",
     "issuedAt": "Data: {{date}}",
+    "itemDiscount": "Nuolaida: {{amount}}",
     "itemTax": "Mokestis({{rate}}%): {{amount}}",
     "markAsClosed": "Pažymėti kaip uždarytą",
     "markAsPaid": "Pažymėti kaip apmokėtą",

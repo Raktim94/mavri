@@ -6,6 +6,10 @@ New features & improvements
 
 - Official Docker prebuilt image published
 
+Bug Fixes
+
+- Fixed an issue where incorrect financial totals were shown when using both discounts and per-item taxes. Previously, taxes were calculated before applying the discount in this scenario. The system now correctly allocates the discount first and then calculates taxes on the adjusted item amounts.
+
 ## 2026-03-01, version 2.2.2
 
 Bug Fixes

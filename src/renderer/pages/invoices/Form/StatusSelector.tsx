@@ -4,9 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { InvoiceStatus } from '../../../shared/enums/invoiceStatus';
 import { InvoiceType } from '../../../shared/enums/invoiceType';
 import type { InvoiceFromData } from '../../../shared/types/invoice';
-import { getFinancialData } from '../../../shared/utils/invoiceFunctions';
-import { useAppSelector } from '../../../state/configureStore';
-import { selectSettings } from '../../../state/pageSlice';
+import { getBalanceDue, getPaidAmount } from '../../../shared/utils/invoiceFunctions';
 
 interface Props {
   invoiceForm?: InvoiceFromData;
@@ -17,11 +15,21 @@ const StatusSelectorComponent: FC<Props> = ({ invoiceForm, onArchivedChanged, on
   const { t } = useTranslation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const storeSettings = useAppSelector(selectSettings);
 
-  const { totalAmountPaid, balanceDue } = useMemo(
-    () => getFinancialData({ storeSettings, invoiceForm }),
-    [storeSettings, invoiceForm]
+  const totalAmountPaid = useMemo(() => getPaidAmount(invoiceForm?.invoicePayments ?? []), [invoiceForm]);
+  const balanceDue = useMemo(
+    () =>
+      getBalanceDue({
+        taxRate: invoiceForm?.taxRate ?? 0,
+        taxType: invoiceForm?.taxType,
+        invoiceItems: invoiceForm?.invoiceItems ?? [],
+        discountType: invoiceForm?.discountType,
+        discountAmount: Number(invoiceForm?.discountAmountCents ?? 0),
+        discountPercent: invoiceForm?.discountPercent,
+        shippingFee: Number(invoiceForm?.shippingFeeCents ?? 0),
+        invoicePayments: invoiceForm?.invoicePayments ?? []
+      }),
+    [invoiceForm]
   );
 
   const updateStatusOnUncheck = () => {

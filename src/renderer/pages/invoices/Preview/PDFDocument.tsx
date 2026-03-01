@@ -204,7 +204,8 @@ const PDFDocumentComponent: FC<Props> = ({
               qtyLabel: pdfTexts.qtyLabel,
               unitCostLabel: pdfTexts.unitCostLabel,
               totalLabel: pdfTexts.totalLabel,
-              taxLabel: pdfTexts.taxLabel
+              taxLabel: pdfTexts.taxLabel,
+              discountLabel: pdfTexts.discountLabel
             }}
           />
           <View

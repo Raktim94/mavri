@@ -6,7 +6,7 @@ import { InvoiceStatus } from '../../shared/enums/invoiceStatus';
 import { Themes } from '../../shared/enums/themes';
 import type { Invoice } from '../../shared/types/invoice';
 import { formatDate, getFormattedCurrency } from '../../shared/utils/formatFunctions';
-import { getBalanceDueCents, getDaysLeft, getTotalAmountCents } from '../../shared/utils/invoiceFunctions';
+import { getBalanceDue, getDaysLeft, getInvoiceTotal } from '../../shared/utils/invoiceFunctions';
 import { useAppSelector } from '../../state/configureStore';
 import { selectSettings } from '../../state/pageSlice';
 
@@ -44,8 +44,33 @@ const InvoiceListItemComponent: FC<Props> = ({ item, isSelected, onEdit }) => {
 
   const latestPaidAt = useMemo(() => getLastPaymentDate(), [getLastPaymentDate]);
   const overdueDaysLeft = useMemo(() => getDaysLeft(item.dueDate), [item]);
-  const totalAmountCents = useMemo(() => getTotalAmountCents(item), [item]);
-  const remainingCents = useMemo(() => getBalanceDueCents(item), [item]);
+  const totalAmountCents = useMemo(
+    () =>
+      getInvoiceTotal({
+        taxRate: item.taxRate,
+        taxType: item.taxType,
+        invoiceItems: item.invoiceItems,
+        discountType: item.discountType,
+        discountAmount: Number(item.discountAmountCents),
+        discountPercent: item.discountPercent,
+        shippingFee: Number(item.shippingFeeCents)
+      }),
+    [item]
+  );
+  const remainingCents = useMemo(
+    () =>
+      getBalanceDue({
+        taxRate: item.taxRate,
+        taxType: item.taxType,
+        invoiceItems: item.invoiceItems,
+        discountType: item.discountType,
+        discountAmount: Number(item.discountAmountCents),
+        discountPercent: item.discountPercent,
+        shippingFee: Number(item.shippingFeeCents),
+        invoicePayments: item.invoicePayments
+      }),
+    [item]
+  );
   const remainingAmount = useMemo(
     () =>
       item.invoiceCurrencySnapshot?.currencySubunit === 0

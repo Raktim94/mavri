@@ -29,7 +29,7 @@ import type {
 import type { Item } from '../../../shared/types/item';
 import type { Response } from '../../../shared/types/response';
 import type { StyleProfile } from '../../../shared/types/styleProfiles';
-import { getFinancialData } from '../../../shared/utils/invoiceFunctions';
+import { getInvoiceTotal, getPaidAmount } from '../../../shared/utils/invoiceFunctions';
 import { useAppDispatch, useAppSelector } from '../../../state/configureStore';
 import { addToast, selectSettings } from '../../../state/pageSlice';
 import { NotesSelector } from './../Form/NotesSelector';
@@ -608,20 +608,26 @@ const InvoiceFormComponent: FC<Props> = ({
     [setInvoiceForm, invoiceForm]
   );
 
-  const getStatus = useCallback(
-    (newInvoiceForm: InvoiceFromData) => {
-      const { totalAmount, totalAmountPaid } = getFinancialData({ storeSettings, invoiceForm: newInvoiceForm });
+  const getStatus = useCallback((newInvoiceForm: InvoiceFromData) => {
+    const totalAmountPaid = getPaidAmount(newInvoiceForm?.invoicePayments ?? []);
+    const totalAmount = getInvoiceTotal({
+      taxRate: newInvoiceForm?.taxRate ?? 0,
+      taxType: newInvoiceForm?.taxType,
+      invoiceItems: newInvoiceForm?.invoiceItems ?? [],
+      discountType: newInvoiceForm?.discountType,
+      discountAmount: Number(newInvoiceForm?.discountAmountCents ?? 0),
+      discountPercent: newInvoiceForm?.discountPercent,
+      shippingFee: Number(newInvoiceForm?.shippingFeeCents ?? 0)
+    });
 
-      if (totalAmountPaid < totalAmount && totalAmountPaid > 0) {
-        return InvoiceStatus.partiallyPaid;
-      } else if (totalAmountPaid >= totalAmount) {
-        return InvoiceStatus.paid;
-      }
+    if (totalAmountPaid < totalAmount && totalAmountPaid > 0) {
+      return InvoiceStatus.partiallyPaid;
+    } else if (totalAmountPaid >= totalAmount) {
+      return InvoiceStatus.paid;
+    }
 
-      return InvoiceStatus.unpaid;
-    },
-    [storeSettings]
-  );
+    return InvoiceStatus.unpaid;
+  }, []);
 
   const handleOnClickRemovePayment = useCallback(
     (data: PaymentForm) => {

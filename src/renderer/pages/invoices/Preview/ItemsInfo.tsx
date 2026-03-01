@@ -4,7 +4,6 @@ import { TableHeaderStyle } from '../../../shared/enums/tableHeaderStyle';
 import { TableRowStyle } from '../../../shared/enums/tableRowStyle';
 import type { CustomField, InvoiceFromData } from '../../../shared/types/invoice';
 import type { Settings } from '../../../shared/types/settings';
-import { createCurrencyFormatter } from '../../../shared/utils/formatFunctions';
 import { getItemFinancialData } from '../../../shared/utils/invoiceFunctions';
 import { DEFAULT_TABLE_FIELD_SORT_ORDERS } from '../../../state/constant';
 import { COLUMN_WEIGHTS, DEFAULT_FONT_SIZES, DEFAULT_USER_COLUMN_WEIGHT, FONT_SIZES, PDF_STYLES } from './constant';
@@ -16,6 +15,7 @@ interface PropsLabels {
   unitCostLabel: string;
   totalLabel: string;
   taxLabel: string;
+  discountLabel: string;
 }
 interface Props {
   invoiceForm?: InvoiceFromData;
@@ -23,12 +23,7 @@ interface Props {
   labels: PropsLabels;
 }
 const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) => {
-  const { itemLabel, unitLabel, qtyLabel, unitCostLabel, totalLabel, taxLabel } = labels;
-
-  const format = useMemo(
-    () => (invoiceForm ? createCurrencyFormatter(storeSettings!, invoiceForm) : (n: number) => String(n)),
-    [storeSettings, invoiceForm]
-  );
+  const { itemLabel, unitLabel, qtyLabel, unitCostLabel, totalLabel, taxLabel, discountLabel } = labels;
 
   const customFields = useMemo(() => {
     const fields =
@@ -380,15 +375,22 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
         const { quantity, taxType, taxRate, invoiceItemSnapshot, customField } = item;
         const { unitPriceCents = '0', itemName, unitName } = invoiceItemSnapshot;
 
-        const { formattedUnitPrice, formattedTotal, formattedTax } = getItemFinancialData({
-          storeSettings,
-          invoiceForm,
-          unitPriceCents: Number(unitPriceCents),
-          quantity,
-          taxType,
-          taxRate,
-          format
-        });
+        const { formattedUnitPrice, formattedTotal, formattedTax, formattedItemDiscountAmount, itemDiscountAmount } =
+          getItemFinancialData({
+            storeSettings,
+            currencySymbol: invoiceForm?.invoiceCurrencySnapshot?.currencySymbol,
+            currencyCode: invoiceForm?.invoiceCurrencySnapshot?.currencyCode,
+            currencySubunit: invoiceForm?.invoiceCurrencySnapshot?.currencySubunit,
+            currencyFormat: invoiceForm?.currencyFormat,
+            unitPrice: Number(unitPriceCents),
+            quantity: Number(quantity),
+            taxType,
+            taxRate,
+            invoiceItems: invoiceForm?.invoiceItems ?? [],
+            discountType: invoiceForm?.discountType,
+            discountAmount: Number(invoiceForm?.discountAmountCents ?? 0),
+            discountPercent: invoiceForm?.discountPercent
+          });
 
         return (
           <View
@@ -452,18 +454,34 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) =
                         {itemName}
                       </Text>
                       {taxType && (
-                        <Text
-                          style={[
-                            PDF_STYLES.tableCellSubtle,
-                            {
-                              fontSize:
-                                FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES]
-                                  .tableCellSubtle
-                            }
-                          ]}
-                        >
-                          {`${taxLabel}(${taxRate}%): ${formattedTax}`}
-                        </Text>
+                        <>
+                          {itemDiscountAmount > 0 && (
+                            <Text
+                              style={[
+                                PDF_STYLES.tableCellSubtle,
+                                {
+                                  fontSize:
+                                    FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES]
+                                      .tableCellSubtle
+                                }
+                              ]}
+                            >
+                              {`${discountLabel}: ${formattedItemDiscountAmount}`}
+                            </Text>
+                          )}
+                          <Text
+                            style={[
+                              PDF_STYLES.tableCellSubtle,
+                              {
+                                fontSize:
+                                  FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES]
+                                    .tableCellSubtle
+                              }
+                            ]}
+                          >
+                            {`${taxLabel}(${taxRate}%): ${formattedTax}`}
+                          </Text>
+                        </>
                       )}
                     </View>
                   );

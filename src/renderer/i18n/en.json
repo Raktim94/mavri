@@ -396,6 +396,7 @@
     "inclusive": "Inclusive (turn on if prices already include tax)",
     "invoiceInfo": "Invoice information",
     "issuedAt": "Date: {{date}}",
+    "itemDiscount": "Discount: {{amount}}",
     "itemTax": "Tax({{rate}}%): {{amount}}",
     "markAsClosed": "Mark as Closed",
     "markAsPaid": "Mark as paid",

@@ -6,7 +6,7 @@ import { NoItem } from '../../shared/components/lists/noItem/NoItem';
 import type { ClientRevenue } from '../../shared/types/clientRevenue';
 import type { Invoice, InvoicesByCurrency } from '../../shared/types/invoice';
 import type { ItemSales } from '../../shared/types/itemSales';
-import { getItemTotalAmountCents, getTotalAmountCents } from '../../shared/utils/invoiceFunctions';
+import { getInvoiceItemTotal, getInvoiceTotal } from '../../shared/utils/invoiceFunctions';
 import { ClientsRevenueChart } from './ClientsRevenueChart';
 import { FinancialCards } from './FinancialCards';
 import { ItemsSalesChart } from './ItemsSalesChart';
@@ -49,7 +49,16 @@ const OverviewComponent: FC<Props> = ({ groupedMeta, dates, currencyCode }) => {
       return issued >= fromDate && issued <= toDate;
     });
     const trendChartDataRaw = filteredInvoices.map(inv => {
-      const totalAmountCents = getTotalAmountCents(inv);
+      const totalAmountCents = getInvoiceTotal({
+        taxRate: inv.taxRate,
+        taxType: inv.taxType,
+        invoiceItems: inv.invoiceItems,
+        discountType: inv.discountType,
+        discountAmount: Number(inv.discountAmountCents),
+        discountPercent: inv.discountPercent,
+        shippingFee: Number(inv.shippingFeeCents),
+        includeTax: true
+      });
       const totalAmount = totalAmountCents / (inv.invoiceCurrencySnapshot?.currencySubunit ?? 0);
       return {
         date: inv.issuedAt,
@@ -61,7 +70,16 @@ const OverviewComponent: FC<Props> = ({ groupedMeta, dates, currencyCode }) => {
       filteredInvoices.reduce(
         (acc, inv) => {
           const name = inv.invoiceClientSnapshot?.clientName ?? '';
-          const totalAmountCents = getTotalAmountCents(inv);
+          const totalAmountCents = getInvoiceTotal({
+            taxRate: inv.taxRate,
+            taxType: inv.taxType,
+            invoiceItems: inv.invoiceItems,
+            discountType: inv.discountType,
+            discountAmount: Number(inv.discountAmountCents),
+            discountPercent: inv.discountPercent,
+            shippingFee: Number(inv.shippingFeeCents),
+            includeTax: true
+          });
           const revenue = totalAmountCents / (inv.invoiceCurrencySnapshot?.currencySubunit ?? 0);
 
           if (!acc[name]) {
@@ -86,7 +104,17 @@ const OverviewComponent: FC<Props> = ({ groupedMeta, dates, currencyCode }) => {
           inv.invoiceItems.forEach(item => {
             const name = item.invoiceItemSnapshot.itemName;
             const quantity = item.quantity;
-            const itemTotalAmountCents = getItemTotalAmountCents(item);
+            const itemTotalAmountCents = getInvoiceItemTotal({
+              taxRate: item.taxRate,
+              unitPrice: Number(item.invoiceItemSnapshot.unitPriceCents),
+              quantity: Number(quantity),
+              taxType: item.taxType,
+              includeTax: true,
+              invoiceItems: inv.invoiceItems,
+              discountType: inv.discountType,
+              discountAmount: Number(inv.discountAmountCents),
+              discountPercent: inv.discountPercent
+            });
             const itemTotalAmount = itemTotalAmountCents / (inv.invoiceCurrencySnapshot?.currencySubunit ?? 0);
 
             if (!acc[name]) {

@@ -12,6 +12,7 @@ import { formatDate, formatXml, splitAddress, xmlEscape } from './helperFunction
 import {
   getBalanceDueCents,
   getDiscountAmountCents,
+  getInvoiceItemAmountCents,
   getInvoiceItemTaxCents,
   getInvoiceTaxCents,
   getItemTotalAmountCentsBeforeTaxCents,
@@ -29,6 +30,61 @@ const decimals2 = (n: number): string => {
 };
 const decimals4 = (n: number): string => {
   return (Math.round(n * 10000) / 10000).toFixed(4);
+};
+
+const getVatGroups = (
+  invoice: Invoice
+): {
+  rate: number;
+  taxableCents: number;
+}[] => {
+  const groups = new Map<number, number>();
+
+  invoice.invoiceItems.forEach(item => {
+    const rate = item.taxType != undefined ? item.taxRate : invoice.taxRate;
+    const taxable = getInvoiceItemAmountCents(item);
+
+    groups.set(rate, (groups.get(rate) ?? 0) + taxable);
+  });
+
+  return Array.from(groups.entries()).map(([rate, taxableCents]) => ({
+    rate,
+    taxableCents
+  }));
+};
+
+const allocateDiscountByVat = (invoice: Invoice): { rate: number; amountCents: number }[] => {
+  const discountCents = getDiscountAmountCents(invoice);
+  if (!discountCents) return [];
+
+  const groups = getVatGroups(invoice);
+
+  if (groups.length <= 1) {
+    return [
+      {
+        rate: groups[0]?.rate ?? invoice.taxRate ?? 0,
+        amountCents: discountCents / invoice.invoiceCurrencySnapshot!.currencySubunit
+      }
+    ];
+  }
+
+  const totalTaxable = groups.reduce((sum, g) => sum + g.taxableCents, 0);
+  return groups.map((g, index) => {
+    if (index === groups.length - 1) {
+      const allocatedSoFar = groups
+        .slice(0, index)
+        .reduce((sum, prev) => sum + Math.round((discountCents * prev.taxableCents) / totalTaxable), 0);
+      return {
+        rate: g.rate,
+        amountCents: (discountCents - allocatedSoFar) / invoice.invoiceCurrencySnapshot!.currencySubunit
+      };
+    }
+    return {
+      rate: g.rate,
+      amountCents:
+        Math.round((discountCents * g.taxableCents) / totalTaxable) / invoice.invoiceCurrencySnapshot!.currencySubunit
+    };
+  });
 };
 
 const getXMLShippingTaxTotal = (invoice: Invoice) => {
@@ -119,14 +175,38 @@ const getXMLInvoiceItemTaxTotal = (invoice: Invoice) => {
   return taxTotalXML;
 };
 
+const getXMLDiscount = (invoice: Invoice) => {
+  const discountAllocations = allocateDiscountByVat(invoice);
+  const discountXml = discountAllocations
+    .filter(d => d.amountCents > 0)
+    .map(
+      d => `
+        <cac:AllowanceCharge>
+          <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+          <cbc:AllowanceChargeReason>Flat discount fee</cbc:AllowanceChargeReason>
+          <cbc:Amount currencyID="${xmlEscape(invoice.invoiceCurrencySnapshot!.currencyCode)}">${decimals2(d.amountCents)}</cbc:Amount>
+          <cac:TaxCategory>
+            <cbc:ID>S</cbc:ID>
+            <cbc:Percent>${decimals2(d.rate ?? 0)}</cbc:Percent>
+            <cac:TaxScheme>
+              <cbc:ID>VAT</cbc:ID>
+            </cac:TaxScheme>
+          </cac:TaxCategory>
+        </cac:AllowanceCharge>
+      `
+    )
+    .join('');
+  return discountXml;
+};
+
 const getXMLHeader = (invoice: Invoice) => {
   const noteText = [invoice.thanksNotes, invoice.customerNotes, invoice.termsConditionNotes]
     .filter(Boolean)
     .join(' | ');
-  const discountAmount = getDiscountAmountCents(invoice) / invoice.invoiceCurrencySnapshot!.currencySubunit;
   const shippingAmount = Number(invoice.shippingFeeCents) / invoice.invoiceCurrencySnapshot!.currencySubunit;
   const issueDate = formatDate(invoice.issuedAt ?? new Date(), DateFormat.yyyyMMddDash);
   const dueDate = invoice.dueDate ? formatDate(invoice.dueDate, DateFormat.yyyyMMddDash) : undefined;
+  const discountXml = getXMLDiscount(invoice);
 
   const header = [
     `<cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0</cbc:CustomizationID>`,
@@ -138,21 +218,7 @@ const getXMLHeader = (invoice: Invoice) => {
     noteText ? `<cbc:Note>${xmlEscape(noteText)}</cbc:Note>` : '',
     `<cbc:DocumentCurrencyCode>${xmlEscape(invoice.invoiceCurrencySnapshot!.currencyCode)}</cbc:DocumentCurrencyCode>`,
     `<cbc:BuyerReference>${invoice.invoiceClientSnapshot!.clientBuyerReference}</cbc:BuyerReference>`,
-    discountAmount > 0
-      ? `
-        <cac:AllowanceCharge>
-          <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
-          <cbc:AllowanceChargeReason>Flat discount fee</cbc:AllowanceChargeReason>
-          <cbc:Amount currencyID="${xmlEscape(invoice.invoiceCurrencySnapshot!.currencyCode)}">${discountAmount}</cbc:Amount>
-          <cac:TaxCategory>
-            <cbc:ID>S</cbc:ID>
-            <cbc:Percent>${decimals2(invoice.taxRate ?? 0)}</cbc:Percent>
-            <cac:TaxScheme>
-              <cbc:ID>VAT</cbc:ID>
-            </cac:TaxScheme>
-          </cac:TaxCategory>
-        </cac:AllowanceCharge>`
-      : ``,
+    discountXml,
     shippingAmount > 0
       ? `
         <cac:AllowanceCharge>

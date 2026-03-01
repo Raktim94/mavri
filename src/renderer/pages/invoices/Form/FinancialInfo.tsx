@@ -58,16 +58,34 @@ const FinancialInfoComponent: FC<Props> = ({
   }, []);
 
   const {
+    formattedTotalTaxAmount,
     formattedSubTotalAmount,
     totalAmountFormatted,
-    formattedTotalTaxAmount,
     discountAmountFormatted,
     shippingAmountFormatted,
     totalAmountPaidFormatted,
     balanceDueFormatted,
     shippingAmount,
     discountAmount
-  } = useMemo(() => getFinancialData({ storeSettings, invoiceForm: invoiceForm }), [storeSettings, invoiceForm]);
+  } = useMemo(
+    () =>
+      getFinancialData({
+        storeSettings,
+        currencySymbol: invoiceForm?.invoiceCurrencySnapshot?.currencySymbol,
+        currencyCode: invoiceForm?.invoiceCurrencySnapshot?.currencyCode,
+        currencySubunit: invoiceForm?.invoiceCurrencySnapshot?.currencySubunit ?? 0,
+        currencyFormat: invoiceForm?.currencyFormat,
+        invoiceItems: invoiceForm?.invoiceItems ?? [],
+        discountType: invoiceForm?.discountType,
+        discountAmount: Number(invoiceForm?.discountAmountCents ?? 0),
+        discountPercent: invoiceForm?.discountPercent,
+        taxRate: invoiceForm?.taxRate ?? 0,
+        shippingAmount: Number(invoiceForm?.shippingFeeCents ?? 0),
+        taxType: invoiceForm?.taxType,
+        invoicePayments: invoiceForm?.invoicePayments ?? []
+      }),
+    [storeSettings, invoiceForm]
+  );
 
   const discountData = useMemo(() => {
     return {
@@ -88,7 +106,15 @@ const FinancialInfoComponent: FC<Props> = ({
   }, [invoiceForm]);
 
   const { amountPaid } = useMemo(
-    () => getPaidData({ storeSettings, invoiceForm: invoiceForm, invoicePayment: selectedPayment }),
+    () =>
+      getPaidData({
+        storeSettings,
+        currencyCode: invoiceForm?.invoiceCurrencySnapshot?.currencyCode,
+        currencySymbol: invoiceForm?.invoiceCurrencySnapshot?.currencySymbol,
+        currencySubunit: invoiceForm?.invoiceCurrencySnapshot?.currencySubunit,
+        currencyFormat: invoiceForm?.currencyFormat,
+        invoicePayment: selectedPayment
+      }),
     [storeSettings, invoiceForm, selectedPayment]
   );
 

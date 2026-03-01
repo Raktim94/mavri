@@ -99,7 +99,10 @@ const PaymentListDropdownComponent: FC<Props> = ({
 
             const { amountPaidFormatted } = getPaidData({
               storeSettings,
-              invoiceForm,
+              currencyCode: invoiceForm?.invoiceCurrencySnapshot?.currencyCode,
+              currencySymbol: invoiceForm?.invoiceCurrencySnapshot?.currencySymbol,
+              currencySubunit: invoiceForm?.invoiceCurrencySnapshot?.currencySubunit,
+              currencyFormat: invoiceForm?.currencyFormat,
               invoicePayment: paymentItem
             });
 

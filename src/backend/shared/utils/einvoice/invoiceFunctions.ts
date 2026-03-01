@@ -85,6 +85,13 @@ export const getInvoiceItemTaxCents = (invoiceItem: InvoiceItem): number => {
   return getUnitTax({ unitPrice: amountCents, taxType: invoiceItem.taxType, taxRate: invoiceItem.taxRate });
 };
 
+export const getInvoiceItemAmountCents = (invoiceItem: InvoiceItem): number => {
+  return getTotalUnitPrice({
+    unitPrice: Number(invoiceItem.invoiceItemSnapshot!.unitPriceCents),
+    quantity: invoiceItem.quantity
+  });
+};
+
 const getSubTotalAmountCentsBeforeTaxCents = (
   invoiceItems: InvoiceItem[],
   invoiceTaxInfo: { taxRate: number; taxType: InvoiceTaxType | undefined }
@@ -92,13 +99,6 @@ const getSubTotalAmountCentsBeforeTaxCents = (
   if (!invoiceItems || invoiceItems.length === 0) return 0;
 
   return invoiceItems.reduce((sum, item) => sum + getItemTotalAmountCentsBeforeTaxCents(item, invoiceTaxInfo), 0);
-};
-
-const getInvoiceItemAmountCents = (invoiceItem: InvoiceItem): number => {
-  return getTotalUnitPrice({
-    unitPrice: Number(invoiceItem.invoiceItemSnapshot!.unitPriceCents),
-    quantity: invoiceItem.quantity
-  });
 };
 
 const getTotalUnitPrice = (data: { unitPrice: number; quantity: string }): number => {
