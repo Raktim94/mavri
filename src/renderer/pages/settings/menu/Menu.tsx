@@ -271,8 +271,10 @@ export const Menu: FC<Props> = ({
           description: t('settingsMenuItems.descriptions.wallOfFame'),
           icon: <EmojiEventsIcon />,
           isToggle: false,
-          isSelected: MenuItemSettings.WallOfFame === selectedMenu,
-          onClick: () => onSelected(MenuItemSettings.WallOfFame)
+          isSelected: false,
+          onClick: () => {
+            getApi().openUrl('https://github.com/piratuks/invoice-builder/blob/main/SUPPORTERS.md');
+          }
         }
       ]
     }

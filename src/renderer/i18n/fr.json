@@ -541,8 +541,6 @@
       "wallOfFame": "Découvrez les contributeurs qui ont soutenu le développement de l’application"
     },
     "importConfirmText": "Êtes-vous sûr de vouloir importer ce fichier JSON ? Cette action effacera votre base actuelle et la remplacera par les données de la sauvegarde. Cette action est irréversible.",
-    "supportDesc": "Soyez le premier à soutenir ce projet et votre nom sera affiché ici !",
-    "supportText": "Aucun soutien pour le moment",
     "titles": {
       "about": "À propos",
       "buyMeCoffee": "Offrez-moi un café",

@@ -541,8 +541,6 @@
       "wallOfFame": "Sehen Sie die Unterstützer, die zur Entwicklung der App beigetragen haben"
     },
     "importConfirmText": "Sind Sie sicher, dass Sie diese JSON-Datei importieren möchten? Diese Aktion löscht Ihre aktuelle Datenbank und ersetzt sie durch die Daten aus dem Backup. Dies kann nicht rückgängig gemacht werden.",
-    "supportDesc": "Sei der Erste, der dieses Projekt unterstützt, und dein Name wird hier angezeigt!",
-    "supportText": "Noch keine Unterstützer",
     "titles": {
       "about": "Über",
       "buyMeCoffee": "Kauf mir einen Kaffee",

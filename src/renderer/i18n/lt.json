@@ -541,8 +541,6 @@
       "wallOfFame": "Peržiūrėkite rėmėjus, kurie prisidėjo prie programėlės kūrimo"
     },
     "importConfirmText": "Ar tikrai norite importuoti šį JSON failą? Šis veiksmas ištrins dabartinę duomenų bazę ir ją pakeis duomenimis iš atsarginės kopijos. Šio veiksmo atšaukti nebus galima.",
-    "supportDesc": "Tapkite pirmuoju rėmėju ir jūsų vardas bus rodomas čia!",
-    "supportText": "Kol kas nėra rėmėjų",
     "titles": {
       "about": "Apie",
       "buyMeCoffee": "Nupirk man kavos",

@@ -42,7 +42,8 @@ The **Settings** screen allows you to configure application behavior, manage dat
 
 From this screen you can:
 
-- Enable or disable optional layouts (**Style profiles**, **Quotes** and **Reports**)
+- Enable or disable optional layouts (**Presets**, **Style profiles**, **Quotes** and **Reports**)
+- Enable or disable optional features (**UBL 2.1**)
 - Export all application data to **JSON**
 - Import previously exported data
 - Access project resources:

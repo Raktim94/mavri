@@ -541,8 +541,6 @@
       "wallOfFame": "View the supporters who have contributed to the app"
     },
     "importConfirmText": "Are you sure you want to import this JSON file? This action will erase your current database and replace it with the data from the backup. This cannot be undone.",
-    "supportDesc": "Be the first to support this project and have your name displayed here!",
-    "supportText": "No supporters yet",
     "titles": {
       "about": "About",
       "buyMeCoffee": "Buy me coffee",

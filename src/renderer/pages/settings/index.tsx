@@ -31,7 +31,6 @@ import {
 } from '../../state/pageSlice';
 import { CustomizeInvoice } from './content/CustomizeInvoice';
 import { LanguageFormat } from './content/LanguageFormat';
-import { WallOfFame } from './content/WallOfFame';
 import { Menu } from './menu/Menu';
 
 export const SettingsPage = () => {
@@ -222,9 +221,6 @@ export const SettingsPage = () => {
         break;
       case MenuItemSettings.LanguageFormat:
         rightColumn = <LanguageFormat onLanguageFormat={onLanguageFormat} showBack={!isDesktop} onBack={onBack} />;
-        break;
-      case MenuItemSettings.WallOfFame:
-        rightColumn = <WallOfFame showBack={!isDesktop} onBack={onBack} />;
         break;
       default:
         rightColumn = <NoItem text={t('app.noItems')} />;

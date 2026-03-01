@@ -446,6 +446,6 @@ Want to be a part of this project’s journey? You can support it here: [Buy Me 
 
 ### 💖 Supporters
 
-_No supporters yet - maybe you’ll be the first!_
+See the full list of supporters here: [Supporters](./supporters.md)
 
 Every contribution counts, even a small one, and your name will appear here as a supporter of Invoice Builder.
