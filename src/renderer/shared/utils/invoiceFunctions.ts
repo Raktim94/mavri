@@ -86,8 +86,6 @@ export const getInvoiceItemLevelTaxDiscount = (data: {
 
   const totalDiscount = calcDiscount({ subTotal, discountType, discountAmount, discountPercent });
 
-  console.log(subTotal, discountType, discountAmount, discountPercent);
-
   if (subTotal > 0 && totalDiscount > 0) {
     discount = Math.round((unitTotal / subTotal) * totalDiscount);
   }
