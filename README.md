@@ -33,6 +33,7 @@ Invoice Builder is designed for freelancers, contractors, and small businesses w
 - **Cross-platform support** - macOS, Windows & Linux
 - **Import/export freedom** - JSON, XLSX, full database backups
 - **Highly customizable PDFs** - branding, layout, colors, typography
+- **UBL & Peppol BIS 3.0 support** – generate invoices that are compliant with European e-invoicing standards for automatic submission to buyers and public administrations
 
 If you value **privacy, portability, and control**, this app is built for you.
 
@@ -47,6 +48,7 @@ If you value **privacy, portability, and control**, this app is built for you.
 - Multi-currency support: choose the currency for each invoice/quote individually
 - Responsive layout - usable on small and large screens, resizable windows supported
 - Invoice/Quote translations – select a language per document, independent of app settings
+- Export invoices in UBL 2.1 / Peppol BIS Billing 3.0 XML format, fully compliant for automated e-invoicing
 
 ### Business Data Management
 
@@ -104,7 +106,7 @@ If you value **privacy, portability, and control**, this app is built for you.
 - Invoice/quote number prefix & suffix
 - File name customization for exported PDFs
 - Light & dark mode
-- Enable/disable reports, style profiles, presets and quotes
+- Enable/disable UBL 2.1 Peppol BIS Billing 3.0, reports, style profiles, presets and quotes
 - Check for updates via GitHub releases
 - Presets: Predefine default Invoice/Quote data (e.g., business, client, currency, bank, style profile, notes, language, signature) to streamline document creation
 
@@ -423,6 +425,7 @@ Please open an issue before starting major work to ensure alignment.
 
 | Version | Status                |
 | ------- | --------------------- |
+| v2.3.0  | ✅ Actively supported |
 | v2.2.2  | ✅ Actively supported |
 | v2.2.1  | ✅ Actively supported |
 | v2.2.0  | ✅ Actively supported |

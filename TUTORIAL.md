@@ -1088,3 +1088,24 @@ You can filter reports using:
 
 ![Reports predefined filters](tutorial/reports_page_3.jpg)
 ![Reports custom filters](tutorial/reports_page_4.jpg)
+
+## e-invoices
+
+The application supports UBL Peppol XML: you can download the XML embedded with the PDF, or as a standalone XML file. This feature is enabled by default and can be toggled in the Settings page.
+
+![E-Invoice](tutorial/e-invoice-actions.jpg)
+
+To generate valid UBL/Peppol XML, additional fields are available on Businesses and Clients. These fields must be properly filled to produce compliant invoices.
+
+![E-Invoice](tutorial/e-invoice-actions1.jpg)
+![E-Invoice](tutorial/e-invoice-actions2.jpg)
+
+> **ℹ️ UBL XML may fail validation if data is misconfigured.**
+> The application only checks that required fields are present. It does not guarantee that all values conform to UBL/Peppol standards.
+>
+> For example:
+>
+> - Tax names must match supported values (e.g., VAT). Arbitrary text will cause validation errors.
+> - Currency codes must be standard ISO codes (e.g., EUR, USD). Random text will fail validation.
+>
+> Use a Peppol XML validator (e.g., [https://peppolvalidator.com/](https://peppolvalidator.com/)) to ensure compliance before sending.
