@@ -21,6 +21,7 @@ import {
   addToast,
   selectSettings,
   setCustomInvoiseSettings,
+  setEInvoiceUBL,
   setLanguageDate,
   setMode,
   setPresets,
@@ -30,7 +31,6 @@ import {
 } from '../../state/pageSlice';
 import { CustomizeInvoice } from './content/CustomizeInvoice';
 import { LanguageFormat } from './content/LanguageFormat';
-import { WallOfFame } from './content/WallOfFame';
 import { Menu } from './menu/Menu';
 
 export const SettingsPage = () => {
@@ -48,8 +48,10 @@ export const SettingsPage = () => {
     immediate: false,
     onDone: (data: Response<Settings>) => {
       if (!data.success) {
-        if (data.message) dispatch(addToast({ message: data.message, severity: 'error' }));
-        else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
+        if (data.message) {
+          const message = i18n.exists(data.message) ? t(data.message) : data.message;
+          dispatch(addToast({ message: message, severity: 'error' }));
+        } else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
       }
     }
   });
@@ -59,8 +61,10 @@ export const SettingsPage = () => {
     immediate: false,
     onDone: (data: Response<unknown>) => {
       if (!data.success) {
-        if (data.message) dispatch(addToast({ message: data.message, severity: 'error' }));
-        else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
+        if (data.message) {
+          const message = i18n.exists(data.message) ? t(data.message) : data.message;
+          dispatch(addToast({ message: message, severity: 'error' }));
+        } else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
       }
     }
   });
@@ -69,8 +73,10 @@ export const SettingsPage = () => {
     immediate: false,
     onDone: (data: Response<ExportMeta>) => {
       if (!data.success) {
-        if (data.message) dispatch(addToast({ message: data.message, severity: 'error' }));
-        else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
+        if (data.message) {
+          const message = i18n.exists(data.message) ? t(data.message) : data.message;
+          dispatch(addToast({ message: message, severity: 'error' }));
+        } else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
       } else if (data?.success) {
         const path = data.data?.filePath;
         dispatch(
@@ -87,8 +93,10 @@ export const SettingsPage = () => {
     immediate: false,
     onDone: (data: Response<unknown>) => {
       if (!data.success) {
-        if (data.message) dispatch(addToast({ message: data.message, severity: 'error' }));
-        else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
+        if (data.message) {
+          const message = i18n.exists(data.message) ? t(data.message) : data.message;
+          dispatch(addToast({ message: message, severity: 'error' }));
+        } else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
       } else {
         dispatch(addToast({ message: t('common.imported'), severity: 'success' }));
         getSettings();
@@ -120,6 +128,13 @@ export const SettingsPage = () => {
   const togglePresets = useCallback(
     (value: boolean) => {
       dispatch(setPresets(value));
+    },
+    [dispatch]
+  );
+
+  const toggleUBL = useCallback(
+    (value: boolean) => {
+      dispatch(setEInvoiceUBL(value));
     },
     [dispatch]
   );
@@ -215,9 +230,6 @@ export const SettingsPage = () => {
       case MenuItemSettings.LanguageFormat:
         rightColumn = <LanguageFormat onLanguageFormat={onLanguageFormat} showBack={!isDesktop} onBack={onBack} />;
         break;
-      case MenuItemSettings.WallOfFame:
-        rightColumn = <WallOfFame showBack={!isDesktop} onBack={onBack} />;
-        break;
       default:
         rightColumn = <NoItem text={t('app.noItems')} />;
         break;
@@ -233,6 +245,7 @@ export const SettingsPage = () => {
       toggleReports={toggleReports}
       toggleStyleProfiles={toggleStyleProfiles}
       togglePresets={togglePresets}
+      toggleUBL={toggleUBL}
       onExportJSON={exportJSON}
       onImportJSON={importJSONCallback}
     />

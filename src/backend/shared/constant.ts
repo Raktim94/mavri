@@ -13,6 +13,7 @@ export const BOOLEAN_FIELDS = [
   'showQuantity',
   'showUnit',
   'showRowNo',
+  'ublON',
   'styleProfileShowQuantity',
   'styleProfileShowUnit',
   'styleProfileShowRowNo'

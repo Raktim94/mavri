@@ -8,6 +8,7 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import InfoIcon from '@mui/icons-material/Info';
 import PolicyIcon from '@mui/icons-material/Policy';
 import ReceiptIcon from '@mui/icons-material/Receipt';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import ShareIcon from '@mui/icons-material/Share';
 import SupportAgentIcon from '@mui/icons-material/SupportAgent';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
@@ -30,6 +31,7 @@ interface Props {
   toggleReports?: (value: boolean) => void;
   toggleStyleProfiles?: (value: boolean) => void;
   togglePresets?: (value: boolean) => void;
+  toggleUBL?: (value: boolean) => void;
   onExportJSON?: () => void;
   onImportJSON?: () => void;
 }
@@ -40,6 +42,7 @@ export const Menu: FC<Props> = ({
   toggleReports = () => {},
   toggleStyleProfiles = () => {},
   togglePresets = () => {},
+  toggleUBL = () => {},
   onModeChange = () => {},
   onExportJSON = () => {},
   onImportJSON = () => {}
@@ -131,6 +134,17 @@ export const Menu: FC<Props> = ({
           checked: storeSettings?.presetsON ?? true,
           onChange: () => {
             togglePresets(!storeSettings?.presetsON);
+          }
+        },
+        {
+          text: t('settingsMenuItems.titles.turnUBL'),
+          description: t('settingsMenuItems.descriptions.turnUBL'),
+          icon: <ReceiptLongIcon />,
+          isToggle: true,
+          isSelected: false,
+          checked: storeSettings?.ublON ?? true,
+          onChange: () => {
+            toggleUBL(!storeSettings?.ublON);
           }
         }
       ]
@@ -257,8 +271,10 @@ export const Menu: FC<Props> = ({
           description: t('settingsMenuItems.descriptions.wallOfFame'),
           icon: <EmojiEventsIcon />,
           isToggle: false,
-          isSelected: MenuItemSettings.WallOfFame === selectedMenu,
-          onClick: () => onSelected(MenuItemSettings.WallOfFame)
+          isSelected: false,
+          onClick: () => {
+            getApi().openUrl('https://github.com/piratuks/invoice-builder/blob/main/SUPPORTERS.md');
+          }
         }
       ]
     }

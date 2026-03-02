@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import type { DBInitType } from '../renderer/shared/enums/dbInitType';
+import type { EInvoice } from '../renderer/shared/enums/einvoice';
 import type { InvoiceType } from '../renderer/shared/enums/invoiceType';
 import type { Bank, BankAdd, BankUpdate } from '../renderer/shared/types/bank';
 import type { BusinessAdd, BusinessUpdate } from '../renderer/shared/types/business';
@@ -98,6 +99,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   addBatchCurrency: (data: CurrencyAdd[]) => ipcRenderer.invoke('batch-add-currency', data),
 
   getNextSequence: (data: { businessId: number; clientId: number }) => ipcRenderer.invoke('get-next-sequence', data),
+  getEInvoiceXML: (data: { invoiceId: number; einvoice: EInvoice }) => ipcRenderer.invoke('get-einvoice-xml', data),
   getCustomHeaders: (type: InvoiceType) => ipcRenderer.invoke('get-custom-headers', type),
   getAllInvoices: (type?: InvoiceType, filter?: FilterData[]) => ipcRenderer.invoke('get-all-invoices', type, filter),
   deleteInvoice: (id: number) => ipcRenderer.invoke('delete-invoice', id),

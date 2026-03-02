@@ -47,6 +47,10 @@ export interface InvoiceClientSnapshots {
   clientCode?: string;
   clientAdditional?: string;
   clientVatCode?: string;
+  clientPeppolEndpointId?: string;
+  clientCountryCode?: string;
+  clientPeppolEndpointSchemeId?: string;
+  clientBuyerReference?: string;
 }
 
 export interface InvoiceBankSnapshots {
@@ -86,6 +90,10 @@ export interface InvoiceBusinessSnapshots {
   businessFileType?: string;
   businessFileName?: string;
   businessVatCode?: string;
+  businessPeppolEndpointId?: string;
+  businessCountryCode?: string;
+  businessCode?: string;
+  businessPeppolEndpointSchemeId?: string;
 }
 
 export interface InvoiceStyleProfileSnapshots {
@@ -203,7 +211,7 @@ export interface InvoiceItem {
   id: number;
   parentInvoiceId: number;
   itemId: number;
-  invoiceItemSnapshot: InvoiceItemSnapshots;
+  invoiceItemSnapshot?: InvoiceItemSnapshots;
   quantity: string;
   customField?: CustomField | string;
   createdAt: string;

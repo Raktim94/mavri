@@ -34,7 +34,7 @@ const rollbackOrThrow = async (db: DatabaseAdapter) => {
   try {
     await db.run('ROLLBACK');
   } catch {
-    throw new Error(`ROLLBACK failed`);
+    throw new Error(`error.rollbackFailed`);
   }
 };
 
@@ -245,7 +245,7 @@ export const batchAddPreset = async (db: DatabaseAdapter, data: Preset[]) => {
         try {
           await db.run('ROLLBACK');
         } catch {
-          throw new Error(`ROLLBACK failed`);
+          throw new Error(`error.rollbackFailed`);
         }
         return result;
       }
@@ -256,7 +256,7 @@ export const batchAddPreset = async (db: DatabaseAdapter, data: Preset[]) => {
     try {
       await db.run('ROLLBACK');
     } catch {
-      throw new Error(`ROLLBACK failed`);
+      throw new Error(`error.rollbackFailed`);
     }
     return { success: false, ...mapDatabaseError(error, db.type) };
   }

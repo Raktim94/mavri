@@ -1,4 +1,5 @@
 import type { Response } from '../../shared/types/response';
+import type { EInvoice } from '../enums/einvoice';
 import { InvoiceStatus } from '../enums/invoiceStatus';
 import type { DatabaseAdapter } from '../types/DatabaseAdapter';
 import type { EntityWithId } from '../types/entityWithId';
@@ -20,6 +21,7 @@ import type {
 } from '../types/invoice';
 import type { FilterData } from '../types/invoiceFilter';
 import { getDefaultValue } from '../utils/dbHelper';
+import { generateInvoiceXML } from '../utils/einvoice/xmlProfiles';
 import { mapDatabaseError } from '../utils/errorFunctions';
 import { getWhereClauseFromFilters } from '../utils/filterFunctions';
 
@@ -43,7 +45,11 @@ const invoiceClientSnapshotsFields: (keyof InvoiceClientSnapshots)[] = [
   'clientPhone',
   'clientCode',
   'clientAdditional',
-  'clientVatCode'
+  'clientVatCode',
+  'clientPeppolEndpointId',
+  'clientCountryCode',
+  'clientPeppolEndpointSchemeId',
+  'clientBuyerReference'
 ];
 const invoiceBankSnapshotsFields: (keyof InvoiceBankSnapshots)[] = [
   'parentInvoiceId',
@@ -73,6 +79,10 @@ const invoiceBusinessSnapshotsFields: (keyof InvoiceBusinessSnapshots)[] = [
   'businessPhone',
   'businessAdditional',
   'businessVatCode',
+  'businessPeppolEndpointId',
+  'businessCountryCode',
+  'businessCode',
+  'businessPeppolEndpointSchemeId',
   // Legacy payment info. New payment info is via Bank
   // 'businessPaymentInformation',
   'businessLogo',
@@ -192,7 +202,7 @@ const rollbackOrThrow = async (db: DatabaseAdapter) => {
   try {
     await db.run('ROLLBACK');
   } catch {
-    throw new Error(`ROLLBACK failed`);
+    throw new Error(`error.rollbackFailed`);
   }
 };
 
@@ -489,6 +499,20 @@ const getInvoices = async (db: DatabaseAdapter, options: GetInvoicesOptions) => 
   });
 };
 
+export const getInvoiceXML = async (db: DatabaseAdapter, data: { invoiceId: number; einvoice: EInvoice }) => {
+  const { invoiceId, einvoice } = data;
+  const invoiceResult = await getInvoices(db, { id: invoiceId });
+
+  if (invoiceResult.length <= 0) {
+    throw new Error('error.invoiceNotFound');
+  }
+
+  const invoice = invoiceResult[0];
+  const xmlData = generateInvoiceXML(einvoice, invoice);
+
+  return { success: true, data: xmlData };
+};
+
 export const getNextSequence = async (db: DatabaseAdapter, data: { businessId: number; clientId: number }) => {
   const currentSequence = await db.get<InvoiceSequence>(
     `SELECT * FROM invoice_sequences WHERE "businessId" = ? and "clientId" = ?`,
@@ -758,7 +782,7 @@ export const updateInvoice = async (db: DatabaseAdapter, data: Invoice) => {
         try {
           await db.run('ROLLBACK');
         } catch {
-          throw new Error(`ROLLBACK failed`);
+          throw new Error(`error.rollbackFailed`);
         }
         return { success: false, key: ibs.key, message: ibs.message };
       }
@@ -775,7 +799,7 @@ export const updateInvoice = async (db: DatabaseAdapter, data: Invoice) => {
         try {
           await db.run('ROLLBACK');
         } catch {
-          throw new Error(`ROLLBACK failed`);
+          throw new Error(`error.rollbackFailed`);
         }
         return { success: false, key: ibs.key, message: ibs.message };
       }
@@ -945,6 +969,10 @@ export const duplicateInvoice = async (
       'businessPhone',
       'businessAdditional',
       'businessVatCode',
+      'businessPeppolEndpointId',
+      'businessCountryCode',
+      'businessCode',
+      'businessPeppolEndpointSchemeId',
       // Legacy payment info. New payment info is via Bank
       // 'businessPaymentInformation',
       'businessLogo',
@@ -959,6 +987,10 @@ export const duplicateInvoice = async (
       'clientPhone',
       'clientCode',
       'clientVatCode',
+      'clientPeppolEndpointId',
+      'clientCountryCode',
+      'clientPeppolEndpointSchemeId',
+      'clientBuyerReference',
       'clientAdditional'
     ]);
     await duplicateSnapshot('invoice_currency_snapshots', ['currencyCode', 'currencySymbol', 'currencySubunit']);

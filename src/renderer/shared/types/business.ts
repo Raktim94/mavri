@@ -9,6 +9,10 @@ export interface BusinessMeta {
   website?: string;
   additional?: string;
   vatCode?: string;
+  peppolEndpointId?: string;
+  countryCode?: string;
+  code?: string;
+  peppolEndpointSchemeId?: string;
   // Legacy payment info. New payment info is via Bank
   paymentInformation?: string;
   invoiceCount: number;
@@ -40,6 +44,10 @@ export interface BusinessAddMeta {
   website?: string;
   additional?: string;
   vatCode?: string;
+  peppolEndpointId?: string;
+  countryCode?: string;
+  code?: string;
+  peppolEndpointSchemeId?: string;
   // Legacy payment info. New payment info is via Bank
   paymentInformation?: string;
   fileSize?: number;
@@ -77,6 +85,10 @@ export interface BusinessFromData {
   website?: string;
   additional?: string;
   vatCode?: string;
+  peppolEndpointId?: string;
+  countryCode?: string;
+  code?: string;
+  peppolEndpointSchemeId?: string;
   // Legacy payment info. New payment info is via Bank
   paymentInformation?: string;
   fileSize?: number;

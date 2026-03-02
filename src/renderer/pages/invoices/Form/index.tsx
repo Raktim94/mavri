@@ -1,11 +1,16 @@
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { Box, Divider, Fab, Tooltip } from '@mui/material';
-import { memo, useCallback, useMemo, useState, useTransition, type FC } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState, useTransition, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
+import i18n from '../../../i18n';
+import { EInvoice } from '../../../shared/enums/einvoice';
 import { InvoiceStatus } from '../../../shared/enums/invoiceStatus';
 import { InvoiceType } from '../../../shared/enums/invoiceType';
 import type { Language } from '../../../shared/enums/language';
-import { useExportPdf } from '../../../shared/hooks/useExportPdf ';
+import { useGetEInvoiceXML } from '../../../shared/hooks/invoices/useGetEInvoiceXML';
+import { useExportPdf } from '../../../shared/hooks/useExportPdf';
+import { useExportPdfWithXml } from '../../../shared/hooks/useExportPdfWithXml';
+import { useExportXML } from '../../../shared/hooks/useExportXML';
 import type { Bank } from '../../../shared/types/bank';
 import type { Business } from '../../../shared/types/business';
 import type { Client } from '../../../shared/types/client';
@@ -23,10 +28,11 @@ import type {
   TaxForm
 } from '../../../shared/types/invoice';
 import type { Item } from '../../../shared/types/item';
+import type { Response } from '../../../shared/types/response';
 import type { StyleProfile } from '../../../shared/types/styleProfiles';
-import { getFinancialData } from '../../../shared/utils/invoiceFunctions';
-import { useAppSelector } from '../../../state/configureStore';
-import { selectSettings } from '../../../state/pageSlice';
+import { getInvoiceTotal, getPaidAmount } from '../../../shared/utils/invoiceFunctions';
+import { useAppDispatch, useAppSelector } from '../../../state/configureStore';
+import { addToast, selectSettings } from '../../../state/pageSlice';
 import { NotesSelector } from './../Form/NotesSelector';
 import { StatusSelector } from './../Form/StatusSelector';
 import { AttachmentsList } from './AttachmentsList';
@@ -80,6 +86,32 @@ const InvoiceFormComponent: FC<Props> = ({
   const [, startTransition] = useTransition();
 
   const [selectedInvoiceItem, setSelectedInvoiceItem] = useState<InvoiceItem | undefined>(undefined);
+
+  const [xmlData, setXMLData] = useState<
+    { invoiceId: number; einvoice: EInvoice; type: 'singleFile' | 'embeddedFile' } | undefined
+  >(undefined);
+  const { exportXML } = useExportXML({ invoiceForm, storeSettings });
+  const { exportPdfWithXml } = useExportPdfWithXml({ invoiceForm, storeSettings });
+
+  const dispatch = useAppDispatch();
+  const { execute: retrieveXML } = useGetEInvoiceXML({
+    params: xmlData,
+    immediate: false,
+    onDone: (data: Response<Uint8Array | undefined>) => {
+      if (!data.success) {
+        if (data.message) {
+          const message = i18n.exists(data.message) ? t(data.message) : data.message;
+          dispatch(addToast({ message: message, severity: 'error' }));
+        } else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
+      }
+
+      if (xmlData && data.data && xmlData.type === 'singleFile') {
+        exportXML(data.data, xmlData?.einvoice);
+      } else if (xmlData && data.data && xmlData.type === 'embeddedFile') {
+        exportPdfWithXml(data.data, xmlData?.einvoice);
+      }
+    }
+  });
 
   const invoiceInformation = useMemo(
     () => ({
@@ -187,7 +219,11 @@ const InvoiceFormComponent: FC<Props> = ({
             businessFileSize: data.fileSize,
             businessFileType: data.fileType,
             businessFileName: data.fileName,
-            businessVatCode: data.vatCode
+            businessVatCode: data.vatCode,
+            businessCountryCode: data.countryCode,
+            businessCode: data.code,
+            businessPeppolEndpointId: data.peppolEndpointId,
+            businessPeppolEndpointSchemeId: data.peppolEndpointSchemeId
           }
         });
       });
@@ -366,7 +402,11 @@ const InvoiceFormComponent: FC<Props> = ({
             clientPhone: data.phone,
             clientCode: data.code,
             clientAdditional: data.additional,
-            clientVatCode: data.vatCode
+            clientVatCode: data.vatCode,
+            clientCountryCode: data.countryCode,
+            clientPeppolEndpointId: data.peppolEndpointId,
+            clientPeppolEndpointSchemeId: data.peppolEndpointSchemeId,
+            clientBuyerReference: data.buyerReference
           }
         });
       });
@@ -572,20 +612,26 @@ const InvoiceFormComponent: FC<Props> = ({
     [setInvoiceForm, invoiceForm]
   );
 
-  const getStatus = useCallback(
-    (newInvoiceForm: InvoiceFromData) => {
-      const { totalAmount, totalAmountPaid } = getFinancialData({ storeSettings, invoiceForm: newInvoiceForm });
+  const getStatus = useCallback((newInvoiceForm: InvoiceFromData) => {
+    const totalAmountPaid = getPaidAmount(newInvoiceForm?.invoicePayments ?? []);
+    const totalAmount = getInvoiceTotal({
+      taxRate: newInvoiceForm?.taxRate ?? 0,
+      taxType: newInvoiceForm?.taxType,
+      invoiceItems: newInvoiceForm?.invoiceItems ?? [],
+      discountType: newInvoiceForm?.discountType,
+      discountAmount: Number(newInvoiceForm?.discountAmountCents ?? 0),
+      discountPercent: newInvoiceForm?.discountPercent,
+      shippingFee: Number(newInvoiceForm?.shippingFeeCents ?? 0)
+    });
 
-      if (totalAmountPaid < totalAmount && totalAmountPaid > 0) {
-        return InvoiceStatus.partiallyPaid;
-      } else if (totalAmountPaid >= totalAmount) {
-        return InvoiceStatus.paid;
-      }
+    if (totalAmountPaid < totalAmount && totalAmountPaid > 0) {
+      return InvoiceStatus.partiallyPaid;
+    } else if (totalAmountPaid >= totalAmount) {
+      return InvoiceStatus.paid;
+    }
 
-      return InvoiceStatus.unpaid;
-    },
-    [storeSettings]
-  );
+    return InvoiceStatus.unpaid;
+  }, []);
 
   const handleOnClickRemovePayment = useCallback(
     (data: PaymentForm) => {
@@ -749,6 +795,12 @@ const InvoiceFormComponent: FC<Props> = ({
     [setInvoiceForm, invoiceForm, handleOnClose]
   );
 
+  useEffect(() => {
+    if (xmlData) {
+      retrieveXML();
+    }
+  }, [xmlData, retrieveXML]);
+
   return (
     <Box
       sx={{
@@ -894,7 +946,9 @@ const InvoiceFormComponent: FC<Props> = ({
         />
       )}
       <MoreActionDropdown
+        type={type}
         isOpen={isDropdownOpenMoreAction}
+        isPDFReady={invoiceForm?.id != undefined}
         onClose={() => handleOnClose(setMoreActionDropdown)}
         onOpen={() => handleOnOpen(setMoreActionDropdown)}
         onDelete={() => {
@@ -909,9 +963,18 @@ const InvoiceFormComponent: FC<Props> = ({
           handleOnClose(setMoreActionDropdown);
           if (invoiceForm?.id !== undefined) handleDuplicate(invoiceForm.id, InvoiceType.invoice);
         }}
-        onExport={() => {
+        onExportPDF={() => {
           handleOnClose(setMoreActionDropdown);
           exportPdf();
+        }}
+        onExportPDFUBL={() => {
+          handleOnClose(setMoreActionDropdown);
+          if (invoiceForm?.id)
+            setXMLData({ invoiceId: invoiceForm.id, einvoice: EInvoice.ubl21, type: 'embeddedFile' });
+        }}
+        onExportUBLXML={() => {
+          handleOnClose(setMoreActionDropdown);
+          if (invoiceForm?.id) setXMLData({ invoiceId: invoiceForm.id, einvoice: EInvoice.ubl21, type: 'singleFile' });
         }}
         showDelete={invoiceForm?.id !== undefined}
         showDuplicate={invoiceForm?.id !== undefined}

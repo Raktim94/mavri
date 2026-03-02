@@ -16,6 +16,10 @@ const clientFields: (keyof Client)[] = [
   'additional',
   'description',
   'vatCode',
+  'peppolEndpointId',
+  'countryCode',
+  'peppolEndpointSchemeId',
+  'buyerReference',
   'isArchived'
 ];
 
@@ -98,7 +102,7 @@ export const batchAddClient = async (db: DatabaseAdapter, data: Client[]) => {
         try {
           await db.run('ROLLBACK');
         } catch {
-          throw new Error(`ROLLBACK failed`);
+          throw new Error(`error.rollbackFailed`);
         }
         return result;
       }
@@ -109,7 +113,7 @@ export const batchAddClient = async (db: DatabaseAdapter, data: Client[]) => {
     try {
       await db.run('ROLLBACK');
     } catch {
-      throw new Error(`ROLLBACK failed`);
+      throw new Error(`error.rollbackFailed`);
     }
     return { success: false, ...mapDatabaseError(error, db.type) };
   }

@@ -314,6 +314,10 @@ export interface InvoiceClientSnapshots {
   clientCode?: string;
   clientAdditional?: string;
   clientVatCode?: string;
+  clientPeppolEndpointId?: string;
+  clientCountryCode?: string;
+  clientPeppolEndpointSchemeId?: string;
+  clientBuyerReference?: string;
 }
 
 export interface InvoiceBusinessSnapshotsMeta {
@@ -332,6 +336,10 @@ export interface InvoiceBusinessSnapshotsMeta {
   businessFileType?: string;
   businessFileName?: string;
   businessVatCode?: string;
+  businessPeppolEndpointId?: string;
+  businessCountryCode?: string;
+  businessCode?: string;
+  businessPeppolEndpointSchemeId?: string;
 }
 
 export interface InvoiceBusinessSnapshots extends InvoiceBusinessSnapshotsMeta {

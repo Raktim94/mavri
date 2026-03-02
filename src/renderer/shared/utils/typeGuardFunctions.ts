@@ -433,6 +433,30 @@ export const isBusinessFromData = (data: unknown): data is BusinessFromData => {
     typeof d.description !== 'string'
   )
     return false;
+
+  if (
+    d.peppolEndpointId !== undefined &&
+    d.peppolEndpointId !== null &&
+    d.peppolEndpointId !== '' &&
+    typeof d.peppolEndpointId !== 'string'
+  )
+    return false;
+  if (
+    d.countryCode !== undefined &&
+    d.countryCode !== null &&
+    d.countryCode !== '' &&
+    typeof d.countryCode !== 'string'
+  )
+    return false;
+  if (
+    d.peppolEndpointSchemeId !== undefined &&
+    d.peppolEndpointSchemeId !== null &&
+    d.peppolEndpointSchemeId !== '' &&
+    typeof d.peppolEndpointSchemeId !== 'string'
+  )
+    return false;
+
+  if (d.code !== undefined && d.code !== null && d.code !== '' && typeof d.code !== 'string') return false;
   if (d.role !== undefined && d.role !== null && d.role !== '' && typeof d.role !== 'string') return false;
   if (d.address !== undefined && d.address !== null && d.address !== '' && typeof d.address !== 'string') return false;
   if (d.website !== undefined && d.website !== null && d.website !== '' && typeof d.website !== 'string') return false;
@@ -528,6 +552,34 @@ export const isClientFromData = (data: unknown): data is ClientFromData => {
   if (d.isArchived !== undefined && d.isArchived !== null && d.isArchived !== '' && typeof d.isArchived !== 'boolean')
     return false;
 
+  if (
+    d.peppolEndpointId !== undefined &&
+    d.peppolEndpointId !== null &&
+    d.peppolEndpointId !== '' &&
+    typeof d.peppolEndpointId !== 'string'
+  )
+    return false;
+  if (
+    d.countryCode !== undefined &&
+    d.countryCode !== null &&
+    d.countryCode !== '' &&
+    typeof d.countryCode !== 'string'
+  )
+    return false;
+  if (
+    d.peppolEndpointSchemeId !== undefined &&
+    d.peppolEndpointSchemeId !== null &&
+    d.peppolEndpointSchemeId !== '' &&
+    typeof d.peppolEndpointSchemeId !== 'string'
+  )
+    return false;
+  if (
+    d.buyerReference !== undefined &&
+    d.buyerReference !== null &&
+    d.buyerReference !== '' &&
+    typeof d.buyerReference !== 'string'
+  )
+    return false;
   if (
     d.description !== undefined &&
     d.description !== null &&
@@ -645,7 +697,11 @@ export const isInvoiceBusinessSnapshotFromData = (data: unknown): data is Invoic
     // Legacy payment info. New payment info is via Bank
     'businessPaymentInformation',
     'businessFileType',
-    'businessFileName'
+    'businessFileName',
+    'businessPeppolEndpointId',
+    'businessCountryCode',
+    'bisinessCode',
+    'businessPeppolEndpointSchemeId'
   ];
 
   for (const key of stringFields) {
@@ -687,7 +743,11 @@ export const isInvoiceClientSnapshotFromData = (data: unknown): data is InvoiceC
     'clientPhone',
     'clientCode',
     'clientAdditional',
-    'clientVatCode'
+    'clientVatCode',
+    'clientPeppolEndpointId',
+    'clientCountryCode',
+    'clientPeppolEndpointSchemeId',
+    'clientBuyerReference'
   ];
 
   for (const key of stringFields) {

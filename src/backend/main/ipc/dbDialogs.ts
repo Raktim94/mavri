@@ -42,6 +42,7 @@ const resetIPCHandlers = () => {
     'delete-currency',
     'batch-add-currency',
     'get-all-currencies',
+    'get-einvoice-xml',
     'get-next-sequence',
     'get-custom-headers',
     'get-all-invoices',

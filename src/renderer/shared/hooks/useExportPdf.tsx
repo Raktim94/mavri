@@ -4,7 +4,8 @@ import { useCallback, useMemo } from 'react';
 import { PDFDocument } from '../../pages/invoices/Preview/PDFDocument';
 import { MONTH_NAMES } from '../../state/constant';
 import { InvoiceType } from '../enums/invoiceType';
-import type { AttachmentURL, InvoiceFromData } from '../types/invoice';
+import type { AttachmentURL, InvoiceFromData, PdfTexts } from '../types/invoice';
+
 import type { Settings } from '../types/settings';
 import { toDataUrl } from '../utils/dataUrlFunctions';
 import { usePdfTexts } from './usePdfTexts';
@@ -99,6 +100,45 @@ export const getWatermarkPaidUrl = async (invoiceForm?: InvoiceFromData) => {
   return watermarkPaidUrl;
 };
 
+export const createPdfBlob = async (invoiceForm: InvoiceFromData, storeSettings: Settings, pdfTexts: PdfTexts) => {
+  const logoUrl = await getLogoUrl(invoiceForm);
+  const attachmentUrls = await getAttachmentsUrl(invoiceForm);
+  const watermarkUrl = await getWatermarkUrl(invoiceForm);
+  const watermarkPaidUrl = await getWatermarkPaidUrl(invoiceForm);
+  const signatureUrl = await getSignatureUrls(invoiceForm);
+  const qrCodeUrl = await getQRCodeUrls(invoiceForm);
+
+  const blob = await pdf(
+    <PDFDocument
+      invoiceForm={invoiceForm}
+      storeSettings={storeSettings}
+      logoUrl={logoUrl}
+      qrCodeUrl={qrCodeUrl}
+      attachmentUrls={attachmentUrls}
+      pdfTexts={pdfTexts}
+      watermarkUrl={watermarkUrl}
+      watermarkPaidUrl={watermarkPaidUrl}
+      signatureUrl={signatureUrl}
+    />
+  ).toBlob();
+
+  return blob;
+};
+
+export const getPDFFilename = (invoiceForm: InvoiceFromData, storeSettings: Settings) => {
+  const hasInvoicePart = invoiceForm.invoicePrefix || invoiceForm.invoiceNumber || invoiceForm.invoiceSuffix;
+  const subTypeName = invoiceForm.invoiceType === InvoiceType.invoice ? 'Invoice' : 'Quote';
+  const invoiceNumber = `${hasInvoicePart ? '_' : ''}${invoiceForm.invoicePrefix ?? ''}${invoiceForm.invoiceNumber ?? ''}${invoiceForm.invoiceSuffix ?? ''}`;
+  const issuedAtDate = invoiceForm?.issuedAt ? parseISO(invoiceForm.issuedAt) : undefined;
+  const year = issuedAtDate && storeSettings?.shouldIncludeYear ? `_${issuedAtDate.getFullYear()}` : '';
+  const month = issuedAtDate && storeSettings?.shouldIncludeMonth ? `_${MONTH_NAMES[issuedAtDate.getMonth()]}` : '';
+  const businessName = storeSettings?.shouldIncludeBusinessName
+    ? `${invoiceForm?.invoiceBusinessSnapshot?.businessName ? invoiceForm?.invoiceBusinessSnapshot?.businessName.trim().replaceAll(' ', '_') + '_' : ''}`
+    : '';
+
+  return `${businessName}${subTypeName}${invoiceNumber}${year}${month}.pdf`;
+};
+
 export const useExportPdf = (data: { invoiceForm?: InvoiceFromData; storeSettings?: Settings }) => {
   const { invoiceForm, storeSettings } = data;
 
@@ -116,43 +156,15 @@ export const useExportPdf = (data: { invoiceForm?: InvoiceFromData; storeSetting
   }, [invoiceForm, pdfTextsDefaults]);
 
   const exportPdf = useCallback(async () => {
-    if (!invoiceForm) return;
+    if (!invoiceForm || !storeSettings) return;
 
-    const logoUrl = await getLogoUrl(invoiceForm);
-    const attachmentUrls = await getAttachmentsUrl(invoiceForm);
-    const watermarkUrl = await getWatermarkUrl(invoiceForm);
-    const watermarkPaidUrl = await getWatermarkPaidUrl(invoiceForm);
-    const signatureUrl = await getSignatureUrls(invoiceForm);
-    const qrCodeUrl = await getQRCodeUrls(invoiceForm);
-
-    const blob = await pdf(
-      <PDFDocument
-        invoiceForm={invoiceForm}
-        storeSettings={storeSettings}
-        logoUrl={logoUrl}
-        qrCodeUrl={qrCodeUrl}
-        attachmentUrls={attachmentUrls}
-        pdfTexts={pdfTexts}
-        watermarkUrl={watermarkUrl}
-        watermarkPaidUrl={watermarkPaidUrl}
-        signatureUrl={signatureUrl}
-      />
-    ).toBlob();
+    const blob = await createPdfBlob(invoiceForm, storeSettings, pdfTexts);
 
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
 
-    const hasInvoicePart = invoiceForm.invoicePrefix || invoiceForm.invoiceNumber || invoiceForm.invoiceSuffix;
-    const subTypeName = invoiceForm.invoiceType === InvoiceType.invoice ? 'Invoice' : 'Quote';
-    const invoiceNumber = `${hasInvoicePart ? '_' : ''}${invoiceForm.invoicePrefix ?? ''}${invoiceForm.invoiceNumber ?? ''}${invoiceForm.invoiceSuffix ?? ''}`;
-    const issuedAtDate = invoiceForm?.issuedAt ? parseISO(invoiceForm.issuedAt) : undefined;
-    const year = issuedAtDate && storeSettings?.shouldIncludeYear ? `_${issuedAtDate.getFullYear()}` : '';
-    const month = issuedAtDate && storeSettings?.shouldIncludeMonth ? `_${MONTH_NAMES[issuedAtDate.getMonth()]}` : '';
-    const businessName = storeSettings?.shouldIncludeBusinessName
-      ? `${invoiceForm?.invoiceBusinessSnapshot?.businessName ? invoiceForm?.invoiceBusinessSnapshot?.businessName.trim().replaceAll(' ', '_') + '_' : ''}`
-      : '';
     a.href = url;
-    a.download = `${businessName}${subTypeName}${invoiceNumber}${year}${month}.pdf`;
+    a.download = getPDFFilename(invoiceForm, storeSettings);
     a.click();
 
     URL.revokeObjectURL(url);

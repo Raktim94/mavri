@@ -15,7 +15,7 @@ import { initStyleProfilesHandlers } from './styleProfiles';
 import { initUnitsHandlers } from './units';
 
 export const initIpcHandler = (db: DatabaseAdapter, mainWindow: BrowserWindow) => {
-  if (!db) throw new Error('Database is not initialized');
+  if (!db) throw new Error('error.databaseNotInitialized');
 
   ipcMain.handle('open-url', async (_event, url: string) => {
     await shell.openExternal(url);

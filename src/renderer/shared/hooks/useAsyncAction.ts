@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../i18n';
 import { useAppDispatch } from '../../state/configureStore';
 import { addToast, disableLoadingCursor, enableLoadingCursor } from '../../state/pageSlice';
 import { useAsync } from './useAsync';
@@ -13,6 +15,7 @@ export const useAsyncAction = <T>(
   asyncFn: () => Promise<T>,
   { showLoader = true, immediate = true, onDone }: UseAsyncActionOptions<T> = {}
 ) => {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const onDoneRef = useRef(onDone);
 
@@ -31,9 +34,10 @@ export const useAsyncAction = <T>(
 
   const handleError = useCallback(
     (err: Error) => {
-      dispatch(addToast({ message: err.message, severity: 'error' }));
+      const message = i18n.exists(err.message) ? t(err.message) : err.message;
+      dispatch(addToast({ message: message, severity: 'error' }));
     },
-    [dispatch]
+    [dispatch, t]
   );
 
   const { data, loading, execute } = useAsync<T>(asyncFn, {

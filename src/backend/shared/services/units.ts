@@ -96,7 +96,7 @@ export const batchAddUnit = async (db: DatabaseAdapter, data: Unit[]) => {
         try {
           await db.run('ROLLBACK');
         } catch {
-          throw new Error(`ROLLBACK failed`);
+          throw new Error(`error.rollbackFailed`);
         }
         return result;
       }
@@ -107,7 +107,7 @@ export const batchAddUnit = async (db: DatabaseAdapter, data: Unit[]) => {
     try {
       await db.run('ROLLBACK');
     } catch {
-      throw new Error(`ROLLBACK failed`);
+      throw new Error(`error.rollbackFailed`);
     }
     return { success: false, ...mapDatabaseError(error, db.type) };
   }

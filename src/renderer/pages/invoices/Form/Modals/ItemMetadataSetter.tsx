@@ -16,6 +16,7 @@ import {
 } from '@mui/material';
 import { memo, useCallback, useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
+import i18n from '../../../../i18n';
 import { AmountInput } from '../../../../shared/components/inputs/amountInput/AmountInput';
 import { ModalAppBar } from '../../../../shared/components/layout/modalAppBar/ModalAppBar';
 import { Alignment } from '../../../../shared/enums/alignment';
@@ -76,8 +77,10 @@ const ItemMetadataSetterComponent: FC<Props> = ({
     immediate: false,
     onDone: (data: Response<CustomFieldMeta[]>) => {
       if (!data.success) {
-        if (data.message) dispatch(addToast({ message: data.message, severity: 'error' }));
-        else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
+        if (data.message) {
+          const message = i18n.exists(data.message) ? t(data.message) : data.message;
+          dispatch(addToast({ message: message, severity: 'error' }));
+        } else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
       }
 
       const unique = [...new Map([...headerOptions, ...(data.data ?? [])].map(h => [h.header, h])).values()];

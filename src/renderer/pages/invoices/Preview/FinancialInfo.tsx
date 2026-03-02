@@ -28,9 +28,9 @@ interface Props {
 }
 const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels }) => {
   const {
+    formattedTotalTaxAmount,
     formattedSubTotalAmount,
     totalAmountFormatted,
-    formattedTotalTaxAmount,
     discountAmountFormatted,
     shippingAmountFormatted,
     totalAmountPaidFormatted,
@@ -39,7 +39,26 @@ const FinancialInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels 
     discountAmount,
     totalTax,
     totalAmountPaid
-  } = useMemo(() => getFinancialData({ storeSettings, invoiceForm: invoiceForm }), [storeSettings, invoiceForm]);
+  } = useMemo(
+    () =>
+      getFinancialData({
+        storeSettings,
+        currencySymbol: invoiceForm?.invoiceCurrencySnapshot?.currencySymbol,
+        currencyCode: invoiceForm?.invoiceCurrencySnapshot?.currencyCode,
+        currencySubunit: invoiceForm?.invoiceCurrencySnapshot?.currencySubunit ?? 0,
+        currencyFormat: invoiceForm?.currencyFormat,
+        invoiceItems: invoiceForm?.invoiceItems ?? [],
+        discountType: invoiceForm?.discountType,
+        discountAmount: Number(invoiceForm?.discountAmountCents ?? 0),
+        discountPercent: invoiceForm?.discountPercent,
+        taxRate: invoiceForm?.taxRate ?? 0,
+        shippingAmount: Number(invoiceForm?.shippingFeeCents ?? 0),
+        taxType: invoiceForm?.taxType,
+        invoicePayments: invoiceForm?.invoicePayments ?? []
+      }),
+    [storeSettings, invoiceForm]
+  );
+
   const {
     subTotalLabel,
     discountLabel,

@@ -3,11 +3,10 @@ import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-ki
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { Box, IconButton, ListItemButton, ListItemText, Menu, MenuItem, Tooltip, Typography } from '@mui/material';
-import React, { memo, useMemo, useState, type FC } from 'react';
+import React, { memo, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SortableItem } from '../../../shared/components/lists/sortableItem/SortableItem';
 import type { InvoiceFromData, InvoiceItem } from '../../../shared/types/invoice';
-import { createCurrencyFormatter } from '../../../shared/utils/formatFunctions';
 import { getItemFinancialData } from '../../../shared/utils/invoiceFunctions';
 import { useAppSelector } from '../../../state/configureStore';
 import { selectSettings } from '../../../state/pageSlice';
@@ -49,11 +48,6 @@ const ItemsListComponent: FC<Props> = ({ invoiceForm, setInvoiceForm, onEdit = (
     }
   };
 
-  const format = useMemo(
-    () => (invoiceForm ? createCurrencyFormatter(storeSettings!, invoiceForm) : (n: number) => String(n)),
-    [storeSettings, invoiceForm]
-  );
-
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext
@@ -64,15 +58,22 @@ const ItemsListComponent: FC<Props> = ({ invoiceForm, setInvoiceForm, onEdit = (
           const { quantity, taxType, taxRate, invoiceItemSnapshot, customField } = invoiceItem;
           const { unitPriceCents = '0', itemName } = invoiceItemSnapshot;
 
-          const { formattedUnitPrice, formattedTotal, formattedTax } = getItemFinancialData({
-            storeSettings,
-            invoiceForm,
-            unitPriceCents: Number(unitPriceCents),
-            quantity,
-            taxType,
-            taxRate,
-            format
-          });
+          const { formattedUnitPrice, formattedTotal, formattedTax, formattedItemDiscountAmount, itemDiscountAmount } =
+            getItemFinancialData({
+              storeSettings,
+              currencySymbol: invoiceForm?.invoiceCurrencySnapshot?.currencySymbol,
+              currencyCode: invoiceForm?.invoiceCurrencySnapshot?.currencyCode,
+              currencySubunit: invoiceForm?.invoiceCurrencySnapshot?.currencySubunit,
+              currencyFormat: invoiceForm?.currencyFormat,
+              unitPrice: Number(unitPriceCents),
+              quantity: Number(quantity),
+              taxType,
+              taxRate,
+              invoiceItems: invoiceForm?.invoiceItems ?? [],
+              discountType: invoiceForm?.discountType,
+              discountAmount: Number(invoiceForm?.discountAmountCents ?? 0),
+              discountPercent: invoiceForm?.discountPercent
+            });
 
           return (
             <SortableItem
@@ -182,25 +183,44 @@ const ItemsListComponent: FC<Props> = ({ invoiceForm, setInvoiceForm, onEdit = (
                   >
                     {formattedTotal}
                   </Typography>
-
                   {invoiceItem.taxType && (
-                    <Typography
-                      component="div"
-                      variant="body2"
-                      sx={{
-                        fontWeight: 500,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        display: 'flex',
-                        justifyContent: 'start',
-                        flexDirection: 'row'
-                      }}
-                    >
-                      {t('invoices.itemTax', {
-                        rate: invoiceItem.taxRate,
-                        amount: formattedTax
-                      })}
-                    </Typography>
+                    <>
+                      {itemDiscountAmount > 0 && (
+                        <Typography
+                          component="div"
+                          variant="body2"
+                          sx={{
+                            fontWeight: 500,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            display: 'flex',
+                            justifyContent: 'start',
+                            flexDirection: 'row'
+                          }}
+                        >
+                          {t('invoices.itemDiscount', {
+                            amount: formattedItemDiscountAmount
+                          })}
+                        </Typography>
+                      )}
+                      <Typography
+                        component="div"
+                        variant="body2"
+                        sx={{
+                          fontWeight: 500,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          display: 'flex',
+                          justifyContent: 'start',
+                          flexDirection: 'row'
+                        }}
+                      >
+                        {t('invoices.itemTax', {
+                          rate: invoiceItem.taxRate,
+                          amount: formattedTax
+                        })}
+                      </Typography>
+                    </>
                   )}
                 </Box>
                 <Tooltip title={t('ariaLabel.dragToSort')}>

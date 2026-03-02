@@ -5,12 +5,12 @@ import type { InvoiceFromData, PdfTexts } from '../../../../../shared/types/invo
 import type { Settings } from '../../../../../shared/types/settings';
 import { createCustomFontStyles, DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './../../constant';
 import { FinancialInfo } from './../../FinancialInfo';
-import { ItemsInfo } from './../../ItemsInfo';
 import { NotesInfo } from './../../NotesInfo';
 import { PageCounterInfo } from './../../PageCounterInfo';
 import { SignatureInfo } from './../../SignatureInfo';
 import { WatermarkInfo } from './../../WatermarkInfo';
 import { WatermarkPaidInfo } from './../../WatermarkPaidInfo';
+import { ItemsInfo } from './../ItemsInfo';
 import { PaymentInfo } from './../PaymentInfo';
 import { HeaderInfo } from './HeaderInfo';
 

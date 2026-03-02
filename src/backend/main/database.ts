@@ -24,7 +24,7 @@ const setupDB = async (opts: {
   }
 
   if (dbType === DatabaseType.postgre) {
-    if (!postgresConfig) throw new Error('Postgres configuration required');
+    if (!postgresConfig) throw new Error('error.postgresConfig');
     const { db: newDb } = await openPostgreSql(postgresConfig);
     dbInstance = newDb;
   } else if (dbType === DatabaseType.sqlite) {
@@ -32,7 +32,7 @@ const setupDB = async (opts: {
     dbInstance = newDb;
   }
 
-  if (!dbInstance) throw new Error('No database selected');
+  if (!dbInstance) throw new Error('error.noDatabase');
 
   if (createIfMissing) {
     await initSchema(dbInstance);
@@ -41,7 +41,7 @@ const setupDB = async (opts: {
 
   const migrationResult = await runMigrations(dbInstance);
   if (migrationResult && !migrationResult.success) {
-    throw new Error(migrationResult.message ?? 'Migrations failed');
+    throw new Error(migrationResult.message ?? 'error.failedMigration');
   }
 
   initIpcHandler(dbInstance, mainWindow);

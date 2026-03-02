@@ -1,7 +1,7 @@
 {
   "name": "invoice-builder",
   "private": true,
-  "version": "2.2.2",
+  "version": "2.3.0",
   "type": "module",
   "description": "Invoice and quotation builder desktop app with PDF export, designed for small businesses and freelancers. Create, manage, and export invoices and quotes easily using a local database in an Electron-based app.",
   "author": "piratuks",
@@ -43,7 +43,8 @@
     "docker:compose:build": "docker compose up -d --build",
     "docker:compose:up": "docker compose up -d",
     "docker:compose:down": "docker compose down -d",
-    "dev": "concurrently \"npm:dev:react\" \"npm:dev:preload\" \"npm:dev:migrations\" \"npm:dev:electron\" \"npm:dev:electron:start:wait\"",
+    "dev": "npm run dev:clean:backend && concurrently \"npm:dev:react\" \"npm:dev:preload\" \"npm:dev:migrations\" \"npm:dev:electron\" \"npm:dev:electron:start:wait\"",
+    "dev:clean:backend": "rimraf dist-be/backend",
     "dev:webserver": "set TS_NODE_PROJECT=tsconfig.webserver.json && npx tsx --watch src/backend/webserver/main.ts",
     "dev:fe": "concurrently \"npm:dev:react\" \"npm:dev:preload\" \"npm:dev:migrations\"",
     "dev:preload": "vite build --config vite.preload.config.ts --watch",
@@ -96,6 +97,7 @@
     "mui-color-input": "^7.0.0",
     "multer": "^2.0.2",
     "pako": "^2.1.0",
+    "pdf-lib": "^1.17.1",
     "pg": "^8.19.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
@@ -113,6 +115,7 @@
     "web-vitals": "^5.1.0"
   },
   "devDependencies": {
+    "@electron/rebuild": "^4.0.3",
     "@emotion/jest": "^11.14.2",
     "@eslint/js": "^9.39.2",
     "@testing-library/jest-dom": "^6.9.1",
@@ -136,7 +139,6 @@
     "concurrently": "^9.2.1",
     "electron": "^40.6.1",
     "electron-builder": "^26.8.1",
-    "@electron/rebuild": "^4.0.3",
     "electronmon": "^2.0.4",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",

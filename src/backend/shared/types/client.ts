@@ -7,6 +7,10 @@ export interface Client {
   address?: string;
   additional?: string;
   vatCode?: string;
+  peppolEndpointId?: string;
+  countryCode?: string;
+  peppolEndpointSchemeId?: string;
+  buyerReference?: string;
   code?: string;
   description?: string;
   isArchived: boolean;
