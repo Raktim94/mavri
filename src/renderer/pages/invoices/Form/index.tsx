@@ -218,6 +218,7 @@ const InvoiceFormComponent: FC<Props> = ({
             businessFileName: data.fileName,
             businessVatCode: data.vatCode,
             businessCountryCode: data.countryCode,
+            businessCode: data.code,
             businessPeppolEndpointId: data.peppolEndpointId,
             businessPeppolEndpointSchemeId: data.peppolEndpointSchemeId
           }

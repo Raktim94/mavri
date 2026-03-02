@@ -25,6 +25,7 @@ const businessFields: (keyof Business)[] = [
   'vatCode',
   'peppolEndpointId',
   'countryCode',
+  'code',
   'peppolEndpointSchemeId',
   'isArchived'
 ];

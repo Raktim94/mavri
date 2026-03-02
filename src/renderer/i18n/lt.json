@@ -95,7 +95,6 @@
   },
   "clients": {
     "add": "Pridėti klientą",
-    "code": "Įmonės kodas",
     "filter": {
       "activeDesc": "Klientai, kurie nėra archyvuoti",
       "activeText": "Aktyvūs klientai",
@@ -141,6 +140,7 @@
     "cheque": "Čekis",
     "classic": "Klasikinis",
     "client": "Klientas",
+    "code": "Įmonės kodas",
     "color": "Spalva",
     "compact": "Kompaktiškas",
     "confirm": "Patvirtinti",

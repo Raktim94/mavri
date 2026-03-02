@@ -95,7 +95,6 @@
   },
   "clients": {
     "add": "Kunde hinzufügen",
-    "code": "Firmennummer",
     "filter": {
       "activeDesc": "Kunden, die nicht archiviert sind",
       "activeText": "Aktive Kunden",
@@ -141,6 +140,7 @@
     "cheque": "Scheck",
     "classic": "Klassisch",
     "client": "Kunde",
+    "code": "Firmennummer",
     "color": "Farbe",
     "compact": "Kompakt",
     "confirm": "Bestätigen",

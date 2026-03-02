@@ -81,6 +81,7 @@ const invoiceBusinessSnapshotsFields: (keyof InvoiceBusinessSnapshots)[] = [
   'businessVatCode',
   'businessPeppolEndpointId',
   'businessCountryCode',
+  'businessCode',
   'businessPeppolEndpointSchemeId',
   // Legacy payment info. New payment info is via Bank
   // 'businessPaymentInformation',
@@ -970,6 +971,7 @@ export const duplicateInvoice = async (
       'businessVatCode',
       'businessPeppolEndpointId',
       'businessCountryCode',
+      'businessCode',
       'businessPeppolEndpointSchemeId',
       // Legacy payment info. New payment info is via Bank
       // 'businessPaymentInformation',

@@ -36,6 +36,7 @@ export const BusinessesPage = () => {
     'fileName',
     'peppolEndpointId',
     'countryCode',
+    'code',
     'peppolEndpointSchemeId'
   ];
   const excelFileName = 'businesses';
@@ -53,6 +54,7 @@ export const BusinessesPage = () => {
       isArchived: false,
       peppolEndpointId: '0192',
       countryCode: 'GB',
+      code: undefined,
       peppolEndpointSchemeId: '123456785',
       // Legacy payment info. New payment info is via Bank
       paymentInformation:

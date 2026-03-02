@@ -95,7 +95,6 @@
   },
   "clients": {
     "add": "Add client",
-    "code": "Company code",
     "filter": {
       "activeDesc": "Clients that are not archived",
       "activeText": "Active clients",
@@ -141,6 +140,7 @@
     "cheque": "Cheque",
     "classic": "Classic",
     "client": "Client",
+    "code": "Company code",
     "color": "Color",
     "compact": "Compact",
     "confirm": "Confirm",

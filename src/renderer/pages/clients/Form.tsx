@@ -144,7 +144,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, client }) => {
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
         <TextField
-          label={t('clients.code')}
+          label={t('common.code')}
           fullWidth
           value={form.code}
           onChange={e => update('code', e.target.value)}

@@ -92,6 +92,7 @@ export interface InvoiceBusinessSnapshots {
   businessVatCode?: string;
   businessPeppolEndpointId?: string;
   businessCountryCode?: string;
+  businessCode?: string;
   businessPeppolEndpointSchemeId?: string;
 }
 

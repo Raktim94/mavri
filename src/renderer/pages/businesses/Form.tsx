@@ -38,6 +38,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, business }) => {
     peppolEndpointSchemeId: business?.peppolEndpointSchemeId ?? '',
     peppolEndpointId: business?.peppolEndpointId ?? '',
     countryCode: business?.countryCode ?? '',
+    code: business?.code ?? '',
     isArchived: business?.isArchived ?? false
   });
   const [errors, setErrors] = useState({
@@ -107,6 +108,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, business }) => {
       peppolEndpointSchemeId: business?.peppolEndpointSchemeId ?? '',
       peppolEndpointId: business?.peppolEndpointId ?? '',
       countryCode: business?.countryCode ?? '',
+      code: business?.code ?? '',
       isArchived: business?.isArchived ?? false
     });
 
@@ -171,6 +173,14 @@ export const Form: FC<Props> = ({ handleChange = () => {}, business }) => {
               maxLength: 2
             }
           }}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, md: 6 }}>
+        <TextField
+          label={t('common.code')}
+          fullWidth
+          value={form.code}
+          onChange={e => update('code', e.target.value)}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>

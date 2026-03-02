@@ -90,8 +90,25 @@ const allocateDiscountByVat = (invoice: Invoice, discountCents: number): { rate:
 };
 
 const getXMLDiscount = (invoice: Invoice, discountCents: number) => {
-  const allocations = allocateDiscountByVat(invoice, discountCents);
-  return allocations
+  const allocations = allocateDiscountByVat(invoice, discountCents).sort((a, b) => a.rate - b.rate);
+  let runningTotal = 0;
+  const rounded = allocations.map((d, index) => {
+    if (index === allocations.length - 1) {
+      return d;
+    }
+
+    const roundedAmount = Math.round(d.amount * 100) / 100;
+    runningTotal += roundedAmount;
+
+    return { ...d, amount: roundedAmount };
+  });
+  const targetTotal = Math.round(discountCents) / 100;
+  const remainder = +(targetTotal - runningTotal).toFixed(2);
+  rounded[rounded.length - 1] = {
+    ...rounded[rounded.length - 1],
+    amount: remainder
+  };
+  return rounded
     .filter(d => d.amount > 0)
     .map(
       d => `
@@ -103,7 +120,7 @@ const getXMLDiscount = (invoice: Invoice, discountCents: number) => {
           <cbc:ID>${d.rate > 0 ? 'S' : 'Z'}</cbc:ID> 
           <cbc:Percent>${decimals2(d.rate)}</cbc:Percent>
           <cac:TaxScheme>
-            <cbc:ID>VAT</cbc:ID>
+            <cbc:ID>${xmlEscape(invoice.taxName || 'VAT')}</cbc:ID>
           </cac:TaxScheme>
         </cac:TaxCategory>
       </cac:AllowanceCharge>
@@ -127,7 +144,7 @@ const getXMLHeader = (invoice: Invoice, calc: CalculatedInvoice) => {
     <cbc:ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0</cbc:ProfileID>
     <cbc:ID>${xmlEscape(invoice.invoiceNumber)}</cbc:ID>
     <cbc:IssueDate>${issueDate}</cbc:IssueDate>
-    ${dueDate ? `<cbc:DueDate>${dueDate}</cbc:DueDate>` : ''}
+    <cbc:DueDate>${dueDate}</cbc:DueDate>
     <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
     ${noteText ? `<cbc:Note>${xmlEscape(noteText)}</cbc:Note>` : ''}
     <cbc:DocumentCurrencyCode>${xmlEscape(invoice.invoiceCurrencySnapshot!.currencyCode)}</cbc:DocumentCurrencyCode>
@@ -143,7 +160,7 @@ const getXMLHeader = (invoice: Invoice, calc: CalculatedInvoice) => {
           <cac:TaxCategory>
             <cbc:ID>Z</cbc:ID>
             <cbc:Percent>0.00</cbc:Percent>
-            <cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>
+            <cac:TaxScheme><cbc:ID>${xmlEscape(invoice.taxName || 'VAT')}</cbc:ID></cac:TaxScheme>
           </cac:TaxCategory>
         </cac:AllowanceCharge>`
         : ''
@@ -168,7 +185,7 @@ const getXMLSupplier = (invoice: Invoice) => {
         ${sellerAddress.postalZone ? `<cbc:PostalZone>${xmlEscape(sellerAddress.postalZone)}</cbc:PostalZone>` : ''}
         <cac:Country><cbc:IdentificationCode>${xmlEscape(sellerAddress.countryCode)}</cbc:IdentificationCode></cac:Country>
       </cac:PostalAddress>
-      ${invoice.invoiceBusinessSnapshot!.businessVatCode ? `<cac:PartyTaxScheme><cbc:CompanyID>${xmlEscape(invoice.invoiceBusinessSnapshot!.businessVatCode)}</cbc:CompanyID><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme>` : ''}
+      ${invoice.invoiceBusinessSnapshot?.businessVatCode || invoice.invoiceBusinessSnapshot?.businessCode ? `<cac:PartyTaxScheme><cbc:CompanyID>${xmlEscape(invoice.invoiceBusinessSnapshot?.businessVatCode || invoice.invoiceBusinessSnapshot?.businessCode)}</cbc:CompanyID><cac:TaxScheme><cbc:ID>${invoice.taxName || 'VAT'}</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme>` : ''}
       <cac:PartyLegalEntity>
         <cbc:RegistrationName>${xmlEscape(invoice.invoiceBusinessSnapshot!.businessName)}</cbc:RegistrationName>
         ${invoice.invoiceBusinessSnapshot!.businessVatCode ? `<cbc:CompanyID>${xmlEscape(invoice.invoiceBusinessSnapshot!.businessVatCode)}</cbc:CompanyID>` : ''}
@@ -208,7 +225,7 @@ const getXMLBuyer = (invoice: Invoice) => {
         ${buyerAddress.postalZone ? `<cbc:PostalZone>${xmlEscape(buyerAddress.postalZone)}</cbc:PostalZone>` : ''}
         <cac:Country><cbc:IdentificationCode>${xmlEscape(buyerAddress.countryCode)}</cbc:IdentificationCode></cac:Country>
       </cac:PostalAddress>
-      ${invoice.invoiceClientSnapshot!.clientVatCode ? `<cac:PartyTaxScheme><cbc:CompanyID>${xmlEscape(invoice.invoiceClientSnapshot!.clientVatCode)}</cbc:CompanyID><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme>` : ''}
+      ${invoice.invoiceClientSnapshot!.clientVatCode ? `<cac:PartyTaxScheme><cbc:CompanyID>${xmlEscape(invoice.invoiceClientSnapshot!.clientVatCode)}</cbc:CompanyID><cac:TaxScheme><cbc:ID>${invoice.taxName || 'VAT'}</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme>` : ''}
       ${
         invoice.invoiceClientSnapshot!.clientPhone || invoice.invoiceClientSnapshot!.clientEmail
           ? `
@@ -251,7 +268,7 @@ const getXMLShippingTaxTotal = (invoice: Invoice, zeroTaxItemAmount: number) => 
   const shippingCents = Number(invoice.shippingFeeCents);
   const c = invoice.invoiceCurrencySnapshot!;
 
-  if (shippingCents <= 0) return '';
+  if (shippingCents <= 0 && zeroTaxItemAmount <= 0) return '';
 
   const shippingAmount = shippingCents / c.currencySubunit;
   const zeroTaxAmount = zeroTaxItemAmount / c.currencySubunit;
@@ -264,7 +281,7 @@ const getXMLShippingTaxTotal = (invoice: Invoice, zeroTaxItemAmount: number) => 
         <cbc:ID>Z</cbc:ID>
         <cbc:Percent>0.00</cbc:Percent>
         <cac:TaxScheme>
-          <cbc:ID>VAT</cbc:ID>
+          <cbc:ID>${xmlEscape(invoice.taxName || 'VAT')}</cbc:ID>
         </cac:TaxScheme>
       </cac:TaxCategory>
     </cac:TaxSubtotal>
@@ -305,7 +322,7 @@ const getXMLTaxTotal = (invoice: Invoice, calc: CalculatedInvoice) => {
           <cbc:ID>${g.rate > 0 ? 'S' : 'Z'}</cbc:ID> 
           <cbc:Percent>${decimals2(g.rate)}</cbc:Percent>
           <cac:TaxScheme>
-            <cbc:ID>VAT</cbc:ID>
+            <cbc:ID>${xmlEscape(invoice.taxName || 'VAT')}</cbc:ID>
           </cac:TaxScheme>
         </cac:TaxCategory>
       </cac:TaxSubtotal>
@@ -368,7 +385,7 @@ const getXMLLines = (invoice: Invoice, calc: CalculatedInvoice) => {
             <cac:ClassifiedTaxCategory>
               <cbc:ID>${l.taxCategoryId}</cbc:ID>
               <cbc:Percent>${decimals2(l.taxRate)}</cbc:Percent>
-              <cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>
+              <cac:TaxScheme><cbc:ID>${xmlEscape(invoice.taxName || 'VAT')}</cbc:ID></cac:TaxScheme>
             </cac:ClassifiedTaxCategory>
           </cac:Item>
           <cac:Price>
@@ -409,7 +426,16 @@ export const generateUBLInvoiceXML = (invoice: Invoice): string => {
     throw new Error(
       'Invoice is not supported for UBL 2.1 XML compliant with PEPPOL BIS Billing 3.0. Invoice is missing country for business'
     );
+  if (!invoice.dueDate)
+    throw new Error(
+      'Invoice is not supported for UBL 2.1 XML compliant with PEPPOL BIS Billing 3.0. Invoice is missing dueDate'
+    );
+  if (!invoice.invoiceBusinessSnapshot.businessCode && !invoice.invoiceBusinessSnapshot.businessVatCode)
+    throw new Error(
+      'Invoice is not supported for UBL 2.1 XML compliant with PEPPOL BIS Billing 3.0. Invoice is missing code or vat for business'
+    );
 
+  console.log(invoice.taxName);
   const calc = calculateInvoiceTotals(invoice);
 
   const raw = `<?xml version="1.0" encoding="UTF-8"?>

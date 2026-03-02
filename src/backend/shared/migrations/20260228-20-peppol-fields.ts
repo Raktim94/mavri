@@ -67,6 +67,12 @@ export const up = async (db: DatabaseAdapter) => {
     await db.run(
       `
         ALTER TABLE businesses
+        ADD COLUMN "code" TEXT
+      `
+    );
+    await db.run(
+      `
+        ALTER TABLE businesses
         ADD COLUMN "peppolEndpointId" TEXT
       `
     );
@@ -80,6 +86,12 @@ export const up = async (db: DatabaseAdapter) => {
       `
         ALTER TABLE businesses
         ADD COLUMN "peppolEndpointSchemeId" TEXT
+      `
+    );
+    await db.run(
+      `
+        ALTER TABLE invoice_business_snapshots
+        ADD COLUMN "businessCode" TEXT
       `
     );
     await db.run(

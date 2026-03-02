@@ -456,6 +456,7 @@ export const isBusinessFromData = (data: unknown): data is BusinessFromData => {
   )
     return false;
 
+  if (d.code !== undefined && d.code !== null && d.code !== '' && typeof d.code !== 'string') return false;
   if (d.role !== undefined && d.role !== null && d.role !== '' && typeof d.role !== 'string') return false;
   if (d.address !== undefined && d.address !== null && d.address !== '' && typeof d.address !== 'string') return false;
   if (d.website !== undefined && d.website !== null && d.website !== '' && typeof d.website !== 'string') return false;
@@ -699,6 +700,7 @@ export const isInvoiceBusinessSnapshotFromData = (data: unknown): data is Invoic
     'businessFileName',
     'businessPeppolEndpointId',
     'businessCountryCode',
+    'bisinessCode',
     'businessPeppolEndpointSchemeId'
   ];
 

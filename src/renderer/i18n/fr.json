@@ -95,7 +95,6 @@
   },
   "clients": {
     "add": "Ajouter un client",
-    "code": "Code entreprise",
     "filter": {
       "activeDesc": "Clients non archivés",
       "activeText": "Clients actifs",
@@ -141,6 +140,7 @@
     "cheque": "Chèque",
     "classic": "Classique",
     "client": "Client",
+    "code": "Code entreprise",
     "color": "Couleur",
     "compact": "Compact",
     "confirm": "Confirmer",

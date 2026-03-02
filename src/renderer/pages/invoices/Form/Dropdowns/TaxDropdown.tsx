@@ -176,18 +176,16 @@ const TaxDropdownComponent: FC<Props> = ({ isOpen, data, onClose, onOpen, onClic
               />
             </Grid>
           )}
-          {form.taxType && (
-            <Grid size={{ xs: 12, md: 12 }}>
-              <TextField
-                label={t('common.name')}
-                fullWidth
-                value={form.taxName}
-                onChange={e => {
-                  update('taxName', e.target.value);
-                }}
-              />
-            </Grid>
-          )}
+          <Grid size={{ xs: 12, md: 12 }}>
+            <TextField
+              label={t('common.name')}
+              fullWidth
+              value={form.taxName}
+              onChange={e => {
+                update('taxName', e.target.value);
+              }}
+            />
+          </Grid>
           {(form.taxType === InvoiceTaxType.exclusive || form.taxType === InvoiceTaxType.inclusive) && (
             <Grid size={{ xs: 12, md: 12 }}>
               <FormControlLabel
