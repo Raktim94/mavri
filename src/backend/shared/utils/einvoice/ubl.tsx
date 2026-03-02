@@ -399,41 +399,23 @@ const getXMLLines = (invoice: Invoice, calc: CalculatedInvoice) => {
 
 export const generateUBLInvoiceXML = (invoice: Invoice): string => {
   if (!invoice.invoiceCurrencySnapshot || !invoice.invoiceBusinessSnapshot || !invoice.invoiceClientSnapshot)
-    throw new Error('Invoice is not supported for UBL 2.1 XML compliant with PEPPOL BIS Billing 3.0');
+    throw new Error('error.peppolNotSupported');
   if (
     !invoice.invoiceBusinessSnapshot.businessPeppolEndpointId ||
     !invoice.invoiceBusinessSnapshot.businessPeppolEndpointSchemeId
   )
-    throw new Error(
-      'Invoice is not supported for UBL 2.1 XML compliant with PEPPOL BIS Billing 3.0. Invoice is missing Peppol Endpoint ID and Schema ID for business'
-    );
+    throw new Error('error.peppolBusinessSchema');
   if (
     !invoice.invoiceClientSnapshot.clientPeppolEndpointId ||
     !invoice.invoiceClientSnapshot.clientPeppolEndpointSchemeId
   )
-    throw new Error(
-      'Invoice is not supported for UBL 2.1 XML compliant with PEPPOL BIS Billing 3.0. Invoice is missing Peppol Endpoint ID and Schema ID for client'
-    );
-  if (!invoice.invoiceClientSnapshot.clientBuyerReference)
-    throw new Error(
-      'Invoice is not supported for UBL 2.1 XML compliant with PEPPOL BIS Billing 3.0. Invoice is missing buyer reference for client'
-    );
-  if (!invoice.invoiceClientSnapshot.clientCountryCode)
-    throw new Error(
-      'Invoice is not supported for UBL 2.1 XML compliant with PEPPOL BIS Billing 3.0. Invoice is missing country for client'
-    );
-  if (!invoice.invoiceBusinessSnapshot.businessCountryCode)
-    throw new Error(
-      'Invoice is not supported for UBL 2.1 XML compliant with PEPPOL BIS Billing 3.0. Invoice is missing country for business'
-    );
-  if (!invoice.dueDate)
-    throw new Error(
-      'Invoice is not supported for UBL 2.1 XML compliant with PEPPOL BIS Billing 3.0. Invoice is missing dueDate'
-    );
+    throw new Error('error.peppolClientSchema');
+  if (!invoice.invoiceClientSnapshot.clientBuyerReference) throw new Error('error.peppolClientReference');
+  if (!invoice.invoiceClientSnapshot.clientCountryCode) throw new Error('error.peppolClientCC');
+  if (!invoice.invoiceBusinessSnapshot.businessCountryCode) throw new Error('error.peppolBusinessCC');
+  if (!invoice.dueDate) throw new Error('error.peppolDueDate');
   if (!invoice.invoiceBusinessSnapshot.businessCode && !invoice.invoiceBusinessSnapshot.businessVatCode)
-    throw new Error(
-      'Invoice is not supported for UBL 2.1 XML compliant with PEPPOL BIS Billing 3.0. Invoice is missing code or vat for business'
-    );
+    throw new Error('error.peppolVATCode');
 
   console.log(invoice.taxName);
   const calc = calculateInvoiceTotals(invoice);

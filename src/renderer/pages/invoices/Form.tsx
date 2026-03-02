@@ -1,5 +1,6 @@
 import { memo, useCallback, useDeferredValue, useEffect, useRef, useState, useTransition, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
+import i18n from '../../i18n';
 import { FontFamily } from '../../shared/enums/fontFamily';
 import { InvoiceFormMode } from '../../shared/enums/invoiceFormMode';
 import { InvoiceStatus } from '../../shared/enums/invoiceStatus';
@@ -54,8 +55,10 @@ const InvoiceFormComponent: FC<Props> = ({
       setNewStyleProfile(undefined);
 
       if (!data.success) {
-        if (data.message) dispatch(addToast({ message: data.message, severity: 'error' }));
-        else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
+        if (data.message) {
+          const message = i18n.exists(data.message) ? t(data.message) : data.message;
+          dispatch(addToast({ message: message, severity: 'error' }));
+        } else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
       }
     }
   });

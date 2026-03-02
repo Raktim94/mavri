@@ -126,7 +126,7 @@ export const importAllData = async (db: DatabaseAdapter, parsed: Record<string, 
       try {
         await db.run('ROLLBACK');
       } catch {
-        throw new Error(`ROLLBACK failed`);
+        throw new Error(`error.rollbackFailed`);
       }
       throw err;
     } finally {

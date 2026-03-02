@@ -1,6 +1,7 @@
 import { Button, Dialog, DialogContent, FormControlLabel, Grid, Switch, TextField } from '@mui/material';
 import { useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
+import i18n from '../../../i18n';
 import { ModalAppBar } from '../../../shared/components/layout/modalAppBar/ModalAppBar';
 import { useTestConnection } from '../../../shared/hooks/dbSelector/useDBTestConnection';
 import { useForm } from '../../../shared/hooks/useForm';
@@ -51,7 +52,10 @@ export const ConnectionSetter: FC<Props> = ({ isOpen, onCancel = () => {}, onSav
     immediate: false,
     onDone: (data: Response<unknown>) => {
       if (!data.success) {
-        dispatch(addToast({ message: t('common.testConnectionFailed'), severity: 'error' }));
+        if (data.message) {
+          const message = i18n.exists(data.message) ? t(data.message) : data.message;
+          dispatch(addToast({ message: message, severity: 'error' }));
+        } else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
       } else if (data.success) {
         dispatch(addToast({ message: t('common.testConnectionSuccess'), severity: 'success' }));
       }

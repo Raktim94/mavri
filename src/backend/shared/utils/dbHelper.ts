@@ -77,7 +77,7 @@ export const prepareUpdate = (data: UpdateData, id?: number) => {
       if (typeof value === 'boolean') param = value ? 1 : 0;
       else if (value === null) param = null;
       else if (typeof value === 'string' || typeof value === 'number') param = value;
-      else throw new Error(`Unsupported value type for key "${key}"`);
+      else throw new Error(`error.unsupportedValue`);
 
       params.push(param);
     }
@@ -138,7 +138,7 @@ export const insertOrIgnore = (
       return `INSERT OR IGNORE INTO ${table} DEFAULT VALUES;`;
     } else {
       if (!conflictTarget) {
-        throw new Error(`Postgres requires a conflict target for table ${table}`);
+        throw new Error(`error.postgresConflictTarget`);
       }
       return `INSERT INTO ${table} DEFAULT VALUES ON CONFLICT (${conflictTarget}) DO NOTHING;`;
     }
@@ -151,7 +151,7 @@ export const insertOrIgnore = (
     return `INSERT OR IGNORE INTO ${table} (${columnsList}) VALUES ${valuesList};`;
   } else {
     if (!conflictTarget) {
-      throw new Error(`Postgres requires a conflict target for table ${table}`);
+      throw new Error(`error.postgresConflictTarget`);
     }
     return `INSERT INTO ${table} (${columnsList}) VALUES ${valuesList} ON CONFLICT (${conflictTarget}) DO NOTHING;`;
   }

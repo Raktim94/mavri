@@ -73,8 +73,8 @@ export const createPostgresAdapter = (connectionString: string): DatabaseAdapter
     if (clientInTransaction) {
       try {
         clientInTransaction.release();
-      } catch (err) {
-        throw new Error(`Failed to release PG client: ${err}`);
+      } catch {
+        throw new Error(`error.failedPGrelease`);
       }
 
       clientInTransaction = null;

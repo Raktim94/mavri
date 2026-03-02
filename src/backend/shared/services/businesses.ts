@@ -109,7 +109,7 @@ export const batchAddBusiness = async (db: DatabaseAdapter, data: Business[]) =>
         try {
           await db.run('ROLLBACK');
         } catch {
-          throw new Error(`ROLLBACK failed`);
+          throw new Error(`error.rollbackFailed`);
         }
         return result;
       }
@@ -120,7 +120,7 @@ export const batchAddBusiness = async (db: DatabaseAdapter, data: Business[]) =>
     try {
       await db.run('ROLLBACK');
     } catch {
-      throw new Error(`ROLLBACK failed`);
+      throw new Error(`error.rollbackFailed`);
     }
     return { success: false, ...mapDatabaseError(error, db.type) };
   }

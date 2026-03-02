@@ -10,21 +10,21 @@ import { createPostgresAdapter, createSqliteAdapter } from './client';
 
 const sanitizeDatabaseName = (database: string): string => {
   if (typeof database !== 'string' || database.trim().length === 0) {
-    throw new Error('Invalid database name');
+    throw new Error('error.invalidDBName');
   }
   const trimmed = database.trim();
   const maxLength = 63;
   if (trimmed.length > maxLength) {
-    throw new Error('Database name is too long');
+    throw new Error('error.databaseNameTooLong');
   }
   if (!/^[A-Za-z0-9_]+$/.test(trimmed)) {
-    throw new Error('Database name contains invalid characters');
+    throw new Error('error.databaseNameInvalid');
   }
   return trimmed;
 };
 
 export const testPostgresConnection = async (data?: PostgresConfig): Promise<void> => {
-  if (!data) throw new Error('Connection failed');
+  if (!data) throw new Error('error.connectionFailed');
 
   const { host, port, user, password, ssl } = data;
 
@@ -41,7 +41,7 @@ export const testPostgresConnection = async (data?: PostgresConfig): Promise<voi
     await client.connect();
     await client.query('SELECT 1');
   } catch {
-    throw new Error('Connection failed');
+    throw new Error('error.connectionFailed');
   } finally {
     await client.end().catch(() => {});
   }
@@ -71,7 +71,7 @@ export const openPostgreSql = async (data: PostgresConfig): Promise<{ db: Databa
     }
     await tempClient.end();
   } catch {
-    throw new Error('Database creation/connection failed');
+    throw new Error('error.databaseCreationFailed');
   }
 
   const adapter = await createPostgresAdapter(connectionString);
@@ -85,7 +85,7 @@ export const openSqlLite = async (data: {
 }): Promise<{ db: DatabaseAdapter }> => {
   const { fullPath, createIfMissing } = data;
 
-  if (!fullPath) throw new Error('Database path is not set');
+  if (!fullPath) throw new Error('error.databasePathInvalid');
 
   const folder = path.dirname(fullPath);
   fs.mkdirSync(folder, { recursive: true });
@@ -104,14 +104,14 @@ export const openSqlLite = async (data: {
     }
   } else {
     if (!fs.existsSync(fullPath)) {
-      throw new Error('Database file does not exist');
+      throw new Error('error.databaseFileNotExist');
     }
   }
 
   const db = await new Promise<sqlite3.Database>((resolve, reject) => {
     const database = new sqlite3.Database(fullPath, err => {
       if (err) {
-        reject(new Error(`Failed to open database: ${err.message}`));
+        reject(new Error(`error.failedToOpenDB`));
         return;
       }
       console.log('Database opened successfully.');
@@ -382,9 +382,9 @@ export const initSchema = async (db: DatabaseAdapter): Promise<void> => {
     try {
       await db.run('ROLLBACK');
     } catch {
-      throw new Error(`ROLLBACK failed`);
+      throw new Error(`error.rollbackFailed`);
     }
-    throw new Error(`Database schema initiation failed`);
+    throw new Error(`error.schemaInitFailed`);
   }
 };
 

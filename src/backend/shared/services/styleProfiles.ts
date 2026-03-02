@@ -177,7 +177,7 @@ export const batchAddStyleProfile = async (db: DatabaseAdapter, data: StyleProfi
         try {
           await db.run('ROLLBACK');
         } catch {
-          throw new Error(`ROLLBACK failed`);
+          throw new Error(`error.rollbackFailed`);
         }
         return result;
       }
@@ -188,7 +188,7 @@ export const batchAddStyleProfile = async (db: DatabaseAdapter, data: StyleProfi
     try {
       await db.run('ROLLBACK');
     } catch {
-      throw new Error(`ROLLBACK failed`);
+      throw new Error(`error.rollbackFailed`);
     }
     return { success: false, ...mapDatabaseError(error, db.type) };
   }

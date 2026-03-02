@@ -202,7 +202,7 @@ const rollbackOrThrow = async (db: DatabaseAdapter) => {
   try {
     await db.run('ROLLBACK');
   } catch {
-    throw new Error(`ROLLBACK failed`);
+    throw new Error(`error.rollbackFailed`);
   }
 };
 
@@ -504,7 +504,7 @@ export const getInvoiceXML = async (db: DatabaseAdapter, data: { invoiceId: numb
   const invoiceResult = await getInvoices(db, { id: invoiceId });
 
   if (invoiceResult.length <= 0) {
-    throw new Error('Invoice not found');
+    throw new Error('error.invoiceNotFound');
   }
 
   const invoice = invoiceResult[0];
@@ -782,7 +782,7 @@ export const updateInvoice = async (db: DatabaseAdapter, data: Invoice) => {
         try {
           await db.run('ROLLBACK');
         } catch {
-          throw new Error(`ROLLBACK failed`);
+          throw new Error(`error.rollbackFailed`);
         }
         return { success: false, key: ibs.key, message: ibs.message };
       }
@@ -799,7 +799,7 @@ export const updateInvoice = async (db: DatabaseAdapter, data: Invoice) => {
         try {
           await db.run('ROLLBACK');
         } catch {
-          throw new Error(`ROLLBACK failed`);
+          throw new Error(`error.rollbackFailed`);
         }
         return { success: false, key: ibs.key, message: ibs.message };
       }

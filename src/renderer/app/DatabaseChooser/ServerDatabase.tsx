@@ -48,8 +48,10 @@ export const ServerDatabase: FC<Props> = ({ onDatabaseRead }) => {
     immediate: false,
     onDone: (data: Response<unknown>) => {
       if (!data.success) {
-        if (data.message) dispatch(addToast({ message: data.message, severity: 'error' }));
-        else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
+        if (data.message) {
+          const message = i18n.exists(data.message) ? t(data.message) : data.message;
+          dispatch(addToast({ message: message, severity: 'error' }));
+        } else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
       } else {
         if (onDatabaseRead) onDatabaseRead();
       }

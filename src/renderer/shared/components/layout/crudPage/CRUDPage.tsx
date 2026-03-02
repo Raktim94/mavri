@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import i18n from '../../../../i18n';
 import { useAppDispatch } from '../../../../state/configureStore';
 import { addToast } from '../../../../state/pageSlice';
 import { FilterType } from '../../../enums/filterType';
@@ -158,8 +159,10 @@ export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
     filter: selectedFilter,
     onDone: (data: Response<T[]>) => {
       if (!data.success) {
-        if (data.message) dispatch(addToast({ message: data.message, severity: 'error' }));
-        else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
+        if (data.message) {
+          const message = i18n.exists(data.message) ? t(data.message) : data.message;
+          dispatch(addToast({ message: message, severity: 'error' }));
+        } else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
       }
     }
   });
@@ -173,8 +176,10 @@ export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
       reload();
 
       if (!data.success) {
-        if (data.message) dispatch(addToast({ message: data.message, severity: 'error' }));
-        else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
+        if (data.message) {
+          const message = i18n.exists(data.message) ? t(data.message) : data.message;
+          dispatch(addToast({ message: message, severity: 'error' }));
+        } else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
       }
     }
   });
@@ -188,8 +193,10 @@ export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
       reload();
 
       if (!data.success) {
-        if (data.message) dispatch(addToast({ message: data.message, severity: 'error' }));
-        else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
+        if (data.message) {
+          const message = i18n.exists(data.message) ? t(data.message) : data.message;
+          dispatch(addToast({ message: message, severity: 'error' }));
+        } else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
       }
     }
   });
@@ -203,8 +210,10 @@ export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
       reload();
 
       if (!data.success) {
-        if (data.message) dispatch(addToast({ message: data.message, severity: 'error' }));
-        else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
+        if (data.message) {
+          const message = i18n.exists(data.message) ? t(data.message) : data.message;
+          dispatch(addToast({ message: message, severity: 'error' }));
+        } else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
       }
     }
   });
@@ -219,8 +228,10 @@ export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
       reload();
 
       if (!data.success) {
-        if (data.message) dispatch(addToast({ message: data.message, severity: 'error' }));
-        else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
+        if (data.message) {
+          const message = i18n.exists(data.message) ? t(data.message) : data.message;
+          dispatch(addToast({ message: message, severity: 'error' }));
+        } else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
       }
     }
   });
@@ -235,8 +246,10 @@ export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
       reload();
 
       if (!data.success) {
-        if (data.message) dispatch(addToast({ message: data.message, severity: 'error' }));
-        else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
+        if (data.message) {
+          const message = i18n.exists(data.message) ? t(data.message) : data.message;
+          dispatch(addToast({ message: message, severity: 'error' }));
+        } else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
       }
     }
   });

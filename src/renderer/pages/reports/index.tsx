@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
+import i18n from '../../i18n';
 import { InvoiceType } from '../../shared/enums/invoiceType';
 import { useInvoicesRetrieve } from '../../shared/hooks/invoices/useInvoicesRetrieve';
 import type { Invoice } from '../../shared/types/invoice';
@@ -24,8 +25,10 @@ export const ReportsPage: FC = () => {
     type: InvoiceType.invoice,
     onDone: (data: Response<Invoice[]>) => {
       if (!data.success) {
-        if (data.message) dispatch(addToast({ message: data.message, severity: 'error' }));
-        else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
+        if (data.message) {
+          const message = i18n.exists(data.message) ? t(data.message) : data.message;
+          dispatch(addToast({ message: message, severity: 'error' }));
+        } else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
       }
     }
   });

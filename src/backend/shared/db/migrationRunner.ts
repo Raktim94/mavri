@@ -38,7 +38,7 @@ export const runMigrations = async (db: DatabaseAdapter, migrationsPath: string)
         // eslint-disable-next-line @typescript-eslint/no-require-imports
         const migration = require(migrationPath);
         if (typeof migration.up !== 'function') {
-          throw new Error(`Migration ${file} does not export up()`);
+          throw new Error(`error.noUpFunction`);
         }
         if (migration.up) {
           await migration.up(db);
@@ -58,7 +58,7 @@ export const runMigrations = async (db: DatabaseAdapter, migrationsPath: string)
       try {
         await db.run('ROLLBACK');
       } catch {
-        throw new Error(`ROLLBACK failed`);
+        throw new Error(`error.rollbackFailed`);
       }
     }
 

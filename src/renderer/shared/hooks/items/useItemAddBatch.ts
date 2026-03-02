@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import i18n from '../../../i18n';
 import { useAppDispatch } from '../../../state/configureStore';
 import { addToast } from '../../../state/pageSlice';
 import { getApi } from '../../api/restApi';
@@ -24,8 +25,10 @@ export const useItemAddBatch = ({ items, immediate = true, showLoader = true, on
     immediate: false,
     onDone: (data: Response<Unit[]>) => {
       if (!data.success) {
-        if (data.message) dispatch(addToast({ message: data.message, severity: 'error' }));
-        else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
+        if (data.message) {
+          const message = i18n.exists(data.message) ? t(data.message) : data.message;
+          dispatch(addToast({ message: message, severity: 'error' }));
+        } else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
       }
     }
   });
@@ -34,8 +37,10 @@ export const useItemAddBatch = ({ items, immediate = true, showLoader = true, on
     immediate: false,
     onDone: (data: Response<Category[]>) => {
       if (!data.success) {
-        if (data.message) dispatch(addToast({ message: data.message, severity: 'error' }));
-        else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
+        if (data.message) {
+          const message = i18n.exists(data.message) ? t(data.message) : data.message;
+          dispatch(addToast({ message: message, severity: 'error' }));
+        } else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
       }
     }
   });
