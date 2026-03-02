@@ -1108,4 +1108,11 @@ To generate valid UBL/Peppol XML, additional fields are available on Businesses 
 > - Tax names must match supported values (e.g., VAT). Arbitrary text will cause validation errors.
 > - Currency codes must be standard ISO codes (e.g., EUR, USD). Random text will fail validation.
 >
+> Export behavior:
+> - A regular PDF can be exported at any time.
+> - The XML file and the PDF with embedded XML reflect only saved data.
+> - You cannot export XML while creating a new invoice until it has been saved.
+> - When editing an invoice, make sure to save changes before exporting.
+>   
+>
 > Use a Peppol XML validator (e.g., [https://peppolvalidator.com/](https://peppolvalidator.com/)) to ensure compliance before sending.
