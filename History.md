@@ -5,7 +5,7 @@
 New features & improvements
 
 - Official Docker prebuilt image published
-- UBL Peppol XML support: download embedded XML alongside the PDF, or as a standalone XML file. [Read more](https://github.com/piratuks/invoice-builder/blob/main/TUTORIAL.md#e-invoices)
+- UBL Peppol XML support: download embedded XML alongside the PDF, or as a standalone XML file.
 
 Bug Fixes
 
