@@ -7,7 +7,7 @@ export const useFormDirtyCheck = <T>(form: T | undefined, initialFormRef: RefObj
   const [isDirty, setIsDirty] = useState(false);
 
   useEffect(() => {
-    if (!form) {
+    if (!form || !initialFormRef.current) {
       setIsDirty(false);
       dispatch(setAllowed(true));
       return;

@@ -1,5 +1,11 @@
 # Invoice Builder
 
+## 2026-03-03, version 2.4.1
+
+Bug Fixes
+
+- Hotfix for dirty confirmation
+
 ## 2026-03-03, version 2.4.0
 
 New features & improvements
