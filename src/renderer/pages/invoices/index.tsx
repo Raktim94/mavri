@@ -272,7 +272,10 @@ export const InvoicesPage: FC<Props> = ({ type }) => {
             key={item.id}
             item={item}
             isSelected={item.id === selectedItem?.id}
-            onEdit={(editItem: Invoice) => onEdit(editItem)}
+            onEdit={(editItem: Invoice) => {
+              setSelectedPreset(undefined);
+              onEdit(editItem);
+            }}
           />
         )}
         form={({ item, onChange, onDelete, onDuplicate }) => (
@@ -306,6 +309,7 @@ export const InvoicesPage: FC<Props> = ({ type }) => {
         onClose={() => setIsAddDropdownOpen(false)}
         onOpen={() => setIsAddDropdownOpen(true)}
         onNew={() => {
+          setSelectedPreset(undefined);
           setIsAddDropdownOpen(false);
           if (openDefaultAdd) {
             openDefaultAdd();

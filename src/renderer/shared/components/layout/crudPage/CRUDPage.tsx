@@ -277,9 +277,17 @@ export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
   }, [filteredItems, currentPage, itemsPerPage]);
 
   const handleCloseModal = useCallback(() => {
-    setIsModalOpen(false);
-    if (!isDesktop) setSelectedItem(undefined);
-  }, [isDesktop]);
+    const doSelect = () => {
+      setIsModalOpen(false);
+      setSelectedItem(undefined);
+    };
+
+    if (attemptNavigation && !isDesktop) {
+      attemptNavigation(doSelect);
+    } else {
+      setIsModalOpen(false);
+    }
+  }, [attemptNavigation, isDesktop]);
 
   const isUpdate = useCallback((item: TAdd | TUpdate): item is TUpdate => {
     return typeof item === 'object' && item !== null && 'id' in item && typeof item.id !== 'undefined';
@@ -324,13 +332,13 @@ export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
           return item;
         });
 
-      if (attemptNavigation) {
+      if (attemptNavigation && isDesktop) {
         attemptNavigation(doSelect);
       } else {
         doSelect();
       }
     },
-    [attemptNavigation]
+    [attemptNavigation, isDesktop]
   );
 
   const onDelete = useCallback((id: number) => {
