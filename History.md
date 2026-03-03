@@ -5,6 +5,7 @@
 New features & improvements
 
 - Improved creation from presets. Showing searchable presets right away insteaf of opening new modal.
+- Implemented confirmation for dirty records before leaving the page and before selecting a different item.
 
 ## 2026-03-02, version 2.3.0
 
