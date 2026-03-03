@@ -4,7 +4,7 @@
 
 New features & improvements
 
-- Improved creation from presets. Showing searchable presets right away insteaf of opening new modal
+- Improved creation from presets. Showing searchable presets right away instead of opening new modal
 - Implemented confirmation for dirty records before leaving the page and before selecting a different item
 - Implemented persistent filters / search / sort
 
