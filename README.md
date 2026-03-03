@@ -53,7 +53,7 @@ If you value **privacy, portability, and control**, this app is built for you.
 ### Business Data Management
 
 - Banks, Businesses, Clients, Items, Categories, Units, Currencies
-- Search, sort, filter, archive (non-destructive)
+- Persistent search, persistent sort, persistent filter, archive (non-destructive)
 - XLSX import/export for most entities
 - Automatic creation of missing units/categories on item import
 
@@ -425,6 +425,7 @@ Please open an issue before starting major work to ensure alignment.
 
 | Version | Status                |
 | ------- | --------------------- |
+| v2.4.0  | ✅ Actively supported |
 | v2.3.0  | ✅ Actively supported |
 | v2.2.2  | ✅ Actively supported |
 | v2.2.1  | ✅ Actively supported |
