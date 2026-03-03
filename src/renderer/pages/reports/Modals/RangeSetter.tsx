@@ -3,7 +3,7 @@ import { memo, useEffect, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Datepicker } from '../../../shared/components/inputs/datepicker/Datepicker';
 import { ModalAppBar } from '../../../shared/components/layout/modalAppBar/ModalAppBar';
-import { useForm } from '../../../shared/hooks/useForm';
+import { useForm } from '../../../shared/hooks/form/useForm';
 import { useAppSelector } from '../../../state/configureStore';
 import { selectSettings } from '../../../state/pageSlice';
 

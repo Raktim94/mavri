@@ -5,7 +5,7 @@ import { CustomizationLayout } from '../../../../shared/components/layout/custom
 import { PageHeader } from '../../../../shared/components/layout/pageHeader/PageHeader';
 import { FontFamily } from '../../../../shared/enums/fontFamily';
 import type { Language } from '../../../../shared/enums/language';
-import { useForm } from '../../../../shared/hooks/useForm';
+import { useForm } from '../../../../shared/hooks/form/useForm';
 import type { CustomizationForm } from '../../../../shared/types/invoice';
 import type { StyleProfileFromData } from '../../../../shared/types/styleProfiles';
 import { useAppSelector } from '../../../../state/configureStore';

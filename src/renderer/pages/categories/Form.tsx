@@ -1,8 +1,8 @@
 import { FormControlLabel, Grid, Switch, TextField } from '@mui/material';
 import { useEffect, useRef, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useForm } from '../../shared/hooks/useForm';
-import { useFormDirtyCheck } from '../../shared/hooks/useFormDirtyCheck';
+import { useForm } from '../../shared/hooks/form/useForm';
+import { useFormDirtyCheck } from '../../shared/hooks/form/useFormDirtyCheck';
 import type { Category, CategoryFromData } from '../../shared/types/category';
 import { validators } from '../../shared/utils/validatorFunctions';
 

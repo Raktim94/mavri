@@ -3,7 +3,7 @@ import { getApi } from '../../api/restApi';
 import type { Item, ItemAdd } from '../../types/item';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
-import { useAsyncAction } from '../useAsyncAction';
+import { useAsyncAction } from '../ayncAction/useAsyncAction';
 
 interface UseItemAddParams extends RequestHook<Response<Item>> {
   item?: ItemAdd;

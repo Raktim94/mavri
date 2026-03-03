@@ -5,7 +5,7 @@ import { AmountInput } from '../../../../shared/components/inputs/amountInput/Am
 import { Datepicker } from '../../../../shared/components/inputs/datepicker/Datepicker';
 import { PageHeader } from '../../../../shared/components/layout/pageHeader/PageHeader';
 import { PaymentType } from '../../../../shared/enums/paymentType';
-import { useForm } from '../../../../shared/hooks/useForm';
+import { useForm } from '../../../../shared/hooks/form/useForm';
 import type { PaymentForm } from '../../../../shared/types/invoice';
 import { validators } from '../../../../shared/utils/validatorFunctions';
 import { useAppSelector } from '../../../../state/configureStore';

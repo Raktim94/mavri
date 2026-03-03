@@ -5,8 +5,8 @@ import { SpinnerOverlay } from '../shared/components/feedback/spinner/SpinnerOve
 import { ToastContainer } from '../shared/components/feedback/toast/toastContainer';
 import { Confirmation } from '../shared/components/modals/confirmation';
 import { BeforeUnloadProvider } from '../shared/context/BeforeUnloadContext';
+import { useBeforeLeave } from '../shared/hooks/other/useBeforeLeave';
 import { useSettingsRetrieve } from '../shared/hooks/settings/useSettingsRetrieve';
-import { useBeforeLeave } from '../shared/hooks/useBeforeLeave';
 import type { Response } from '../shared/types/response';
 import type { Settings } from '../shared/types/settings';
 import { useAppDispatch, useAppSelector } from '../state/configureStore';

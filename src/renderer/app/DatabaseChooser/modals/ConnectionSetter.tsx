@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import i18n from '../../../i18n';
 import { ModalAppBar } from '../../../shared/components/layout/modalAppBar/ModalAppBar';
 import { useTestConnection } from '../../../shared/hooks/dbSelector/useDBTestConnection';
-import { useForm } from '../../../shared/hooks/useForm';
+import { useForm } from '../../../shared/hooks/form/useForm';
 import type { PostgresConfig } from '../../../shared/types/postgresConfig';
 import type { Response } from '../../../shared/types/response';
 import { validators } from '../../../shared/utils/validatorFunctions';

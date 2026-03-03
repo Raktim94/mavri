@@ -3,7 +3,7 @@ import { getApi } from '../../api/restApi';
 import type { Category, CategoryAdd } from '../../types/category';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
-import { useAsyncAction } from '../useAsyncAction';
+import { useAsyncAction } from '../ayncAction/useAsyncAction';
 
 interface UseCategoryAddParams extends RequestHook<Response<Category>> {
   category?: CategoryAdd;

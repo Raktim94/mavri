@@ -16,7 +16,7 @@ import { AmountInput } from '../../../../shared/components/inputs/amountInput/Am
 import { PageHeader } from '../../../../shared/components/layout/pageHeader/PageHeader';
 import { InvoiceTaxOptionType } from '../../../../shared/enums/invoiceTaxOptionType';
 import { InvoiceItemTaxType, InvoiceTaxType } from '../../../../shared/enums/taxType';
-import { useForm } from '../../../../shared/hooks/useForm';
+import { useForm } from '../../../../shared/hooks/form/useForm';
 import type { TaxForm } from '../../../../shared/types/invoice';
 import { validators } from '../../../../shared/utils/validatorFunctions';
 

@@ -6,7 +6,7 @@ import type { InvoiceType } from '../../enums/invoiceType';
 import type { Invoice } from '../../types/invoice';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
-import { useAsyncAction } from '../useAsyncAction';
+import { useAsyncAction } from '../ayncAction/useAsyncAction';
 
 interface UseInvoicesParams extends RequestHook<Response<Invoice[]>> {
   type?: InvoiceType;

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import type { Language } from '../enums/language';
-import type { PdfTexts } from '../types/invoice';
+import type { Language } from '../../enums/language';
+import type { PdfTexts } from '../../types/invoice';
 import { useUppercaseTranslation } from './useUppercaseTranslation';
 
 export const usePdfTexts = (

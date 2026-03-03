@@ -3,7 +3,7 @@ import { MuiColorInput } from 'mui-color-input';
 import { useCallback, useEffect, useRef, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SizeType } from '../../../../enums/sizeType';
-import { useForm } from '../../../../hooks/useForm';
+import { useForm } from '../../../../hooks/form/useForm';
 import type { CustomizationFormBranding } from '../../../../types/invoice';
 import { toDataUrl, toUint8Array } from '../../../../utils/dataUrlFunctions';
 import { UploadImage } from '../../../inputs/uploadImage/UploadImage';

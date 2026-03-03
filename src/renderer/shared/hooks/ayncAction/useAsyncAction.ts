@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import i18n from '../../i18n';
-import { useAppDispatch } from '../../state/configureStore';
-import { addToast, disableLoadingCursor, enableLoadingCursor } from '../../state/pageSlice';
+import i18n from '../../../i18n';
+import { useAppDispatch } from '../../../state/configureStore';
+import { addToast, disableLoadingCursor, enableLoadingCursor } from '../../../state/pageSlice';
 import { useAsync } from './useAsync';
 
 interface UseAsyncActionOptions<T> {

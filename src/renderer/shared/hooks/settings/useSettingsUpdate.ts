@@ -3,7 +3,7 @@ import { getApi } from '../../api/restApi';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
 import type { SettingsUpdate } from '../../types/settings';
-import { useAsyncAction } from '../useAsyncAction';
+import { useAsyncAction } from '../ayncAction/useAsyncAction';
 
 interface UseSettingsUpdateParams extends RequestHook<Response<SettingsUpdate>> {
   newSettings: SettingsUpdate;

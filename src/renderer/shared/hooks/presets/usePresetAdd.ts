@@ -3,7 +3,7 @@ import { getApi } from '../../api/restApi';
 import type { Preset, PresetAdd } from '../../types/preset';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
-import { useAsyncAction } from '../useAsyncAction';
+import { useAsyncAction } from '../ayncAction/useAsyncAction';
 
 interface UsePresetParams extends RequestHook<Response<Preset>> {
   preset?: PresetAdd;

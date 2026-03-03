@@ -1,6 +1,6 @@
 import type { TOptions } from 'i18next';
 import { useTranslation } from 'react-i18next';
-import type { Language } from '../enums/language';
+import type { Language } from '../../enums/language';
 
 export const useUppercaseTranslation = (enabled?: boolean, language?: Language) => {
   const { t, i18n } = useTranslation();

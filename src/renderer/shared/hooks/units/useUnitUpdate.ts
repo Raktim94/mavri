@@ -3,7 +3,7 @@ import { getApi } from '../../api/restApi';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
 import type { Unit, UnitUpdate } from '../../types/unit';
-import { useAsyncAction } from '../useAsyncAction';
+import { useAsyncAction } from '../ayncAction/useAsyncAction';
 
 interface UseUnitUpdateParams extends RequestHook<Response<Unit>> {
   unit?: UnitUpdate;

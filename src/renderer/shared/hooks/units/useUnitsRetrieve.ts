@@ -5,7 +5,7 @@ import { getApi } from '../../api/restApi';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
 import type { Unit } from '../../types/unit';
-import { useAsyncAction } from '../useAsyncAction';
+import { useAsyncAction } from '../ayncAction/useAsyncAction';
 
 export const useUnitsRetrieve = ({ showLoader = true, filter, onDone }: RequestHook<Response<Unit[]>>) => {
   const dispatch = useAppDispatch();

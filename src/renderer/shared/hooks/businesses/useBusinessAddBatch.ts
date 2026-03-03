@@ -3,7 +3,7 @@ import { getApi } from '../../api/restApi';
 import type { Business, BusinessAdd } from '../../types/business';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
-import { useAsyncAction } from '../useAsyncAction';
+import { useAsyncAction } from '../ayncAction/useAsyncAction';
 
 interface UseBusinessAddParams extends RequestHook<Response<BusinessAdd[]>> {
   businesses?: BusinessAdd[];

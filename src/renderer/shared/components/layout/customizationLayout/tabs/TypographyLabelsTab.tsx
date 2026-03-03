@@ -12,8 +12,8 @@ import {
 import { useCallback, useEffect, useRef, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Language } from '../../../../enums/language';
-import { useForm } from '../../../../hooks/useForm';
-import { usePdfTexts } from '../../../../hooks/usePdfTexts';
+import { useForm } from '../../../../hooks/form/useForm';
+import { usePdfTexts } from '../../../../hooks/pdf/usePdfTexts';
 import type { CustomizationFormTypographyLabels } from '../../../../types/invoice';
 import type { PDFText } from '../../../../types/pdfText';
 import { TabPanel } from '../../tabPanel/TabPanel';

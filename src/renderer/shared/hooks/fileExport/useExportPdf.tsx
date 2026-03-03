@@ -1,14 +1,14 @@
 import { pdf } from '@react-pdf/renderer';
 import { parseISO } from 'date-fns';
 import { useCallback, useMemo } from 'react';
-import { PDFDocument } from '../../pages/invoices/Preview/PDFDocument';
-import { MONTH_NAMES } from '../../state/constant';
-import { InvoiceType } from '../enums/invoiceType';
-import type { AttachmentURL, InvoiceFromData, PdfTexts } from '../types/invoice';
+import { PDFDocument } from '../../../pages/invoices/Preview/PDFDocument';
+import { MONTH_NAMES } from '../../../state/constant';
+import { InvoiceType } from '../../enums/invoiceType';
+import type { AttachmentURL, InvoiceFromData, PdfTexts } from '../../types/invoice';
 
-import type { Settings } from '../types/settings';
-import { toDataUrl } from '../utils/dataUrlFunctions';
-import { usePdfTexts } from './usePdfTexts';
+import type { Settings } from '../../types/settings';
+import { toDataUrl } from '../../utils/dataUrlFunctions';
+import { usePdfTexts } from '../pdf/usePdfTexts';
 
 export const getAttachmentsUrl = async (invoiceForm?: InvoiceFromData): Promise<AttachmentURL[]> => {
   const attachments = invoiceForm?.invoiceAttachments ?? [];

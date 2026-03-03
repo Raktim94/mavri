@@ -2,8 +2,8 @@ import { Divider, FormControlLabel, Grid, Switch, TextField } from '@mui/materia
 import { useCallback, useEffect, useMemo, useRef, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Language } from '../../shared/enums/language';
-import { useForm } from '../../shared/hooks/useForm';
-import { useFormDirtyCheck } from '../../shared/hooks/useFormDirtyCheck';
+import { useForm } from '../../shared/hooks/form/useForm';
+import { useFormDirtyCheck } from '../../shared/hooks/form/useFormDirtyCheck';
 import type { Bank } from '../../shared/types/bank';
 import type { Business } from '../../shared/types/business';
 import type { Client } from '../../shared/types/client';

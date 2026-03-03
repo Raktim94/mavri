@@ -3,7 +3,7 @@ import { getApi } from '../../api/restApi';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
 import type { StyleProfile, StyleProfileUpdate } from '../../types/styleProfiles';
-import { useAsyncAction } from '../useAsyncAction';
+import { useAsyncAction } from '../ayncAction/useAsyncAction';
 
 interface UseStyleProfileUpdateParams extends RequestHook<Response<StyleProfile>> {
   styleProfile?: StyleProfileUpdate;

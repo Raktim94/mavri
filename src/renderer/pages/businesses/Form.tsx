@@ -3,8 +3,8 @@ import { Box, FormControlLabel, Grid, Switch, TextField, Tooltip } from '@mui/ma
 import { useEffect, useRef, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { UploadImage } from '../../shared/components/inputs/uploadImage/UploadImage';
-import { useForm } from '../../shared/hooks/useForm';
-import { useFormDirtyCheck } from '../../shared/hooks/useFormDirtyCheck';
+import { useForm } from '../../shared/hooks/form/useForm';
+import { useFormDirtyCheck } from '../../shared/hooks/form/useFormDirtyCheck';
 import type { Business, BusinessFromData } from '../../shared/types/business';
 import { toDataUrl, toUint8Array } from '../../shared/utils/dataUrlFunctions';
 import { validators } from '../../shared/utils/validatorFunctions';

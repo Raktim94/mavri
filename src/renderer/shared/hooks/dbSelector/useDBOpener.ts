@@ -3,7 +3,7 @@ import { getApi } from '../../api/restApi';
 import type { DBSelector } from '../../types/dbSelector';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
-import { useAsyncAction } from '../useAsyncAction';
+import { useAsyncAction } from '../ayncAction/useAsyncAction';
 
 export const useDBOpener = ({ showLoader = true, immediate = true, onDone }: RequestHook<Response<DBSelector>>) => {
   const asyncFn = useCallback(() => getApi().openDatabase(), []);

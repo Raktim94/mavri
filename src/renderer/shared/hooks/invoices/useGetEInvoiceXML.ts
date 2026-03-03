@@ -3,7 +3,7 @@ import { getApi } from '../../api/restApi';
 import type { EInvoice } from '../../enums/einvoice';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
-import { useAsyncAction } from '../useAsyncAction';
+import { useAsyncAction } from '../ayncAction/useAsyncAction';
 
 interface UseEInvoiceParams extends RequestHook<Response<Uint8Array | undefined>> {
   params?: { invoiceId: number; einvoice: EInvoice };

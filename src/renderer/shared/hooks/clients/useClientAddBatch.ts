@@ -3,7 +3,7 @@ import { getApi } from '../../api/restApi';
 import type { Client, ClientAdd } from '../../types/client';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
-import { useAsyncAction } from '../useAsyncAction';
+import { useAsyncAction } from '../ayncAction/useAsyncAction';
 
 interface UseClientAddParams extends RequestHook<Response<ClientAdd[]>> {
   clients?: ClientAdd[];

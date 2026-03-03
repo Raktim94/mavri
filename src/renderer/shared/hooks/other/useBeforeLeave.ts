@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useBlocker } from 'react-router-dom';
-import { useAppDispatch } from '../../state/configureStore';
-import { setAllowed } from '../../state/pageSlice';
+import { useAppDispatch } from '../../../state/configureStore';
+import { setAllowed } from '../../../state/pageSlice';
 
 interface UseBeforeLeaveResult {
   blocked: boolean;

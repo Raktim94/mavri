@@ -15,7 +15,7 @@ import { FontFamily } from '../../../../enums/fontFamily';
 import { LayoutType } from '../../../../enums/layoutType';
 import { PageFormat } from '../../../../enums/pageFormat';
 import { SizeType } from '../../../../enums/sizeType';
-import { useForm } from '../../../../hooks/useForm';
+import { useForm } from '../../../../hooks/form/useForm';
 import type { CustomizationFormPageSetup } from '../../../../types/invoice';
 import { TabPanel } from '../../tabPanel/TabPanel';
 

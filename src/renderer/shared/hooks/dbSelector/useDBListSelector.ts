@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { getApi } from '../../api/restApi';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
-import { useAsyncAction } from '../useAsyncAction';
+import { useAsyncAction } from '../ayncAction/useAsyncAction';
 
 export const useDBListSelector = ({ immediate = true, showLoader = true, onDone }: RequestHook<Response<string[]>>) => {
   const asyncFn = useCallback(() => getApi().getDatabaseList(), []);

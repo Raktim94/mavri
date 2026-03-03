@@ -3,8 +3,8 @@ import { useCallback, useEffect, useMemo, useRef, useState, type FC } from 'reac
 import { useTranslation } from 'react-i18next';
 import { CustomizationLayout } from '../../shared/components/layout/customizationLayout/CustomizationLayout';
 import { FontFamily } from '../../shared/enums/fontFamily';
-import { useForm } from '../../shared/hooks/useForm';
-import { useFormDirtyCheck } from '../../shared/hooks/useFormDirtyCheck';
+import { useForm } from '../../shared/hooks/form/useForm';
+import { useFormDirtyCheck } from '../../shared/hooks/form/useFormDirtyCheck';
 import type { CustomizationForm } from '../../shared/types/invoice';
 import type { StyleProfile, StyleProfileFromData } from '../../shared/types/styleProfiles';
 import { validators } from '../../shared/utils/validatorFunctions';

@@ -1,6 +1,6 @@
 import { useEffect, useState, type RefObject } from 'react';
-import { useAppDispatch } from '../../state/configureStore';
-import { setAllowed } from '../../state/pageSlice';
+import { useAppDispatch } from '../../../state/configureStore';
+import { setAllowed } from '../../../state/pageSlice';
 
 export const useFormDirtyCheck = <T>(form: T | undefined, initialFormRef: RefObject<T | undefined>) => {
   const dispatch = useAppDispatch();

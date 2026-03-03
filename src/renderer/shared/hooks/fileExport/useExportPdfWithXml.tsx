@@ -1,11 +1,11 @@
 import { PDFDocument as PdfLibDocument } from 'pdf-lib';
 import { useCallback, useMemo } from 'react';
-import type { EInvoice } from '../enums/einvoice';
-import type { InvoiceFromData } from '../types/invoice';
-import type { Settings } from '../types/settings';
+import type { EInvoice } from '../../enums/einvoice';
+import type { InvoiceFromData } from '../../types/invoice';
+import type { Settings } from '../../types/settings';
+import { usePdfTexts } from '../pdf/usePdfTexts';
 import { createPdfBlob, getPDFFilename } from './useExportPdf';
 import { getXMLFilename } from './useExportXML';
-import { usePdfTexts } from './usePdfTexts';
 
 export const useExportPdfWithXml = (data: { invoiceForm?: InvoiceFromData; storeSettings?: Settings }) => {
   const { invoiceForm, storeSettings } = data;

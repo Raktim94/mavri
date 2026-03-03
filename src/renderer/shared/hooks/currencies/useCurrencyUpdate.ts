@@ -3,7 +3,7 @@ import { getApi } from '../../api/restApi';
 import type { Currency, CurrencyUpdate } from '../../types/currency';
 import type { RequestHook } from '../../types/requestHook';
 import type { Response } from '../../types/response';
-import { useAsyncAction } from '../useAsyncAction';
+import { useAsyncAction } from '../ayncAction/useAsyncAction';
 
 interface UseCurrencyUpdateParams extends RequestHook<Response<Currency>> {
   currency?: CurrencyUpdate;

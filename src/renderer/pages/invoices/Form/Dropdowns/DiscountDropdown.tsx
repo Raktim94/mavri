@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { AmountInput } from '../../../../shared/components/inputs/amountInput/AmountInput';
 import { PageHeader } from '../../../../shared/components/layout/pageHeader/PageHeader';
 import { DiscountType } from '../../../../shared/enums/discountType';
-import { useForm } from '../../../../shared/hooks/useForm';
+import { useForm } from '../../../../shared/hooks/form/useForm';
 import type { DiscountForm } from '../../../../shared/types/invoice';
 import { validators } from '../../../../shared/utils/validatorFunctions';
 import { useAppSelector } from '../../../../state/configureStore';

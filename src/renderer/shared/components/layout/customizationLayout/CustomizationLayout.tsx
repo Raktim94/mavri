@@ -2,7 +2,7 @@ import { Box, Tab, Tabs } from '@mui/material';
 import { useCallback, useEffect, useMemo, useRef, useState, type FC, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Language } from '../../../enums/language';
-import { useForm } from '../../../hooks/useForm';
+import { useForm } from '../../../hooks/form/useForm';
 import type {
   CustomizationForm,
   CustomizationFormBranding,

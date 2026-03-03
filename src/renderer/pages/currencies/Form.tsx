@@ -1,8 +1,8 @@
 import { Autocomplete, FormControlLabel, Grid, Switch, TextField } from '@mui/material';
 import { useEffect, useRef, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useForm } from '../../shared/hooks/useForm';
-import { useFormDirtyCheck } from '../../shared/hooks/useFormDirtyCheck';
+import { useForm } from '../../shared/hooks/form/useForm';
+import { useFormDirtyCheck } from '../../shared/hooks/form/useFormDirtyCheck';
 import type { Currency, CurrencyFromData } from '../../shared/types/currency';
 import { getFormattedLabel } from '../../shared/utils/formatFunctions';
 import { validators } from '../../shared/utils/validatorFunctions';
