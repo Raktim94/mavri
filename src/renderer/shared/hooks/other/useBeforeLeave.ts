@@ -28,17 +28,6 @@ export const useBeforeLeave = (allowedToLeave = true): UseBeforeLeaveResult => {
     setShowPrompt(blocker.state === 'blocked');
   }, [blocker.state]);
 
-  useEffect(() => {
-    const handler = (e: BeforeUnloadEvent) => {
-      if (!blocked) return;
-      e.preventDefault();
-      //e.returnValue = '';
-    };
-
-    window.addEventListener('beforeunload', handler);
-    return () => window.removeEventListener('beforeunload', handler);
-  }, [blocked]);
-
   const confirmNavigation = useCallback(() => {
     blocker.proceed?.();
     setShowPrompt(false);
