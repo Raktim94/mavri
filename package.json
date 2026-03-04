@@ -22,7 +22,11 @@
     "quotation-builder",
     "billing-software",
     "business-software",
-    "document-generation"
+    "document-generation",
+    "e-invoices",
+    "peppol",
+    "ubl",
+    "xrechnung"
   ],
   "bugs": {
     "url": "https://github.com/piratuks/invoice-builder/issues"
