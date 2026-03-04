@@ -17,7 +17,7 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react
 import { useTranslation } from 'react-i18next';
 import i18n from '../../../../i18n';
 import { useAppDispatch } from '../../../../state/configureStore';
-import { addToast } from '../../../../state/pageSlice';
+import { addToast, setAllowed } from '../../../../state/pageSlice';
 import { useBeforeUnloadContext } from '../../../context/BeforeUnloadContext';
 import { FilterType } from '../../../enums/filterType';
 import { SortType } from '../../../enums/sortType';
@@ -221,8 +221,10 @@ export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
     immediate: false,
     onDone: (data: Response<T>) => {
       setChangedItem(undefined);
-      if (!isDesktop) setSelectedItem(undefined);
-      else setSelectedItem(data.data);
+      if (!isDesktop) {
+        setSelectedItem(undefined);
+        dispatch(setAllowed(true));
+      } else setSelectedItem(data.data);
 
       reload();
 

@@ -1,5 +1,11 @@
 # Invoice Builder
 
+## [date], version [version]
+
+Bug Fixes
+
+- Fix for dirty confirmation when screen is small
+
 ## 2026-03-04, version 2.4.2
 
 Bug Fixes

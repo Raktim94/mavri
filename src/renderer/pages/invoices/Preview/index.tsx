@@ -45,12 +45,15 @@ const InvoicesPreviewComponent: FC<Props> = ({ onSaveProfile = () => {}, setInvo
 
   const handleOnClickCustomization = useCallback(
     (data: CustomizationForm) => {
+      const { customField, ...rest } = data;
+      void customField;
+
       setInvoiceForm({
         ...invoiceForm,
         invoiceCustomization: {
           ...invoiceForm?.invoiceCustomization,
-          ...data,
-          fieldSortOrders: Object.entries(data.fieldSortOrders ?? DEFAULT_TABLE_FIELD_SORT_ORDERS).reduce(
+          ...rest,
+          fieldSortOrders: Object.entries(rest.fieldSortOrders ?? DEFAULT_TABLE_FIELD_SORT_ORDERS).reduce(
             (acc, [key, value]) => {
               if (!customFieldHeaders.some(item => item.header === key)) {
                 acc[key] = value;
@@ -61,8 +64,8 @@ const InvoicesPreviewComponent: FC<Props> = ({ onSaveProfile = () => {}, setInvo
           )
         },
         invoiceItems: invoiceForm?.invoiceItems?.map(item => {
-          const newSortOrder = data.fieldSortOrders
-            ? data.fieldSortOrders[item.customField?.header ?? '']
+          const newSortOrder = rest.fieldSortOrders
+            ? rest.fieldSortOrders[item.customField?.header ?? '']
             : item.customField?.sortOrder;
 
           return {
