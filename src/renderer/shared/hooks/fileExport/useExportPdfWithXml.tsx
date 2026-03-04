@@ -1,11 +1,9 @@
 import { PDFDocument as PdfLibDocument } from 'pdf-lib';
 import { useCallback, useMemo } from 'react';
-import type { EInvoice } from '../../enums/einvoice';
 import type { InvoiceFromData } from '../../types/invoice';
 import type { Settings } from '../../types/settings';
 import { usePdfTexts } from '../pdf/usePdfTexts';
 import { createPdfBlob, getPDFFilename } from './useExportPdf';
-import { getXMLFilename } from './useExportXML';
 
 export const useExportPdfWithXml = (data: { invoiceForm?: InvoiceFromData; storeSettings?: Settings }) => {
   const { invoiceForm, storeSettings } = data;
@@ -25,7 +23,7 @@ export const useExportPdfWithXml = (data: { invoiceForm?: InvoiceFromData; store
   }, [invoiceForm, pdfTextsDefaults]);
 
   const exportPdfWithXml = useCallback(
-    async (xml: Uint8Array, einvoice: EInvoice) => {
+    async (xml: Uint8Array) => {
       if (!invoiceForm || !storeSettings) return;
 
       const blob = await createPdfBlob(invoiceForm, storeSettings, pdfTexts);
@@ -33,7 +31,7 @@ export const useExportPdfWithXml = (data: { invoiceForm?: InvoiceFromData; store
       const pdfBytes = new Uint8Array(await blob.arrayBuffer());
 
       const pdfDoc = await PdfLibDocument.load(pdfBytes);
-      pdfDoc.attach(xml, getXMLFilename(invoiceForm, einvoice, storeSettings), { mimeType: 'application/xml' });
+      pdfDoc.attach(xml, `ubl-invoice`, { mimeType: 'application/xml' });
       const modifiedPdfBytes = await pdfDoc.save();
 
       const newBlob = new Blob([new Uint8Array(modifiedPdfBytes)], { type: 'application/pdf' });

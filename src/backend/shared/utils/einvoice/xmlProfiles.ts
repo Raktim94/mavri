@@ -1,6 +1,6 @@
 import { EInvoice } from '../../enums/einvoice';
 import type { Invoice } from '../../types/invoice';
-import { generateUBLInvoiceXML } from './ubl';
+import { generateUBLInvoiceXML } from './ubl21';
 
 export interface XMLProfile {
   id: string; // stable identifier (e.g. "ubl21")

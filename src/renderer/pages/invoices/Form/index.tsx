@@ -108,7 +108,7 @@ const InvoiceFormComponent: FC<Props> = ({
       if (xmlData && data.data && xmlData.type === 'singleFile') {
         exportXML(data.data, xmlData?.einvoice);
       } else if (xmlData && data.data && xmlData.type === 'embeddedFile') {
-        exportPdfWithXml(data.data, xmlData?.einvoice);
+        exportPdfWithXml(data.data);
       }
     }
   });
