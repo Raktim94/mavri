@@ -344,7 +344,6 @@
     "databaseNotInitialized": "La base de données n'est pas initialisée",
     "databasePathInvalid": "Chemin de la base de données non défini",
     "datatypeMismatch": "Le type de données de l’enregistrement ne correspond pas.",
-    "dbNotInitialized": "La base de données n'est pas initialisée",
     "diskIOError": "Erreur d’E/S disque.",
     "failedMigration": "Échec des migrations",
     "failedNormalizeImportedRows": "Échec du traitement des lignes suivantes: {{rowNumber}}. Veuillez vérifier le format des données.",

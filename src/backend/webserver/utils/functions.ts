@@ -40,7 +40,7 @@ export const requireDB = (_req: Request, res: Response, next: NextFunction) => {
     return res.status(400).json({
       success: false,
       message: undefined,
-      key: 'error.dbNotInitialized'
+      key: 'error.databaseNotInitialized'
     });
   }
   next();

@@ -344,7 +344,6 @@
     "databaseNotInitialized": "Duomenų bazė nėra inicializuota",
     "databasePathInvalid": "Duomenų bazės kelias nenustatytas",
     "datatypeMismatch": "Įrašo duomenų tipas neatitinka reikalavimų.",
-    "dbNotInitialized": "Duomenų bazė nėra inicijuota",
     "diskIOError": "Įvyko disko įvesties/išvesties klaida.",
     "failedMigration": "Migracijos nepavyko",
     "failedNormalizeImportedRows": "Nepavyko apdoroti šių eilučių: {{rowNumber}}. Patikrinkite duomenų formatą.",

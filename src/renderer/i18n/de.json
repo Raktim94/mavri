@@ -344,7 +344,6 @@
     "databaseNotInitialized": "Datenbank ist nicht initialisiert",
     "databasePathInvalid": "Datenbankpfad ist nicht gesetzt",
     "datatypeMismatch": "Datensatz hat einen Datentyp-Konflikt.",
-    "dbNotInitialized": "Datenbank ist nicht initialisiert",
     "diskIOError": "Festplatten-E/A-Fehler aufgetreten.",
     "failedMigration": "Migrationen fehlgeschlagen",
     "failedNormalizeImportedRows": "Folgende Zeilen konnten nicht verarbeitet werden: {{rowNumber}}. Bitte überprüfen Sie das Datenformat.",

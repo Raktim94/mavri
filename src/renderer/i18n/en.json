@@ -344,7 +344,6 @@
     "databaseNotInitialized": "Database is not initialized",
     "databasePathInvalid": "Database path is not set",
     "datatypeMismatch": "Record has a datatype mismatch.",
-    "dbNotInitialized": "Database is not initialized",
     "diskIOError": "Disk I/O error occurred.",
     "failedMigration": "Migrations failed",
     "failedNormalizeImportedRows": "Failed to process the following rows: {{rowNumber}}. Please check the data format.",
