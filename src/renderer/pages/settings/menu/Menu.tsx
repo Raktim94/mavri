@@ -32,6 +32,7 @@ interface Props {
   toggleStyleProfiles?: (value: boolean) => void;
   togglePresets?: (value: boolean) => void;
   toggleUBL?: (value: boolean) => void;
+  toggleXRechnung?: (value: boolean) => void;
   onExportJSON?: () => void;
   onImportJSON?: () => void;
 }
@@ -45,7 +46,8 @@ export const Menu: FC<Props> = ({
   toggleUBL = () => {},
   onModeChange = () => {},
   onExportJSON = () => {},
-  onImportJSON = () => {}
+  onImportJSON = () => {},
+  toggleXRechnung = () => {}
 }) => {
   const { mode, toggleMode } = useContext(ThemeContext);
   const { t } = useTranslation();
@@ -155,7 +157,7 @@ export const Menu: FC<Props> = ({
           isSelected: false,
           checked: storeSettings?.xrechnungON ?? true,
           onChange: () => {
-            toggleUBL(!storeSettings?.xrechnungON);
+            toggleXRechnung(!storeSettings?.xrechnungON);
           }
         }
       ]

@@ -36,7 +36,7 @@ export interface SettingsUpdate {
   quotesON?: boolean;
   styleProfilesON?: boolean;
   ublON?: boolean;
-  xrechnungON: boolean;
+  xrechnungON?: boolean;
   presetsON?: boolean;
   reportsON?: boolean;
 }

@@ -1,5 +1,11 @@
 # Invoice Builder
 
+## 2026-03-31, version 2.5.1
+
+Bug Fixes
+
+- Fixed issue which prevented to toggle off XRechnung (UBL 2.1) XML support feature
+
 ## 2026-03-04, version 2.5.0
 
 New features & improvements

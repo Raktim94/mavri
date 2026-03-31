@@ -22,6 +22,7 @@ import {
   selectSettings,
   setCustomInvoiseSettings,
   setEInvoiceUBL,
+  setEInvoiceXRechnung,
   setLanguageDate,
   setMode,
   setPresets,
@@ -139,6 +140,13 @@ export const SettingsPage = () => {
     [dispatch]
   );
 
+  const toggleXRechnung = useCallback(
+    (value: boolean) => {
+      dispatch(setEInvoiceXRechnung(value));
+    },
+    [dispatch]
+  );
+
   const toggleReports = useCallback(
     (value: boolean) => {
       dispatch(setReports(value));
@@ -246,6 +254,7 @@ export const SettingsPage = () => {
       toggleStyleProfiles={toggleStyleProfiles}
       togglePresets={togglePresets}
       toggleUBL={toggleUBL}
+      toggleXRechnung={toggleXRechnung}
       onExportJSON={exportJSON}
       onImportJSON={importJSONCallback}
     />
