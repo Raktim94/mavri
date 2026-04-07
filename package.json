@@ -171,7 +171,7 @@
     "workerDirectory": "public"
   },
   "overrides": {
-    "ajv": "6.12.6",
+    "ajv": "6.14.0",
     "ajv-keywords": "3.5.2",
     "tar": "^7.5.9",
     "minimatch": "^10.2.1"
