@@ -9,6 +9,8 @@
 ![Docker](https://img.shields.io/badge/Docker-blue?style=flat-square&logo=docker&logoColor=white)
 [![GHCR](https://img.shields.io/badge/ghcr.io-invoice--builder-blue?style=flat-square&logo=github)](https://github.com/piratuks/invoice-builder/pkgs/container/invoice-builder)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FF813F?style=flat&logo=buy-me-a-coffee&logoColor=white)](https://www.buymeacoffee.com/evaldizi)
+[![oosmetrics](https://api.oosmetrics.com/api/v1/badge/achievement/fae95447-d182-4281-a9ab-72f3a728cab8.svg)](https://oosmetrics.com/repo/piratuks/invoice-builder)
+[![oosmetrics](https://api.oosmetrics.com/api/v1/badge/achievement/b9423919-f6dd-44ca-a4ae-a9be883d092e.svg)](https://oosmetrics.com/repo/piratuks/invoice-builder)
 
 **Offline invoicing with full data ownership.**
 
