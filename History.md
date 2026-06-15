@@ -1,5 +1,19 @@
 # Invoice Builder
 
+## 2026-06-15, version 2.5.2
+
+New features & improvements
+
+- Allowing brackets ( and ) in phone number validation
+- Allowing spaces in phone numbers
+- Visual improvement for invoice sidebar (showing invoice number and changed how archived represented)
+- Taxes percentage now allows decimal/float value
+- Add ability to filter invoice via paidAt date for reporting. However this applied only for new invoices. Invoices created/updated from 2.5.2 version
+
+Bug Fixes
+
+- Fixed Logo/Watermarks for invoices. Previously it was breaking layout. The issue was only via web/docker.
+
 ## 2026-03-31, version 2.5.1
 
 Bug Fixes
