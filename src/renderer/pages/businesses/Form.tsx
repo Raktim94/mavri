@@ -234,7 +234,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, business }) => {
           helperText={errors.phone ? t('common.invalidPhone') : t('common.phoneHelper')}
           slotProps={{
             htmlInput: {
-              maxLength: 16
+              maxLength: 20
             }
           }}
         />
@@ -272,7 +272,9 @@ export const Form: FC<Props> = ({ handleChange = () => {}, business }) => {
             fullWidth
             value={form.peppolEndpointId}
             error={errors.peppolEndpointId}
-            helperText={errors.phone ? t('common.invalidPeppolEndpointId') : t('common.peppolEndpointIdHelper')}
+            helperText={
+              errors.peppolEndpointId ? t('common.invalidPeppolEndpointId') : t('common.peppolEndpointIdHelper')
+            }
             onChange={e => {
               update('peppolEndpointId', e.target.value);
               validateField('peppolEndpointId', e.target.value);
@@ -288,7 +290,9 @@ export const Form: FC<Props> = ({ handleChange = () => {}, business }) => {
             value={form.peppolEndpointSchemeId}
             error={errors.peppolEndpointSchemeId}
             helperText={
-              errors.phone ? t('common.invalidPeppolEndpointSchemeId') : t('common.peppolEndpointSchemeIdHelper')
+              errors.peppolEndpointSchemeId
+                ? t('common.invalidPeppolEndpointSchemeId')
+                : t('common.peppolEndpointSchemeIdHelper')
             }
             onChange={e => {
               update('peppolEndpointSchemeId', e.target.value);
@@ -303,7 +307,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, business }) => {
           fullWidth
           value={form.countryCode}
           error={errors.countryCode}
-          helperText={errors.phone ? t('common.invalidCountryCode') : t('common.countryCodeHelper')}
+          helperText={errors.countryCode ? t('common.invalidCountryCode') : t('common.countryCodeHelper')}
           onChange={e => {
             update('countryCode', e.target.value);
             validateField('countryCode', e.target.value);
