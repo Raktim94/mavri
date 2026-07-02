@@ -1,6 +1,6 @@
 # Invoice Builder
 
-## {DATE}, version {VERSION}
+## 2026-07-02, version 2.5.3
 
 Bug Fixes
 
