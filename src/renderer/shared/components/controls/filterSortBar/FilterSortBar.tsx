@@ -33,9 +33,9 @@ export const FilterSortBar = <T extends string | number | symbol>({
 
   return (
     <>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
         <Box></Box>
-        <Box display="flex" alignItems="center" gap={2}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <Typography>{t('common.sortBy')}:</Typography>
           <Select size="small" value={activeSortBy.value} onChange={onSortByChange}>
             {sortByOptions.map(item => (

@@ -560,7 +560,7 @@ export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
   const leftColumn = (
     <Grid size={{ xs: 12, md: showRightSide ? 4 : 12 }} component="div" sx={{ position: 'relative', height: '100%' }}>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, height: '100%', overflow: 'auto' }}>
-        <Box display="flex" alignItems="center" gap={1}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           {leftTitle && (
             <Typography
               variant="h5"
@@ -666,7 +666,7 @@ export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
         <Box sx={{ flexGrow: 1 }} />
 
         {filteredItems.length > itemsPerPage && (
-          <Stack spacing={2} alignItems="center">
+          <Stack sx={{ spacing: 2, alignItems: 'center' }}>
             <Pagination
               count={totalPages}
               page={currentPage}
@@ -716,7 +716,12 @@ export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
         text={t('common.confirmDelete')}
       />
 
-      <Grid container component="div" spacing={2} justifyContent="center" alignItems="stretch" sx={{ height: '100%' }}>
+      <Grid
+        container
+        component="div"
+        spacing={2}
+        sx={{ height: '100%', justifyContent: 'center', alignItems: 'stretch' }}
+      >
         {!showRightSide && leftColumn}
         {showRightSide && (
           <>

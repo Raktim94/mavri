@@ -158,7 +158,6 @@ export const LocalDatabase: FC<Props> = ({ onDatabaseRead }) => {
     <Box
       sx={{
         display: 'flex',
-        height: '100vh',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'start',
@@ -277,11 +276,11 @@ export const LocalDatabase: FC<Props> = ({ onDatabaseRead }) => {
                     slotProps={{ primary: { sx: { fontWeight: 600 } } }}
                     secondary={
                       <Typography
-                        fontSize={'small'}
                         component="div"
                         variant="body2"
                         color="text.secondary"
                         sx={{
+                          fontSize: 'small',
                           fontWeight: 400,
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',

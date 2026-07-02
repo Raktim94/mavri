@@ -119,14 +119,12 @@ const CustomizationDropdownComponent: FC<Props> = ({
           open={isOpen}
           onClose={() => onClose?.()}
           onOpen={() => onOpen?.()}
-          ModalProps={{
-            BackdropProps: {
+          slotProps={{
+            backdrop: {
               sx: {
                 backgroundColor: 'transparent'
               }
-            }
-          }}
-          slotProps={{
+            },
             paper: {
               sx: {
                 maxWidth: isDesktop ? '60%' : '100%',

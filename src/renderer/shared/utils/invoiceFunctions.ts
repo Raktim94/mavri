@@ -229,7 +229,6 @@ export const aggregateInvoicesByCurrency = (
   const fromDate = parseISO(from);
   const toDate = parseISO(to);
 
-  console.log(invoices, fromDate, toDate, reportDateType);
   const filtered = invoices.filter(inv => {
     const issueDate = parseISO(inv.issuedAt);
     let paidAtDate: Date | undefined = undefined;

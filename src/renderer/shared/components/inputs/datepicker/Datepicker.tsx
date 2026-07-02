@@ -72,21 +72,23 @@ export const Datepicker: React.FC<Props> = ({
             onKeyDown: (e: React.KeyboardEvent) => {
               e.preventDefault();
             },
-            InputProps: {
-              readOnly: true,
-              startAdornment:
-                !required && currValue ? (
-                  <IconButton
-                    size="small"
-                    onClick={e => {
-                      e.stopPropagation();
-                      setCurrValue(undefined);
-                      setSelectedValue(undefined);
-                    }}
-                  >
-                    <ClearIcon fontSize="small" />
-                  </IconButton>
-                ) : undefined
+            slotProps: {
+              input: {
+                readOnly: true,
+                startAdornment:
+                  !required && currValue ? (
+                    <IconButton
+                      size="small"
+                      onClick={e => {
+                        e.stopPropagation();
+                        setCurrValue(undefined);
+                        setSelectedValue(undefined);
+                      }}
+                    >
+                      <ClearIcon fontSize="small" />
+                    </IconButton>
+                  ) : undefined
+              }
             }
           }
         }}

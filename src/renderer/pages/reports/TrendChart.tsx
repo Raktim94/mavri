@@ -17,7 +17,7 @@ const TrendChartComponent: React.FC<Props> = ({ data }) => {
 
   return (
     <Box sx={{ mt: 1 }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h6" color={theme.palette.text.primary}>
           {t('reports.salesTrending')}
         </Typography>

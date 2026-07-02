@@ -126,8 +126,7 @@ export const TypographyLabelsTab: FC<Props> = ({ data, value, onChange, language
                         <Typography
                           component="div"
                           variant="body2"
-                          fontSize={'small'}
-                          sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                          sx={{ fontSize: 'small', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                         >
                           {label}
                         </Typography>
@@ -136,8 +135,12 @@ export const TypographyLabelsTab: FC<Props> = ({ data, value, onChange, language
                             color={theme.palette.text.secondary}
                             component="div"
                             variant="body2"
-                            fontSize={'medium'}
-                            sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                            sx={{
+                              fontSize: 'medium',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap'
+                            }}
                           >
                             {value}
                           </Typography>

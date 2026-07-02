@@ -36,7 +36,7 @@ export const PageHeader: FC<Props> = ({
   const theme = useTheme();
 
   return (
-    <Box display="flex" alignItems="center" gap={1}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
       {showBack && (
         <Tooltip title={t('ariaLabel.back')}>
           <IconButton onClick={onBack} aria-label={t('ariaLabel.back')} sx={{ color: theme.palette.secondary.main }}>

@@ -261,7 +261,12 @@ export const SettingsPage = () => {
   );
 
   return (
-    <Grid container component="div" spacing={2} justifyContent="center" alignItems="stretch" sx={{ height: '100%' }}>
+    <Grid
+      container
+      component="div"
+      spacing={2}
+      sx={{ height: '100%', justifyContent: 'center', alignItems: 'stretch' }}
+    >
       <Confirmation
         onCancel={handleCancelImport}
         onConfirm={handleConfirmImport}

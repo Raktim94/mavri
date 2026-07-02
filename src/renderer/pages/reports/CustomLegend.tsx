@@ -41,7 +41,7 @@ const CustomLegendComponent: FC<CustomProps> = ({ chartData }) => {
               }}
             />
             <Box sx={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
-              <Typography variant="body2" fontWeight={600}>
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>
                 {entry?.name}
               </Typography>
               <Typography variant="caption" color="text.secondary">

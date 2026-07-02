@@ -240,8 +240,7 @@ const InvoiceListItemComponent: FC<Props> = ({ item, isSelected, onEdit }) => {
                         color={theme.palette.warning.main}
                         component="div"
                         variant="body2"
-                        fontSize={'small'}
-                        sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                        sx={{ fontSize: 'small', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                       >
                         {t('invoices.dueDate', {
                           days: overdueDaysLeft,
@@ -254,8 +253,7 @@ const InvoiceListItemComponent: FC<Props> = ({ item, isSelected, onEdit }) => {
                         color={theme.palette.error.main}
                         component="div"
                         variant="body2"
-                        fontSize={'small'}
-                        sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                        sx={{ fontSize: 'small', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                       >
                         {t('invoices.overdue', {
                           days: Math.abs(overdueDaysLeft)
@@ -267,8 +265,7 @@ const InvoiceListItemComponent: FC<Props> = ({ item, isSelected, onEdit }) => {
                         color={theme.palette.warning.main}
                         component="div"
                         variant="body2"
-                        fontSize={'small'}
-                        sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                        sx={{ fontSize: 'small', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                       >
                         {t('invoices.dueToday', {
                           date: formatDate(item.dueDate, settings.dateFormat)
@@ -283,8 +280,7 @@ const InvoiceListItemComponent: FC<Props> = ({ item, isSelected, onEdit }) => {
                     color={theme.palette.success.main}
                     component="div"
                     variant="body2"
-                    fontSize={'small'}
-                    sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                    sx={{ fontSize: 'small', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                   >
                     {t('invoices.markedAsPaid', {
                       date: formatDate(latestPaidAt, settings.dateFormat)
@@ -295,8 +291,7 @@ const InvoiceListItemComponent: FC<Props> = ({ item, isSelected, onEdit }) => {
                       color={theme.palette.info.main}
                       component="div"
                       variant="body2"
-                      fontSize={'small'}
-                      sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                      sx={{ fontSize: 'small', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                     >
                       {t('invoices.overpaid', {
                         amount: getFormattedCurrency({
@@ -319,8 +314,7 @@ const InvoiceListItemComponent: FC<Props> = ({ item, isSelected, onEdit }) => {
                     color={theme.palette.info.main}
                     component="div"
                     variant="body2"
-                    fontSize={'small'}
-                    sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                    sx={{ fontSize: 'small', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                   >
                     {t('invoices.partiallyPaid', {
                       amount: getFormattedCurrency({

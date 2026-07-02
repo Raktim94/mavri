@@ -3,7 +3,7 @@ import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Cell, Pie, PieChart, ResponsiveContainer, type PieLabelRenderProps } from 'recharts';
 import type { ItemSales } from '../../shared/types/itemSales';
-import { CustomLegend } from './CustomLegent';
+import { CustomLegend } from './CustomLegend';
 
 interface Props {
   data: ItemSales[];
@@ -51,14 +51,14 @@ const ItemsSalesChartComponent: React.FC<Props> = ({ data }) => {
 
   return (
     <Box sx={{ mt: 1 }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h6" color={theme.palette.text.primary}>
           {t('reports.topItems')}
         </Typography>
       </Box>
 
-      <Box display="flex" alignItems="center" justifyContent="center">
-        <Box flex="0 0 300px" height={300}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Box sx={{ flex: '0 0 300px', height: 300 }}>
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -81,7 +81,7 @@ const ItemsSalesChartComponent: React.FC<Props> = ({ data }) => {
           </ResponsiveContainer>
         </Box>
 
-        <Box ml={3}>
+        <Box sx={{ ml: 3 }}>
           <CustomLegend chartData={chartData} />
         </Box>
       </Box>

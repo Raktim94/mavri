@@ -1,4 +1,4 @@
-import AddCircleOutline from '@mui/icons-material/AddCircleOutline';
+import AddCircleOutline from '@mui/icons-material/AddCircleOutlined';
 import LibraryAddIcon from '@mui/icons-material/LibraryAdd';
 import {
   Box,
