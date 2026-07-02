@@ -1,7 +1,6 @@
 import { config } from 'dotenv';
 import { app, BrowserWindow } from 'electron';
-import { dirname, join, resolve } from 'path';
-import { fileURLToPath } from 'url';
+import { join, resolve } from 'path';
 import { APP_CONFIG } from './config';
 import { initDBDialogsHandlers } from './ipc/dbDialogs';
 
@@ -10,8 +9,9 @@ config();
 const isDev = !app.isPackaged;
 const devServer = APP_CONFIG.FE_SERVER_URL;
 const dbName = APP_CONFIG.DB_NAME;
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const mainAssetsPath = isDev
+  ? join(resolve(), 'dist-be/backend/main/assets')
+  : join(app.getAppPath(), 'dist-be/backend/main/assets');
 const preloadPath = isDev
   ? join(resolve(), 'dist-be/preload/preload.cjs')
   : join(app.getAppPath(), 'dist-be/preload/preload.cjs');
@@ -25,7 +25,7 @@ const createWindow = () => {
     height: 768,
     show: true,
     autoHideMenuBar: true,
-    icon: join(__dirname, 'assets', 'icon.png'),
+    icon: join(mainAssetsPath, 'icon.png'),
     webPreferences: {
       preload: preloadPath,
       nodeIntegration: false,
