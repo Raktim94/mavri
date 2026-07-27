@@ -8,6 +8,9 @@ import { mapDatabaseError } from '../utils/errorFunctions';
 export const runMigrations = async (db: DatabaseAdapter, migrationsPath: string) => {
   let transactionStarted = false;
   try {
+    if (!fs.existsSync(migrationsPath)) {
+      return;
+    }
     const files = fs
       .readdirSync(migrationsPath)
       .filter(f => /^\d{8}-\d{2}-.*\.(cjs|js|ts)$/.test(f))
