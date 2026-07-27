@@ -30,7 +30,7 @@ services:
         # Backend webserver host
       - DEV_SERVER_URL=0.0.0.0
       # Frontend webserver URL
-      - FE_SERVER_URLhttp://localhost:3001
+      - FE_SERVER_URL=http://localhost:3001
       # Path to migration files in docker volume
       - MIGRATIONS_PATH=/app/dist-be/backend/server/shared/migrations
       # nginx proxies /api/* to localhost (same container)
