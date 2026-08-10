@@ -1,5 +1,11 @@
 # Invoice Builder
 
+## 2026-08-10, version 2.5.5
+
+Bug fixes
+
+- Invoice number must be unique per (businessId, clientId).
+
 ## 2026-07-02, version 2.5.4
 
 New features & improvements
