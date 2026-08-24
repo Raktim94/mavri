@@ -236,6 +236,7 @@ No account required.
 >
 > This is normal for newly published apps and does **not** indicate a security issue.  
 > Simply choose **Keep anyway / Save anyway** to proceed with the download.
+> 
 > 🐧 **Linux package warning**
 >
 > On some Linux distributions (Ubuntu, Linux Mint, etc.), you may see messages such as:
@@ -245,6 +246,7 @@ No account required.
 >
 > This warning appears because the app is not distributed via the default system repositories.  
 > If you downloaded the package directly from the official GitHub Releases page, it is safe to proceed.
+> 
 > 🍎 **macOS Gatekeeper warning**
 >
 > Because this app is **unsigned**, macOS may display a message like:
