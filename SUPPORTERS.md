@@ -2,6 +2,7 @@
 
 Thanks to the individuals and organizations whose support helps this project grow and improve.
 
+- **Pete**
 - **longslowbakery**
 - **2 anonymous supporters**
 
