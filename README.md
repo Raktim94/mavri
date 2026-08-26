@@ -465,4 +465,10 @@ Want to be a part of this project’s journey? You can support it here: [Buy Me 
 
 See the full list of supporters here: [Supporters](SUPPORTERS.md)
 
+## 🚀 Project Status
+
+Invoice Builder is currently open for acquisition (asset-only).  
+If your company works with invoicing, accounting, ERP, or compliance tools and is interested in taking over development, feel free to reach out (contact: evaldiz@gmail.com)
+
+
 Every contribution counts, even a small one, and your name will appear here as a supporter of Invoice Builder.
