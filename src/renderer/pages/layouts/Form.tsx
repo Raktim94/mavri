@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useForm } from '../../shared/hooks/form/useForm';
 import { useFormDirtyCheck } from '../../shared/hooks/form/useFormDirtyCheck';
 import { parseLayoutSchema, type Layout, type LayoutAdd, type LayoutFormData } from '../../shared/types/layouts';
+import '../../shared/utils/monacoEnvironment';
 
 loader.config({ monaco });
 

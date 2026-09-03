@@ -48,7 +48,17 @@ export default defineConfig(({ mode }) => {
     },
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, 'src')
+        '@': path.resolve(__dirname, 'src'),
+        // Absolute aliases for monaco worker entry files: Rolldown's worker
+        // bundler fails to resolve bare `monaco-editor/...` specifiers.
+        '@monaco-editor-worker/editor': path.resolve(
+          __dirname,
+          'node_modules/monaco-editor/esm/vs/editor/editor.worker.js'
+        ),
+        '@monaco-editor-worker/json': path.resolve(
+          __dirname,
+          'node_modules/monaco-editor/esm/vs/language/json/json.worker.js'
+        )
       }
     }
   };
