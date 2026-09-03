@@ -1,5 +1,11 @@
 # Invoice Builder
 
+## 2026-09-03, version 2.7.1
+
+Bug fixes
+
+- Fixed Monaco Editor workers failing to load in Electron and self-hosted production builds by allowing blob: and data: worker scripts in the Content Security Policy. This prevents the editor from displaying the raw Microsoft license header and restores layout editor functionality.
+
 ## 2026-09-03, version 2.7.0
 
 New features & improvements
