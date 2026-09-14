@@ -98,11 +98,11 @@ Contributions to the project are welcome. By submitting code, issues, or documen
 
 ## 11. Governing Law
 
-These Terms shall be governed by and interpreted according to the laws of **Lithuanian**, without regard to conflict-of-law provisions.
+These Terms shall be governed by and interpreted according to the laws of **India**, without regard to conflict-of-law provisions.
 
 ---
 
 ## 12. Contact
 
 If you have questions about these Terms, please contact:  
-**[piratuks](https://github.com/piratuks)**
+**[Raktim94](https://github.com/Raktim94)**

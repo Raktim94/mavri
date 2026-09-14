@@ -1,37 +1,26 @@
-# Two-container setup using the pre-built image from GitHub Container Registry.
-# Pull the latest image:  docker compose pull
-# Start:                  docker compose up -d
-#
-# NOTE: VITE_API_URL is baked into the frontend at image-build time.
-# If you need a custom backend URL, build the image yourself:
-#   docker build --build-arg VITE_API_URL=http://your-host:3000 -t invoice-builder .
-# and replace the `image:` lines below with `image: invoice-builder`.
+# NodeDR Invoice — Two-container setup
+# Build and start:  docker compose up -d --build
+# Pull pre-built:   docker compose pull && docker compose up -d
+# Stop:             docker compose down
 
 services:
   backend:
-    image: ghcr.io/piratuks/invoice-builder:latest
-    # To build locally instead of pulling, uncomment the line below and remove the image: line above:
-    # build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     extra_hosts:
       - 'host.docker.internal:host-gateway'
-    container_name: backend
-    # backend internal-only, works only via nginx
-    # ports:
-    #   - '3000:3000'
+    container_name: nodedr-invoice-backend
     environment:
       - SERVICE=backend
       - NODE_ENV=docker
       - DB_DIRECTORY=/data
-      # Backend webserver port
       - PORT=3000
-      # Backend webserver host
       - DEV_SERVER_URL=0.0.0.0
-      # Frontend webserver URL
       - FE_SERVER_URL=http://localhost:3001
-      # Path to migration files in docker volume
       - MIGRATIONS_PATH=/app/dist-be/backend/server/shared/migrations
     volumes:
-      - app-data:/data
+      - nodedr-invoice-data:/data
     healthcheck:
       test:
         [
@@ -46,21 +35,14 @@ services:
       start_period: 10s
 
   frontend:
-    image: ghcr.io/piratuks/invoice-builder:latest
-    # To build locally instead of pulling, uncomment below and remove the image: line above:
-    # build: .
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile
-    #   args:
-    #     VITE_API_URL: ${VITE_API_URL}
-    container_name: frontend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nodedr-invoice-frontend
     ports:
-      - '3001:3001'
+      - '${HOST_PORT:-3001}:3001'
     environment:
       - SERVICE=frontend
-      # nginx inside the container proxies /api/* here;
-      # 'backend' resolves to the backend container via Docker's internal DNS.
       - BACKEND_HOST=backend
       - BACKEND_PORT=3000
     depends_on:
@@ -68,4 +50,4 @@ services:
         condition: service_healthy
 
 volumes:
-  app-data:
+  nodedr-invoice-data:

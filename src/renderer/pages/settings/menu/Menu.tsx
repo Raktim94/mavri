@@ -210,7 +210,7 @@ export const Menu: FC<Props> = ({
           isSelected: false,
           isToggle: false,
           onClick: () => {
-            getApi().openUrl('https://github.com/piratuks/invoice-builder');
+            getApi().openUrl('https://github.com/Raktim94/nodedr-invoice');
           }
         },
         {
@@ -220,7 +220,7 @@ export const Menu: FC<Props> = ({
           isSelected: false,
           isToggle: false,
           onClick: () => {
-            getApi().openUrl('https://github.com/piratuks/invoice-builder/blob/main/TUTORIAL.md');
+            getApi().openUrl('https://github.com/Raktim94/nodedr-invoice/blob/main/TUTORIAL.md');
           }
         },
         {
@@ -230,7 +230,7 @@ export const Menu: FC<Props> = ({
           isSelected: false,
           isToggle: false,
           onClick: () => {
-            getApi().openUrl('https://github.com/piratuks/invoice-builder/issues');
+            getApi().openUrl('https://github.com/Raktim94/nodedr-invoice/issues');
           }
         },
         {
@@ -240,7 +240,7 @@ export const Menu: FC<Props> = ({
           isSelected: false,
           isToggle: false,
           onClick: () => {
-            getApi().openUrl('https://github.com/piratuks/invoice-builder/blob/main/PRIVACY-POLICY.md');
+            getApi().openUrl('https://github.com/Raktim94/nodedr-invoice/blob/main/PRIVACY-POLICY.md');
           }
         },
         {
@@ -250,7 +250,7 @@ export const Menu: FC<Props> = ({
           isToggle: false,
           isSelected: false,
           onClick: () => {
-            getApi().openUrl('https://github.com/piratuks/invoice-builder/blob/main/TERMS-OF-USE.md');
+            getApi().openUrl('https://github.com/Raktim94/nodedr-invoice/blob/main/TERMS-OF-USE.md');
           }
         }
       ]
@@ -289,7 +289,7 @@ export const Menu: FC<Props> = ({
           isToggle: false,
           isSelected: false,
           onClick: () => {
-            getApi().openUrl('https://www.buymeacoffee.com/evaldizi');
+            getApi().openUrl('https://github.com/Raktim94/nodedr-invoice');
           }
         },
         {
@@ -299,7 +299,7 @@ export const Menu: FC<Props> = ({
           isToggle: false,
           isSelected: false,
           onClick: () => {
-            getApi().openUrl('https://github.com/piratuks/invoice-builder/blob/main/SUPPORTERS.md');
+            getApi().openUrl('https://github.com/Raktim94/nodedr-invoice/blob/main/SUPPORTERS.md');
           }
         }
       ]

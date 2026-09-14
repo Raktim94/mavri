@@ -6,8 +6,8 @@ directories:
 
 publish:
   provider: github
-  owner: piratuks
-  repo: invoice-builder
+  owner: Raktim94
+  repo: nodedr-invoice
 
 files:
   - dist-fe/**
@@ -37,7 +37,7 @@ linux:
     - deb
     - AppImage
   category: Office
-  maintainer: 'Piratuks <evaldiz@gmail.com>'
+  maintainer: 'Raktim Ranjit <ranjitraktim5@gmail.com>'
   icon: 'src/backend/main/assets/linux-icons'
 
 mac:

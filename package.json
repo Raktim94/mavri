@@ -1,10 +1,10 @@
 {
-  "name": "invoice-builder",
+  "name": "nodedr-invoice",
   "private": true,
-  "version": "2.7.1",
+  "version": "1.0.0",
   "type": "module",
-  "description": "Invoice and quotation builder desktop app with PDF export, designed for small businesses and freelancers. Create, manage, and export invoices and quotes easily using a local database in an Electron-based app.",
-  "author": "piratuks",
+  "description": "Offline-first invoicing and quoting application for freelancers and small businesses. Create, manage, and export invoices and quotes with full data ownership.",
+  "author": "Raktim Ranjit <ranjitraktim5@gmail.com>",
   "keywords": [
     "invoice",
     "quotation",
@@ -29,13 +29,13 @@
     "xrechnung"
   ],
   "bugs": {
-    "url": "https://github.com/piratuks/invoice-builder/issues"
+    "url": "https://github.com/Raktim94/nodedr-invoice/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/piratuks/invoice-builder.git"
+    "url": "git://github.com/Raktim94/nodedr-invoice.git"
   },
-  "license": "MIT",
+  "license": "AGPL-3.0-only",
   "scripts": {
     "docker:build": "docker build -t invoice-builder .",
     "docker:backup-data": "node scripts/backup-data.cjs",

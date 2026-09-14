@@ -13,4 +13,4 @@ Your support helps maintain development, documentation, and long-term project su
 
 ## Become a Supporter
 
-You can support the project here: [Buy Me a Coffee](https://www.buymeacoffee.com/evaldizi)
+You can support the project here: [GitHub Sponsors](https://github.com/sponsors/Raktim94)

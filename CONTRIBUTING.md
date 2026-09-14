@@ -1,120 +1,64 @@
-# Contributing to invoice-builder
+# Contributing to NodeDR Invoice
 
-Thank you for considering contributing to invoice-builder! We appreciate the time and effort you dedicate to helping this project grow.
+Thank you for considering contributing to NodeDR Invoice! This document provides guidelines and information about contributing to this project.
 
-## Code of Conduct
+## How to Contribute
 
-This project adheres to the [CODE-OF-CONDUCT](CODE-OF-CONDUCT.md).
+### Reporting Bugs
 
-## Getting Started
+Before creating bug reports, please check existing issues to avoid duplicates.
 
-1. Fork the repository and clone it to your local machine.
-2. Install project dependencies: `npm install`
-3. Run tests to ensure everything is set up correctly: `npm test`
+When creating a bug report, include:
 
-## Issues and Feature Requests
+* A clear and descriptive title
+* Steps to reproduce the issue
+* Expected behavior vs actual behavior
+* Your environment (OS, browser, app version)
+* Any relevant screenshots or logs
 
-If you encounter a bug or have a feature request, please create an issue following the template provided.
+### Suggesting Features
 
-### Bug Report
+Feature requests are welcome. Please open an issue with:
 
-#### Description
+* A clear description of the feature
+* The motivation/use case
+* Any implementation ideas
 
-Provide a concise description of the bug.
+### Pull Requests
 
-#### Steps to Reproduce
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Run tests (`npm test`)
+5. Run linter (`npm run lint`)
+6. Commit your changes (`git commit -m 'Add amazing feature'`)
+7. Push to the branch (`git push origin feature/amazing-feature`)
+8. Open a Pull Request
 
-1.  Step 1 to reproduce the bug
-2.  Step 2 to reproduce the bug
-3.  Additional steps if needed
+## Development Setup
 
-#### Expected Behavior
-
-Describe what you expected to happen.
-
-#### Actual Behavior
-
-Describe what actually happened.
-
-#### Screenshots
-
-If applicable, add screenshots to help explain the problem.
-
-#### Additional Information
-
-Include any additional information or context about the bug.
-
-### Feature Request
-
-#### Description
-
-Provide a concise description of the feature request.
-
-#### Motivation
-
-Why do you want this feature? What use case does it address?
-
-#### Proposed Solution
-
-If you have a potential solution in mind, describe it here.
-
-#### Alternatives Considered
-
-Have you considered any alternative solutions or features?
-
-#### Additional Information
-
-Include any additional information or context about the feature request.
-
-## Branching Strategy
-
-- **main:** Main development branch.
-- **feature/{tickent number}-{branch name}:** Use feature branches for developing new features.
-- **bugfix/{tickent number}-{branch name}:** Use bugfix branches for fixing bugs.
-
-## Pull Requests
-
-1. Fork the repository and create a new branch based on the [branching strategy](#branching-strategy).
-2. Make your changes and ensure that all tests pass.
-3. Submit a pull request with a clear title and description of the changes.
+```bash
+git clone https://github.com/Raktim94/nodedr-invoice.git
+cd nodedr-invoice
+npm install
+npm run dev
+```
 
 ## Code Style
 
-### General Guidelines
+* Use TypeScript for all new code
+* Follow the existing code style (ESLint + Prettier)
+* Write meaningful commit messages
+* Keep changes focused and minimal
 
-- Use 2 spaces for indentation.
-- Always use meaningful variable and function names.
-- Follow a consistent naming convention for variables and functions (e.g., camelCase).
-- Use single quotes for strings unless interpolation is needed.
+## Commit Messages
 
-### TypeScript Specific Guidelines
-
-- Take advantage of TypeScript's static typing to enhance code robustness.
-- Use TypeScript interfaces for defining data shapes.
-
-### Linting
-
-We use ESLint to enforce our coding standards. You can run the linter locally by using the following command:
-
-```bash
-npm run lint
-npm run format
-```
-
-## Review Process
-
-1. Pull requests will be reviewed within [5 days].
-2. Feedback and possible adjustments may be requested during the review process.
-3. Once approved, changes will be merged into the main branch.
+* Use the present tense ("Add feature" not "Added feature")
+* Use the imperative mood ("Move cursor to..." not "Moves cursor to...")
+* Keep the first line under 72 characters
+* Reference issues and pull requests liberally
 
 ## License
 
-By contributing to this project, you agree that your contributions will be licensed under the [LICENSE](LICENSE.md) file.
-
-## Conclusion
-
-Thank you for contributing to invoice-builder! Your time and efforts are greatly appreciated.
-
-## Feedback
-
-We welcome your feedback on these contribution guidelines. Feel free to open an issue to suggest improvements.
+By contributing, you agree that your contributions will be licensed under the
+GNU Affero General Public License v3.0.
