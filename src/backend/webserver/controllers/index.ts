@@ -12,6 +12,7 @@ import { initPresetsController } from './presets';
 import { initSettingsController } from './settings';
 import { initStyleProfilesController } from './styleProfiles';
 import { initUnitsController } from './units';
+import { initUsSalesTaxController } from './usSalesTax';
 
 export const initControllers = (app: Express) => {
   initImportExportController(app);
@@ -27,4 +28,5 @@ export const initControllers = (app: Express) => {
   initCurrenciesController(app);
   initBanksController(app);
   initPresetsController(app);
+  initUsSalesTaxController(app);
 };

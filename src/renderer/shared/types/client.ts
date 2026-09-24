@@ -12,6 +12,8 @@ export interface Client {
   countryCode?: string;
   peppolEndpointSchemeId?: string;
   buyerReference?: string;
+  taxExempt?: boolean;
+  taxExemptionCertificate?: string;
   invoiceCount: number;
   quotesCount: number;
   createdAt: string;
@@ -33,6 +35,8 @@ export interface ClientAdd {
   countryCode?: string;
   peppolEndpointSchemeId?: string;
   buyerReference?: string;
+  taxExempt?: boolean;
+  taxExemptionCertificate?: string;
   description?: string;
   isArchived: boolean;
 }
@@ -55,6 +59,8 @@ export interface ClientFromData {
   countryCode?: string;
   peppolEndpointSchemeId?: string;
   buyerReference?: string;
+  taxExempt?: boolean;
+  taxExemptionCertificate?: string;
   description?: string;
   isArchived: boolean;
 }

@@ -9,6 +9,8 @@ export const BOOLEAN_FIELDS = [
   'receiptPrintingOn',
   'presetsON',
   'isArchived',
+  'taxExempt',
+  'clientTaxExempt',
   'labelUpperCase',
   'styleProfileLabelUpperCase',
   'showQuantity',

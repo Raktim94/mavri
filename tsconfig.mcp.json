@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "outDir": "./dist-be/backend/mcp",
+    "rootDir": "./src/backend",
+    "strict": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src/backend/mcp/**/*.ts", "src/backend/shared/**/*.ts"],
+  "exclude": ["node_modules"]
+}

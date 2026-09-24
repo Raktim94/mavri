@@ -15,6 +15,7 @@ import { initReceiptHandlers } from './receipt';
 import { initSettingsHandlers } from './settings';
 import { initStyleProfilesHandlers } from './styleProfiles';
 import { initUnitsHandlers } from './units';
+import { initUsSalesTaxHandlers } from './usSalesTax';
 
 export const initIpcHandler = (db: DatabaseAdapter, mainWindow: BrowserWindow) => {
   if (!db) throw new Error('error.databaseNotInitialized');
@@ -38,4 +39,5 @@ export const initIpcHandler = (db: DatabaseAdapter, mainWindow: BrowserWindow) =
   initBanksHandlers(db);
   initPresetHandlers(db);
   initReceiptHandlers();
+  initUsSalesTaxHandlers(db);
 };

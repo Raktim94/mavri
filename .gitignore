@@ -38,6 +38,8 @@ dist-be
 release
 
 data/*.db
+data/.session_secret
+.session_secret
 
 dist-fe
 dist-be

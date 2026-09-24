@@ -158,7 +158,7 @@ const apiGet = async <T>(path: string, params?: Record<string, string>): Promise
   if (params) {
     Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
   }
-  const res = await fetch(url.toString());
+  const res = await fetch(url.toString(), { credentials: 'include' });
   return res.json() as Promise<T>;
 };
 
@@ -168,7 +168,7 @@ const apiGetBlob = async (path: string, params?: Record<string, string>): Promis
     Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
   }
 
-  const res = await fetch(url.toString());
+  const res = await fetch(url.toString(), { credentials: 'include' });
   if (res.ok) {
     const buffer = await res.arrayBuffer();
     return { success: true, data: new Uint8Array(buffer) } as Response<Uint8Array | undefined>;
@@ -180,7 +180,7 @@ const apiGetBlob = async (path: string, params?: Record<string, string>): Promis
 const apiPost = async <T>(path: string, body?: unknown): Promise<T> => {
   const url = baseUrl() + path;
 
-  const options: RequestInit = { method: 'POST' };
+  const options: RequestInit = { method: 'POST', credentials: 'include' };
 
   if (body instanceof FormData) {
     options.body = body;
@@ -197,6 +197,7 @@ const apiPut = async <T>(path: string, body?: unknown): Promise<T> => {
   const url = baseUrl() + path;
   const res = await fetch(url, {
     method: 'PUT',
+    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: body !== undefined ? JSON.stringify(body) : undefined
   });
@@ -205,9 +206,30 @@ const apiPut = async <T>(path: string, body?: unknown): Promise<T> => {
 
 const apiDelete = async <T>(path: string): Promise<T> => {
   const url = baseUrl() + path;
-  const res = await fetch(url, { method: 'DELETE' });
+  const res = await fetch(url, { method: 'DELETE', credentials: 'include' });
   return res.json() as Promise<T>;
 };
+
+// Auth is only relevant in web mode (the REST API) — Electron talks to the
+// database directly over IPC and never needs a session. Kept separate from
+// the Api/webApi() contract below since Electron's preload has no
+// equivalent of these calls.
+export interface AuthStatus {
+  needsSetup: boolean;
+}
+export interface AuthUser {
+  id: number;
+  email: string;
+  role: string;
+}
+
+export const getAuthStatus = () => apiGet<Response<AuthStatus>>('/api/auth/status');
+export const getAuthMe = () => apiGet<Response<AuthUser>>('/api/auth/me');
+export const postAuthSetup = (email: string, password: string) =>
+  apiPost<Response<AuthUser>>('/api/auth/setup', { email, password });
+export const postAuthLogin = (email: string, password: string) =>
+  apiPost<Response<AuthUser>>('/api/auth/login', { email, password });
+export const postAuthLogout = () => apiPost<Response<undefined>>('/api/auth/logout');
 
 export const webApi = () => {
   return {

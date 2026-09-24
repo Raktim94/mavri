@@ -13,6 +13,8 @@ export interface Client {
   buyerReference?: string;
   code?: string;
   description?: string;
+  taxExempt?: boolean;
+  taxExemptionCertificate?: string;
   isArchived: boolean;
   createdAt: string;
   updatedAt: string;

@@ -20,6 +20,8 @@ const clientFields: (keyof Client)[] = [
   'countryCode',
   'peppolEndpointSchemeId',
   'buyerReference',
+  'taxExempt',
+  'taxExemptionCertificate',
   'isArchived'
 ];
 
@@ -55,7 +57,7 @@ export const addClient = async (db: DatabaseAdapter, data: Client): Promise<Resp
            THEN i."id" END)
        `
   });
-  return handle(data);
+  return handle({ ...data, taxExempt: data.taxExempt ?? false });
 };
 
 export const updateClient = async (db: DatabaseAdapter, data: Client): Promise<Response<Client & EntityWithCounts>> => {
@@ -70,7 +72,7 @@ export const updateClient = async (db: DatabaseAdapter, data: Client): Promise<R
            THEN i."id" END)
        `
   });
-  return handle(data, true);
+  return handle({ ...data, taxExempt: data.taxExempt ?? false }, true);
 };
 
 export const deleteClient = async (db: DatabaseAdapter, id: number) => {
@@ -97,7 +99,7 @@ export const batchAddClient = async (db: DatabaseAdapter, data: Client[]) => {
   try {
     await db.run('BEGIN');
     for (const row of data) {
-      const result = await handle(row);
+      const result = await handle({ ...row, taxExempt: row.taxExempt ?? false });
       if (!result.success) {
         try {
           await db.run('ROLLBACK');

@@ -105,6 +105,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   addCurrency: (data: CurrencyAdd) => ipcRenderer.invoke('add-currency', data),
   addBatchCurrency: (data: CurrencyAdd[]) => ipcRenderer.invoke('batch-add-currency', data),
 
+  getUsSalesTaxRates: () => ipcRenderer.invoke('get-us-sales-tax-rates'),
+  getUsSalesTaxRate: (stateCode: string) => ipcRenderer.invoke('get-us-sales-tax-rate', stateCode),
+
   getNextSequence: (data: { businessId: number; clientId: number; invoiceType: InvoiceType }) =>
     ipcRenderer.invoke('get-next-sequence', data),
   getEInvoiceXML: (data: { invoiceId: number; einvoice: EInvoice }) => ipcRenderer.invoke('get-einvoice-xml', data),

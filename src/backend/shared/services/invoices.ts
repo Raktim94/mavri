@@ -58,7 +58,9 @@ const invoiceClientSnapshotsFields: (keyof InvoiceClientSnapshots)[] = [
   'clientPeppolEndpointId',
   'clientCountryCode',
   'clientPeppolEndpointSchemeId',
-  'clientBuyerReference'
+  'clientBuyerReference',
+  'clientTaxExempt',
+  'clientTaxExemptionCertificate'
 ];
 const invoiceBankSnapshotsFields: (keyof InvoiceBankSnapshots)[] = [
   'parentInvoiceId',
@@ -962,6 +964,7 @@ export const addInvoice = async (db: DatabaseAdapter, data: Invoice) => {
     if (data.clientId != undefined && data.invoiceClientSnapshot) {
       const ibs = await handleInvoiceClientSnapshots({
         ...data.invoiceClientSnapshot,
+        clientTaxExempt: data.invoiceClientSnapshot.clientTaxExempt ?? false,
         parentInvoiceId: newId
       });
       if (!ibs.success) {
@@ -1128,6 +1131,7 @@ export const updateInvoice = async (db: DatabaseAdapter, data: Invoice) => {
       const ibs = await handleInvoiceClientSnapshots(
         {
           ...data.invoiceClientSnapshot,
+          clientTaxExempt: data.invoiceClientSnapshot.clientTaxExempt ?? false,
           parentInvoiceId: data.id
         },
         data.invoiceClientSnapshot.id != undefined
@@ -1352,7 +1356,9 @@ export const duplicateInvoice = async (
       'clientCountryCode',
       'clientPeppolEndpointSchemeId',
       'clientBuyerReference',
-      'clientAdditional'
+      'clientAdditional',
+      'clientTaxExempt',
+      'clientTaxExemptionCertificate'
     ]);
     await duplicateSnapshot('invoice_currency_snapshots', ['currencyCode', 'currencySymbol', 'currencySubunit']);
     await duplicateSnapshot('invoice_customizations', [

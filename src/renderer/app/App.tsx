@@ -21,6 +21,7 @@ import {
   setSettings
 } from '../state/pageSlice';
 import { AppLayout } from './AppLayout';
+import { AuthGate } from './AuthGate/AuthGate';
 import { DatabaseChooser } from './DatabaseChooser/DatabaseChooser';
 
 export const App: FC = () => {
@@ -75,12 +76,14 @@ export const App: FC = () => {
 
   return (
     <>
-      {!dbReady && <DatabaseChooser onDatabaseRead={onDatabaseRead} />}
-      {dbReady && (
-        <BeforeUnloadProvider value={{ attemptNavigation, setBlocked }}>
-          <AppLayout />
-        </BeforeUnloadProvider>
-      )}
+      <AuthGate>
+        {!dbReady && <DatabaseChooser onDatabaseRead={onDatabaseRead} />}
+        {dbReady && (
+          <BeforeUnloadProvider value={{ attemptNavigation, setBlocked }}>
+            <AppLayout />
+          </BeforeUnloadProvider>
+        )}
+      </AuthGate>
       <ToastContainer toasts={toasts} onClose={handleClose} />
       {isLoading && <SpinnerOverlay />}
       <Confirmation

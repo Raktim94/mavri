@@ -51,6 +51,8 @@ export interface InvoiceClientSnapshots {
   clientCountryCode?: string;
   clientPeppolEndpointSchemeId?: string;
   clientBuyerReference?: string;
+  clientTaxExempt?: boolean;
+  clientTaxExemptionCertificate?: string;
 }
 
 export interface InvoiceBankSnapshots {
