@@ -1,7 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { verifyApiKey } from '../shared/services/auth';
-import { connectDb } from './db';
+import { connectDb, resolveDbDir } from './db';
 import { registerTools } from './tools';
 
 // This process only ever talks stdio JSON-RPC on stdout — never console.log
@@ -27,7 +27,7 @@ const main = async () => {
   log(`Authenticated as API key "${verified.name}".`);
 
   const server = new McpServer({ name: 'nodedr-invoice', version: '1.0.0' });
-  registerTools(server, db);
+  registerTools(server, db, resolveDbDir());
 
   const transport = new StdioServerTransport();
   await server.connect(transport);

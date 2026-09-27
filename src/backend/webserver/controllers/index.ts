@@ -4,6 +4,7 @@ import { initBusinessesController } from './businesses';
 import { initCategoriesController } from './categories';
 import { initClientsController } from './clients';
 import { initCurrenciesController } from './currencies';
+import { initEcommerceIntegrationsController } from './ecommerceIntegrations';
 import { initImportExportController } from './importExport';
 import { initInvoicesController } from './invoices';
 import { initItemsController } from './items';
@@ -26,6 +27,7 @@ export const initControllers = (app: Express) => {
   initStyleProfilesController(app);
   initUnitsController(app);
   initCurrenciesController(app);
+  initEcommerceIntegrationsController(app);
   initBanksController(app);
   initPresetsController(app);
   initUsSalesTaxController(app);

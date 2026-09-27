@@ -1,8 +1,11 @@
+import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
+import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import ScheduleOutlinedIcon from '@mui/icons-material/ScheduleOutlined';
 import { Grid, useTheme } from '@mui/material';
 import { memo, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SummaryCard } from '../../shared/components/layout/summaryCard/SummaryCard';
-import { Themes } from '../../shared/enums/themes';
 import type { InvoicesByCurrencyMeta } from '../../shared/types/invoice';
 import { formatAmount } from '../../shared/utils/formatFunctions';
 import { useAppSelector } from '../../state/configureStore';
@@ -23,8 +26,8 @@ const FinancialCardsComponent: FC<Props> = ({ data }) => {
           title={t('common.total')}
           value={formatAmount(data.totalAmount, storeSettings?.amountFormat)}
           subtitle={t('reports.totalInvoices', { count: data.invoiceCount })}
-          bgColor={theme.palette.primary.main}
-          textColor={theme.palette.mode === Themes.dark ? theme.palette.common.black : theme.palette.common.white}
+          accentColor={theme.palette.primary.main}
+          icon={<ReceiptLongOutlinedIcon />}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 6, lg: 3 }}>
@@ -34,8 +37,8 @@ const FinancialCardsComponent: FC<Props> = ({ data }) => {
           subtitle={t('reports.avgInvoice', {
             avg: formatAmount(data.avgPerInvoice, storeSettings?.amountFormat)
           })}
-          bgColor={theme.palette.secondary.main}
-          textColor={theme.palette.mode === Themes.dark ? theme.palette.common.black : theme.palette.common.white}
+          accentColor={theme.palette.info.main}
+          icon={<TrendingUpIcon />}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 6, lg: 3 }}>
@@ -45,16 +48,16 @@ const FinancialCardsComponent: FC<Props> = ({ data }) => {
           subtitle={t('reports.overdue', {
             count: data.overdueCount
           })}
-          bgColor={theme.palette.success.main}
-          textColor={theme.palette.mode === Themes.dark ? theme.palette.common.black : theme.palette.common.white}
+          accentColor={theme.palette.success.main}
+          icon={<CheckCircleOutlineOutlinedIcon />}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 6, lg: 3 }}>
         <SummaryCard
           title={t('reports.outstanding')}
           value={formatAmount(data.balanceDue, storeSettings?.amountFormat)}
-          bgColor={theme.palette.warning.main}
-          textColor={theme.palette.mode === Themes.dark ? theme.palette.common.black : theme.palette.common.white}
+          accentColor={theme.palette.warning.main}
+          icon={<ScheduleOutlinedIcon />}
         />
       </Grid>
     </Grid>

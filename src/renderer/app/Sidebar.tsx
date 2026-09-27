@@ -19,6 +19,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import LogoutIcon from '@mui/icons-material/Logout';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import ScaleIcon from '@mui/icons-material/Scale';
+import StorefrontIcon from '@mui/icons-material/Storefront';
 import ViewModule from '@mui/icons-material/ViewModule';
 import { Box, Divider, Drawer, IconButton, Tooltip, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
@@ -26,7 +27,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { useCallback, useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { getApi } from '../shared/api/restApi';
+import { getApi, isWebMode } from '../shared/api/restApi';
 import { MenuList } from '../shared/components/lists/menuList/MenuList';
 import { Confirmation } from '../shared/components/modals/confirmation';
 import type { MenuItem } from '../shared/types/menuItem';
@@ -218,7 +219,23 @@ export const Sidebar: FC = () => {
           minHeight: 50,
           isSelected: isSelected,
           onClick: onClickNavigate
-        }
+        },
+        // Web-only: connecting a Shopify/WooCommerce store needs this
+        // instance to have a public URL for the platform to call, which
+        // isn't meaningful for the offline Electron app.
+        ...(isWebMode()
+          ? [
+              {
+                text: t('menuItems.integrations'),
+                icon: <StorefrontIcon />,
+                path: '/integrations',
+                isToggle: false,
+                minHeight: 50,
+                isSelected: isSelected,
+                onClick: onClickNavigate
+              }
+            ]
+          : [])
       ]
     },
     {

@@ -7,6 +7,7 @@ import { APP_CONFIG } from './config';
 import { initControllers } from './controllers';
 import { initAuthController } from './controllers/auth';
 import { dbDir, initDatabaseController } from './controllers/database';
+import { initEcommerceWebhookController } from './controllers/ecommerceWebhooks';
 import { dbInstance } from './database';
 import { DbSessionStore } from './middleware/dbSessionStore';
 import { requireAuth } from './middleware/auth';
@@ -35,7 +36,19 @@ app.use(
   })
 );
 
-app.use(express.json({ limit: '50mb' }));
+// `verify` stashes the exact raw bytes alongside the parsed body. Needed
+// only by the e-commerce webhook route (HMAC signatures are computed over
+// raw bytes, not the re-serialized object), but capturing it here for every
+// request is cheap and keeps the webhook route from needing its own
+// separate body-parser wired in ahead of this one.
+app.use(
+  express.json({
+    limit: '50mb',
+    verify: (req, _res, buf) => {
+      (req as Request & { rawBody?: Buffer }).rawBody = Buffer.from(buf);
+    }
+  })
+);
 
 app.use(
   cors({
@@ -84,6 +97,9 @@ const main = async () => {
   // Public: bootstrapping the first database/account, and logging in.
   initDatabaseController(app);
   initAuthController(app);
+  // Public: e-commerce platforms call this directly, authenticated by their
+  // own HMAC signature rather than a session or API key (see controller).
+  initEcommerceWebhookController(app);
 
   // Everything registered from here on requires a valid session or API key.
   app.use('/api', requireAuth);

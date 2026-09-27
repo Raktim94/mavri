@@ -1,6 +1,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import * as clientsService from '../shared/services/clients';
+import * as ecommerceService from '../shared/services/ecommerce';
 import * as invoicesService from '../shared/services/invoices';
 import * as itemsService from '../shared/services/items';
 import * as usSalesTaxService from '../shared/services/usSalesTax';
@@ -54,7 +55,7 @@ const getItemRow = (db: DatabaseAdapter, id: number) =>
 const getUnitName = (db: DatabaseAdapter, unitId?: number) =>
   unitId ? db.get<{ name: string }>(`SELECT "name" FROM units WHERE "id" = ?`, [unitId]) : Promise.resolve(null);
 
-export const registerTools = (server: McpServer, db: DatabaseAdapter) => {
+export const registerTools = (server: McpServer, db: DatabaseAdapter, dbDir: string) => {
   // --- clients ------------------------------------------------------
 
   server.registerTool(
@@ -521,6 +522,139 @@ export const registerTools = (server: McpServer, db: DatabaseAdapter) => {
       const result = await invoicesService.deleteInvoice(db, id);
       if (!result.success) return errorResult(errorKey(result));
       return json({ success: true });
+    }
+  );
+
+  // --- e-commerce -----------------------------------------------------
+
+  server.registerTool(
+    'list_ecommerce_integrations',
+    {
+      title: 'List e-commerce integrations',
+      description:
+        'List connected e-commerce stores (Shopify/WooCommerce/generic webhook) that auto-create invoices from orders. Never includes the webhook secret.',
+      inputSchema: {}
+    },
+    async () => {
+      const result = await ecommerceService.listIntegrations(db, '');
+      if (!result.success) return errorResult(errorKey(result));
+      return json(result.data);
+    }
+  );
+
+  server.registerTool(
+    'create_ecommerce_integration',
+    {
+      title: 'Connect an e-commerce store',
+      description:
+        "Register a new e-commerce store (Shopify, WooCommerce, or a generic webhook source) so its orders auto-create invoices. Returns a webhook secret ONCE — it cannot be retrieved again afterwards, so surface it to the user and tell them to put it in their store's webhook settings immediately.",
+      inputSchema: {
+        name: z.string(),
+        platform: z.enum(['shopify', 'woocommerce', 'generic']),
+        businessId: z.number(),
+        currencyId: z.number(),
+        bankId: z.number().optional(),
+        layoutId: z.number().optional(),
+        styleProfilesId: z.number().optional(),
+        defaultTaxRate: z.number().optional().default(0),
+        autoIssue: z.boolean().optional().default(true)
+      }
+    },
+    async data => {
+      const result = await ecommerceService.createIntegration(db, dbDir, data);
+      if (!result.success || !result.data) return errorResult(errorKey(result));
+      return json({
+        integration: {
+          id: result.data.integration.id,
+          name: result.data.integration.name,
+          platform: result.data.integration.platform
+        },
+        webhookSecret: result.data.webhookSecret,
+        warning: 'This secret is shown once. Store it now — the app cannot display it again.'
+      });
+    }
+  );
+
+  server.registerTool(
+    'deactivate_ecommerce_integration',
+    {
+      title: 'Deactivate an e-commerce integration',
+      description: 'Stop a connected store from creating any further invoices. Does not delete past orders/invoices.',
+      inputSchema: { id: z.number() }
+    },
+    async ({ id }) => {
+      const result = await ecommerceService.deactivateIntegration(db, id);
+      if (!result.success) return errorResult(errorKey(result));
+      return json({ success: true });
+    }
+  );
+
+  server.registerTool(
+    'create_invoice_from_order',
+    {
+      title: 'Create an invoice from an order',
+      description:
+        "Manually turn an order (from any source, or one you compose yourself) into an invoice through a connected integration's default business/currency/bank/layout, without going through a webhook. Useful for backfilling an order a webhook missed, or for sources with no webhook at all.",
+      inputSchema: {
+        integrationId: z.number(),
+        externalOrderId: z.string(),
+        orderNumber: z.string().optional(),
+        customerName: z.string(),
+        customerEmail: z.string().optional(),
+        customerPhone: z.string().optional(),
+        customerAddress: z.string().optional(),
+        customerCountryCode: z.string().optional(),
+        lineItems: z
+          .array(
+            z.object({
+              name: z.string(),
+              quantity: z.number(),
+              unitPriceMajor: z.number()
+            })
+          )
+          .min(1),
+        shippingMajor: z.number().optional().default(0),
+        taxRatePercent: z.number().optional(),
+        notes: z.string().optional()
+      }
+    },
+    async ({ integrationId, ...orderInput }) => {
+      const integration = await ecommerceService.getActiveIntegration(db, integrationId);
+      if (!integration) return errorResult('error.notFound');
+
+      const existing = await ecommerceService.findExistingOrder(db, integrationId, orderInput.externalOrderId);
+      if (existing?.status === 'processed') {
+        return json({ invoiceId: existing.invoiceId, deduplicated: true });
+      }
+
+      const normalized = {
+        externalOrderId: orderInput.externalOrderId,
+        orderNumber: orderInput.orderNumber,
+        customer: {
+          name: orderInput.customerName,
+          email: orderInput.customerEmail,
+          phone: orderInput.customerPhone,
+          address: orderInput.customerAddress,
+          countryCode: orderInput.customerCountryCode
+        },
+        lineItems: orderInput.lineItems,
+        shippingMajor: orderInput.shippingMajor,
+        taxRatePercent: orderInput.taxRatePercent,
+        notes: orderInput.notes
+      };
+
+      const orderRecordId =
+        existing?.id ??
+        (await ecommerceService.recordOrderReceived(db, integrationId, orderInput.externalOrderId, 'mcp-manual'));
+
+      const result = await ecommerceService.createInvoiceFromOrder(db, integration, normalized);
+      if (!result.success || !result.data) {
+        await ecommerceService.markOrderFailed(db, orderRecordId, result.message ?? result.key ?? 'unknown');
+        return errorResult(errorKey(result));
+      }
+
+      await ecommerceService.markOrderProcessed(db, orderRecordId, result.data.invoiceId);
+      return json(result.data);
     }
   );
 };

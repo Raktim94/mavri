@@ -4,6 +4,12 @@ import { DatabaseType } from '../shared/enums/databaseType';
 import { isTableExists } from '../shared/utils/dbHelper';
 import type { DatabaseAdapter } from '../shared/types/DatabaseAdapter';
 
+// Same directory the webserver resolves dbDir to (see webserver/database.ts)
+// — needed here too because e-commerce webhook secrets are encrypted with a
+// key file stored next to the database, and this process must be able to
+// decrypt/encrypt them for the ecommerce MCP tools.
+export const resolveDbDir = (): string => path.resolve(process.cwd(), process.env.DB_DIRECTORY || 'data');
+
 // The MCP server always attaches to an existing, already-migrated database —
 // it never creates, wipes or migrates one itself. That's deliberate, not
 // just a shortcut: openSqlLite's createIfMissing path deletes the file

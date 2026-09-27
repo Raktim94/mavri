@@ -10,6 +10,7 @@ import { BusinessesPage } from './pages/businesses';
 import { CategoriesPage } from './pages/categories';
 import { ClientsPage } from './pages/clients';
 import { CurrenciesPage } from './pages/currencies';
+import { IntegrationsPage } from './pages/integrations';
 import { InvoicesPage } from './pages/invoices';
 import { ItemsPage } from './pages/items';
 import { LayoutsPage } from './pages/layouts';
@@ -53,6 +54,11 @@ const createRouter = () => {
         { path: 'reports', element: <ReportsPage /> },
         { path: 'banks', element: <BanksPage /> },
         { path: 'presets', element: <PresetsPage /> },
+        // Web-only: e-commerce webhooks need a publicly reachable URL, which
+        // the offline Electron app has no equivalent of. The route still
+        // exists so a direct link doesn't 404; the sidebar only links to it
+        // in web mode (see Sidebar.tsx).
+        { path: 'integrations', element: <IntegrationsPage /> },
         { path: '*', element: <Navigate to="/invoices" replace /> }
       ]
     }
