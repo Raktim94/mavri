@@ -1,7 +1,7 @@
 {
   "app": {
     "noItems": "Selecione um item para ver os detalhes",
-    "title": "Invoice Builder",
+    "title": "NodeDR Invoice",
     "version": "Versão"
   },
   "ariaLabel": {
@@ -603,12 +603,15 @@
     "avgInvoice": "{{avg}} Fatura média",
     "collected": "Recebido",
     "collectionRate": "Taxa de recebimento",
+    "cumulative": "Cumulative revenue over the period",
     "currencyDashboard": "Visão geral de {{currency}}",
     "customRange": "Período personalizado",
+    "dateBasis": "Date basis",
     "dateRange": "Período",
     "dateTypeIssuedAt": "Usar a data de 'Emissão'",
     "dateTypePaidAt": "Usar a data de 'Pagamento'",
     "invoiceCount": "{{name}} ({{count}} fat.)",
+    "invoicesShort": "{{count}} inv",
     "itemsCount": "{{name}} (qtd.: {{count}})",
     "last30Days": "Últimos 30 dias",
     "lastMonth": "Mês passado",
@@ -617,8 +620,12 @@
     "noItems": "Nenhuma fatura foi encontrada no período selecionado. Crie pelo menos uma fatura para gerar o relatório.",
     "outstanding": "Em aberto",
     "overdue": "{{count}} vencidas",
+    "paidVsOutstanding": "Paid versus outstanding",
+    "qtyShort": "qty {{count}}",
+    "recentInvoices": "Recent invoices",
     "salesTrending": "Tendência de vendas",
     "selectDateRange": "Selecionar período",
+    "subtitle": "How your business is doing at a glance",
     "thisMonth": "Este mês",
     "thisQuarter": "Este trimestre",
     "thisYear": "Este ano",
@@ -630,7 +637,7 @@
   "settingsMenuItems": {
     "descriptions": {
       "about": "Saiba mais sobre este aplicativo e seus recursos.",
-      "buyMeCoffee": "O Invoice Builder é mantido por um único desenvolvedor. Seu apoio mantém as atualizações e novos recursos chegando! Seja um dos primeiros apoiadores e veja seu nome no aplicativo",
+      "buyMeCoffee": "O NodeDR Invoice é mantido por um único desenvolvedor. Seu apoio mantém as atualizações e novos recursos chegando! Seja um dos primeiros apoiadores e veja seu nome no aplicativo",
       "customizeInvoice": "Prefixo do número da fatura, por exemplo: INV, sufixo.",
       "darkMode": "Alternar entre os temas claro e escuro.",
       "export": "Exporte seus dados para backup ou uso em outros aplicativos.",

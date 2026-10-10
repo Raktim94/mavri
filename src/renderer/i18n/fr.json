@@ -1,7 +1,7 @@
 {
   "app": {
     "noItems": "Sélectionnez un élément pour afficher les détails",
-    "title": "Invoice Builder",
+    "title": "NodeDR Invoice",
     "version": "Version"
   },
   "ariaLabel": {
@@ -603,12 +603,15 @@
     "avgInvoice": "{{avg}} Moy. facture",
     "collected": "Collecté",
     "collectionRate": "Taux de collecte",
+    "cumulative": "Cumulative revenue over the period",
     "currencyDashboard": "Aperçu {{currency}}",
     "customRange": "Plage personnalisée",
+    "dateBasis": "Date basis",
     "dateRange": "Plage de dates",
     "dateTypeIssuedAt": "Utiliser la date « Émise le »",
     "dateTypePaidAt": "Utiliser la date « Payé le »",
     "invoiceCount": "{{name}} ({{count}} fact.)",
+    "invoicesShort": "{{count}} inv",
     "itemsCount": "{{name}} (qté: {{count}})",
     "last30Days": "30 derniers jours",
     "lastMonth": "Mois dernier",
@@ -617,8 +620,12 @@
     "noItems": "Aucune facture trouvée pour la période sélectionnée. Veuillez créer au moins une facture pour générer le rapport.",
     "outstanding": "En attente",
     "overdue": "{{count}} en retard",
+    "paidVsOutstanding": "Paid versus outstanding",
+    "qtyShort": "qty {{count}}",
+    "recentInvoices": "Recent invoices",
     "salesTrending": "Tendance des ventes",
     "selectDateRange": "Sélectionnez une plage de dates",
+    "subtitle": "How your business is doing at a glance",
     "thisMonth": "Ce mois‑ci",
     "thisQuarter": "Ce trimestre",
     "thisYear": "Cette année",
@@ -630,7 +637,7 @@
   "settingsMenuItems": {
     "descriptions": {
       "about": "En savoir plus sur cette application et ses fonctionnalités.",
-      "buyMeCoffee": "Invoice Builder est maintenu par un développeur indépendant. Votre soutien permet de continuer les mises à jour et d’ajouter de nouvelles fonctionnalités ! Soyez l’un des premiers contributeurs et voyez votre nom apparaître dans l’application",
+      "buyMeCoffee": "NodeDR Invoice est maintenu par un développeur indépendant. Votre soutien permet de continuer les mises à jour et d’ajouter de nouvelles fonctionnalités ! Soyez l’un des premiers contributeurs et voyez votre nom apparaître dans l’application",
       "customizeInvoice": "Préfixe de numéro de facture (ex.: INV), suffixe.",
       "darkMode": "Basculer entre les thèmes clair et sombre.",
       "export": "Exportez vos données pour sauvegarde ou utilisation ailleurs.",

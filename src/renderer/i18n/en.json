@@ -1,7 +1,7 @@
 {
   "app": {
     "noItems": "Selected an item to view details",
-    "title": "Invoice Builder",
+    "title": "NodeDR Invoice",
     "version": "Version"
   },
   "ariaLabel": {
@@ -603,12 +603,15 @@
     "avgInvoice": "{{avg}} Avg. Invoice",
     "collected": "Collected",
     "collectionRate": "Collection rate",
+    "cumulative": "Cumulative revenue over the period",
     "currencyDashboard": "{{currency}} Overview",
     "customRange": "Custom range",
+    "dateBasis": "Date basis",
     "dateRange": "Date range",
     "dateTypeIssuedAt": "Use 'Issued At' date",
     "dateTypePaidAt": "Use 'Paid At' date",
     "invoiceCount": "{{name}} ({{count}} inv)",
+    "invoicesShort": "{{count}} inv",
     "itemsCount": "{{name}} (qty: {{count}})",
     "last30Days": "Last 30 days",
     "lastMonth": "Last month",
@@ -617,12 +620,16 @@
     "noItems": "No invoices were found for the selected period. Please create at least one invoice to generate the report.",
     "outstanding": "Outstanding",
     "overdue": "{{count}} Overdue",
+    "paidVsOutstanding": "Paid versus outstanding",
+    "qtyShort": "qty {{count}}",
+    "recentInvoices": "Recent invoices",
     "salesTrending": "Sales trending",
     "selectDateRange": "Select date range",
+    "subtitle": "How your business is doing at a glance",
     "thisMonth": "This month",
     "thisQuarter": "This quarter",
     "thisYear": "This year",
-    "title": "Financial dashboard",
+    "title": "Dashboard",
     "topClients": "Top clients by revenue",
     "topItems": "Top items by sales",
     "totalInvoices": "{{count}} Invoices"
@@ -630,7 +637,7 @@
   "settingsMenuItems": {
     "descriptions": {
       "about": "Learn more about this app, its features.",
-      "buyMeCoffee": "Invoice Builder is maintained by a single developer. Your support keeps updates coming and new features rolling out! Be one of the first supporters and see your name in the app",
+      "buyMeCoffee": "NodeDR Invoice is maintained by a single developer. Your support keeps updates coming and new features rolling out! Be one of the first supporters and see your name in the app",
       "customizeInvoice": "Invoice number prefix e.g.: INV, suffix.",
       "darkMode": "Switch between light and dark themes.",
       "export": "Export your data for backup or to use in other applications.",

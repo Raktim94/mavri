@@ -26,9 +26,15 @@
 </p>
 
 <p align="center">
-  <img src="tutorial/invoice_form.jpg" alt="Invoice form" width="48%">
-  <img src="tutorial/invoice_pdf_preview.jpg" alt="Invoice PDF preview" width="48%">
+  <img src="docs/screenshots/dashboard-light.png" alt="Dashboard (light)" width="100%">
 </p>
+
+<p align="center">
+  <img src="docs/screenshots/dashboard-dark.png" alt="Dashboard (dark)" width="49%">
+  <img src="tutorial/invoice_pdf_preview.jpg" alt="Invoice PDF preview" width="49%">
+</p>
+
+<sub align="center">Screenshots use fictional demo data.</sub>
 
 ---
 

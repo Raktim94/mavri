@@ -1,13 +1,4 @@
-import {
-  Box,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  Typography,
-  useTheme,
-  type SelectChangeEvent
-} from '@mui/material';
+import { Box, FormControl, InputLabel, MenuItem, Select, Typography, type SelectChangeEvent } from '@mui/material';
 import {
   endOfDay,
   endOfMonth,
@@ -45,7 +36,6 @@ const HeaderComponent: FC<Props> = ({
   onDateChange = () => {},
   currencies
 }) => {
-  const theme = useTheme();
   const { t } = useTranslation();
   const storeSettings = useAppSelector(selectSettings);
 
@@ -184,16 +174,21 @@ const HeaderComponent: FC<Props> = ({
 
   return (
     <>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <Typography variant="h5" noWrap component="div" sx={{ color: theme.palette.secondary.main }}>
-          {t('reports.title')}
-        </Typography>
+      <Box sx={{ display: 'flex', alignItems: { md: 'flex-end' }, gap: 1.5, flexWrap: 'wrap' }}>
+        <Box>
+          <Typography variant="h1" component="h1" noWrap sx={{ fontSize: '2rem' }}>
+            {t('reports.title')}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+            {t('reports.subtitle')}
+          </Typography>
+        </Box>
         <Box sx={{ flexGrow: 1 }} />
-        <FormControl size="small" sx={{ minWidth: 200 }}>
-          <InputLabel id="date-label">{t('common.currency')}</InputLabel>
+        <FormControl size="small" sx={{ minWidth: 170 }}>
+          <InputLabel id="date-label">{t('reports.dateBasis')}</InputLabel>
           <Select
             labelId="date-label"
-            label={t('common.currency')}
+            label={t('reports.dateBasis')}
             value={reportDateType}
             onChange={handleDateTypeChange}
           >
@@ -201,7 +196,7 @@ const HeaderComponent: FC<Props> = ({
             <MenuItem value={ReportDateType.paidAt}>{t('reports.dateTypePaidAt')}</MenuItem>
           </Select>
         </FormControl>
-        <FormControl size="small" sx={{ minWidth: 200 }}>
+        <FormControl size="small" sx={{ minWidth: 170 }}>
           <InputLabel id="currency-label">{t('common.currency')}</InputLabel>
           <Select
             labelId="currency-label"
@@ -216,7 +211,7 @@ const HeaderComponent: FC<Props> = ({
             ))}
           </Select>
         </FormControl>
-        <FormControl size="small" sx={{ minWidth: 200 }}>
+        <FormControl size="small" sx={{ minWidth: 170 }}>
           <InputLabel id="date-range-label">{t('reports.dateRange')}</InputLabel>
           <Select
             labelId="date-range-label"

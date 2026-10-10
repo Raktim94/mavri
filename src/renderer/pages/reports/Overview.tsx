@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material';
+import { Box, Grid } from '@mui/material';
 import { parseISO } from 'date-fns';
 import { memo, useMemo, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -8,9 +8,11 @@ import type { ClientRevenue } from '../../shared/types/clientRevenue';
 import type { Invoice, InvoicesByCurrency } from '../../shared/types/invoice';
 import type { ItemSales } from '../../shared/types/itemSales';
 import { getInvoiceItemTotal, getInvoiceTotal } from '../../shared/utils/invoiceFunctions';
+import { CollectionCard } from './CollectionCard';
 import { ClientsRevenueChart } from './ClientsRevenueChart';
 import { FinancialCards } from './FinancialCards';
 import { ItemsSalesChart } from './ItemsSalesChart';
+import { RecentInvoices, type RecentInvoiceRow } from './RecentInvoices';
 import { TrendChart } from './TrendChart';
 
 interface Props {
@@ -152,27 +154,64 @@ const OverviewComponent: FC<Props> = ({ reportDateType, groupedMeta, dates, curr
       )
     );
 
-    return { trendChartData, clientRevenueData, itemSalesData };
+    const recentInvoices: RecentInvoiceRow[] = [...filteredInvoices]
+      .sort((a, b) => new Date(b.issuedAt).getTime() - new Date(a.issuedAt).getTime())
+      .slice(0, 6)
+      .map(inv => ({
+        id: inv.id,
+        number: inv.invoiceNumber,
+        client: inv.invoiceClientSnapshot?.clientName ?? '',
+        issuedAt: inv.issuedAt,
+        dueDate: inv.dueDate,
+        status: inv.status,
+        total:
+          getInvoiceTotal({
+            taxRate: inv.taxRate,
+            taxType: inv.taxType,
+            invoiceItems: inv.invoiceItems,
+            discountType: inv.discountType,
+            discountAmount: Number(inv.discountAmountCents),
+            discountPercent: inv.discountPercent,
+            shippingFee: Number(inv.shippingFeeCents),
+            surchargeType: inv.surchargeType,
+            surchargeAmount: Number(inv.surchargeAmountCents),
+            surchargePercent: inv.surchargePercent,
+            includeTax: true
+          }) / (inv.invoiceCurrencySnapshot?.currencySubunit || 1)
+      }));
+
+    return { trendChartData, clientRevenueData, itemSalesData, recentInvoices };
   }, [groups, reportDateType, currencyCode, dates, invoices]);
 
-  return (
-    <>
-      <Box sx={{ mt: 3, height: '100%' }}>
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-            {t('reports.currencyDashboard', { currency: currencyCode })}
-          </Typography>
-          <>
-            {groups[currencyCode] && <FinancialCards data={groups[currencyCode]} />}
-            {groups[currencyCode] && reportData && <TrendChart data={reportData.trendChartData} />}
-            {groups[currencyCode] && reportData && <ClientsRevenueChart data={reportData.clientRevenueData} />}
-            {groups[currencyCode] && reportData && <ItemsSalesChart data={reportData.itemSalesData} />}
-          </>
-        </Box>
+  const meta = groups[currencyCode];
 
-        {!groups[currencyCode] && <NoItem text={t('reports.noItems')} />}
-      </Box>
-    </>
+  return (
+    <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
+      {meta && reportData ? (
+        <>
+          <FinancialCards data={meta} />
+          <Grid container spacing={3}>
+            <Grid size={{ xs: 12, lg: 8 }}>
+              <TrendChart data={reportData.trendChartData} />
+            </Grid>
+            <Grid size={{ xs: 12, lg: 4 }}>
+              <CollectionCard data={meta} />
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <ClientsRevenueChart data={reportData.clientRevenueData} />
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <ItemsSalesChart data={reportData.itemSalesData} />
+            </Grid>
+            <Grid size={12}>
+              <RecentInvoices rows={reportData.recentInvoices} />
+            </Grid>
+          </Grid>
+        </>
+      ) : (
+        <NoItem text={t('reports.noItems')} />
+      )}
+    </Box>
   );
 };
 
