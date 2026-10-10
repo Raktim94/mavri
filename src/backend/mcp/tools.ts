@@ -3,9 +3,9 @@ import { z } from 'zod';
 import * as clientsService from '../shared/services/clients';
 import * as ecommerceService from '../shared/services/ecommerce';
 import * as invoicesService from '../shared/services/invoices';
+import { findInvoiceById, findInvoices, summarizeInvoice } from '../shared/services/invoiceFetcher';
 import * as itemsService from '../shared/services/items';
 import * as usSalesTaxService from '../shared/services/usSalesTax';
-import { FilterType } from '../shared/enums/filterType';
 import { InvoiceType } from '../shared/enums/invoiceType';
 import type { DatabaseAdapter } from '../shared/types/DatabaseAdapter';
 import type { Invoice, InvoiceItem } from '../shared/types/invoice';
@@ -246,40 +246,25 @@ export const registerTools = (server: McpServer, db: DatabaseAdapter, dbDir: str
   server.registerTool(
     'list_invoices',
     {
-      title: 'List invoices or quotes',
-      description: 'List invoices/quotes, optionally filtered by client or status.',
+      title: 'Search invoices or quotes',
+      description:
+        'Search/list invoices and quotes with filters and pagination. Returns summaries; use get_invoice for full detail.',
       inputSchema: {
         invoiceType: z.enum(['invoice', 'quotation']).optional(),
         clientId: z.number().optional(),
-        status: z.enum(['open', 'unpaid', 'closed', 'partially', 'paid']).optional()
+        status: z.enum(['open', 'unpaid', 'closed', 'partially', 'paid']).optional(),
+        search: z.string().optional().describe('Matches invoice number or client name'),
+        from: z.string().optional().describe('ISO date, issued on/after'),
+        to: z.string().optional().describe('ISO date, issued on/before'),
+        limit: z.number().optional().describe('Default 50, max 200'),
+        offset: z.number().optional()
       }
     },
-    async ({ invoiceType, clientId, status }) => {
-      const filter = [
-        clientId != null ? { type: FilterType.client, value: String(clientId) } : undefined,
-        status ? { type: FilterType.status, value: status } : undefined
-      ].filter((f): f is { type: FilterType; value: string } => f != undefined);
-
-      const result = await invoicesService.getAllInvoices(db, invoiceType, filter.length ? filter : undefined);
+    async query => {
+      const result = await findInvoices(db, query);
       if (!result.success) return errorResult(errorKey(result));
-      // Trim the heavy nested snapshot payload for the list view — callers use get_invoice for full detail.
-      const summarized = (result.data ?? []).map(inv => ({
-        id: inv.id,
-        invoiceType: inv.invoiceType,
-        invoiceNumber: inv.invoiceNumber,
-        status: inv.status,
-        issuedAt: inv.issuedAt,
-        dueDate: inv.dueDate,
-        clientId: inv.clientId,
-        clientName: inv.invoiceClientSnapshot?.clientName,
-        businessId: inv.businessId,
-        currencyCode: inv.invoiceCurrencySnapshot?.currencyCode,
-        taxRate: inv.taxRate,
-        discountPercent: inv.discountPercent,
-        itemCount: inv.invoiceItems?.length ?? 0,
-        totalPaidCents: (inv.invoicePayments ?? []).reduce((sum, p) => sum + Number(p.amountCents || 0), 0)
-      }));
-      return json(summarized);
+      const { items, ...page } = result.data;
+      return json({ ...page, items: items.map(summarizeInvoice) });
     }
   );
 
@@ -291,11 +276,9 @@ export const registerTools = (server: McpServer, db: DatabaseAdapter, dbDir: str
       inputSchema: { id: z.number() }
     },
     async ({ id }) => {
-      const result = await invoicesService.getAllInvoices(db);
+      const result = await findInvoiceById(db, id);
       if (!result.success) return errorResult(errorKey(result));
-      const invoice = (result.data ?? []).find(inv => inv.id === id);
-      if (!invoice) return errorResult('error.invoiceNotFound');
-      return json(invoice);
+      return json(result.data);
     }
   );
 

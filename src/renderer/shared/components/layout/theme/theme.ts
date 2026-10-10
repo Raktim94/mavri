@@ -9,133 +9,104 @@ declare module '@mui/material/styles' {
   }
 }
 
-const commonSettings: ThemeOptions = {
-  typography: {
-    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
-    h1: { fontWeight: 700, fontSize: '2rem' },
-    h2: { fontWeight: 600, fontSize: '1.75rem' },
-    button: { textTransform: 'none', fontWeight: 600 }
+// Design tokens from DESIGN.md (warm cream canvas, coral primary, serif display).
+const SANS = '"StyreneB", "Inter", "Roboto", "Helvetica", "Arial", sans-serif';
+const SERIF = '"Copernicus", "Tiempos Headline", "Iowan Old Style", Georgia, serif';
+
+const serifHeading = (fontSize: string, letterSpacing: string, lineHeight: number) => ({
+  fontFamily: SERIF,
+  fontWeight: 400,
+  fontSize,
+  letterSpacing,
+  lineHeight
+});
+
+const scrollbar = (track: string, thumb: string) => ({
+  '&::-webkit-scrollbar': { width: '10px', height: '10px' },
+  '&::-webkit-scrollbar-track': { background: track, borderRadius: '5px' },
+  '&::-webkit-scrollbar-thumb': {
+    backgroundColor: thumb,
+    border: `2px solid ${track}`,
+    borderRadius: '5px'
   },
-  shape: { borderRadius: 12 },
+  scrollbarWidth: 'thin',
+  scrollbarColor: `${thumb} ${track}`
+});
+
+const buildSettings = (border: string, track: string, thumb: string): ThemeOptions => ({
+  typography: {
+    fontFamily: SANS,
+    h1: serifHeading('2.25rem', '-0.5px', 1.15),
+    h2: serifHeading('1.75rem', '-0.3px', 1.2),
+    h3: serifHeading('1.5rem', '-0.2px', 1.25),
+    h4: { ...serifHeading('1.25rem', '0', 1.3) },
+    h5: { fontWeight: 500, fontSize: '1.125rem' },
+    h6: { fontWeight: 500, fontSize: '1rem' },
+    button: { textTransform: 'none', fontWeight: 500, letterSpacing: 0 }
+  },
+  shape: { borderRadius: 8 },
   components: {
     MuiButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: 12
-        }
-      }
+      defaultProps: { disableElevation: true },
+      styleOverrides: { root: { borderRadius: 8 } }
     },
     MuiPaper: {
-      styleOverrides: {
-        root: {
-          borderRadius: 12
-        }
-      }
+      styleOverrides: { root: { borderRadius: 12, backgroundImage: 'none' } }
+    },
+    MuiCard: {
+      styleOverrides: { root: { border: `1px solid ${border}`, boxShadow: 'none' } }
     },
     MuiCssBaseline: {
       styleOverrides: {
-        body: {
-          '&::-webkit-scrollbar': {
-            width: '10px',
-            height: '10px'
-          },
-          '&::-webkit-scrollbar-track': {
-            borderRadius: '5px'
-          },
-          '&::-webkit-scrollbar-thumb': {
-            borderRadius: '5px'
-          },
-          scrollbarWidth: 'thin'
-        }
+        body: scrollbar(track, thumb),
+        '*': scrollbar(track, thumb)
       }
     }
   }
-};
+});
 
 export const lightTheme = createTheme({
-  ...commonSettings,
-  components: {
-    MuiCssBaseline: {
-      styleOverrides: {
-        body: {
-          '&::-webkit-scrollbar-track': {
-            background: '#e5e5e5'
-          },
-          '&::-webkit-scrollbar-thumb': {
-            backgroundColor: '#1976d2',
-            border: '2px solid #e5e5e5'
-          },
-          scrollbarColor: '#1976d2 #e5e5e5'
-        },
-        '*': {
-          '&::-webkit-scrollbar-track': {
-            background: '#e5e5e5'
-          },
-          '&::-webkit-scrollbar-thumb': {
-            backgroundColor: '#1976d2',
-            border: '2px solid #e5e5e5'
-          },
-          scrollbarColor: '#1976d2 #e5e5e5'
-        }
-      }
-    }
-  },
+  ...buildSettings('#e6dfd8', '#efe9de', '#cc785c'),
   palette: {
     mode: 'light',
-    primary: { main: '#1976d2' },
-    secondary: { main: '#9c27b0' },
+    primary: { main: '#cc785c', dark: '#a9583e', contrastText: '#ffffff' },
+    secondary: { main: '#5db8a6', contrastText: '#141413' },
+    info: { main: '#5db8a6' },
+    success: { main: '#5db872' },
+    warning: { main: '#d4a017' },
+    error: { main: '#c64545' },
     background: {
-      default: '#f5f6fa',
+      default: '#faf9f5',
       paper: '#ffffff'
     },
     text: {
-      primary: '#1e1e1e',
-      secondary: '#555'
+      primary: '#141413',
+      secondary: '#6c6a64'
     },
-    customBorder: '#e0e0e0'
+    divider: '#e6dfd8',
+    customBorder: '#e6dfd8'
   }
 });
 
 export const darkTheme = createTheme({
-  ...commonSettings,
-  components: {
-    MuiCssBaseline: {
-      styleOverrides: {
-        body: {
-          '&::-webkit-scrollbar-track': {
-            background: '#2c2c2c'
-          },
-          '&::-webkit-scrollbar-thumb': {
-            backgroundColor: '#1976d2',
-            border: '2px solid #2c2c2c'
-          },
-          scrollbarColor: '#1976d2 #2c2c2c'
-        },
-        '*': {
-          '&::-webkit-scrollbar-track': {
-            background: '#2c2c2c'
-          },
-          '&::-webkit-scrollbar-thumb': {
-            backgroundColor: '#1976d2',
-            border: '2px solid #2c2c2c'
-          },
-          scrollbarColor: '#1976d2 #2c2c2c'
-        }
-      }
-    }
-  },
+  ...buildSettings('#33302b', '#252320', '#cc785c'),
   palette: {
     mode: 'dark',
-    primary: { main: '#90caf9' },
-    secondary: { main: '#ce93d8' },
+    primary: { main: '#d98b70', dark: '#cc785c', contrastText: '#141413' },
+    secondary: { main: '#5db8a6', contrastText: '#141413' },
+    info: { main: '#5db8a6' },
+    success: { main: '#5db872' },
+    warning: { main: '#e8a55a' },
+    error: { main: '#e06a6a' },
     background: {
-      default: '#121212',
-      paper: '#1e1e1e'
+      default: '#181715',
+      paper: '#1f1e1b'
     },
     text: {
-      primary: '#ffffff',
-      secondary: '#b0b0b0'
+      primary: '#faf9f5',
+      secondary: '#a09d96'
     },
-    customBorder: '#333'
+    divider: '#33302b',
+    customBorder: '#33302b'
   }
 });

@@ -111,16 +111,16 @@ export const PDF_STYLES = StyleSheet.create({
   w35: { width: '35%' },
   w20: { width: '20%' },
   w15: { width: '15%' },
-  border: { height: 1, backgroundColor: '#e0e0e0' },
+  border: { height: 1, backgroundColor: '#e6dfd8' },
   maxw50: { maxWidth: '50%' },
   alignStart: { alignItems: 'flex-start' },
   alignCenter: { alignItems: 'center' },
   alignEnd: { alignItems: 'flex-end' },
   business: { fontWeight: 500 },
-  businessText: { fontWeight: 400, color: '#808080' },
+  businessText: { fontWeight: 400, color: '#6c6a64' },
   title: { fontWeight: 700 },
   regular: { fontWeight: 400 },
-  regularBold: { fontWeight: 600, color: '#333333' },
+  regularBold: { fontWeight: 600, color: '#252523' },
   italic: { fontStyle: 'italic' },
   layoutRequired: { color: '#d32f2f', fontWeight: 700 },
   table: {
@@ -136,7 +136,7 @@ export const PDF_STYLES = StyleSheet.create({
     fontWeight: 'bold'
   },
   tableCellSubtle: {
-    color: '#808080'
+    color: '#6c6a64'
   },
   attachment: { width: '100%', height: '90%', objectFit: 'contain' },
   signature: {
@@ -165,6 +165,6 @@ export const PDF_STYLES = StyleSheet.create({
     position: 'absolute',
     bottom: 20,
     right: 40,
-    color: '#808080'
+    color: '#6c6a64'
   }
 });

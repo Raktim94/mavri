@@ -127,7 +127,7 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels, col
   const headerRowStyle = useMemo(() => {
     let rowBckgColor = 'transparent';
     let rowFontColor = 'inherit';
-    let rowBorder: string | undefined = '1px solid #e0e0e0';
+    let rowBorder: string | undefined = '1px solid #e6dfd8';
     let rowBorderCell: string | undefined = undefined;
 
     if (invoiceForm?.invoiceCustomization?.tableHeaderStyle === TableHeaderStyle.light) {
@@ -144,7 +144,7 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels, col
       invoiceForm?.invoiceCustomization?.tableHeaderStyle === TableHeaderStyle.outline
     ) {
       rowBorder = undefined;
-      rowBorderCell = '1px solid #e0e0e0';
+      rowBorderCell = '1px solid #e6dfd8';
     }
 
     return { bckgColor: rowBckgColor, fontColor: rowFontColor, border: rowBorder, borderCell: rowBorderCell };
@@ -186,15 +186,15 @@ const ItemsInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, labels, col
   ]);
 
   const rowStyle = useMemo(() => {
-    let rowBorderBottom: string | undefined = '1px solid #e0e0e0';
+    let rowBorderBottom: string | undefined = '1px solid #e6dfd8';
     let rowBorderCell: string | undefined = undefined;
     let rowColor = undefined;
 
     if (invoiceForm?.invoiceCustomization?.tableRowStyle === TableRowStyle.bordered) {
-      rowBorderCell = '1px solid #e0e0e0';
+      rowBorderCell = '1px solid #e6dfd8';
     } else if (invoiceForm?.invoiceCustomization?.tableRowStyle === TableRowStyle.stripped) {
       rowBorderBottom = undefined;
-      rowColor = '#e0e0e0';
+      rowColor = '#e6dfd8';
     }
 
     return {

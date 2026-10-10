@@ -33,6 +33,15 @@ COPY scripts/nginx.conf.template /app/scripts/nginx.conf.template
 RUN sed -i 's/\r$//' /app/scripts/docker-start.sh \
     && chmod +x /app/scripts/docker-start.sh
 
+ENV SERVICE=all \
+    NODE_ENV=docker \
+    DB_DIRECTORY=/data \
+    PORT=3000 \
+    DEV_SERVER_URL=0.0.0.0 \
+    BACKEND_HOST=localhost \
+    BACKEND_PORT=3000 \
+    MIGRATIONS_PATH=/app/dist-be/backend/server/shared/migrations
+
 VOLUME ["/data"]
 
 CMD ["/app/scripts/docker-start.sh"]

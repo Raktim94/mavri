@@ -44,7 +44,7 @@ const HeaderInfoComponent: FC<Props> = ({ invoiceForm, storeSettings, logoUrl, p
       block.paddingTop === 10 ? PDF_STYLES.pt10 : block.paddingTop === 20 ? PDF_STYLES.pt20 : undefined,
       block.paddingBottom === 20 ? PDF_STYLES.pb20 : undefined,
       block.gap === 5 ? PDF_STYLES.gap5 : block.gap === 10 ? PDF_STYLES.gap10 : undefined,
-      block.boxed ? { backgroundColor: '#e0e0e0', padding: 5, borderRadius: 5 } : undefined
+      block.boxed ? { backgroundColor: '#e6dfd8', padding: 5, borderRadius: 5 } : undefined
     ];
     const key = `${block.type}-${index}`;
 

@@ -9,23 +9,21 @@ interface Props {
   data: ClientRevenue[];
 }
 
+// Stable, on-brand series colors (DESIGN.md) instead of random hues.
+const SERIES_COLORS = ['#cc785c', '#5db8a6', '#e8a55a', '#a9583e', '#8e8b82', '#5db872', '#d4a017', '#6c6a64'];
+
 const ClientsRevenueChartComponent: React.FC<Props> = ({ data }) => {
   const theme = useTheme();
   const { t } = useTranslation();
 
-  const getRandomColor = () => {
-    const hue = Math.floor(Math.random() * 360);
-    return `hsl(${hue}, 70%, 50%)`;
-  };
-
   const chartData = useMemo(() => {
-    return data.map(client => ({
+    return data.map((client, index) => ({
       name: t('reports.invoiceCount', {
         name: client.name,
         count: client.invoiceCount
       }),
       value: client.revenue,
-      color: getRandomColor()
+      color: SERIES_COLORS[index % SERIES_COLORS.length]
     }));
   }, [data, t]);
 

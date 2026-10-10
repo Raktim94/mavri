@@ -45,7 +45,7 @@ export const StyleProfilesPage = () => {
   const excelTemplateData: Rows = [
     {
       name: 'Test Profile',
-      color: '#006400',
+      color: '#cc785c',
       logoSize: 'medium',
       fontSize: 'medium',
       FontFamily: 'Roboto',

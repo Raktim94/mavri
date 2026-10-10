@@ -105,7 +105,7 @@ const InvoiceFormComponent: FC<Props> = ({
             invoiceAttachments: [],
             language: Language.en,
             invoiceCustomization: {
-              color: '#006400',
+              color: '#cc785c',
               logoSize: SizeType.medium,
               fontSize: SizeType.medium,
               fontFamily: FontFamily.roboto,

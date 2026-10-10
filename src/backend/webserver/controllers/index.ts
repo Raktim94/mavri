@@ -10,6 +10,7 @@ import { initInvoicesController } from './invoices';
 import { initItemsController } from './items';
 import { initLayoutsController } from './layouts';
 import { initPresetsController } from './presets';
+import { initPublicApiController } from './publicApi';
 import { initSettingsController } from './settings';
 import { initStyleProfilesController } from './styleProfiles';
 import { initUnitsController } from './units';
@@ -31,4 +32,5 @@ export const initControllers = (app: Express) => {
   initBanksController(app);
   initPresetsController(app);
   initUsSalesTaxController(app);
+  initPublicApiController(app);
 };

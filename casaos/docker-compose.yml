@@ -1,0 +1,89 @@
+name: nodedr-invoice
+
+services:
+  nodedr-invoice:
+    image: ghcr.io/raktim94/nodedr-invoice:latest
+    container_name: nodedr-invoice
+    hostname: nodedr-invoice
+    restart: unless-stopped
+    ports:
+      - target: 3001
+        published: "1995"
+        protocol: tcp
+    environment:
+      SERVICE: all
+      NODE_ENV: docker
+      DB_DIRECTORY: /data
+      PORT: "3000"
+      DEV_SERVER_URL: 0.0.0.0
+      FE_SERVER_URL: "http://localhost:1995"
+      FRONTEND_ORIGIN: "http://localhost:1995"
+      COOKIE_SECURE: "false"
+      BACKEND_HOST: localhost
+      BACKEND_PORT: "3000"
+      MIGRATIONS_PATH: /app/dist-be/backend/server/shared/migrations
+    volumes:
+      - type: bind
+        source: /DATA/AppData/$AppID/data
+        target: /data
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "require('http').get('http://localhost:3000/api/health',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    x-casaos:
+      envs:
+        - container: FRONTEND_ORIGIN
+          description:
+            en_US: Origin allowed to call the API (CORS). Keep in sync with the URL you open the app on, including the port.
+        - container: COOKIE_SECURE
+          description:
+            en_US: Set to true only when served over real HTTPS (reverse proxy or Cloudflare Tunnel). Leave false for plain LAN use.
+      ports:
+        - container: "3001"
+          description:
+            en_US: NodeDR Invoice web interface
+      volumes:
+        - container: /data
+          description:
+            en_US: SQLite database, session secret and encryption key. Back this up.
+
+x-casaos:
+  id: com.nodedr.invoice
+  architectures:
+    - amd64
+    - arm64
+  main: nodedr-invoice
+  author: NodeDR Infotech Private Limited
+  developer: Raktim94
+  category: Finance
+  icon: https://cdn.jsdelivr.net/gh/Raktim94/nodedr-invoice@main/casaos/icon.png
+  title:
+    en_US: NodeDR Invoice
+  tagline:
+    en_US: Self-hosted invoicing, quotes and payments with an API and MCP server
+  description:
+    en_US: |
+      NodeDR Invoice is a free, open-source invoicing app that runs on your own
+      hardware. Create invoices and quotes, track payments, customize PDFs, and
+      let other systems create invoices through an API key authenticated REST API
+      (`/api/v1`), e-commerce webhooks, or the bundled MCP server.
+
+      Open it at `http://<your-server>:1995`.
+  tips:
+    before_install:
+      en_US: |
+        Your data persists at `/DATA/AppData/nodedr-invoice/data`.
+        On first launch you create the owner account. If you change the port,
+        update FRONTEND_ORIGIN to match.
+  index: /
+  scheme: http
+  port_map: "1995"
+  website: "https://www.nodedr.com"
+  repo: "https://github.com/Raktim94/nodedr-invoice"
+  support: "https://github.com/Raktim94/nodedr-invoice/issues"
