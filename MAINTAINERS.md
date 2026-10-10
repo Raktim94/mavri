@@ -1,12 +1,11 @@
 # Maintainers
 
-## Active Maintainers
+## Lead maintainer
 
-- **Raktim Ranjit** - Project Lead
-  - GitHub: [@Raktim94](https://github.com/Raktim94)
-  - Email: ranjitraktim5@gmail.com
+**Raktim Ranjit** — creator, project lead, and maintainer at **NodeDR Infotech Private Limited**
 
-## Getting in Touch
+- GitHub: [@Raktim94](https://github.com/Raktim94)
+- Personal website: [raktimranjit.com](https://raktimranjit.com)
+- Company: [NodeDR](https://nodedr.com)
 
-For questions about the project, open an issue on GitHub.
-For security vulnerabilities, please email the maintainer directly.
+For general questions and feature proposals, [open an issue](https://github.com/Raktim94/nodedr-invoice/issues). For security reports, contact the maintainer privately; see [SECURITY.md](SECURITY.md).
