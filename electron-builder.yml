@@ -37,7 +37,7 @@ linux:
     - deb
     - AppImage
   category: Office
-  maintainer: 'Raktim Ranjit <ranjitraktim5@gmail.com>'
+  maintainer: 'Raktim Ranjit <mail@raktimranjit.com>'
   icon: 'src/backend/main/assets/linux-icons'
 
 mac:

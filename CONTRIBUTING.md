@@ -24,7 +24,7 @@ the issue/PR process.
 ## Code of Conduct
 
 This project follows the [Contributor Covenant](./CODE_OF_CONDUCT.md). Report unacceptable
-behavior to **ranjitraktim5@gmail.com**.
+behavior to **mail@raktimranjit.com**.
 
 ## Maintainers & copyright
 
