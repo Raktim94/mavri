@@ -8,7 +8,7 @@ services:
     restart: unless-stopped
     ports:
       - target: 3001
-        published: "1995"
+        published: "8473"
         protocol: tcp
     environment:
       SERVICE: all
@@ -16,8 +16,8 @@ services:
       DB_DIRECTORY: /data
       PORT: "3000"
       DEV_SERVER_URL: 0.0.0.0
-      FE_SERVER_URL: "http://localhost:1995"
-      FRONTEND_ORIGIN: "http://localhost:1995"
+      FE_SERVER_URL: "http://localhost:8473"
+      FRONTEND_ORIGIN: "http://localhost:8473"
       COOKIE_SECURE: "false"
       BACKEND_HOST: localhost
       BACKEND_PORT: "3000"
@@ -74,7 +74,7 @@ x-casaos:
       let other systems create invoices through an API key authenticated REST API
       (`/api/v1`), e-commerce webhooks, or the bundled MCP server.
 
-      Open it at `http://<your-server>:1995`.
+      Open it at `http://<your-server>:8473`.
   tips:
     before_install:
       en_US: |
@@ -83,7 +83,7 @@ x-casaos:
         update FRONTEND_ORIGIN to match.
   index: /
   scheme: http
-  port_map: "1995"
+  port_map: "8473"
   website: "https://www.nodedr.com"
   repo: "https://github.com/Raktim94/nodedr-invoice"
   support: "https://github.com/Raktim94/nodedr-invoice/issues"

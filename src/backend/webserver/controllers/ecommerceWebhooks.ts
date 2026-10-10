@@ -1,6 +1,6 @@
 import { createHash } from 'crypto';
 import { type Express, type Request, type Response } from 'express';
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import * as ecommerceService from '../../shared/services/ecommerce';
 import type { EcommercePlatform } from '../../shared/types/ecommerce';
 import { dbInstance } from '../database';
@@ -18,7 +18,7 @@ const webhookLimiter = rateLimit({
   max: 60,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: req => String(req.params.integrationId ?? req.ip ?? 'unknown'),
+  keyGenerator: req => String(req.params.integrationId ?? ipKeyGenerator(req.ip ?? 'unknown')),
   message: { success: false, key: 'error.rateLimiter' }
 });
 

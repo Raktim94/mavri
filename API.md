@@ -13,7 +13,7 @@ Idempotent on `externalOrderId` per integration (retries return the existing inv
 `integrationId` refers to a connected integration (Integrations page, or the `create_ecommerce_integration` MCP tool), which supplies business, currency, bank and layout.
 
 ```bash
-curl -X POST http://localhost:1995/api/v1/orders \
+curl -X POST http://localhost:8473/api/v1/orders \
   -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \
   -d '{
     "integrationId": 1,

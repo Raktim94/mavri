@@ -72,8 +72,8 @@ Behind HTTPS, set `COOKIE_SECURE=true` and `FRONTEND_ORIGIN=https://your.domain`
 ### CasaOS / ZimaOS
 
 Import [`casaos/docker-compose.yml`](casaos/docker-compose.yml) via **App Store → Custom Install → Import**.
-It runs one container on port **1995**, stores data in `/DATA/AppData/nodedr-invoice/data`, includes a healthcheck and restarts automatically.
-Then open `http://<your-server>:1995` and create the owner account.
+It runs one container on port **8473**, stores data in `/DATA/AppData/nodedr-invoice/data`, includes a healthcheck and restarts automatically.
+Then open `http://<your-server>:8473` and create the owner account.
 
 ### Desktop app
 
@@ -88,13 +88,13 @@ chmod +x NodeDR-Invoice-*.AppImage && ./NodeDR-Invoice-*.AppImage   # Linux
 Create an API key in the app, then let other systems create and fetch invoices:
 
 ```bash
-curl -X POST http://localhost:1995/api/v1/orders \
+curl -X POST http://localhost:8473/api/v1/orders \
   -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \
   -d '{"integrationId":1,"externalOrderId":"ORD-1001",
        "customer":{"name":"Acme Ltd","email":"billing@acme.test"},
        "lineItems":[{"name":"Consulting","quantity":2,"unitPriceMajor":150}]}'
 
-curl -H "Authorization: Bearer $KEY" "http://localhost:1995/api/v1/invoices?status=unpaid&search=acme&limit=20"
+curl -H "Authorization: Bearer $KEY" "http://localhost:8473/api/v1/invoices?status=unpaid&search=acme&limit=20"
 ```
 
 | Integration | What it does |
