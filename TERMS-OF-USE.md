@@ -10,7 +10,7 @@ If you do not agree with these Terms, you must not use the Application.
 
 ## 1. Overview
 
-The Application is a free, open-source desktop software tool that allows users to create and manage invoices, quotations, clients, items, and businesses. All data is stored locally on the user’s machine. No data is transmitted to the developer or any third party.
+The Application is a free, open-source software tool that allows users to create and manage invoices, quotations, clients, items, and businesses. All data is stored on the machine or server where the user runs it. No data is transmitted to the developer or any third party.
 
 ---
 

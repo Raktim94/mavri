@@ -11,10 +11,10 @@ Get from zero to your first PDF invoice in about five minutes. Screenshots use f
 There is **no database to set up**. On Docker and CasaOS, Mavri creates its database (`invoice.db`) by itself the first time it starts and keeps it in your data volume.
 
 ```bash
-docker compose -f docker-compose.standalone.yml up -d
+docker compose up -d
 ```
 
-Open <http://localhost:3001>. On CasaOS, install the app and open it on port **8473**. (Desktop app: just launch it — it asks where to keep your database file.)
+Open <http://localhost:3001>. On CasaOS, install the app and open it on port **8473**.
 
 ## 2. Create your account
 

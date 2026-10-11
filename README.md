@@ -23,9 +23,9 @@
 
 <p align="center">
   <a href="LICENSE"><img alt="AGPL-3.0 license" src="https://img.shields.io/badge/license-AGPL--3.0-282640"></a>
-  <a href="docker-compose.standalone.yml"><img alt="Docker Compose" src="https://img.shields.io/badge/deploy-Docker%20Compose-282640?logo=docker&logoColor=white"></a>
+  <a href="docker-compose.yml"><img alt="Docker Compose" src="https://img.shields.io/badge/deploy-Docker%20Compose-282640?logo=docker&logoColor=white"></a>
   <a href="docs/reference/API.md"><img alt="REST API" src="https://img.shields.io/badge/API-REST-EA806E"></a>
-  <a href="src/backend/mcp"><img alt="MCP server" src="https://img.shields.io/badge/integrations-MCP-EA806E"></a>
+  <a href="rewrite/internal/mcp"><img alt="MCP server" src="https://img.shields.io/badge/integrations-MCP-EA806E"></a>
 </p>
 
 > The repository, container image, and current app identifiers still use `nodedr-invoice`. Keep those names in the commands below.
@@ -85,10 +85,10 @@ Requires Docker and Docker Compose. This path builds the app from this repositor
 ```bash
 git clone https://github.com/Raktim94/nodedr-invoice.git
 cd nodedr-invoice
-docker compose -f docker-compose.standalone.yml up -d --build
+docker compose up -d --build
 ```
 
-Open **http://localhost:3001** and create the owner account. There is no database setup: on Docker and CasaOS, Mavri creates its database automatically on first start. Set `HOST_PORT=8080` to expose a different host port. Data persists in the `nodedr-invoice-data` Docker volume; back up that volume regularly. For an HTTPS reverse proxy, set `COOKIE_SECURE=true` and `FRONTEND_ORIGIN` to the public origin.
+Open **http://localhost:3001** and create the owner account. There is no database setup: on Docker and CasaOS, Mavri creates its database automatically on first start. Set `HOST_PORT=8080` to expose a different host port. Data persists in the `nodedr-invoice-data` Docker volume; back up that volume regularly. Behind an HTTPS reverse proxy (nginx, Caddy, Cloudflare Tunnel), set `COOKIE_SECURE=true` and `TRUST_PROXY=1`.
 
 A prebuilt, version-pinned image is available at `ghcr.io/raktim94/nodedr-invoice:1.0.0` (amd64 and arm64).
 
@@ -96,11 +96,7 @@ A prebuilt, version-pinned image is available at `ghcr.io/raktim94/nodedr-invoic
 
 Import [`casaos/docker-compose.yml`](casaos/docker-compose.yml) through **App Store → Custom Install → Import**. Open `http://<your-server>:8473` and create the owner account. The app stores data under `/DATA/AppData/nodedr-invoice/data`.
 
-### Desktop
-
-Download the Linux build (`.deb` or AppImage) from [Releases](https://github.com/Raktim94/nodedr-invoice/releases). On Linux, make the AppImage executable before opening it.
-
-After launch, add a business, currency, client, item, bank, and layout; then create an invoice or quote and export its PDF. The [tutorial](docs/TUTORIAL.md) walks through the full flow.
+After you sign in, add a business, currency, client, item, bank, and layout; then create an invoice or quote and export its PDF. The [tutorial](docs/TUTORIAL.md) walks through the full flow.
 
 ## What Mavri can do
 
@@ -125,43 +121,37 @@ curl -X POST http://localhost:3001/api/v1/orders \
   -d '{"integrationId":1,"externalOrderId":"ORD-1001","customer":{"name":"Acme Ltd","email":"billing@acme.test"},"lineItems":[{"name":"Consulting","quantity":2,"unitPriceMajor":150}]}'
 ```
 
-Mavri also accepts HMAC-signed Shopify, WooCommerce, and generic webhooks. Run `npm run mcp` for the bundled MCP server. See [API.md](docs/reference/API.md) and the [tutorial](docs/TUTORIAL.md) for setup and examples.
+Mavri also accepts HMAC-signed Shopify, WooCommerce, and generic webhooks. The MCP server is the `mcp` binary built from `rewrite/cmd/mcp` (see [rewrite/README.md](rewrite/README.md)). See [API.md](docs/reference/API.md) and the [tutorial](docs/TUTORIAL.md) for setup and examples.
 
-## Go backend
+## How it is built
 
-A Go replacement for the Express backend lives in [`rewrite/`](rewrite/README.md). It implements every route and MCP tool of the web backend on SQLite, and the web app runs on it unchanged. It was checked against the real TypeScript backend by driving both with the same requests (257 REST responses and 60 MCP replies, no differences) and by running the app in Chrome against it. To run it as one small container (about 66 MB) serving the app and the API:
-
-```bash
-docker compose -f docker-compose.go.yml up -d --build
-```
-
-It opens the same `/data/invoice.db` the Node version used. Not yet moved: the Electron desktop app (still on the TypeScript backend) and PostgreSQL (the Go server uses SQLite only). The Node setup above stays the supported default until you choose to switch; see [`rewrite/README.md`](rewrite/README.md) for what differs and why.
+The backend is a single Go program in [`rewrite/`](rewrite/README.md): REST API, MCP server, SQLite storage, webhooks and e-invoice export. It also serves the React app, so the whole product is one container of about 66 MB. It was written to match the earlier Express backend exactly (257 REST responses and 60 MCP replies compared with no differences before that backend was removed) and is exercised end to end with the real web app in Chrome. See [`rewrite/README.md`](rewrite/README.md) for what differs from the old behaviour and why.
 
 ## Project layout
 
 | Path | What is in it |
 | --- | --- |
 | `src/renderer` | React and MUI user interface |
-| `src/backend` | Express web server, Electron main process, MCP server, shared services and migrations |
-| `rewrite` | Go backend: REST API, MCP server, tests and the comparison scripts against the TypeScript one |
+| `rewrite` | Go backend: REST API, MCP server, SQLite schema, tests and the browser end-to-end check |
 | `docs` | Tutorial, API and layout references, screenshots, rewrite notes |
 | `casaos`, `Dockerfile`, `docker-compose*.yml` | Container and CasaOS deployment |
-| `scripts` | Container start-up and packaging helpers |
+| `scripts` | Developer helpers (translation sorting) |
 
 ## Documentation and development
 
 [Tutorial](docs/TUTORIAL.md) · [API](docs/reference/API.md) · [Layout JSON reference](docs/reference/LAYOUT.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [Privacy](PRIVACY-POLICY.md)
 
-For local desktop development, install Node.js 20+ and npm:
+For local development you need Node.js 20+ and Go 1.24+ (or Docker). Run the backend, then the web app:
 
 ```bash
 git clone https://github.com/Raktim94/nodedr-invoice.git
 cd nodedr-invoice
 npm install
-npm run dev
+(cd rewrite && DEFAULT_DATABASE=invoice.db FRONTEND_ORIGIN=http://127.0.0.1:5173 go run ./cmd/server)   # API on :3000
+VITE_API_URL=http://127.0.0.1:3000 npm run dev                                                   # web app on :5173
 ```
 
-The stack is TypeScript, React, MUI, Electron, Express, SQLite/PostgreSQL, and Docker. Read [CONTRIBUTING.md](CONTRIBUTING.md) before proposing a change.
+The stack is TypeScript, React and MUI for the interface, Go and SQLite for the backend, and Docker. Read [CONTRIBUTING.md](CONTRIBUTING.md) before proposing a change.
 
 ## Maintainer, origins, and license
 

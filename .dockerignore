@@ -1,6 +1,5 @@
 node_modules
 dist-fe
-dist-be
 release
 .git
 .github

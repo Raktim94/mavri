@@ -73,15 +73,6 @@ You can customize:
 
 ![Language and format](tutorial-assets/settings_page_1.jpg)
 
-### Receipt printing
-
-Receipt printing is available in the desktop Electron app for invoices and quotes. It prints a compact 80mm receipt layout designed for retail checkout and POS-style workflows.
-
-> ℹ️ This feature is desktop-only and uses the operating system print dialog. A compatible printer must be installed and selected before printing. It is not available in the web/docker version.
-
-![Receipt printing](tutorial-assets/printing_receipt_1.png)
-
-![Receipt printing](tutorial-assets/printing_receipt_2.png)
 
 ### Invoice & File Naming
 

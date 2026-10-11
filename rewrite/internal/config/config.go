@@ -1,6 +1,6 @@
 // Package config loads runtime settings from the environment.
 //
-// Names and defaults mirror the TypeScript web server (src/backend/webserver)
+// Names and defaults mirror the TypeScript web server (the old Express server)
 // so existing Docker/CasaOS environment files keep working unchanged.
 package config
 

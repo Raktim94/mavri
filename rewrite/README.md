@@ -1,11 +1,13 @@
-# Mavri Go backend (rewrite)
+# Mavri backend (Go)
 
-A new backend written in Go. The TypeScript backend in `src/backend/` stays the
-active application until every row in
-[`docs/rewrite/PARITY_MATRIX.md`](../docs/rewrite/PARITY_MATRIX.md) is proven.
-The React/TypeScript renderer and Electron shell are unchanged.
+The backend of Mavri: REST API, MCP server, SQLite storage, e-commerce webhooks
+and e-invoice export, in one Go program that also serves the React app. It
+replaced an Express/Electron backend, which has been removed from the
+repository (see git history before the commit "remove the Node backend and the
+desktop app" if you need it).
 
-The Go code is written fresh against the behaviour recorded in the matrix, not
+It was written against the behaviour recorded in
+[`docs/rewrite/PARITY_MATRIX.md`](../docs/rewrite/PARITY_MATRIX.md), not
 translated line by line. The project still builds on the upstream Invoice
 Builder project, so the repository `LICENSE` and attribution in the root
 `README.md` stay in place.
@@ -30,15 +32,13 @@ Builder project, so the repository `LICENSE` and attribution in the root
 | `internal/audit` | Tamper-evident hash-chained audit log |
 | `internal/einvoice` | UBL 2.1 / XRechnung XML, same float arithmetic and rounding as before; checked byte for byte against 12 documents the TS server wrote (`internal/api/testdata/einvoice`) |
 | `internal/jsnum` | JavaScript's `Number()`, number printing, `Math.round` and `toFixed`, which the XML and order handling depend on |
-| `internal/mcp`, `cmd/mcp` | MCP server over stdio with the same 20 tools; `tools/contract/run_mcp.sh` drives it and the TS one with one conversation: 60 replies, 0 differences (schemas, results, validation messages) |
+| `internal/mcp`, `cmd/mcp` | MCP server over stdio with the same 20 tools |
 | `internal/secrets` | AES-256-GCM for webhook secrets, readable by values the TS server wrote |
 | `internal/orders` | Store integrations, order normalisation (Shopify, WooCommerce, generic), order ledger, order to invoice |
 | `internal/transfer` | Whole-database JSON export and import (all or nothing) |
 | `internal/invoices` | Invoice service: read with everything attached, save/update with snapshots, items, payments and attachments in one transaction, duplicate and quotation conversion, numbering |
 | `internal/entity` | Generic list/create/update/delete/batch engine for the simple resources (banks, businesses, clients, currencies, categories, units, items) |
 | `tools/e2e` | `run.sh` builds the Docker image and `ui_flow.py` drives the real web app in Chrome against it, failing on any unexpected HTTP, console or page error |
-| `tools/contract` | `run.sh`: starts the TS server and the Go server on copies of one database, runs the same 257-call conversation against both and diffs every response (timestamps and random key secrets masked) |
-| `tools/difftest` | Script that generates the TS reference cases (run outside the repo) |
 | `internal/ecommerce` | Webhook signature schemes and verification |
 
 ## Run
@@ -59,7 +59,7 @@ that version had applied all its migrations.
 One container with the app and the API, about 66 MB:
 
 ```sh
-docker compose -f docker-compose.go.yml up -d --build      # from the repository root
+docker compose up -d --build      # from the repository root
 ```
 
 Behind a reverse proxy (nginx, Caddy, a Cloudflare tunnel) set `TRUST_PROXY=1` so
@@ -80,27 +80,24 @@ NODEDR_API_KEY=ndr_... DB_DIRECTORY=data DB_FILE=invoice.db go run ./cmd/mcp
 docker run --rm -v "$PWD":/w -w /w golang:1.24 sh -c 'gofmt -l . && go vet ./... && go test -race ./...'
 ```
 
-That runs the unit and HTTP tests, including golden files the Node server wrote.
-Two scripts compare Go with the real TypeScript backend by driving both with the
-same conversation from copies of one database (they need `npm install` in the
-repository root, Python 3 and Docker):
+That runs the unit and HTTP tests. The e-invoice XML tests compare against
+golden files (`internal/api/testdata/einvoice`) that the original Express server
+produced for the same invoices, so the output stays identical to the old one.
 
-```sh
-sh tools/contract/run.sh        # REST API: 257 responses
-sh tools/contract/run_mcp.sh    # MCP: 60 replies
-```
-
-A third script drives the real web app in Chrome against the Go server in its
-Docker image (account, records, invoice, PDF preview, payment, duplicate, quote
-to invoice, backup and re-import, every page):
+`tools/e2e` drives the real web app in Chrome against the server in its Docker
+image: it creates the owner account, the records an invoice needs, an invoice,
+its PDF preview, a payment, a duplicate, a quote turned into an invoice, a backup
+export and re-import, and visits every page, failing on any unexpected HTTP,
+console or page error.
 
 ```sh
 sh tools/e2e/run.sh             # needs docker, python3 + playwright, Google Chrome
 ```
 
-The two contract scripts report 0 differences. They mask timestamps and random secrets, ignore list
-order (it depends on the second a row was created) and list, rather than fail on,
-the places where the TypeScript server crashes and Go answers cleanly.
+Before the Express backend was removed, two scripts drove both backends with the
+same conversation from copies of one database and compared every reply: 257 REST
+responses and 60 MCP replies, no differences (only the places where the old
+server crashed and Go answers cleanly). They are in git history.
 
 ## Status
 
@@ -121,9 +118,7 @@ and a tamper-evident audit log (`audit`). They are tested as libraries.
 - **PostgreSQL.** The server and MCP run on SQLite only; asking for PostgreSQL
   answers "not supported". Supporting it means a second SQL dialect (`pgx`,
   placeholders, `datetime('now')`, grouping rules) and a PostgreSQL store.
-- **The Electron desktop app** still runs its own TypeScript backend over IPC.
-  Moving it to Go needs a decision: the Go server demands a sign-in, which the
-  single-user desktop app never had (see the parity matrix, section 2).
+- **The desktop app** (Electron) was dropped; Mavri is installed with Docker.
 - **Response headers** are not compared with the TypeScript server's (bodies and
   status codes are), nor rate limits.
 - **Exact versus float rounding** in `money` is still the open decision from the

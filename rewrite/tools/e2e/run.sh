@@ -5,7 +5,7 @@
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd)
 ROOT=$(cd "$HERE/../../.." && pwd)
-docker build --network host -f "$ROOT/Dockerfile.go" -t mavri-e2e-image "$ROOT"
+docker build --network host -f "$ROOT/Dockerfile" -t mavri-e2e-image "$ROOT"
 docker rm -f mavri-e2e >/dev/null 2>&1 || true
 trap 'docker rm -f mavri-e2e >/dev/null 2>&1 || true' EXIT
 docker run -d --name mavri-e2e -p 3921:3001 mavri-e2e-image >/dev/null

@@ -26,7 +26,6 @@ dist-ssr
 TODO.txt
 
 dist
-dist-be
 
 .env.docker
 .env
@@ -42,5 +41,3 @@ data/.session_secret
 .session_secret
 
 dist-fe
-dist-be
-dist-electron

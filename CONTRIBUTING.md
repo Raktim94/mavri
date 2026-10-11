@@ -1,7 +1,7 @@
 # Contributing to Mavri
 
 Thanks for considering a contribution! Mavri is a small, focused,
-offline-first invoicing tool that ships as a desktop app, a Docker image and a
+invoicing tool that ships as a Docker image and a
 CasaOS/ZimaOS app from the same code. This guide covers setup, conventions and
 the issue/PR process.
 
@@ -46,18 +46,17 @@ rather than expanding into multi-tenant SaaS territory. For anything big, open a
 ```bash
 git clone https://github.com/Raktim94/nodedr-invoice.git
 cd nodedr-invoice
-docker compose -f docker-compose.standalone.yml up -d --build   # http://localhost:3001
+docker compose up -d --build   # http://localhost:3001
 ```
 
 ### Option B — Local dev
 
+Needs Node.js 20+ and Go 1.24+.
+
 ```bash
 npm install
-npm run dev                    # Electron desktop app
-# or, in the browser:
-npm run dev:react              # terminal 1: Vite frontend
-npm run dev:webserver          # terminal 2: Express REST API
-npm run mcp                    # optional: MCP server
+(cd rewrite && DEFAULT_DATABASE=invoice.db FRONTEND_ORIGIN=http://127.0.0.1:5173 go run ./cmd/server)   # terminal 1: API on :3000
+VITE_API_URL=http://127.0.0.1:3000 npm run dev                                                           # terminal 2: web app on :5173
 ```
 
 ### Checks to run before pushing
@@ -65,31 +64,26 @@ npm run mcp                    # optional: MCP server
 ```bash
 npm run lint
 npm test
-npm run mcp:typecheck
-npx tsc -p tsconfig.webserver.json --noEmit
+npx tsc -p tsconfig.app.json --noEmit
+(cd rewrite && gofmt -l . && go vet ./... && go test -race ./...)
 ```
 
 ## Project structure
 
 ```
-src/
-  backend/
-    main/        Electron main process
-    webserver/   Express app: controllers, auth middleware, /api/v1
-    mcp/         MCP server and tools
-    shared/      Environment-agnostic services, types, migrations
-  preload/       Electron preload
-  renderer/      React app (pages, state, shared UI, i18n)
+src/renderer/    React app (pages, state, shared UI, i18n)
+rewrite/         Go backend: cmd/server, cmd/mcp, internal/* (API, SQLite, schema, MCP, e-invoice)
 casaos/          CasaOS/ZimaOS app manifest
-scripts/         Docker start script and nginx template
+scripts/         Developer helpers (translation sorting)
+docs/            Tutorial, API and layout references, screenshots
 ```
 
 ## Conventions that are not optional
 
-- **TypeScript only** for new code; ESLint + Prettier must pass (`npm run lint:fix`).
-- **Business logic lives in `src/backend/shared/services`** and is reused by Electron IPC, the web
-  controllers *and* the MCP tools — don't duplicate it in a controller.
-- **Never edit an existing migration.** Add a new, date-prefixed file in `shared/migrations`.
+- **Interface code is TypeScript**; ESLint + Prettier must pass (`npm run lint:fix`). **Backend code is Go**; `gofmt` and `go vet` must be clean.
+- **Business logic lives in `rewrite/internal`** and is shared by the REST handlers *and* the MCP
+  tools (`invoices`, `orders`, `entity`) — don't duplicate it in a handler.
+- **Never edit the baseline schema.** Add a date-prefixed `.sql` file in `rewrite/internal/schema/migrations`.
 - **Money is stored in minor units** (cents) as strings; convert at the edges only.
 - **Invoices snapshot** business, client, items, bank, currency, style and layout. Don't make an
   invoice read live data for those.

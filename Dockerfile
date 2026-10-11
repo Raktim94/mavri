@@ -1,47 +1,39 @@
-FROM node:20-alpine AS builder
+# Mavri: one container, one port (the Go server serves the API and the web app).
+#   docker build -t mavri .
+#   docker run -p 3001:3001 -v mavri-data:/data mavri
+# Or: docker compose up -d --build
+
+FROM node:20-alpine AS web
 WORKDIR /app
-
-
 COPY package.json package-lock.json* ./
 RUN npm install
-
 COPY . .
-
-# VITE_API_URL is no longer required for Docker (nginx proxies /api/* internally).
-# It is kept as an optional build arg for non-Docker / custom deployments only.
+# Optional: only for deployments where the API lives on another origin.
 ARG VITE_API_URL
 ENV VITE_API_URL=$VITE_API_URL
-
 RUN npm run build:react
-RUN npm run build:webserver
 
-FROM node:20-alpine AS runner
-WORKDIR /app
+FROM golang:1.24-alpine AS server
+WORKDIR /src
+COPY rewrite/go.mod rewrite/go.sum ./
+RUN go mod download
+COPY rewrite/ ./
+RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /mavri ./cmd/server
 
-# nginx serves the static frontend and proxies /api/* to the backend;
-# gettext provides envsubst to template the nginx config at startup.
-RUN apk add --no-cache nginx gettext
-
-COPY --from=builder /app/dist-fe /app/dist-fe
-COPY --from=builder /app/dist-be /app/dist-be
-COPY --from=builder /app/node_modules /app/node_modules
-
-EXPOSE 3000 3001
-
-COPY scripts/docker-start.sh /app/scripts/docker-start.sh
-COPY scripts/nginx.conf.template /app/scripts/nginx.conf.template
-RUN sed -i 's/\r$//' /app/scripts/docker-start.sh \
-    && chmod +x /app/scripts/docker-start.sh
-
-ENV SERVICE=all \
-    NODE_ENV=docker \
+FROM alpine:3.20
+RUN adduser -D -u 10001 mavri && mkdir /data && chown mavri /data
+COPY --from=server /mavri /usr/local/bin/mavri
+COPY --from=web /app/dist-fe /app/dist-fe
+USER mavri
+# Opens (or creates) /data/invoice.db on start.
+ENV DEFAULT_DATABASE=invoice.db \
     DB_DIRECTORY=/data \
-    PORT=3000 \
+    PORT=3001 \
+    TRUST_PROXY=0 \
     DEV_SERVER_URL=0.0.0.0 \
-    BACKEND_HOST=localhost \
-    BACKEND_PORT=3000 \
-    MIGRATIONS_PATH=/app/dist-be/backend/server/shared/migrations
-
+    FRONTEND_DIR=/app/dist-fe
 VOLUME ["/data"]
-
-CMD ["/app/scripts/docker-start.sh"]
+EXPOSE 3001
+HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=5 \
+  CMD wget -qO- http://127.0.0.1:3001/api/health >/dev/null || exit 1
+CMD ["mavri"]

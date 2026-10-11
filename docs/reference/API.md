@@ -35,4 +35,4 @@ Response `201`: `{ "success": true, "data": { "invoiceId": 42 } }`
 
 ## MCP
 
-The MCP server (`npm run` script in `package.json`, `src/backend/mcp`) exposes the same operations to AI agents: `list_invoices` (search + pagination), `get_invoice`, `create_invoice`, `create_invoice_from_order`, `record_payment`, and more.
+The MCP server (`rewrite/cmd/mcp`, a stdio program; set `NODEDR_API_KEY`, `DB_DIRECTORY` and `DB_FILE`) exposes the same operations to AI agents: `list_invoices` (search + pagination), `get_invoice`, `create_invoice`, `create_invoice_from_order`, `record_payment`, and more.

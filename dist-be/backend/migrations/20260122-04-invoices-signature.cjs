@@ -1,0 +1,3 @@
+Object.defineProperty(exports,Symbol.toStringTag,{value:`Module`});const e=require("./errorFunctions-CauxoFNQ.cjs"),t=require("./dbHelper-CkY49b5y.cjs");var n=async n=>{try{if((await t.r(n,`invoices`)).find(e=>e.name===`signatureData`))return;await n.run(`
+      ALTER TABLE invoices ADD COLUMN "signatureData" ${t.t(`BLOB`,n.type)};
+    `),await n.run(`ALTER TABLE invoices ADD COLUMN "signatureName" TEXT;`),await n.run(`ALTER TABLE invoices ADD COLUMN "signatureType" TEXT;`),await n.run(`ALTER TABLE invoices ADD COLUMN "signatureSize" INTEGER;`)}catch(t){return{success:!1,...e.t(t,n.type)}}};exports.up=n;

@@ -1,5 +1,7 @@
 # Mavri backend parity matrix
 
+> Historical record. The Express/Electron backend this was extracted from has been removed; the Go backend is the only one. The Electron IPC section no longer applies (the desktop app was dropped).
+
 Generated from the TypeScript backend at commit `1308d57` by an extraction script, so row counts match the source. Every row starts as TODO. A row becomes DONE only when a Go test or a contract comparison against the TS backend passes, not when it compiles.
 
 ## 1. REST routes (`/api`)

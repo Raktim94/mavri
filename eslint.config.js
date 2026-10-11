@@ -9,7 +9,6 @@ export default [
   {
     ignores: [
       'dist-fe/**',
-      'dist-be/**',
       'release/**',
       'coverage/**',
       'index.html',
