@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"testing/fstest"
 
 	_ "modernc.org/sqlite"
 )
@@ -85,5 +86,53 @@ func TestDevAndBuildMigrationNamesAreEquivalent(t *testing.T) {
 	}
 	if err := Apply(db); err != nil {
 		t.Errorf(".ts names should satisfy the check: %v", err)
+	}
+}
+
+func TestNewMigrationsRunOnceInOrderAndRollBackOnFailure(t *testing.T) {
+	db := open(t)
+	if err := Apply(db); err != nil {
+		t.Fatal(err)
+	}
+	fsys := fstest.MapFS{
+		"20270101-01-add-note.sql":  {Data: []byte(`ALTER TABLE clients ADD COLUMN "note" TEXT;`)},
+		"20270102-01-fill-note.sql": {Data: []byte(`INSERT INTO clients ("name","shortName","note") VALUES ('A','A','hi');`)},
+		"README.md":                 {Data: []byte("ignored")},
+		"not-a-migration.sql":       {Data: []byte(`DROP TABLE clients;`)},
+	}
+	if err := ApplyFS(db, fsys); err != nil {
+		t.Fatal(err)
+	}
+	if got := count(t, db, `SELECT COUNT(*) FROM clients WHERE "note" = 'hi'`); got != 1 {
+		t.Errorf("migrations did not run in order: %d", got)
+	}
+	if got := count(t, db, `SELECT COUNT(*) FROM migrations WHERE "name" LIKE '2027%'`); got != 2 {
+		t.Errorf("recorded: %d", got)
+	}
+	// A second run changes nothing.
+	if err := ApplyFS(db, fsys); err != nil {
+		t.Fatal(err)
+	}
+	if got := count(t, db, `SELECT COUNT(*) FROM clients`); got != 1 {
+		t.Errorf("a migration ran twice: %d clients", got)
+	}
+	// A failing migration leaves no trace, not even earlier ones from the same run.
+	bad := fstest.MapFS{
+		"20270101-01-add-note.sql":  fsys["20270101-01-add-note.sql"],
+		"20270102-01-fill-note.sql": fsys["20270102-01-fill-note.sql"],
+		"20270201-01-ok.sql":        {Data: []byte(`ALTER TABLE clients ADD COLUMN "extra" TEXT;`)},
+		"20270202-01-broken.sql":    {Data: []byte(`ALTER TABLE nope ADD COLUMN x TEXT;`)},
+	}
+	err := ApplyFS(db, bad)
+	if err == nil || !strings.Contains(err.Error(), "20270202-01-broken.sql") {
+		t.Fatalf("want the failing file named, got %v", err)
+	}
+	// (A double-quoted name that is not a column silently becomes a string in
+	// SQLite, so ask the catalogue instead of selecting the column.)
+	if got := count(t, db, `SELECT COUNT(*) FROM pragma_table_info('clients') WHERE name = 'extra'`); got != 0 {
+		t.Error("the earlier migration of the failed run must be rolled back")
+	}
+	if got := count(t, db, `SELECT COUNT(*) FROM migrations WHERE "name" LIKE '20270201%'`); got != 0 {
+		t.Error("a rolled back migration must not be recorded")
 	}
 }
