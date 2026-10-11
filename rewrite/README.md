@@ -21,6 +21,7 @@ Builder project, so the repository `LICENSE` and attribution in the root
 | `internal/scrypt` | scrypt (RFC 7914), standard library only, checked against Node |
 | `internal/auth` | Password hashing, API-key secrets, password policy, lockout rules |
 | `internal/money` | Exact (rational) invoice arithmetic, differential-tested against the real TS functions |
+| `internal/gst` | India GST: identifiers, Rule 46 checks, effective-dated rules, tax calculation (no built-in rates) |
 | `tools/difftest` | Script that generates the TS reference cases (run outside the repo) |
 | `internal/ecommerce` | Webhook signature schemes and verification |
 
@@ -42,6 +43,8 @@ Invoice totals, line discounts and tax in exact arithmetic, compared with the
 real renderer functions on 1,500 synthetic invoices: identical except where a
 line's discount share is exactly n.5 cents (the old float code rounds down,
 the exact version rounds up). Which behaviour to keep is an open decision.
+GST (India) logic with tests: see the matrix for what is unverified. Rates are
+never built in; they come from rules the business loads.
 These are pure functions: they are not yet wired to a database or routes.
 
 Not started: database layer, migrations, authentication, every resource route,
