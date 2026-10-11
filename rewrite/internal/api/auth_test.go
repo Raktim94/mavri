@@ -36,9 +36,11 @@ func newEnv(t *testing.T) *env {
 }
 
 type reply struct {
-	Code    int
-	Body    map[string]any
-	Cookies []*http.Cookie
+	Code        int
+	Body        map[string]any
+	Cookies     []*http.Cookie
+	Raw         string
+	Disposition string
 }
 
 func (e *env) do(method, path, body string, hdr map[string]string, cookie *http.Cookie) reply {
@@ -54,7 +56,7 @@ func (e *env) do(method, path, body string, hdr map[string]string, cookie *http.
 	e.h.ServeHTTP(rec, req)
 	var m map[string]any
 	_ = json.Unmarshal(rec.Body.Bytes(), &m)
-	return reply{Code: rec.Code, Body: m, Cookies: rec.Result().Cookies()}
+	return reply{Code: rec.Code, Body: m, Cookies: rec.Result().Cookies(), Raw: rec.Body.String(), Disposition: rec.Header().Get("Content-Disposition")}
 }
 
 func (r reply) key() any { return r.Body["key"] }
@@ -291,4 +293,17 @@ func (e *env) setupCookie() *http.Cookie {
 		e.t.Fatalf("login: %v", r.Body)
 	}
 	return r.session()
+}
+
+type rawReply struct {
+	code        int
+	body        string
+	disposition string
+}
+
+// rawGet returns the response body as text; do is the signed-in helper of invoiceEnv.
+func rawGet(t *testing.T, do func(method, path, body string) reply, path string) rawReply {
+	t.Helper()
+	r := do("GET", path, "")
+	return rawReply{code: r.Code, body: r.Raw, disposition: r.Disposition}
 }

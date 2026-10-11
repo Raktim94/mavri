@@ -1,0 +1,117 @@
+{
+ "bankId": 1,
+ "businessId": 1,
+ "clientId": 1,
+ "currencyId": 1,
+ "customerNotes": "Note 'one'",
+ "discountAmountCents": "777",
+ "discountName": "Promo",
+ "discountPercent": 0,
+ "discountType": "fixed",
+ "dueDate": "2026-10-15",
+ "invoiceAttachments": [],
+ "invoiceBankSnapshot": {
+  "accountHolder": "M\u00fcller",
+  "accountNumber": "DE89370400440532013000",
+  "bankName": "First",
+  "name": "Main",
+  "swiftCode": "COBADEFFXXX"
+ },
+ "invoiceBusinessSnapshot": {
+  "businessAddress": "Hauptstr. 5, Berlin, 10115, DE",
+  "businessCode": "HRB 1",
+  "businessCountryCode": "de",
+  "businessEmail": "info@ms.test",
+  "businessName": "M\u00fcller & S\u00f6hne <GmbH>",
+  "businessPeppolEndpointId": "info@ms.test",
+  "businessPeppolEndpointSchemeId": "EM",
+  "businessPhone": "+49 30 123",
+  "businessShortName": "MS",
+  "businessVatCode": "DE123456789"
+ },
+ "invoiceClientSnapshot": {
+  "clientAddress": "1 High Street, London, SW1A 1AA, GBR",
+  "clientBuyerReference": "04011000-12345-34",
+  "clientCountryCode": "gb",
+  "clientEmail": "ap@acme.test",
+  "clientName": "Acme \"Corp\" Ltd",
+  "clientPeppolEndpointId": "9999",
+  "clientPeppolEndpointSchemeId": "0088",
+  "clientPhone": "+44 20 1",
+  "clientVatCode": "GB999"
+ },
+ "invoiceCurrencySnapshot": {
+  "currencyCode": "USD",
+  "currencySubunit": 100,
+  "currencySymbol": "$"
+ },
+ "invoiceCustomization": {
+  "color": "#112233",
+  "fieldSortOrders": {
+   "item": 1,
+   "no": 0,
+   "quantity": 3,
+   "total": 5,
+   "unit": 2,
+   "unitCost": 4
+  },
+  "fontFamily": "Roboto",
+  "fontSize": "medium",
+  "labelUpperCase": true,
+  "logoSize": "medium",
+  "pageFormat": "A4",
+  "pdfTexts": {
+   "note": "z<&>",
+   "title": "Invoice"
+  },
+  "showQuantity": true,
+  "showRowNo": false,
+  "showUnit": true,
+  "tableHeaderStyle": "light",
+  "tableRowStyle": "classic",
+  "watermarkFileData": "iVBORw0KGgo="
+ },
+ "invoiceItems": [
+  {
+   "invoiceItemSnapshot": {
+    "itemName": "Only",
+    "unitPriceCents": "1005"
+   },
+   "itemId": 1,
+   "quantity": "1",
+   "taxRate": 21,
+   "taxType": "exclusive"
+  },
+  {
+   "invoiceItemSnapshot": {
+    "itemName": "Two",
+    "unitPriceCents": "333"
+   },
+   "itemId": 2,
+   "quantity": "2",
+   "taxRate": 6,
+   "taxType": "inclusive"
+  }
+ ],
+ "invoiceNumber": "X-F",
+ "invoicePayments": [],
+ "invoiceType": "invoice",
+ "isArchived": false,
+ "issuedAt": "2026-09-15",
+ "language": "en",
+ "shippingFeeCents": "0",
+ "signatureData": "iVBORw0KGgo=",
+ "signatureName": "sig.png",
+ "signatureSize": 8,
+ "signatureType": "image/png",
+ "status": "unpaid",
+ "surchargeAmountCents": "0",
+ "surchargeName": null,
+ "surchargePercent": 0,
+ "surchargeType": null,
+ "taxName": "VAT",
+ "taxRate": 10,
+ "taxType": null,
+ "termsConditionNotes": "Net 30\\\"x",
+ "thanksNotes": "Thanks & \"regards\" <3"
+}

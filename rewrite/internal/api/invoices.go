@@ -2,9 +2,12 @@ package api
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"io"
 	"net/http"
 
+	"github.com/Raktim94/nodedr-invoice/rewrite/internal/einvoice"
 	"github.com/Raktim94/nodedr-invoice/rewrite/internal/entity"
 	"github.com/Raktim94/nodedr-invoice/rewrite/internal/httpx"
 	"github.com/Raktim94/nodedr-invoice/rewrite/internal/invoices"
@@ -115,6 +118,25 @@ func (a *authAPI) mountInvoices(mux *http.ServeMux) {
 			return
 		}
 		succeeded(w, rows)
+	}))
+	mux.HandleFunc("GET /api/invoices/xml", a.invoiceHandler(func(ctx context.Context, svc *invoices.Service, w http.ResponseWriter, r *http.Request) {
+		q := r.URL.Query()
+		id := entity.IDFromPath(q.Get("invoiceId"))
+		xml, err := svc.XML(ctx, id, q.Get("einvoice"))
+		if err != nil {
+			// Validation problems carry the translation key as the message, as
+			// the desktop app's handler reported them.
+			msg := err.Error()
+			var ve *einvoice.Error
+			if errors.As(err, &ve) {
+				msg = ve.Message
+			}
+			httpx.WriteJSON(w, http.StatusInternalServerError, httpx.Envelope{Success: false, Key: "error.unknownError", Message: &msg})
+			return
+		}
+		w.Header().Set("Content-Type", "application/xml; charset=utf-8")
+		w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="einvoice-%s.xml"`, q.Get("invoiceId")))
+		_, _ = io.WriteString(w, xml)
 	}))
 	mux.HandleFunc("GET /api/invoices/sequence", a.invoiceHandler(func(ctx context.Context, svc *invoices.Service, w http.ResponseWriter, r *http.Request) {
 		typ := r.URL.Query().Get("invoiceType")

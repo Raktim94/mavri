@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Raktim94/nodedr-invoice/rewrite/internal/einvoice"
 	"github.com/Raktim94/nodedr-invoice/rewrite/internal/entity"
 )
 
@@ -162,4 +163,16 @@ func (s *Service) ByID(ctx context.Context, id int64) (Row, error) {
 		return nil, err
 	}
 	return got[0], nil
+}
+
+// XML builds the e-invoice XML of one invoice for a profile ("ubl21" or "xrechnung").
+func (s *Service) XML(ctx context.Context, id int64, profile string) (string, error) {
+	inv, err := s.ByID(ctx, id)
+	if err != nil {
+		return "", err
+	}
+	if inv == nil {
+		return "", &einvoice.Error{Message: "error.invoiceNotFound"}
+	}
+	return einvoice.Generate(profile, inv)
 }

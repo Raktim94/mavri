@@ -59,7 +59,7 @@ Generated from the TypeScript backend at commit `1308d57` by an extraction scrip
 | 49 | POST | `/api/invoices/duplicate` | session or Bearer API key |  | invoices.ts | DONE: identical to TS in tools/contract |
 | 50 | GET | `/api/invoices/headers` | session or Bearer API key |  | invoices.ts | DONE: identical to TS in tools/contract |
 | 51 | GET | `/api/invoices/sequence` | session or Bearer API key |  | invoices.ts | DONE: identical to TS in tools/contract |
-| 52 | GET | `/api/invoices/xml` | session or Bearer API key |  | invoices.ts | TODO |
+| 52 | GET | `/api/invoices/xml` | session or Bearer API key |  | invoices.ts | DONE: 12 documents byte-identical to TS in tools/contract and as golden files |
 | 53 | GET | `/api/items` | session or Bearer API key |  | items.ts | DONE: identical to TS in tools/contract |
 | 54 | POST | `/api/items` | session or Bearer API key |  | items.ts | DONE: identical to TS in tools/contract |
 | 55 | PUT | `/api/items` | session or Bearer API key |  | items.ts | DONE: identical to TS in tools/contract |

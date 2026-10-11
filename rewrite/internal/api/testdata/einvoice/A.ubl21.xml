@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+<cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+<cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0</cbc:CustomizationID>
+<cbc:ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0</cbc:ProfileID>
+<cbc:ID>X-A</cbc:ID>
+<cbc:IssueDate>2026-09-15</cbc:IssueDate>
+<cbc:DueDate>2026-10-15</cbc:DueDate>
+<cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
+<cbc:Note>Thanks &amp; "regards" &lt;3 | Note &apos;one&apos; | Net 30&quot;x</cbc:Note>
+<cbc:DocumentCurrencyCode>USD</cbc:DocumentCurrencyCode>
+<cbc:BuyerReference>04011000-12345-34</cbc:BuyerReference>
+<cac:AccountingSupplierParty>
+  <cac:Party>
+    <cbc:EndpointID schemeID="EM">info@ms.test</cbc:EndpointID>
+    <cac:PartyName>
+      <cbc:Name>Müller &amp; Söhne &lt;GmbH&gt;</cbc:Name>
+    </cac:PartyName>
+    <cac:PostalAddress>
+      <cbc:StreetName>Hauptstr. 5</cbc:StreetName>
+      <cbc:CityName>Berlin</cbc:CityName>
+      <cbc:PostalZone>10115</cbc:PostalZone>
+      <cac:Country>
+        <cbc:IdentificationCode>DE</cbc:IdentificationCode>
+      </cac:Country>
+    </cac:PostalAddress>
+    <cac:PartyTaxScheme>
+      <cbc:CompanyID>DE123456789</cbc:CompanyID>
+      <cac:TaxScheme>
+        <cbc:ID>VAT</cbc:ID>
+      </cac:TaxScheme>
+    </cac:PartyTaxScheme>
+    <cac:PartyLegalEntity>
+      <cbc:RegistrationName>Müller &amp; Söhne &lt;GmbH&gt;</cbc:RegistrationName>
+      <cbc:CompanyID>DE123456789</cbc:CompanyID>
+    </cac:PartyLegalEntity>
+    <cac:Contact>
+      <cbc:Telephone>+49 30 123</cbc:Telephone>
+      <cbc:ElectronicMail>info@ms.test</cbc:ElectronicMail>
+    </cac:Contact>
+  </cac:Party>
+</cac:AccountingSupplierParty>
+<cac:AccountingCustomerParty>
+  <cac:Party>
+    <cbc:EndpointID schemeID="0088">9999</cbc:EndpointID>
+    <cac:PartyName>
+      <cbc:Name>Acme "Corp" Ltd</cbc:Name>
+    </cac:PartyName>
+    <cac:PostalAddress>
+      <cbc:StreetName>1 High Street</cbc:StreetName>
+      <cbc:CityName>London</cbc:CityName>
+      <cac:Country>
+        <cbc:IdentificationCode>GB</cbc:IdentificationCode>
+      </cac:Country>
+    </cac:PostalAddress>
+    <cac:PartyTaxScheme>
+      <cbc:CompanyID>GB999</cbc:CompanyID>
+      <cac:TaxScheme>
+        <cbc:ID>VAT</cbc:ID>
+      </cac:TaxScheme>
+    </cac:PartyTaxScheme>
+    <cac:PartyLegalEntity>
+      <cbc:RegistrationName>Acme "Corp" Ltd</cbc:RegistrationName>
+      <cbc:CompanyID>GB999</cbc:CompanyID>
+    </cac:PartyLegalEntity>
+    <cac:Contact>
+      <cbc:Telephone>+44 20 1</cbc:Telephone>
+      <cbc:ElectronicMail>ap@acme.test</cbc:ElectronicMail>
+    </cac:Contact>
+  </cac:Party>
+</cac:AccountingCustomerParty>
+<cac:PaymentMeans>
+  <cbc:PaymentMeansCode>30</cbc:PaymentMeansCode>
+  <cac:PayeeFinancialAccount>
+    <cbc:ID>DE89370400440532013000</cbc:ID>
+    <cbc:Name>Müller</cbc:Name>
+    <cac:FinancialInstitutionBranch>
+      <cbc:ID>COBADEFFXXX</cbc:ID>
+    </cac:FinancialInstitutionBranch>
+  </cac:PayeeFinancialAccount>
+</cac:PaymentMeans>
+<cac:TaxTotal>
+  <cbc:TaxAmount currencyID="USD">16.00</cbc:TaxAmount>
+  <cac:TaxSubtotal>
+    <cbc:TaxableAmount currencyID="USD">59.97</cbc:TaxableAmount>
+    <cbc:TaxAmount currencyID="USD">6.00</cbc:TaxAmount>
+    <cac:TaxCategory>
+      <cbc:ID>S</cbc:ID>
+      <cbc:Percent>10.00</cbc:Percent>
+      <cac:TaxScheme>
+        <cbc:ID>VAT</cbc:ID>
+      </cac:TaxScheme>
+    </cac:TaxCategory>
+  </cac:TaxSubtotal>
+  <cac:TaxSubtotal>
+    <cbc:TaxableAmount currencyID="USD">50.00</cbc:TaxableAmount>
+    <cbc:TaxAmount currencyID="USD">10.00</cbc:TaxAmount>
+    <cac:TaxCategory>
+      <cbc:ID>S</cbc:ID>
+      <cbc:Percent>20.00</cbc:Percent>
+      <cac:TaxScheme>
+        <cbc:ID>VAT</cbc:ID>
+      </cac:TaxScheme>
+    </cac:TaxCategory>
+  </cac:TaxSubtotal>
+  <cac:TaxSubtotal>
+    <cbc:TaxableAmount currencyID="USD">7.07</cbc:TaxableAmount>
+    <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+    <cac:TaxCategory>
+      <cbc:ID>Z</cbc:ID>
+      <cbc:Percent>0.00</cbc:Percent>
+      <cac:TaxScheme>
+        <cbc:ID>VAT</cbc:ID>
+      </cac:TaxScheme>
+    </cac:TaxCategory>
+  </cac:TaxSubtotal>
+</cac:TaxTotal>
+<cac:LegalMonetaryTotal>
+  <cbc:LineExtensionAmount currencyID="USD">117.03</cbc:LineExtensionAmount>
+  <cbc:TaxExclusiveAmount currencyID="USD">117.03</cbc:TaxExclusiveAmount>
+  <cbc:TaxInclusiveAmount currencyID="USD">133.03</cbc:TaxInclusiveAmount>
+  <cbc:PayableAmount currencyID="USD">133.03</cbc:PayableAmount>
+</cac:LegalMonetaryTotal>
+<cac:InvoiceLine>
+  <cbc:ID>1</cbc:ID>
+  <cbc:InvoicedQuantity unitCode="EA">3.00</cbc:InvoicedQuantity>
+  <cbc:LineExtensionAmount currencyID="USD">59.97</cbc:LineExtensionAmount>
+  <cac:Item>
+    <cbc:Name>Widget &lt;A&gt;</cbc:Name>
+    <cac:ClassifiedTaxCategory>
+      <cbc:ID>S</cbc:ID>
+      <cbc:Percent>10.00</cbc:Percent>
+      <cac:TaxScheme>
+        <cbc:ID>VAT</cbc:ID>
+      </cac:TaxScheme>
+    </cac:ClassifiedTaxCategory>
+  </cac:Item>
+  <cac:Price>
+    <cbc:PriceAmount currencyID="USD">19.9900</cbc:PriceAmount>
+  </cac:Price>
+</cac:InvoiceLine>
+<cac:InvoiceLine>
+  <cbc:ID>2</cbc:ID>
+  <cbc:InvoicedQuantity unitCode="EA">1.50</cbc:InvoicedQuantity>
+  <cbc:LineExtensionAmount currencyID="USD">50.00</cbc:LineExtensionAmount>
+  <cac:Item>
+    <cbc:Name>Gizmo &amp; Co</cbc:Name>
+    <cac:ClassifiedTaxCategory>
+      <cbc:ID>S</cbc:ID>
+      <cbc:Percent>20.00</cbc:Percent>
+      <cac:TaxScheme>
+        <cbc:ID>VAT</cbc:ID>
+      </cac:TaxScheme>
+    </cac:ClassifiedTaxCategory>
+  </cac:Item>
+  <cac:Price>
+    <cbc:PriceAmount currencyID="USD">33.3333</cbc:PriceAmount>
+  </cac:Price>
+</cac:InvoiceLine>
+<cac:InvoiceLine>
+  <cbc:ID>3</cbc:ID>
+  <cbc:InvoicedQuantity unitCode="EA">7.00</cbc:InvoicedQuantity>
+  <cbc:LineExtensionAmount currencyID="USD">7.07</cbc:LineExtensionAmount>
+  <cac:Item>
+    <cbc:Name>Zero rated</cbc:Name>
+    <cac:ClassifiedTaxCategory>
+      <cbc:ID>Z</cbc:ID>
+      <cbc:Percent>0.00</cbc:Percent>
+      <cac:TaxScheme>
+        <cbc:ID>VAT</cbc:ID>
+      </cac:TaxScheme>
+    </cac:ClassifiedTaxCategory>
+  </cac:Item>
+  <cac:Price>
+    <cbc:PriceAmount currencyID="USD">1.0100</cbc:PriceAmount>
+  </cac:Price>
+</cac:InvoiceLine>
+</Invoice>

@@ -21,7 +21,7 @@ def call(method, path, body=None):
         code, text = e.code, e.read()
     try: payload = json.loads(text or b"null")
     except ValueError: payload = "<non-json>"
-    log.append({"call": f"{method} {path}", "status": code, "body": payload})
+    log.append({"call": f"{method} {path}", "status": code, "body": payload, "request": body})
     return payload
 
 import gzip, uuid
@@ -42,6 +42,14 @@ def upload(doc_bytes, gz=True, field="file"):
     body = (f"--{boundary}\r\nContent-Disposition: form-data; name=\"{field}\"; filename=\"backup.json.gz\"\r\n"
             f"Content-Type: application/gzip\r\n\r\n").encode() + (gzip.compress(doc_bytes) if gz else doc_bytes) + f"\r\n--{boundary}--\r\n".encode()
     return call_raw("POST", "/api/import", body, f"multipart/form-data; boundary={boundary}")
+
+def call_text(path):
+    req = urllib.request.Request(base + path, method="GET")
+    try:
+        r = op.open(req); code, text, disp = r.status, r.read().decode(), r.headers.get("Content-Disposition")
+    except urllib.error.HTTPError as e:
+        code, text, disp = e.code, e.read().decode(errors="replace"), None
+    log.append({"call": f"GET {path} [text]", "status": code, "body": {"text": text, "disposition": disp}})
 
 creds = {"email": "me@example.com", "password": "Correct-Horse-9"}
 if "--setup" in sys.argv:
@@ -302,6 +310,47 @@ call("DELETE", "/api/ecommerce/integrations/%d" % S)
 call("DELETE", "/api/ecommerce/integrations/999")
 call("GET", "/api/ecommerce/integrations")
 call("GET", "/api/invoices?type=invoice")
+# ---- e-invoice XML -----------------------------------------------------------------
+def peppol(number, **over):
+    base_inv = snaps(number)
+    base_inv.update({
+        "issuedAt": "2026-09-15", "dueDate": "2026-10-15", "thanksNotes": "Thanks & \"regards\" <3", "customerNotes": "Note 'one'", "termsConditionNotes": "Net 30\\\"x",
+        "discountType": None, "discountAmountCents": "0", "discountPercent": 0, "shippingFeeCents": "0", "surchargeType": None,
+        "taxType": "exclusive", "taxRate": 10, "taxName": "VAT", "invoiceNumber": number,
+        "invoiceBusinessSnapshot": {"businessName": "Müller & Söhne <GmbH>", "businessShortName": "MS", "businessAddress": "Hauptstr. 5, Berlin, 10115, DE",
+                                    "businessEmail": "info@ms.test", "businessPhone": "+49 30 123", "businessVatCode": "DE123456789", "businessCode": "HRB 1",
+                                    "businessPeppolEndpointId": "info@ms.test", "businessPeppolEndpointSchemeId": "EM", "businessCountryCode": "de"},
+        "invoiceClientSnapshot": {"clientName": "Acme \"Corp\" Ltd", "clientAddress": "1 High Street, London, SW1A 1AA, GBR", "clientEmail": "ap@acme.test",
+                                  "clientPhone": "+44 20 1", "clientVatCode": "GB999", "clientPeppolEndpointId": "9999", "clientPeppolEndpointSchemeId": "0088",
+                                  "clientBuyerReference": "04011000-12345-34", "clientCountryCode": "gb"},
+        "invoiceBankSnapshot": {"name": "Main", "bankName": "First", "accountNumber": "DE89370400440532013000", "accountHolder": "Müller", "swiftCode": "COBADEFFXXX"},
+        "invoiceItems": [
+            {"itemId": 1, "quantity": "3", "taxRate": 10, "invoiceItemSnapshot": {"itemName": "Widget <A>", "unitPriceCents": "1999", "unitName": "pc"}},
+            {"itemId": 2, "quantity": "1.5", "taxRate": 20, "taxType": "inclusive", "invoiceItemSnapshot": {"itemName": "Gizmo & Co", "unitPriceCents": "3333"}},
+            {"itemId": 1, "quantity": "7", "taxRate": 0, "taxType": "exclusive", "invoiceItemSnapshot": {"itemName": "Zero rated", "unitPriceCents": "101"}}],
+        "invoicePayments": [], "invoiceAttachments": [],
+    })
+    base_inv.update(over)
+    return base_inv
+
+variants = [
+    ("A", peppol("X-A")),
+    ("B", peppol("X-B", discountType="fixed", discountAmountCents="1234", shippingFeeCents="450")),
+    ("C", peppol("X-C", discountType="percentage", discountPercent=12.5, surchargeType="percentage", surchargePercent=3, surchargeName="Handling <fee>",
+                 invoicePayments=[{"amountCents": "2000", "paidAt": "2026-09-16 10:00:00", "paymentMethod": "card"}])),
+    ("D", peppol("X-D", taxType="deducted", surchargeType="fixed", surchargeAmountCents="999", discountType="fixed", discountAmountCents="1")),
+    ("E", peppol("X-E", taxType="inclusive", discountType="percentage", discountPercent=7, shippingFeeCents="1")),
+    ("F", peppol("X-F", taxType=None, discountType="fixed", discountAmountCents="777",
+                 invoiceItems=[{"itemId": 1, "quantity": "1", "taxRate": 21, "taxType": "exclusive", "invoiceItemSnapshot": {"itemName": "Only", "unitPriceCents": "1005"}},
+                               {"itemId": 2, "quantity": "2", "taxRate": 6, "taxType": "inclusive", "invoiceItemSnapshot": {"itemName": "Two", "unitPriceCents": "333"}}])),
+]
+for tag, body in variants:
+    created = call("POST", "/api/invoices", body)
+    if created.get("success"):
+        iid = created["data"]["id"]
+        call_text(f"/api/invoices/xml?invoiceId={iid}&einvoice=ubl21")
+        call_text(f"/api/invoices/xml?invoiceId={iid}&einvoice=xrechnung")
+call_text("/api/invoices/xml?invoiceId=999999&einvoice=ubl21")
 # Auth edge cases that do not depend on session ids.
 call("POST", "/api/auth/login", {"email": "me@example.com", "password": "wrong-Password1"})
 call("POST", "/api/auth/login", {"email": "nobody@example.com", "password": "Correct-Horse-9"})

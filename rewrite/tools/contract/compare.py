@@ -18,6 +18,9 @@ def norm(v):
     return v
 
 def by_id(entry):
+    entry = {k: v for k, v in entry.items() if k != "request"}
+    if isinstance(entry['body'], dict) and 'text' in entry['body']:
+        return entry
     """Lists are ordered by creation second, which depends on when each server ran;
     the order rule itself is covered by Go unit tests, so compare lists by id."""
     data = entry["body"].get("data") if isinstance(entry["body"], dict) else None
@@ -30,13 +33,18 @@ b = [by_id(e) for e in json.load(open(sys.argv[2]))]
 bad = 0
 fixed = 0
 for x, y in zip(a, b):
-    ts_crashed = x["status"] == 500 and x["body"] == "<non-json>"
-    go_refused = y["status"] in (200, 400) and isinstance(y["body"], dict) and y["body"].get("success") is False
+    ts_html = isinstance(x["body"], dict) and str(x["body"].get("text", "")).startswith("<!DOCTYPE html>")
+    ts_crashed = x["status"] == 500 and (x["body"] == "<non-json>" or ts_html)
+    go_body = y["body"]
+    if isinstance(go_body, dict) and "text" in go_body:
+        try: go_body = json.loads(go_body["text"])
+        except ValueError: pass
+    go_refused = y["status"] in (200, 400, 500) and isinstance(go_body, dict) and go_body.get("success") is False
     if norm(x) != norm(y) and ts_crashed and go_refused:
         # The TypeScript server answered an HTML 500 page (an unhandled error);
         # Go answers with a proper failure. Counted separately, not as a regression.
         fixed += 1
-        print("TS CRASH, GO REFUSES CLEANLY:", x["call"], "->", y["body"].get("key"))
+        print("TS CRASH, GO REFUSES CLEANLY:", x["call"], "->", go_body.get("key") if go_body.get("key") != "error.unknownError" else go_body.get("message"))
         continue
     if norm(x) != norm(y):
         bad += 1

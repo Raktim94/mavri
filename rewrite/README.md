@@ -28,12 +28,14 @@ Builder project, so the repository `LICENSE` and attribution in the root
 | `internal/billing` | Terms, aging, late fees, allocation, lifecycle, credit notes, numbering, recurring, reminders, quotes, statements, FX records |
 | `internal/rbac` | Roles, permissions, approval thresholds |
 | `internal/audit` | Tamper-evident hash-chained audit log |
+| `internal/einvoice` | UBL 2.1 / XRechnung XML, same float arithmetic and rounding as before; checked byte for byte against 12 documents the TS server wrote (`internal/api/testdata/einvoice`) |
+| `internal/jsnum` | JavaScript's `Number()`, number printing, `Math.round` and `toFixed`, which the XML and order handling depend on |
 | `internal/secrets` | AES-256-GCM for webhook secrets, readable by values the TS server wrote |
 | `internal/orders` | Store integrations, order normalisation (Shopify, WooCommerce, generic), order ledger, order to invoice |
 | `internal/transfer` | Whole-database JSON export and import (all or nothing) |
 | `internal/invoices` | Invoice service: read with everything attached, save/update with snapshots, items, payments and attachments in one transaction, duplicate and quotation conversion, numbering |
 | `internal/entity` | Generic list/create/update/delete/batch engine for the simple resources (banks, businesses, clients, currencies, categories, units, items) |
-| `tools/contract` | `run.sh`: starts the TS server and the Go server on copies of one database, runs the same 238-call conversation against both and diffs every response (timestamps and random key secrets masked) |
+| `tools/contract` | `run.sh`: starts the TS server and the Go server on copies of one database, runs the same 257-call conversation against both and diffs every response (timestamps and random key secrets masked) |
 | `tools/difftest` | Script that generates the TS reference cases (run outside the repo) |
 | `internal/ecommerce` | Webhook signature schemes and verification |
 
@@ -69,15 +71,15 @@ GST (India) logic with tests: see the matrix for what is unverified. Rates are
 never built in; they come from rules the business loads.
 The auth routes and the simple resource routes (banks, businesses,
 clients, currencies, categories, units, items) run on SQLite and answer
-identically to the TypeScript server, as do settings, the US tax lookups, style profiles, layouts, presets and invoices (create, update, duplicate, convert, delete, numbering), export/import, e-commerce integrations, signed webhooks and the public v1 API: `tools/contract/run.sh` compares 238
+identically to the TypeScript server, as do settings, the US tax lookups, style profiles, layouts, presets and invoices (create, update, duplicate, convert, delete, numbering), export/import, e-commerce integrations, signed webhooks, the public v1 API and the e-invoice XML (UBL 2.1 and XRechnung): `tools/contract/run.sh` compares 257
 responses (status and body) and reports 0 differences. It does not cover rate
 limits, response headers, or PostgreSQL.
 
-Known, deliberate differences: a customer's new client gets a two-letter short name derived from their name (the old server tried to store the whole name, which the column refuses, so most first orders failed), `GET /api/v1/invoices?clientId=` filters by client id (the old server compared it with client names and always came back empty), `GET /api/v1/invoices/:id` returns binary fields as base64 like every other route (the old server leaked Node Buffer JSON), import also clears `invoice_payments` (the old server forgot, so importing over any data that had payments failed with a duplicate id), and a file holding `[]` is refused instead of wiping the database; a saved invoice and its numbering change are one transaction (the old server advanced the counter after committing, so a failure there left an invoice that never took its number); the old server answered an HTML 500 page when an invoice was rejected for a missing snapshot or a bad enum value, Go answers `success:false` with the key (the contract run lists these two); opening a database with mode `create` refuses to overwrite an existing file (the old server deleted it); an empty database name is refused; PostgreSQL answers "not supported"; a field left out of a create request takes the
+Known, deliberate differences: `GET /api/invoices/xml` answers errors as JSON with the translation key as `message` and serves `application/xml` (the old server crashed to an HTML error page, or sent the content type `xml`), a customer's new client gets a two-letter short name derived from their name (the old server tried to store the whole name, which the column refuses, so most first orders failed), `GET /api/v1/invoices?clientId=` filters by client id (the old server compared it with client names and always came back empty), `GET /api/v1/invoices/:id` returns binary fields as base64 like every other route (the old server leaked Node Buffer JSON), import also clears `invoice_payments` (the old server forgot, so importing over any data that had payments failed with a duplicate id), and a file holding `[]` is refused instead of wiping the database; a saved invoice and its numbering change are one transaction (the old server advanced the counter after committing, so a failure there left an invoice that never took its number); the old server answered an HTML 500 page when an invoice was rejected for a missing snapshot or a bad enum value, Go answers `success:false` with the key (the contract run lists these two); opening a database with mode `create` refuses to overwrite an existing file (the old server deleted it); an empty database name is refused; PostgreSQL answers "not supported"; a field left out of a create request takes the
 column default instead of failing on NULL; batch imports decode base64 logos
 and QR codes instead of storing the base64 text.
 
-Not started: PostgreSQL, e-invoice XML export (`/api/invoices/xml`), the migrations runner (a fresh database gets the
+Not started: PostgreSQL, the migrations runner (a fresh database gets the
 baseline; later schema changes still need a Go migration mechanism), import/export, MCP, e-commerce
 webhooks, desktop bridge.
 
