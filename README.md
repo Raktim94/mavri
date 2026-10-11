@@ -98,7 +98,7 @@ Import [`casaos/docker-compose.yml`](casaos/docker-compose.yml) through **App St
 
 ### Desktop
 
-Download the Windows, macOS, or Linux build from [Releases](https://github.com/Raktim94/nodedr-invoice/releases). On Linux, make the AppImage executable before opening it.
+Download the Linux build (`.deb` or AppImage) from [Releases](https://github.com/Raktim94/nodedr-invoice/releases). On Linux, make the AppImage executable before opening it.
 
 After launch, add a business, currency, client, item, bank, and layout; then create an invoice or quote and export its PDF. The [tutorial](docs/TUTORIAL.md) walks through the full flow.
 

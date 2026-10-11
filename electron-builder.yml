@@ -20,18 +20,6 @@ extraMetadata:
 
 forceCodeSigning: false
 
-afterPack: scripts/after-pack.cjs
-
-win:
-  target:
-    - nsis
-
-nsis:
-  oneClick: true
-  perMachine: false
-  allowElevation: false
-  allowToChangeInstallationDirectory: false
-
 linux:
   target:
     - deb
@@ -39,19 +27,3 @@ linux:
   category: Office
   maintainer: 'Raktim Ranjit <mail@raktimranjit.com>'
   icon: 'src/backend/main/assets/linux-icons'
-
-mac:
-  target:
-    - dmg
-  category: public.app-category.productivity
-  icon: 'src/backend/main/assets/icon.icns'
-
-dmg:
-  contents:
-    - type: file
-      x: 130
-      y: 220
-    - type: link
-      x: 410
-      y: 220
-      path: /Applications
