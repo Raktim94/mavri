@@ -31,11 +31,21 @@ Builder project, so the repository `LICENSE` and attribution in the root
 
 ## Run and test
 
+Requires Go 1.24 or newer. No Go on your machine? Use a container:
+
+```sh
+docker run --rm -v "$PWD":/w -w /w golang:1.24 sh -c 'gofmt -l . && go vet ./... && go test ./...'
+```
+
+With Go installed:
+
 ```sh
 cd rewrite
 go vet ./... && go test -race ./...
 PORT=3000 go run ./cmd/server
 ```
+
+Last verified on 2026-10-11 with `golang:1.24`: `gofmt -l` lists nothing, `go vet ./...` is clean, and `go test ./...` passes in every package that has tests. The `-race` run was not repeated.
 
 ## Status
 
