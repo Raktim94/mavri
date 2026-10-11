@@ -26,6 +26,8 @@ def by_id(entry):
     data = entry["body"].get("data") if isinstance(entry["body"], dict) else None
     if isinstance(data, list) and all(isinstance(r, dict) and "id" in r for r in data):
         entry = {**entry, "body": {**entry["body"], "data": sorted(data, key=lambda r: r["id"])}}
+    elif isinstance(data, dict) and isinstance(data.get("items"), list) and all(isinstance(r, dict) and "id" in r for r in data["items"]):
+        entry = {**entry, "body": {**entry["body"], "data": {**data, "items": sorted(data["items"], key=lambda r: r["id"])}}}
     return entry
 
 a = [by_id(e) for e in json.load(open(sys.argv[1]))]
