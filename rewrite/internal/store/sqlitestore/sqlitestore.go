@@ -44,6 +44,9 @@ func Open(path string) (*Store, error) {
 	return &Store{db: db}, nil
 }
 
+// DB exposes the connection pool to the resource layer.
+func (s *Store) DB() *sql.DB { return s.db }
+
 // Close releases the database.
 func (s *Store) Close() error { return s.db.Close() }
 

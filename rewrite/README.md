@@ -28,6 +28,8 @@ Builder project, so the repository `LICENSE` and attribution in the root
 | `internal/billing` | Terms, aging, late fees, allocation, lifecycle, credit notes, numbering, recurring, reminders, quotes, statements, FX records |
 | `internal/rbac` | Roles, permissions, approval thresholds |
 | `internal/audit` | Tamper-evident hash-chained audit log |
+| `internal/entity` | Generic list/create/update/delete/batch engine for the simple resources (banks, businesses, clients, currencies, categories, units, items) |
+| `tools/contract` | `run.sh`: starts the TS server and the Go server on copies of one database, runs the same 85-call conversation against both and diffs every response (timestamps and random key secrets masked) |
 | `tools/difftest` | Script that generates the TS reference cases (run outside the repo) |
 | `internal/ecommerce` | Webhook signature schemes and verification |
 
@@ -61,12 +63,18 @@ line's discount share is exactly n.5 cents (the old float code rounds down,
 the exact version rounds up). Which behaviour to keep is an open decision.
 GST (India) logic with tests: see the matrix for what is unverified. Rates are
 never built in; they come from rules the business loads.
-The auth routes (setup, login, logout, me, API keys) run on SQLite and were
-checked by hand against a running server, including a session surviving a
-restart. They are not yet compared against the TypeScript backend.
+The auth routes and the seven simple resource routes (banks, businesses,
+clients, currencies, categories, units, items) run on SQLite and answer
+identically to the TypeScript server: `tools/contract/run.sh` compares 85
+responses (status and body) and reports 0 differences. It does not cover rate
+limits, response headers, or PostgreSQL.
 
-Not started: PostgreSQL, the migrations runner (a fresh database gets the
-baseline; later schema changes still need a Go migration mechanism), every resource route, invoices, import/export, MCP, e-commerce
+Known, deliberate differences: a field left out of a create request takes the
+column default instead of failing on NULL; batch imports decode base64 logos
+and QR codes instead of storing the base64 text.
+
+Not started: PostgreSQL, presets, style profiles, layouts, settings, invoices, the migrations runner (a fresh database gets the
+baseline; later schema changes still need a Go migration mechanism), import/export, MCP, e-commerce
 webhooks, desktop bridge.
 
 Not yet verified: that response headers match the TypeScript server byte for

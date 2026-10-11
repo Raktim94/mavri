@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/Raktim94/nodedr-invoice/rewrite/internal/config"
+	"github.com/Raktim94/nodedr-invoice/rewrite/internal/entity"
 	"github.com/Raktim94/nodedr-invoice/rewrite/internal/httpx"
 	"github.com/Raktim94/nodedr-invoice/rewrite/internal/store"
 )
@@ -49,6 +50,14 @@ func newHandler(cfg config.Config, log *slog.Logger, st store.Store, now func() 
 	mux.HandleFunc("GET /api/auth/api-keys", a.requireAuth(humanOnly(a.requireDB(a.listKeys))))
 	mux.HandleFunc("POST /api/auth/api-keys", a.requireAuth(humanOnly(a.requireDB(a.createKey))))
 	mux.HandleFunc("DELETE /api/auth/api-keys/{id}", a.requireAuth(humanOnly(a.requireDB(a.revokeKey))))
+
+	for path, spec := range map[string]*entity.Spec{
+		"/api/banks": entity.Banks, "/api/businesses": entity.Businesses, "/api/clients": entity.Clients,
+		"/api/currencies": entity.Currencies, "/api/categories": entity.Categories, "/api/units": entity.Units,
+		"/api/items": entity.Items,
+	} {
+		a.mountResource(mux, path, spec)
+	}
 
 	limiter := httpx.NewLimiter(time.Minute, 300, cfg.TrustedProxies)
 	apiLimited := func(next http.Handler) http.Handler {

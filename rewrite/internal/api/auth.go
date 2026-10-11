@@ -262,7 +262,8 @@ func (a *authAPI) login(w http.ResponseWriter, r *http.Request) {
 		serverError(w)
 		return
 	}
-	u.LastLoginAt = at
+	// The response carries the previous login time (null on the first login),
+	// as the TypeScript server's did; the new time is only stored.
 	httpx.OK(w, toPublicUser(u))
 }
 

@@ -8,39 +8,39 @@ Generated from the TypeScript backend at commit `1308d57` by an extraction scrip
 
 | # | Method | Path | Access | Extra limiter | TS source | Go status |
 |---|---|---|---|---|---|---|
-| 1 | GET | `/api/auth/api-keys` | session or Bearer API key |  | auth.ts | IN PROGRESS: unit-tested, TS contract check pending |
-| 2 | POST | `/api/auth/api-keys` | session or Bearer API key |  | auth.ts | IN PROGRESS: unit-tested, TS contract check pending |
-| 3 | DELETE | `/api/auth/api-keys/:id` | session or Bearer API key |  | auth.ts | IN PROGRESS: unit-tested, TS contract check pending |
-| 4 | POST | `/api/auth/login` | public | 10 / 15 min | auth.ts | IN PROGRESS: unit-tested, TS contract check pending |
-| 5 | POST | `/api/auth/logout` | public |  | auth.ts | IN PROGRESS: unit-tested, TS contract check pending |
-| 6 | GET | `/api/auth/me` | session or Bearer API key |  | auth.ts | IN PROGRESS: unit-tested, TS contract check pending |
-| 7 | POST | `/api/auth/setup` | public | 5 / hour | auth.ts | IN PROGRESS: unit-tested, TS contract check pending |
-| 8 | GET | `/api/auth/status` | public |  | auth.ts | IN PROGRESS: unit-tested, TS contract check pending |
-| 9 | GET | `/api/banks` | session or Bearer API key |  | banks.ts | TODO |
-| 10 | POST | `/api/banks` | session or Bearer API key |  | banks.ts | TODO |
-| 11 | PUT | `/api/banks` | session or Bearer API key |  | banks.ts | TODO |
-| 12 | DELETE | `/api/banks/:id` | session or Bearer API key |  | banks.ts | TODO |
-| 13 | POST | `/api/banks/batch` | session or Bearer API key |  | banks.ts | TODO |
-| 14 | GET | `/api/businesses` | session or Bearer API key |  | businesses.ts | TODO |
-| 15 | POST | `/api/businesses` | session or Bearer API key |  | businesses.ts | TODO |
-| 16 | PUT | `/api/businesses` | session or Bearer API key |  | businesses.ts | TODO |
-| 17 | DELETE | `/api/businesses/:id` | session or Bearer API key |  | businesses.ts | TODO |
-| 18 | POST | `/api/businesses/batch` | session or Bearer API key |  | businesses.ts | TODO |
-| 19 | GET | `/api/categories` | session or Bearer API key |  | categories.ts | TODO |
-| 20 | POST | `/api/categories` | session or Bearer API key |  | categories.ts | TODO |
-| 21 | PUT | `/api/categories` | session or Bearer API key |  | categories.ts | TODO |
-| 22 | DELETE | `/api/categories/:id` | session or Bearer API key |  | categories.ts | TODO |
-| 23 | POST | `/api/categories/batch` | session or Bearer API key |  | categories.ts | TODO |
-| 24 | GET | `/api/clients` | session or Bearer API key |  | clients.ts | TODO |
-| 25 | POST | `/api/clients` | session or Bearer API key |  | clients.ts | TODO |
-| 26 | PUT | `/api/clients` | session or Bearer API key |  | clients.ts | TODO |
-| 27 | DELETE | `/api/clients/:id` | session or Bearer API key |  | clients.ts | TODO |
-| 28 | POST | `/api/clients/batch` | session or Bearer API key |  | clients.ts | TODO |
-| 29 | GET | `/api/currencies` | session or Bearer API key |  | currencies.ts | TODO |
-| 30 | POST | `/api/currencies` | session or Bearer API key |  | currencies.ts | TODO |
-| 31 | PUT | `/api/currencies` | session or Bearer API key |  | currencies.ts | TODO |
-| 32 | DELETE | `/api/currencies/:id` | session or Bearer API key |  | currencies.ts | TODO |
-| 33 | POST | `/api/currencies/batch` | session or Bearer API key |  | currencies.ts | TODO |
+| 1 | GET | `/api/auth/api-keys` | session or Bearer API key |  | auth.ts | DONE: identical to TS in tools/contract |
+| 2 | POST | `/api/auth/api-keys` | session or Bearer API key |  | auth.ts | DONE: identical to TS in tools/contract |
+| 3 | DELETE | `/api/auth/api-keys/:id` | session or Bearer API key |  | auth.ts | DONE: identical to TS in tools/contract |
+| 4 | POST | `/api/auth/login` | public | 10 / 15 min | auth.ts | DONE: identical to TS in tools/contract |
+| 5 | POST | `/api/auth/logout` | public |  | auth.ts | DONE: identical to TS in tools/contract |
+| 6 | GET | `/api/auth/me` | session or Bearer API key |  | auth.ts | DONE: identical to TS in tools/contract |
+| 7 | POST | `/api/auth/setup` | public | 5 / hour | auth.ts | DONE: identical to TS in tools/contract |
+| 8 | GET | `/api/auth/status` | public |  | auth.ts | DONE: identical to TS in tools/contract |
+| 9 | GET | `/api/banks` | session or Bearer API key |  | banks.ts | DONE: identical to TS in tools/contract |
+| 10 | POST | `/api/banks` | session or Bearer API key |  | banks.ts | DONE: identical to TS in tools/contract |
+| 11 | PUT | `/api/banks` | session or Bearer API key |  | banks.ts | DONE: identical to TS in tools/contract |
+| 12 | DELETE | `/api/banks/:id` | session or Bearer API key |  | banks.ts | DONE: identical to TS in tools/contract |
+| 13 | POST | `/api/banks/batch` | session or Bearer API key |  | banks.ts | DONE: identical to TS in tools/contract |
+| 14 | GET | `/api/businesses` | session or Bearer API key |  | businesses.ts | DONE: identical to TS in tools/contract |
+| 15 | POST | `/api/businesses` | session or Bearer API key |  | businesses.ts | DONE: identical to TS in tools/contract |
+| 16 | PUT | `/api/businesses` | session or Bearer API key |  | businesses.ts | DONE: identical to TS in tools/contract |
+| 17 | DELETE | `/api/businesses/:id` | session or Bearer API key |  | businesses.ts | DONE: identical to TS in tools/contract |
+| 18 | POST | `/api/businesses/batch` | session or Bearer API key |  | businesses.ts | DONE: identical to TS in tools/contract |
+| 19 | GET | `/api/categories` | session or Bearer API key |  | categories.ts | DONE: identical to TS in tools/contract |
+| 20 | POST | `/api/categories` | session or Bearer API key |  | categories.ts | DONE: identical to TS in tools/contract |
+| 21 | PUT | `/api/categories` | session or Bearer API key |  | categories.ts | DONE: identical to TS in tools/contract |
+| 22 | DELETE | `/api/categories/:id` | session or Bearer API key |  | categories.ts | DONE: identical to TS in tools/contract |
+| 23 | POST | `/api/categories/batch` | session or Bearer API key |  | categories.ts | DONE: identical to TS in tools/contract |
+| 24 | GET | `/api/clients` | session or Bearer API key |  | clients.ts | DONE: identical to TS in tools/contract |
+| 25 | POST | `/api/clients` | session or Bearer API key |  | clients.ts | DONE: identical to TS in tools/contract |
+| 26 | PUT | `/api/clients` | session or Bearer API key |  | clients.ts | DONE: identical to TS in tools/contract |
+| 27 | DELETE | `/api/clients/:id` | session or Bearer API key |  | clients.ts | DONE: identical to TS in tools/contract |
+| 28 | POST | `/api/clients/batch` | session or Bearer API key |  | clients.ts | DONE: identical to TS in tools/contract |
+| 29 | GET | `/api/currencies` | session or Bearer API key |  | currencies.ts | DONE: identical to TS in tools/contract |
+| 30 | POST | `/api/currencies` | session or Bearer API key |  | currencies.ts | DONE: identical to TS in tools/contract |
+| 31 | PUT | `/api/currencies` | session or Bearer API key |  | currencies.ts | DONE: identical to TS in tools/contract |
+| 32 | DELETE | `/api/currencies/:id` | session or Bearer API key |  | currencies.ts | DONE: identical to TS in tools/contract |
+| 33 | POST | `/api/currencies/batch` | session or Bearer API key |  | currencies.ts | DONE: identical to TS in tools/contract |
 | 34 | GET | `/api/databases` | public until first user exists | listDbLimiter | database.ts | TODO |
 | 35 | POST | `/api/databases` | public until first user exists | listDbLimiter | database.ts | TODO |
 | 36 | GET | `/api/databases/ready` | public |  | main.ts | IN PROGRESS: unit-tested, TS contract check pending |
@@ -60,11 +60,11 @@ Generated from the TypeScript backend at commit `1308d57` by an extraction scrip
 | 50 | GET | `/api/invoices/headers` | session or Bearer API key |  | invoices.ts | TODO |
 | 51 | GET | `/api/invoices/sequence` | session or Bearer API key |  | invoices.ts | TODO |
 | 52 | GET | `/api/invoices/xml` | session or Bearer API key |  | invoices.ts | TODO |
-| 53 | GET | `/api/items` | session or Bearer API key |  | items.ts | TODO |
-| 54 | POST | `/api/items` | session or Bearer API key |  | items.ts | TODO |
-| 55 | PUT | `/api/items` | session or Bearer API key |  | items.ts | TODO |
-| 56 | DELETE | `/api/items/:id` | session or Bearer API key |  | items.ts | TODO |
-| 57 | POST | `/api/items/batch` | session or Bearer API key |  | items.ts | TODO |
+| 53 | GET | `/api/items` | session or Bearer API key |  | items.ts | DONE: identical to TS in tools/contract |
+| 54 | POST | `/api/items` | session or Bearer API key |  | items.ts | DONE: identical to TS in tools/contract |
+| 55 | PUT | `/api/items` | session or Bearer API key |  | items.ts | DONE: identical to TS in tools/contract |
+| 56 | DELETE | `/api/items/:id` | session or Bearer API key |  | items.ts | DONE: identical to TS in tools/contract |
+| 57 | POST | `/api/items/batch` | session or Bearer API key |  | items.ts | DONE: identical to TS in tools/contract |
 | 58 | GET | `/api/layouts` | session or Bearer API key |  | layouts.ts | TODO |
 | 59 | POST | `/api/layouts` | session or Bearer API key |  | layouts.ts | TODO |
 | 60 | PUT | `/api/layouts` | session or Bearer API key |  | layouts.ts | TODO |
@@ -84,11 +84,11 @@ Generated from the TypeScript backend at commit `1308d57` by an extraction scrip
 | 74 | POST | `/api/styleProfiles/batch` | session or Bearer API key |  | styleProfiles.ts | TODO |
 | 75 | GET | `/api/tax/us-states` | session or Bearer API key |  | usSalesTax.ts | TODO |
 | 76 | GET | `/api/tax/us-states/:stateCode` | session or Bearer API key |  | usSalesTax.ts | TODO |
-| 77 | GET | `/api/units` | session or Bearer API key |  | units.ts | TODO |
-| 78 | POST | `/api/units` | session or Bearer API key |  | units.ts | TODO |
-| 79 | PUT | `/api/units` | session or Bearer API key |  | units.ts | TODO |
-| 80 | DELETE | `/api/units/:id` | session or Bearer API key |  | units.ts | TODO |
-| 81 | POST | `/api/units/batch` | session or Bearer API key |  | units.ts | TODO |
+| 77 | GET | `/api/units` | session or Bearer API key |  | units.ts | DONE: identical to TS in tools/contract |
+| 78 | POST | `/api/units` | session or Bearer API key |  | units.ts | DONE: identical to TS in tools/contract |
+| 79 | PUT | `/api/units` | session or Bearer API key |  | units.ts | DONE: identical to TS in tools/contract |
+| 80 | DELETE | `/api/units/:id` | session or Bearer API key |  | units.ts | DONE: identical to TS in tools/contract |
+| 81 | POST | `/api/units/batch` | session or Bearer API key |  | units.ts | DONE: identical to TS in tools/contract |
 | 82 | GET | `/api/v1/invoices` | session or Bearer API key |  | publicApi.ts | TODO |
 | 83 | GET | `/api/v1/invoices/:id` | session or Bearer API key |  | publicApi.ts | TODO |
 | 84 | POST | `/api/v1/orders` | session or Bearer API key |  | publicApi.ts | TODO |

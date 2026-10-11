@@ -13,6 +13,7 @@ import (
 
 	"github.com/Raktim94/nodedr-invoice/rewrite/internal/config"
 	"github.com/Raktim94/nodedr-invoice/rewrite/internal/store"
+	"github.com/Raktim94/nodedr-invoice/rewrite/internal/store/sqlitestore"
 )
 
 const goodPassword = "Correct-Horse-9"
@@ -22,6 +23,7 @@ type env struct {
 	h     http.Handler
 	st    *store.Memory
 	clock time.Time
+	sql   *sqlitestore.Store
 }
 
 func newEnv(t *testing.T) *env {
@@ -155,10 +157,13 @@ func TestLoginLockoutAndRecovery(t *testing.T) {
 	}
 	e.clock = e.clock.Add(16 * time.Minute)
 	ok := e.do("POST", "/api/auth/login", creds("OWNER@example.com", goodPassword), nil, nil)
-	if ok.Code != 200 || ok.session() == nil || ok.data()["lastLoginAt"] == nil {
+	if ok.Code != 200 || ok.session() == nil || ok.data()["lastLoginAt"] != nil {
 		t.Fatalf("login after lock expiry: %d %v", ok.Code, ok.Body)
 	}
 	u, _ := e.st.UserByEmail(context.Background(), "owner@example.com")
+	if u.LastLoginAt == "" {
+		t.Error("the new login time should be stored")
+	}
 	if u.FailedLoginCount != 0 || u.LockedUntil != "" {
 		t.Errorf("success should clear the counters: %+v", u)
 	}
