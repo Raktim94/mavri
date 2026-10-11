@@ -238,7 +238,7 @@ export const InvoicesPage: FC<Props> = ({ type }) => {
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.25 }}>
               <EditPreviewToggle mode={mode} setMode={setMode} />
               <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.6rem', lineHeight: 1 }}>
-                Made by Mavri Invoice Builder
+                Made by Mavri
               </Typography>
             </Box>
           );

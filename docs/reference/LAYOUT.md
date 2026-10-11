@@ -1,6 +1,6 @@
 # Invoice Layout JSON
 
-Invoice Builder layouts describe the structure and order of an invoice PDF. A layout is a JSON document interpreted by the invoice renderer using the application's built-in PDF components.
+Mavri layouts describe the structure and order of an invoice PDF. A layout is a JSON document interpreted by the invoice renderer using the application's built-in PDF components.
 
 Layouts are intentionally declarative and restricted. JSON can choose which supported content appears and how supported blocks are composed, but it cannot provide React code, arbitrary styles, custom fonts, labels, or page settings.
 

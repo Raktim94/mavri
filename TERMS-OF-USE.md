@@ -2,7 +2,7 @@
 
 **Last updated:** 2025-11-18
 
-Thank you for using **Invoice Builder** (“the Application”). These Terms of Use (“Terms”) govern your access to and use of this software. By downloading, installing, or using the Application, you agree to these Terms.
+Thank you for using **Mavri** (“the Application”). These Terms of Use (“Terms”) govern your access to and use of this software. By downloading, installing, or using the Application, you agree to these Terms.
 
 If you do not agree with these Terms, you must not use the Application.
 

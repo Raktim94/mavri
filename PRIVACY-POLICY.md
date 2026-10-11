@@ -2,7 +2,7 @@
 
 **Last updated:** 2025-11-18
 
-This Privacy Policy explains how **Invoice Builder** (“the Application”) handles your information.  
+This Privacy Policy explains how **Mavri** (“the Application”) handles your information.  
 The Application is designed with privacy in mind and stores all data **locally** on your device.
 
 The developer (“we,” “us,” “our”) does **not** collect, transmit, store, or process any personal data.
