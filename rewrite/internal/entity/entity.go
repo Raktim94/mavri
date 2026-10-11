@@ -37,10 +37,6 @@ type Spec struct {
 	Defaults map[string]any
 	// Prepare may adjust a row inside the batch transaction (e.g. resolve names).
 	Prepare func(ctx context.Context, tx *sql.Tx, row Row) error
-
-	once sync.Once
-	cols []column
-	err  error
 }
 
 type column struct {
@@ -97,32 +93,41 @@ func MapError(err error) *Failure {
 // Repo runs a Spec against a database.
 type Repo struct{ DB *sql.DB }
 
+var colCache sync.Map // table name -> []column; every database has the same layout
+
+func tableColumns(ctx context.Context, db *sql.DB, table string) ([]column, error) {
+	if v, ok := colCache.Load(table); ok {
+		return v.([]column), nil
+	}
+	rows, err := db.QueryContext(ctx, fmt.Sprintf(`PRAGMA table_info("%s")`, table))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var cols []column
+	for rows.Next() {
+		var cid, notnull, pk int
+		var name, typ string
+		var dflt sql.NullString
+		if err := rows.Scan(&cid, &name, &typ, &notnull, &dflt, &pk); err != nil {
+			return nil, err
+		}
+		u := strings.ToUpper(typ)
+		cols = append(cols, column{name: name, text: strings.Contains(u, "DATE") || strings.Contains(u, "TIME"),
+			hasDefault: notnull == 1 && dflt.Valid})
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	if len(cols) == 0 {
+		return nil, fmt.Errorf("entity: table %q not found", table)
+	}
+	colCache.Store(table, cols)
+	return cols, nil
+}
+
 func (s *Spec) columns(ctx context.Context, db *sql.DB) ([]column, error) {
-	s.once.Do(func() {
-		rows, err := db.QueryContext(ctx, fmt.Sprintf(`PRAGMA table_info("%s")`, s.Table))
-		if err != nil {
-			s.err = err
-			return
-		}
-		defer rows.Close()
-		for rows.Next() {
-			var cid, notnull, pk int
-			var name, typ string
-			var dflt sql.NullString
-			if err := rows.Scan(&cid, &name, &typ, &notnull, &dflt, &pk); err != nil {
-				s.err = err
-				return
-			}
-			u := strings.ToUpper(typ)
-			s.cols = append(s.cols, column{name: name, text: strings.Contains(u, "DATE") || strings.Contains(u, "TIME"),
-				hasDefault: notnull == 1 && dflt.Valid})
-		}
-		s.err = rows.Err()
-		if s.err == nil && len(s.cols) == 0 {
-			s.err = fmt.Errorf("entity: table %q not found", s.Table)
-		}
-	})
-	return s.cols, s.err
+	return tableColumns(ctx, db, s.Table)
 }
 
 func (s *Spec) selectSQL(cols []column) string {
@@ -463,3 +468,75 @@ func IDFromPath(v string) int64 {
 }
 
 func formatInt(i int64) string { return strconv.FormatInt(i, 10) }
+
+// plainColumns selects every column of a table, dates as stored text.
+func plainColumns(cols []column, alias string) string {
+	parts := make([]string, len(cols))
+	for i, c := range cols {
+		if c.text {
+			parts[i] = fmt.Sprintf(`CAST(%s."%s" AS TEXT) AS "%s"`, alias, c.name, c.name)
+		} else {
+			parts[i] = fmt.Sprintf(`%s."%s"`, alias, c.name)
+		}
+	}
+	return strings.Join(parts, ", ")
+}
+
+// Select returns every column of table's rows matching tail (a WHERE/ORDER BY
+// clause with ? placeholders), converted like the resource rows.
+func (r Repo) Select(ctx context.Context, table, tail string, args ...any) ([]Row, error) {
+	cols, err := tableColumns(ctx, r.DB, table)
+	if err != nil {
+		return nil, err
+	}
+	rows, err := r.DB.QueryContext(ctx, fmt.Sprintf(`SELECT %s FROM %s t %s`, plainColumns(cols, "t"), table, tail), args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	spec := &Spec{}
+	out, err := spec.scan(rows)
+	if out == nil {
+		out = []Row{}
+	}
+	return out, err
+}
+
+// UpdateColumns sets the given columns on the rows matching where. Only real
+// columns of the table are accepted. It reports false when nothing was given.
+func (r Repo) UpdateColumns(ctx context.Context, table string, values Row, where string, args ...any) (bool, error) {
+	cols, err := tableColumns(ctx, r.DB, table)
+	if err != nil {
+		return false, err
+	}
+	known := map[string]bool{}
+	for _, c := range cols {
+		known[c.name] = true
+	}
+	spec := &Spec{}
+	var set []string
+	var params []any
+	for k, v := range values {
+		if v == nil {
+			if !known[k] {
+				return false, &Failure{Key: "error.sqlSyntaxError"}
+			}
+			set, params = append(set, fmt.Sprintf(`"%s" = ?`, k)), append(params, nil)
+			continue
+		}
+		if !known[k] {
+			return false, &Failure{Key: "error.sqlSyntaxError"}
+		}
+		p, err := spec.param(k, v)
+		if err != nil {
+			return false, &Failure{Key: "error.unknownError", Message: "error.unsupportedValue"}
+		}
+		set, params = append(set, fmt.Sprintf(`"%s" = ?`, k)), append(params, p)
+	}
+	if len(set) == 0 {
+		return false, nil
+	}
+	set = append(set, `"updatedAt" = datetime('now')`)
+	_, err = r.DB.ExecContext(ctx, fmt.Sprintf(`UPDATE %s SET %s WHERE %s`, table, strings.Join(set, ", "), where), append(params, args...)...)
+	return err == nil, err
+}

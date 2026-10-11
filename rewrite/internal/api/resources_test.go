@@ -273,3 +273,40 @@ func TestIntegerIDsStayExact(t *testing.T) {
 		t.Log("duplicate currency codes are allowed by the schema")
 	}
 }
+
+func TestSettingsAndTaxRoutes(t *testing.T) {
+	e, ck := sqlEnv(t)
+	s := e.do("GET", "/api/settings", "", nil, ck)
+	if s.data()["language"] != "en" || s.data()["isDarkMode"] != false {
+		t.Fatalf("settings: %v", s.Body)
+	}
+	if r := e.do("PUT", "/api/settings", `{"id":9,"language":"de","isDarkMode":true}`, nil, ck); r.Body["success"] != true {
+		t.Fatalf("put: %v", r.Body)
+	}
+	s = e.do("GET", "/api/settings", "", nil, ck)
+	if s.data()["language"] != "de" || s.data()["isDarkMode"] != true || s.data()["id"] != float64(1) {
+		t.Errorf("after put: %v", s.data())
+	}
+	if r := e.do("PUT", "/api/settings", `{"nope":1}`, nil, ck); r.Body["success"] != false || r.key() != "error.sqlSyntaxError" {
+		t.Errorf("unknown column must be refused, never put into SQL: %v", r.Body)
+	}
+	if r := e.do("PUT", "/api/settings", `{"language\" = 'x' --":1}`, nil, ck); r.key() != "error.sqlSyntaxError" {
+		t.Errorf("injection attempt: %v", r.Body)
+	}
+	if r := e.do("PUT", "/api/settings", `{}`, nil, ck); r.Body["success"] != true {
+		t.Errorf("empty put: %v", r.Body)
+	}
+	states := rows(t, e.do("GET", "/api/tax/us-states", "", nil, ck))
+	if len(states) != 51 || states[0]["stateName"] != "Alabama" {
+		t.Errorf("states: %d %v", len(states), states[0])
+	}
+	if r := e.do("GET", "/api/tax/us-states/ca", "", nil, ck); r.data()["stateCode"] != "CA" {
+		t.Errorf("lower-case state code: %v", r.Body)
+	}
+	if r := e.do("GET", "/api/tax/us-states/ZZ", "", nil, ck); r.Code != 200 || r.Body["success"] != true || r.Body["data"] != nil {
+		t.Errorf("unknown state: %v", r.Body)
+	}
+	if _, has := e.do("GET", "/api/tax/us-states/ZZ", "", nil, ck).Body["data"]; !has {
+		t.Error(`unknown state must answer "data":null explicitly`)
+	}
+}

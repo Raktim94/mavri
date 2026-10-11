@@ -60,6 +60,15 @@ for p in ["banks", "businesses", "clients", "currencies", "categories", "units",
     for f in ['[{"type":"Active","value":""}]', '[{"type":"Archived","value":""}]', '[{"type":"NoInvoices","value":""}]',
               '[{"type":"AtleastOneInvoice","value":""}]', '[{"type":"NoInvoices30","value":""}]', 'junk']:
         call("GET", "/api/" + p + "?filter=" + urllib.parse.quote(f))
+call("GET", "/api/settings")
+call("PUT", "/api/settings", {"id": 5, "language": "de", "isDarkMode": True, "createdAt": "x", "shouldIncludeYear": False})
+call("PUT", "/api/settings", {})
+call("PUT", "/api/settings", {"noSuchColumn": 1})
+call("PUT", "/api/settings", {"language": {"a": 1}})
+call("GET", "/api/settings")
+call("GET", "/api/tax/us-states")
+call("GET", "/api/tax/us-states/ca")
+call("GET", "/api/tax/us-states/ZZ")
 # Auth edge cases that do not depend on session ids.
 call("POST", "/api/auth/login", {"email": "me@example.com", "password": "wrong-Password1"})
 call("POST", "/api/auth/login", {"email": "nobody@example.com", "password": "Correct-Horse-9"})

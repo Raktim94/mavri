@@ -75,15 +75,15 @@ Generated from the TypeScript backend at commit `1308d57` by an extraction scrip
 | 65 | PUT | `/api/presets` | session or Bearer API key |  | presets.ts | TODO |
 | 66 | DELETE | `/api/presets/:id` | session or Bearer API key |  | presets.ts | TODO |
 | 67 | POST | `/api/presets/batch` | session or Bearer API key |  | presets.ts | TODO |
-| 68 | GET | `/api/settings` | session or Bearer API key |  | settings.ts | TODO |
-| 69 | PUT | `/api/settings` | session or Bearer API key |  | settings.ts | TODO |
+| 68 | GET | `/api/settings` | session or Bearer API key |  | settings.ts | DONE: identical to TS in tools/contract |
+| 69 | PUT | `/api/settings` | session or Bearer API key |  | settings.ts | DONE: identical to TS in tools/contract |
 | 70 | GET | `/api/styleProfiles` | session or Bearer API key |  | styleProfiles.ts | TODO |
 | 71 | POST | `/api/styleProfiles` | session or Bearer API key |  | styleProfiles.ts | TODO |
 | 72 | PUT | `/api/styleProfiles` | session or Bearer API key |  | styleProfiles.ts | TODO |
 | 73 | DELETE | `/api/styleProfiles/:id` | session or Bearer API key |  | styleProfiles.ts | TODO |
 | 74 | POST | `/api/styleProfiles/batch` | session or Bearer API key |  | styleProfiles.ts | TODO |
-| 75 | GET | `/api/tax/us-states` | session or Bearer API key |  | usSalesTax.ts | TODO |
-| 76 | GET | `/api/tax/us-states/:stateCode` | session or Bearer API key |  | usSalesTax.ts | TODO |
+| 75 | GET | `/api/tax/us-states` | session or Bearer API key |  | usSalesTax.ts | DONE: identical to TS in tools/contract |
+| 76 | GET | `/api/tax/us-states/:stateCode` | session or Bearer API key |  | usSalesTax.ts | DONE: identical to TS in tools/contract |
 | 77 | GET | `/api/units` | session or Bearer API key |  | units.ts | DONE: identical to TS in tools/contract |
 | 78 | POST | `/api/units` | session or Bearer API key |  | units.ts | DONE: identical to TS in tools/contract |
 | 79 | PUT | `/api/units` | session or Bearer API key |  | units.ts | DONE: identical to TS in tools/contract |

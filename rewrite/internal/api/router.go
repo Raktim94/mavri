@@ -59,6 +59,8 @@ func newHandler(cfg config.Config, log *slog.Logger, st store.Store, now func() 
 		a.mountResource(mux, path, spec)
 	}
 
+	a.mountSettings(mux)
+
 	limiter := httpx.NewLimiter(time.Minute, 300, cfg.TrustedProxies)
 	apiLimited := func(next http.Handler) http.Handler {
 		limited := limiter.Middleware(next)

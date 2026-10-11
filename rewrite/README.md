@@ -29,7 +29,7 @@ Builder project, so the repository `LICENSE` and attribution in the root
 | `internal/rbac` | Roles, permissions, approval thresholds |
 | `internal/audit` | Tamper-evident hash-chained audit log |
 | `internal/entity` | Generic list/create/update/delete/batch engine for the simple resources (banks, businesses, clients, currencies, categories, units, items) |
-| `tools/contract` | `run.sh`: starts the TS server and the Go server on copies of one database, runs the same 85-call conversation against both and diffs every response (timestamps and random key secrets masked) |
+| `tools/contract` | `run.sh`: starts the TS server and the Go server on copies of one database, runs the same 94-call conversation against both and diffs every response (timestamps and random key secrets masked) |
 | `tools/difftest` | Script that generates the TS reference cases (run outside the repo) |
 | `internal/ecommerce` | Webhook signature schemes and verification |
 
@@ -65,7 +65,7 @@ GST (India) logic with tests: see the matrix for what is unverified. Rates are
 never built in; they come from rules the business loads.
 The auth routes and the seven simple resource routes (banks, businesses,
 clients, currencies, categories, units, items) run on SQLite and answer
-identically to the TypeScript server: `tools/contract/run.sh` compares 85
+identically to the TypeScript server, as do settings and the US tax lookups: `tools/contract/run.sh` compares 94
 responses (status and body) and reports 0 differences. It does not cover rate
 limits, response headers, or PostgreSQL.
 
@@ -73,7 +73,7 @@ Known, deliberate differences: a field left out of a create request takes the
 column default instead of failing on NULL; batch imports decode base64 logos
 and QR codes instead of storing the base64 text.
 
-Not started: PostgreSQL, presets, style profiles, layouts, settings, invoices, the migrations runner (a fresh database gets the
+Not started: PostgreSQL, presets, style profiles, layouts, invoices, the migrations runner (a fresh database gets the
 baseline; later schema changes still need a Go migration mechanism), import/export, MCP, e-commerce
 webhooks, desktop bridge.
 
