@@ -1,0 +1,53 @@
+# Mavri — Two-container setup
+# Build and start:  docker compose up -d --build
+# Pull pre-built:   docker compose pull && docker compose up -d
+# Stop:             docker compose down
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    container_name: nodedr-invoice-backend
+    environment:
+      - SERVICE=backend
+      - NODE_ENV=docker
+      - DB_DIRECTORY=/data
+      - PORT=3000
+      - DEV_SERVER_URL=0.0.0.0
+      - FE_SERVER_URL=http://localhost:3001
+      - MIGRATIONS_PATH=/app/dist-be/backend/server/shared/migrations
+    volumes:
+      - nodedr-invoice-data:/data
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "const net=require('net');const c=net.createConnection(3000,'localhost');c.on('connect',()=>{c.destroy();process.exit(0)});c.on('error',()=>process.exit(1))"
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nodedr-invoice-frontend
+    ports:
+      - '${HOST_PORT:-3001}:3001'
+    environment:
+      - SERVICE=frontend
+      - BACKEND_HOST=backend
+      - BACKEND_PORT=3000
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  nodedr-invoice-data:
