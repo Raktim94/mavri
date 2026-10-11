@@ -23,6 +23,7 @@ Builder project, so the repository `LICENSE` and attribution in the root
 | `internal/money` | Exact (rational) invoice arithmetic, differential-tested against the real TS functions |
 | `internal/gst` | India GST: identifiers, Rule 46 checks, effective-dated rules, tax calculation (no built-in rates) |
 | `internal/upi` | UPI payment links and payment state machine (trusted evidence only) |
+| `internal/billing` | Terms, aging, late fees, allocation, lifecycle, credit notes, numbering, recurring, reminders, quotes, statements, FX records |
 | `tools/difftest` | Script that generates the TS reference cases (run outside the repo) |
 | `internal/ecommerce` | Webhook signature schemes and verification |
 
