@@ -10,21 +10,42 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strconv"
 	"syscall"
 	"time"
 
 	"github.com/Raktim94/nodedr-invoice/rewrite/internal/api"
 	"github.com/Raktim94/nodedr-invoice/rewrite/internal/config"
+	"github.com/Raktim94/nodedr-invoice/rewrite/internal/store"
+	"github.com/Raktim94/nodedr-invoice/rewrite/internal/store/sqlitestore"
 )
 
 func main() {
 	log := slog.New(slog.NewJSONHandler(os.Stderr, nil))
 	cfg := config.Load()
 
+	// With no default database the server starts "not ready" and the auth
+	// routes answer error.databaseNotInitialized until one is configured.
+	var st store.Store
+	if cfg.DefaultDB != "" {
+		if err := os.MkdirAll(cfg.DataDir, 0o700); err != nil {
+			fmt.Fprintln(os.Stderr, "cannot create data directory:", err)
+			os.Exit(1)
+		}
+		db, err := sqlitestore.Open(filepath.Join(cfg.DataDir, cfg.DefaultDB))
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "cannot open database:", err)
+			os.Exit(1)
+		}
+		defer db.Close()
+		st = db
+		log.Info("database ready", "file", cfg.DefaultDB)
+	}
+
 	srv := &http.Server{
 		Addr:              net.JoinHostPort(cfg.Host, strconv.Itoa(cfg.Port)),
-		Handler:           api.NewHandler(cfg, log, nil),
+		Handler:           api.NewHandler(cfg, log, st),
 		ReadHeaderTimeout: 10 * time.Second,
 		ReadTimeout:       5 * time.Minute, // large JSON imports
 		WriteTimeout:      5 * time.Minute,

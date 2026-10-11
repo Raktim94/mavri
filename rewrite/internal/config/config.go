@@ -6,6 +6,7 @@ package config
 
 import (
 	"os"
+	"path/filepath"
 	"strconv"
 )
 
@@ -19,6 +20,7 @@ type Config struct {
 	Port           int    // PORT (default 3000)
 	Host           string // DEV_SERVER_URL, the bind address (default 127.0.0.1)
 	DataDir        string // DB_DIRECTORY (default "data")
+	DefaultDB      string // DEFAULT_DATABASE file name inside DataDir; "invoice.db" when NODE_ENV=docker, else none
 	FrontendOrigin string // FRONTEND_ORIGIN, else FE_SERVER_URL, else http://127.0.0.1:5173
 	CookieSecure   bool   // COOKIE_SECURE == "true"
 	TrustedProxies int    // proxy hops to trust for client IPs (TS: trust proxy = 1)
@@ -26,10 +28,17 @@ type Config struct {
 }
 
 // Load reads the configuration from the process environment.
-func Load() Config { return LoadFrom(os.Getenv) }
+func Load() Config { return loadWith(os.LookupEnv) }
 
 // LoadFrom reads the configuration through getenv, which makes it testable.
 func LoadFrom(getenv func(string) string) Config {
+	return loadWith(func(k string) (string, bool) { v := getenv(k); return v, v != "" })
+}
+
+// loadWith takes a lookup that reports whether a variable is set at all, which
+// DEFAULT_DATABASE needs: set to empty means "no default database".
+func loadWith(lookup func(string) (string, bool)) Config {
+	getenv := func(k string) string { v, _ := lookup(k); return v }
 	first := func(vals ...string) string {
 		for _, v := range vals {
 			if v != "" {
@@ -42,11 +51,20 @@ func LoadFrom(getenv func(string) string) Config {
 	if p, err := strconv.Atoi(getenv("PORT")); err == nil && p > 0 && p < 65536 {
 		port = p
 	}
+	defaultDB := ""
+	if v, ok := lookup("DEFAULT_DATABASE"); ok {
+		if v != "" {
+			defaultDB = filepath.Base(v) // a bare file name; never a path
+		}
+	} else if getenv("NODE_ENV") == "docker" {
+		defaultDB = "invoice.db"
+	}
 	feServer := first(getenv("FE_SERVER_URL"), "http://127.0.0.1:5173")
 	return Config{
 		Port:           port,
 		Host:           first(getenv("DEV_SERVER_URL"), "127.0.0.1"),
 		DataDir:        first(getenv("DB_DIRECTORY"), "data"),
+		DefaultDB:      defaultDB,
 		FrontendOrigin: first(getenv("FRONTEND_ORIGIN"), feServer),
 		CookieSecure:   getenv("COOKIE_SECURE") == "true",
 		TrustedProxies: 1,

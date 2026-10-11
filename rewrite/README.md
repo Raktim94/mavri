@@ -18,7 +18,7 @@ Builder project, so the repository `LICENSE` and attribution in the root
 | `internal/config` | Environment settings (same variable names as the TS server) |
 | `internal/httpx` | Response envelope, security headers, CORS, body limit, rate limiter |
 | `internal/api` | Route wiring and the `/api/auth/*` handlers (setup, login, logout, me, API keys) |
-| `internal/store` | Persistence interface for users, API keys and sessions, plus an in-memory version for tests. SQLite and PostgreSQL versions are the next step |
+| `internal/store` | Persistence interface for users, API keys and sessions, plus an in-memory version for tests. `sqlitestore` is the SQLite version (same tables as the TS backend); PostgreSQL is still to do. Both pass one shared contract test (`storetest`) |
 | `internal/scrypt` | scrypt (RFC 7914), standard library only, checked against Node |
 | `internal/auth` | Password hashing, API-key secrets, password policy, lockout rules |
 | `internal/money` | Exact (rational) invoice arithmetic, differential-tested against the real TS functions |
@@ -43,7 +43,7 @@ With Go installed:
 ```sh
 cd rewrite
 go vet ./... && go test -race ./...
-PORT=3000 go run ./cmd/server
+DEFAULT_DATABASE=invoice.db PORT=3000 go run ./cmd/server   # without DEFAULT_DATABASE the server starts with no database
 ```
 
 Last verified on 2026-10-11 with `golang:1.24`: `gofmt -l` lists nothing, `go vet ./...` is clean, and `go test ./...` passes in every package that has tests. The `-race` run was not repeated.
@@ -60,17 +60,19 @@ line's discount share is exactly n.5 cents (the old float code rounds down,
 the exact version rounds up). Which behaviour to keep is an open decision.
 GST (India) logic with tests: see the matrix for what is unverified. Rates are
 never built in; they come from rules the business loads.
-These are pure functions: they are not yet wired to a database or routes.
+The auth routes (setup, login, logout, me, API keys) run on SQLite and were
+checked by hand against a running server, including a session surviving a
+restart. They are not yet compared against the TypeScript backend.
 
-Not started: database layer, migrations, authentication, every resource route,
-invoices, import/export, MCP, e-commerce webhooks, desktop bridge.
+Not started: PostgreSQL, the migrations runner (only the auth tables are
+created), every resource route, invoices, import/export, MCP, e-commerce
+webhooks, desktop bridge.
 
 Not yet verified: that response headers match the TypeScript server byte for
 byte. That needs a contract test against a running TS server.
 
 ## Dependencies
 
-Only the Go standard library is used so far. The SQLite driver, `pgx` and an
-`golang.org/x/crypto/scrypt` replacement are still to be added; they could not be downloaded in the
-session that wrote this slice because module downloads were blocked. Add them
-with `go get` and commit `go.sum` when building outside that environment.
+Only `modernc.org/sqlite` (a pure-Go SQLite driver, no cgo) is pulled in; v1.44.0
+is the newest release that builds with Go 1.24. `pgx` is still to be added for
+PostgreSQL. Run `go mod tidy` and commit `go.sum` after changing dependencies.

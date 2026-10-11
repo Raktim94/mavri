@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"log/slog"
@@ -157,7 +158,7 @@ func TestLoginLockoutAndRecovery(t *testing.T) {
 	if ok.Code != 200 || ok.session() == nil || ok.data()["lastLoginAt"] == nil {
 		t.Fatalf("login after lock expiry: %d %v", ok.Code, ok.Body)
 	}
-	u, _ := e.st.UserByEmail(nil, "owner@example.com")
+	u, _ := e.st.UserByEmail(context.Background(), "owner@example.com")
 	if u.FailedLoginCount != 0 || u.LockedUntil != "" {
 		t.Errorf("success should clear the counters: %+v", u)
 	}

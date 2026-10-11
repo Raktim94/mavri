@@ -45,3 +45,29 @@ func TestCookieSecureOnlyExactlyTrue(t *testing.T) {
 		}
 	}
 }
+
+func TestDefaultDatabase(t *testing.T) {
+	cases := []struct {
+		env  map[string]string
+		want string
+	}{
+		{nil, ""},
+		{map[string]string{"NODE_ENV": "docker"}, "invoice.db"},
+		{map[string]string{"DEFAULT_DATABASE": "shop.db"}, "shop.db"},
+		{map[string]string{"DEFAULT_DATABASE": "../../etc/x.db"}, "x.db"},
+	}
+	for _, c := range cases {
+		if got := LoadFrom(env(c.env)).DefaultDB; got != c.want {
+			t.Errorf("%v: got %q want %q", c.env, got, c.want)
+		}
+	}
+}
+
+func TestDefaultDatabaseSetEmptyDisablesDocker(t *testing.T) {
+	look := func(k string) (string, bool) {
+		return map[string]string{"NODE_ENV": "docker", "DEFAULT_DATABASE": ""}[k], k == "NODE_ENV" || k == "DEFAULT_DATABASE"
+	}
+	if got := loadWith(look).DefaultDB; got != "" {
+		t.Errorf("explicitly empty DEFAULT_DATABASE should disable it, got %q", got)
+	}
+}
