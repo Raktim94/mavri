@@ -17,7 +17,8 @@ Builder project, so the repository `LICENSE` and attribution in the root
 | `cmd/server` | HTTP server entry point, graceful shutdown |
 | `internal/config` | Environment settings (same variable names as the TS server) |
 | `internal/httpx` | Response envelope, security headers, CORS, body limit, rate limiter |
-| `internal/api` | Route wiring |
+| `internal/api` | Route wiring and the `/api/auth/*` handlers (setup, login, logout, me, API keys) |
+| `internal/store` | Persistence interface for users, API keys and sessions, plus an in-memory version for tests. SQLite and PostgreSQL versions are the next step |
 | `internal/scrypt` | scrypt (RFC 7914), standard library only, checked against Node |
 | `internal/auth` | Password hashing, API-key secrets, password policy, lockout rules |
 | `internal/money` | Exact (rational) invoice arithmetic, differential-tested against the real TS functions |

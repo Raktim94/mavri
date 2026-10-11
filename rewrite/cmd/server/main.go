@@ -24,7 +24,7 @@ func main() {
 
 	srv := &http.Server{
 		Addr:              net.JoinHostPort(cfg.Host, strconv.Itoa(cfg.Port)),
-		Handler:           api.NewHandler(cfg, log),
+		Handler:           api.NewHandler(cfg, log, nil),
 		ReadHeaderTimeout: 10 * time.Second,
 		ReadTimeout:       5 * time.Minute, // large JSON imports
 		WriteTimeout:      5 * time.Minute,

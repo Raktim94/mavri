@@ -8,14 +8,14 @@ Generated from the TypeScript backend at commit `1308d57` by an extraction scrip
 
 | # | Method | Path | Access | Extra limiter | TS source | Go status |
 |---|---|---|---|---|---|---|
-| 1 | GET | `/api/auth/api-keys` | session or Bearer API key |  | auth.ts | TODO |
-| 2 | POST | `/api/auth/api-keys` | session or Bearer API key |  | auth.ts | TODO |
-| 3 | DELETE | `/api/auth/api-keys/:id` | session or Bearer API key |  | auth.ts | TODO |
-| 4 | POST | `/api/auth/login` | public | 10 / 15 min | auth.ts | TODO |
-| 5 | POST | `/api/auth/logout` | public |  | auth.ts | TODO |
-| 6 | GET | `/api/auth/me` | session or Bearer API key |  | auth.ts | TODO |
-| 7 | POST | `/api/auth/setup` | public | 5 / hour | auth.ts | TODO |
-| 8 | GET | `/api/auth/status` | public |  | auth.ts | TODO |
+| 1 | GET | `/api/auth/api-keys` | session or Bearer API key |  | auth.ts | IN PROGRESS: unit-tested, TS contract check pending |
+| 2 | POST | `/api/auth/api-keys` | session or Bearer API key |  | auth.ts | IN PROGRESS: unit-tested, TS contract check pending |
+| 3 | DELETE | `/api/auth/api-keys/:id` | session or Bearer API key |  | auth.ts | IN PROGRESS: unit-tested, TS contract check pending |
+| 4 | POST | `/api/auth/login` | public | 10 / 15 min | auth.ts | IN PROGRESS: unit-tested, TS contract check pending |
+| 5 | POST | `/api/auth/logout` | public |  | auth.ts | IN PROGRESS: unit-tested, TS contract check pending |
+| 6 | GET | `/api/auth/me` | session or Bearer API key |  | auth.ts | IN PROGRESS: unit-tested, TS contract check pending |
+| 7 | POST | `/api/auth/setup` | public | 5 / hour | auth.ts | IN PROGRESS: unit-tested, TS contract check pending |
+| 8 | GET | `/api/auth/status` | public |  | auth.ts | IN PROGRESS: unit-tested, TS contract check pending |
 | 9 | GET | `/api/banks` | session or Bearer API key |  | banks.ts | TODO |
 | 10 | POST | `/api/banks` | session or Bearer API key |  | banks.ts | TODO |
 | 11 | PUT | `/api/banks` | session or Bearer API key |  | banks.ts | TODO |
