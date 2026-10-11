@@ -18,6 +18,9 @@ Builder project, so the repository `LICENSE` and attribution in the root
 | `internal/config` | Environment settings (same variable names as the TS server) |
 | `internal/httpx` | Response envelope, security headers, CORS, body limit, rate limiter |
 | `internal/api` | Route wiring |
+| `internal/scrypt` | scrypt (RFC 7914), standard library only, checked against Node |
+| `internal/auth` | Password hashing, API-key secrets, password policy, lockout rules |
+| `internal/ecommerce` | Webhook signature schemes and verification |
 
 ## Run and test
 
@@ -30,7 +33,10 @@ PORT=3000 go run ./cmd/server
 ## Status
 
 Done and unit-tested: configuration, middleware stack, `/api/health`,
-`/api/version`, `/api/databases/ready`.
+`/api/version`, `/api/databases/ready`; password and API-key hashing (existing
+hashes verify), password policy, lockout rules and webhook signatures, all
+cross-checked against values produced by Node's crypto and the TS code.
+These are pure functions: they are not yet wired to a database or routes.
 
 Not started: database layer, migrations, authentication, every resource route,
 invoices, import/export, MCP, e-commerce webhooks, desktop bridge.
@@ -41,6 +47,6 @@ byte. That needs a contract test against a running TS server.
 ## Dependencies
 
 Only the Go standard library is used so far. The SQLite driver, `pgx` and an
-scrypt implementation are still to be added; they could not be downloaded in the
+`golang.org/x/crypto/scrypt` replacement are still to be added; they could not be downloaded in the
 session that wrote this slice because module downloads were blocked. Add them
 with `go get` and commit `go.sum` when building outside that environment.

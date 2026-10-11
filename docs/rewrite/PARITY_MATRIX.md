@@ -252,14 +252,14 @@ Tables ending in `_new` are temporary rebuild tables inside migrations, not fina
 
 | Area | Reference behavior (TS) | Go status |
 |---|---|---|
-| Password hash | `scrypt:N:r:p:salt:hash`, N=16384, r=8, p=1, keylen 64, hex, constant-time compare. Existing hashes must verify | TODO |
-| Lockout | 5 failed attempts, 15 minute lock | TODO |
-| API keys | prefix `ndr_`, 32 random bytes base64url, stored as scrypt hash with fixed salt, 12-char display prefix, last-use tracking | TODO |
+| Password hash | `scrypt:N:r:p:salt:hash`, N=16384, r=8, p=1, keylen 64, hex, constant-time compare. Existing hashes must verify | IN PROGRESS: pure logic verified against Node vectors; DB and HTTP wiring pending |
+| Lockout | 5 failed attempts, 15 minute lock | IN PROGRESS: pure logic verified against Node vectors; DB and HTTP wiring pending |
+| API keys | prefix `ndr_`, 32 random bytes base64url, stored as scrypt hash with fixed salt, 12-char display prefix, last-use tracking | IN PROGRESS: pure logic verified against Node vectors; DB and HTTP wiring pending |
 | Sessions | cookie `nodedr.sid`, httpOnly, sameSite lax, 24 h, secure flag from config, stored in DB, secret persisted per db dir | TODO |
 | Auth guard | session first, then `Authorization: Bearer`; failure `401 {success:false, key:'error.unauthorized'}` | TODO |
 | Rate limits | global 300/min on `/api`; login 10/15 min; setup 5/h; webhooks 60/min; error key `error.rateLimiter` | IN PROGRESS: unit-tested, TS contract check pending |
 | Body/proxy | 50 MB JSON, raw body kept for webhooks, `trust proxy` = 1 | IN PROGRESS: unit-tested, TS contract check pending |
 | Headers/CORS | helmet defaults (CSP off), CORP same-site, HSTS only when cookie secure, CORS with credentials from configured origin | IN PROGRESS: unit-tested, TS contract check pending |
 | DB file names | resolved inside the data dir, `..` escapes rejected, only .db/.sqlite/.sqlite3 listed | TODO |
-| Webhooks | HMAC-SHA256 over raw bytes, Shopify uses `x-shopify-hmac-sha256` base64, constant-time compare, payload hash for idempotency, secrets `whsec_...` | TODO |
+| Webhooks | HMAC-SHA256 over raw bytes, Shopify uses `x-shopify-hmac-sha256` base64, constant-time compare, payload hash for idempotency, secrets `whsec_...` | IN PROGRESS: pure logic verified against Node vectors; DB and HTTP wiring pending |
 | Response envelope | `{success, message, data, key}`; error keys like `error.unknownError` must be preserved | TODO |
