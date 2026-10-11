@@ -23,7 +23,7 @@ const FinancialCardsComponent: FC<Props> = ({ data }) => {
     <Grid container spacing={2}>
       <Grid size={{ xs: 12, md: 6, lg: 3 }}>
         <SummaryCard
-          title={t('common.total')}
+          title={t('reports.invoicedThisPeriod')}
           value={formatAmount(data.totalAmount, storeSettings?.amountFormat)}
           subtitle={t('reports.totalInvoices', { count: data.invoiceCount })}
           accentColor={theme.palette.primary.main}

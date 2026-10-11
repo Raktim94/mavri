@@ -42,6 +42,7 @@ export const AmountInput: FC<Props> = ({
       required={required}
       value={value}
       thousandSeparator={thousand}
+      thousandsGroupStyle={amountFormat?.startsWith('en-IN') ? 'lakh' : 'thousand'}
       decimalSeparator={decimalScale !== undefined ? '.' : hasDecimal ? decimal : undefined}
       decimalScale={decimalScale !== undefined ? decimalScale : hasDecimal ? 2 : 0}
       fixedDecimalScale={decimalScale !== undefined ? false : hasDecimal}

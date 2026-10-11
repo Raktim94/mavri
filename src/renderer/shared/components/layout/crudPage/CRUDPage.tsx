@@ -99,6 +99,8 @@ interface Props<T, TAdd, TUpdate> {
   showRightSide?: boolean;
   showAddButton?: boolean;
   onAddClick?: (defaultOnAdd: () => void) => void;
+  /** Open the blank add form once on first render (used by dashboard deep links). */
+  openAddOnMount?: boolean;
 }
 
 export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
@@ -145,7 +147,8 @@ export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
     showRightSide = true,
     showAddButton = true,
     renderCustomButtons = () => null,
-    onAddClick
+    onAddClick,
+    openAddOnMount
   } = props;
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
@@ -323,6 +326,12 @@ export const CRUDPage = <T, TAdd, TUpdate>(props: Props<T, TAdd, TUpdate>) => {
     setSelectedItem(undefined);
     setIsModalOpen(true);
   };
+
+  useEffect(() => {
+    if (openAddOnMount) onAdd();
+    // Intentionally once: a deep link should not re-open the form after it is closed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSave = useCallback(
     async (data: unknown) => {

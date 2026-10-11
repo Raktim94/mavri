@@ -23,33 +23,35 @@ const TrendChartComponent: React.FC<Props> = ({ data }) => {
 
   return (
     <DashboardCard title={t('reports.salesTrending')} subtitle={t('reports.cumulative')}>
-      <ResponsiveContainer width="100%" height={280}>
-        <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-          <defs>
-            <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={color} stopOpacity={0.35} />
-              <stop offset="100%" stopColor={color} stopOpacity={0} />
-            </linearGradient>
-          </defs>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme.palette.divider} />
-          <XAxis
-            dataKey="date"
-            tickLine={false}
-            axisLine={false}
-            tick={{ fill: theme.palette.text.secondary, fontSize: 12 }}
-            tickFormatter={value => (storeSettings ? formatDate(value, storeSettings.dateFormat) : value)}
-          />
-          <YAxis
-            width={48}
-            tickLine={false}
-            axisLine={false}
-            tick={{ fill: theme.palette.text.secondary, fontSize: 12 }}
-            tickFormatter={compact}
-          />
-          <Tooltip content={props => <CustomTooltip {...props} />} />
-          <Area type="monotone" dataKey="total" stroke={color} strokeWidth={2.5} fill="url(#trendFill)" />
-        </AreaChart>
-      </ResponsiveContainer>
+      <div role="img" aria-label={t('reports.trendDescription')}>
+        <ResponsiveContainer width="100%" height={280}>
+          <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+            <defs>
+              <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={color} stopOpacity={0.35} />
+                <stop offset="100%" stopColor={color} stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme.palette.divider} />
+            <XAxis
+              dataKey="date"
+              tickLine={false}
+              axisLine={false}
+              tick={{ fill: theme.palette.text.secondary, fontSize: 12 }}
+              tickFormatter={value => (storeSettings ? formatDate(value, storeSettings.dateFormat) : value)}
+            />
+            <YAxis
+              width={48}
+              tickLine={false}
+              axisLine={false}
+              tick={{ fill: theme.palette.text.secondary, fontSize: 12 }}
+              tickFormatter={compact}
+            />
+            <Tooltip content={props => <CustomTooltip {...props} />} />
+            <Area type="monotone" dataKey="total" stroke={color} strokeWidth={2.5} fill="url(#trendFill)" />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
     </DashboardCard>
   );
 };

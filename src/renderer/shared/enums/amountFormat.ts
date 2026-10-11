@@ -4,5 +4,7 @@ export enum AmountFormat {
   ltLT = 'lt-LT',
   ltLTnodecimal = 'lt-LT-no-decimal',
   deDE = 'de-DE',
-  deDEnodecimal = 'de-DE-no-decimal'
+  deDEnodecimal = 'de-DE-no-decimal',
+  enIN = 'en-IN',
+  enINnodecimal = 'en-IN-no-decimal'
 }

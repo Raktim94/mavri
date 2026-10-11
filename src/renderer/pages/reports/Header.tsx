@@ -1,4 +1,14 @@
-import { Box, FormControl, InputLabel, MenuItem, Select, Typography, type SelectChangeEvent } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import {
+  Box,
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Typography,
+  type SelectChangeEvent
+} from '@mui/material';
 import {
   endOfDay,
   endOfMonth,
@@ -15,6 +25,7 @@ import {
 } from 'date-fns';
 import { memo, useCallback, useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { ReportDateType } from '../../shared/enums/reportDateType';
 import { ReportRangeType } from '../../shared/enums/reportRangeType';
 import type { InvoicesByCurrency } from '../../shared/types/invoice';
@@ -37,6 +48,7 @@ const HeaderComponent: FC<Props> = ({
   currencies
 }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const storeSettings = useAppSelector(selectSettings);
 
   const [selectedCurrencyCode, setSelectedCurrencyCode] = useState<string>('');
@@ -184,6 +196,18 @@ const HeaderComponent: FC<Props> = ({
           </Typography>
         </Box>
         <Box sx={{ flexGrow: 1 }} />
+        <Button variant="outlined" onClick={() => navigate('/quotes', { state: { create: true } })}>
+          {t('reports.createQuote')}
+        </Button>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => navigate('/invoices', { state: { create: true } })}
+        >
+          {t('reports.createInvoice')}
+        </Button>
+      </Box>
+      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mt: 2 }}>
         <FormControl size="small" sx={{ minWidth: 170 }}>
           <InputLabel id="date-label">{t('reports.dateBasis')}</InputLabel>
           <Select
