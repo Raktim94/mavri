@@ -4,24 +4,36 @@ import { InvoiceType } from '../../../shared/enums/invoiceType';
 import type { InvoiceFromData } from '../../../shared/types/invoice';
 import type { Settings } from '../../../shared/types/settings';
 import { formatDate } from '../../../shared/utils/formatFunctions';
-import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './constant';
 import { TitleInfo } from './TitleInfo';
+import { PDF_STYLES, fontScaleFor } from './pdfTheme';
 
-interface PropsLabels {
-  invoiceNoLabel: string;
-  quoteNoLabel: string;
-  dueDateLabel: string;
-  dateLabel: string;
-  pdfQUOTELabel: string;
-  pdfINVOICELabel: string;
-}
 interface Props {
   invoiceForm?: InvoiceFromData;
   storeSettings?: Settings;
-  labels: PropsLabels;
+  labels: {
+    invoiceNoLabel: string;
+    quoteNoLabel: string;
+    dueDateLabel: string;
+    dateLabel: string;
+    pdfQUOTELabel: string;
+    pdfINVOICELabel: string;
+  };
   showTitle?: boolean;
   showInvoiceLabel?: boolean;
 }
+
+const MetaRow: FC<{ label?: string; value: string; boldSize: number; regularSize: number }> = ({
+  label,
+  value,
+  boldSize,
+  regularSize
+}) => (
+  <View style={[PDF_STYLES.row, PDF_STYLES.alignEnd]}>
+    {label !== undefined && <Text style={[PDF_STYLES.regularBold, { fontSize: boldSize }]}>{label}</Text>}
+    <Text style={[PDF_STYLES.regular, { fontSize: regularSize }]}>{value}</Text>
+  </View>
+);
+
 const InvoiceInformationInfoComponent: FC<Props> = ({
   invoiceForm,
   storeSettings,
@@ -29,85 +41,45 @@ const InvoiceInformationInfoComponent: FC<Props> = ({
   showTitle,
   showInvoiceLabel
 }) => {
-  const { invoiceNoLabel, quoteNoLabel, dueDateLabel, dateLabel, pdfQUOTELabel, pdfINVOICELabel } = labels;
+  const scale = fontScaleFor(invoiceForm?.invoiceCustomization);
+  const numberLabel = invoiceForm?.invoiceType === InvoiceType.invoice ? labels.invoiceNoLabel : labels.quoteNoLabel;
+  const fullNumber = `${invoiceForm?.invoicePrefix ?? ''}${invoiceForm?.invoiceNumber ?? ''}${invoiceForm?.invoiceSuffix ?? ''}`;
 
   return (
     <View style={[PDF_STYLES.alignEnd, PDF_STYLES.gap4]}>
       {showTitle && (
         <TitleInfo
           invoiceForm={invoiceForm}
-          labels={{
-            pdfINVOICELabel: pdfINVOICELabel,
-            pdfQUOTELabel: pdfQUOTELabel
-          }}
+          labels={{ pdfINVOICELabel: labels.pdfINVOICELabel, pdfQUOTELabel: labels.pdfQUOTELabel }}
         />
       )}
 
-      <View style={[PDF_STYLES.gap3, PDF_STYLES.alignEnd, {}]}>
-        <View style={[PDF_STYLES.row, PDF_STYLES.alignEnd]}>
-          {showInvoiceLabel && (
-            <Text
-              style={[
-                PDF_STYLES.regularBold,
-                { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regularBold }
-              ]}
-            >
-              {invoiceForm?.invoiceType === InvoiceType.invoice ? invoiceNoLabel : quoteNoLabel}:{' '}
-            </Text>
-          )}
-          <Text
-            style={[
-              PDF_STYLES.regular,
-              { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regular }
-            ]}
-          >
-            {invoiceForm?.invoicePrefix}
-            {invoiceForm?.invoiceNumber}
-            {invoiceForm?.invoiceSuffix}
-          </Text>
-        </View>
+      <View style={[PDF_STYLES.gap3, PDF_STYLES.alignEnd]}>
+        <MetaRow
+          label={showInvoiceLabel ? `${numberLabel}: ` : undefined}
+          value={fullNumber}
+          boldSize={scale.regularBold}
+          regularSize={scale.regular}
+        />
         {storeSettings && invoiceForm?.issuedAt && (
-          <View style={[PDF_STYLES.row, PDF_STYLES.alignEnd]}>
-            <Text
-              style={[
-                PDF_STYLES.regularBold,
-                { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regularBold }
-              ]}
-            >
-              {dateLabel}:{' '}
-            </Text>
-            <Text
-              style={[
-                PDF_STYLES.regular,
-                { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regular }
-              ]}
-            >
-              {formatDate(invoiceForm.issuedAt, storeSettings.dateFormat)}
-            </Text>
-          </View>
+          <MetaRow
+            label={`${labels.dateLabel}: `}
+            value={formatDate(invoiceForm.issuedAt, storeSettings.dateFormat)}
+            boldSize={scale.regularBold}
+            regularSize={scale.regular}
+          />
         )}
         {storeSettings && invoiceForm?.dueDate && (
-          <View style={[PDF_STYLES.row, PDF_STYLES.alignEnd]}>
-            <Text
-              style={[
-                PDF_STYLES.regularBold,
-                { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regularBold }
-              ]}
-            >
-              {dueDateLabel}:{' '}
-            </Text>
-            <Text
-              style={[
-                PDF_STYLES.regular,
-                { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regular }
-              ]}
-            >
-              {formatDate(invoiceForm.dueDate, storeSettings.dateFormat)}
-            </Text>
-          </View>
+          <MetaRow
+            label={`${labels.dueDateLabel}: `}
+            value={formatDate(invoiceForm.dueDate, storeSettings.dateFormat)}
+            boldSize={scale.regularBold}
+            regularSize={scale.regular}
+          />
         )}
       </View>
     </View>
   );
 };
+
 export const InvoiceInformationInfo = memo(InvoiceInformationInfoComponent);

@@ -2,31 +2,22 @@ import { Text } from '@react-pdf/renderer';
 import { memo, type FC } from 'react';
 import { InvoiceType } from '../../../shared/enums/invoiceType';
 import type { InvoiceFromData } from '../../../shared/types/invoice';
-import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './constant';
+import { PDF_STYLES, fontScaleFor } from './pdfTheme';
 
-interface PropsLabels {
-  pdfQUOTELabel: string;
-  pdfINVOICELabel: string;
-}
 interface Props {
   invoiceForm?: InvoiceFromData;
-  labels: PropsLabels;
+  labels: { pdfINVOICELabel: string; pdfQUOTELabel: string };
 }
+
 const TitleInfoComponent: FC<Props> = ({ invoiceForm, labels }) => {
-  const { pdfINVOICELabel, pdfQUOTELabel } = labels;
+  const scale = fontScaleFor(invoiceForm?.invoiceCustomization);
+  const title = invoiceForm?.invoiceType === InvoiceType.invoice ? labels.pdfINVOICELabel : labels.pdfQUOTELabel;
 
   return (
-    <Text
-      style={[
-        PDF_STYLES.title,
-        {
-          color: invoiceForm?.invoiceCustomization?.color,
-          fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].title
-        }
-      ]}
-    >
-      {invoiceForm?.invoiceType === InvoiceType.invoice ? pdfINVOICELabel : pdfQUOTELabel}
+    <Text style={[PDF_STYLES.title, { color: invoiceForm?.invoiceCustomization?.color, fontSize: scale.title }]}>
+      {title}
     </Text>
   );
 };
+
 export const TitleInfo = memo(TitleInfoComponent);

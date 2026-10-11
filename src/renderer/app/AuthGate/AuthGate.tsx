@@ -2,29 +2,20 @@ import { Alert, Box, Button, Paper, TextField, Typography } from '@mui/material'
 import { useCallback, useEffect, useState, type FC, type FormEvent, type PropsWithChildren } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getAuthMe, getAuthStatus, postAuthLogin, postAuthSetup } from '../../shared/api/platformApi';
-import { isWebMode } from '../../shared/api/restApi';
 
 type GateState = 'checking' | 'needsSetup' | 'needsLogin' | 'authenticated';
 
-// Web mode (the REST API) requires a session once an owner account exists —
-// Electron talks to the database over IPC directly and never hits this.
-// This gate is intentionally minimal: it unblocks the web UI rather than
-// leaving it unusable behind the new auth requirement, but a fuller
-// account/login screen matching the rest of the design system is a good
-// follow-up.
+// Once an owner account exists the REST API requires a session: this gate shows
+// the account-creation or sign-in screen until there is one.
 export const AuthGate: FC<PropsWithChildren> = ({ children }) => {
   const { t } = useTranslation();
-  const [state, setState] = useState<GateState>(isWebMode() ? 'checking' : 'authenticated');
+  const [state, setState] = useState<GateState>('checking');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const check = useCallback(async () => {
-    if (!isWebMode()) {
-      setState('authenticated');
-      return;
-    }
     const me = await getAuthMe();
     if (me.success) {
       setState('authenticated');

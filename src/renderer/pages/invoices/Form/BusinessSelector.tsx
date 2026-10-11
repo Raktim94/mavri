@@ -1,7 +1,8 @@
-import { Box, ListItemButton, ListItemText, Typography, useTheme } from '@mui/material';
-import { memo, useEffect, useState, type FC } from 'react';
+import { Box } from '@mui/material';
+import { memo, useEffect, useState, type FC, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toDataUrl } from '../../../shared/utils/dataUrlFunctions';
+import { FieldChip } from './fields/FieldChip';
 
 interface Props {
   data?: {
@@ -14,111 +15,70 @@ interface Props {
   onEdit: () => void;
 }
 
+const LOGO_BOX_SX = {
+  width: '60px',
+  height: '60px',
+  border: '2px solid',
+  borderColor: 'primary.main',
+  bgcolor: 'common.white',
+  borderRadius: 1,
+  overflow: 'hidden'
+} as const;
+
 const BusinessSelectorComponent: FC<Props> = ({ data, onEdit, isRequired = true }) => {
   const { businessLogo, businessFileType, businessName, businessShortName } = data ?? {};
-
   const { t } = useTranslation();
-  const theme = useTheme();
-
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     (async () => {
       const url = businessLogo ? await toDataUrl(businessLogo, businessFileType) : null;
-      setLogoUrl(url);
+      if (!cancelled) setLogoUrl(url);
     })();
+    return () => {
+      cancelled = true;
+    };
   }, [businessLogo, businessFileType]);
 
-  return (
-    <ListItemButton
-      onClick={onEdit}
-      sx={{
-        pt: 2,
-        pb: 2,
-        pl: 2,
-        pr: 2,
-        width: '100%',
-        borderRadius: 1,
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'start',
-        flexDirection: 'column'
-      }}
-    >
+  let trailing: ReactNode = null;
+  if (logoUrl) {
+    trailing = (
+      <Box sx={{ ...LOGO_BOX_SX, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <img
+          src={logoUrl}
+          alt={t('invoices.businessLogo')}
+          style={{ width: '60px', height: '60px', objectFit: 'contain' }}
+        />
+      </Box>
+    );
+  } else if (businessShortName) {
+    trailing = (
       <Box
         sx={{
+          ...LOGO_BOX_SX,
+          color: 'common.black',
           display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'start',
+          justifyContent: 'center',
           alignItems: 'center',
-          width: '100%',
-          gap: 2
+          fontWeight: 500
         }}
       >
-        <ListItemText
-          primary={
-            <Typography
-              component="div"
-              variant="body1"
-              sx={{ fontWeight: 600, color: 'primary.main', overflow: 'hidden', textOverflow: 'ellipsis' }}
-            >
-              {t('businesses.title').toUpperCase()} {isRequired ? '*' : ''}
-            </Typography>
-          }
-          secondary={
-            <Typography
-              component="div"
-              variant="body2"
-              sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}
-            >
-              {businessName}
-            </Typography>
-          }
-          disableTypography
-          sx={{ m: 0 }}
-          slotProps={{ primary: { sx: { fontWeight: 500, m: 0 } } }}
-        />
-        {logoUrl ? (
-          <Box
-            sx={{
-              width: '60px',
-              height: '60px',
-              border: `2px solid ${theme.palette.primary.main}`,
-              background: theme.palette.common.white,
-              borderRadius: 1,
-              overflow: 'hidden',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <img
-              src={logoUrl}
-              alt={t('invoices.businessLogo')}
-              style={{ width: '60px', height: '60px', objectFit: 'contain' }}
-            />
-          </Box>
-        ) : businessShortName ? (
-          <Box
-            sx={{
-              width: '60px',
-              height: '60px',
-              border: `2px solid ${theme.palette.primary.main}`,
-              background: theme.palette.common.white,
-              color: theme.palette.common.black,
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              borderRadius: 1,
-              fontWeight: 500,
-              overflow: 'hidden'
-            }}
-          >
-            {businessShortName}
-          </Box>
-        ) : null}
+        {businessShortName}
       </Box>
-    </ListItemButton>
+    );
+  }
+
+  return (
+    <FieldChip
+      label={t('businesses.title')}
+      value={businessName}
+      required={isRequired}
+      fullWidth
+      trailing={trailing}
+      onEdit={onEdit}
+    />
   );
 };
+
 export const BusinessSelector = memo(BusinessSelectorComponent);

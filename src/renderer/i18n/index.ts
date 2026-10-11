@@ -1,4 +1,4 @@
-import i18n from 'i18next';
+import i18next from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import { initReactI18next } from 'react-i18next';
 
@@ -8,22 +8,26 @@ import fr from './fr.json';
 import lt from './lt.json';
 import pt from './pt.json';
 
-i18n
+const DEFAULT_LOCALE = 'en';
+
+const resources = {
+  en: { translation: en },
+  lt: { translation: lt },
+  fr: { translation: fr },
+  de: { translation: de },
+  pt: { translation: pt }
+};
+
+i18next
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
-    resources: {
-      en: { translation: en },
-      lt: { translation: lt },
-      fr: { translation: fr },
-      de: { translation: de },
-      pt: { translation: pt }
-    },
-    lng: 'en',
-    fallbackLng: 'en',
+    resources,
+    lng: DEFAULT_LOCALE,
+    fallbackLng: DEFAULT_LOCALE,
     interpolation: {
       escapeValue: false
     }
   });
 
-export default i18n;
+export default i18next;

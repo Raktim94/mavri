@@ -11,7 +11,6 @@ import type { Currency } from '../../shared/types/currency';
 import type { SignatureForm } from '../../shared/types/invoice';
 import type { Preset, PresetFromData } from '../../shared/types/preset';
 import type { StyleProfile } from '../../shared/types/styleProfiles';
-import { validators } from '../../shared/utils/validatorFunctions';
 import { useAppSelector } from '../../state/configureStore';
 import { selectSettings } from '../../state/pageSlice';
 import { BankSelector } from '../invoices/Form/BankSelector';
@@ -28,52 +27,33 @@ import { LanguageSelector } from '../invoices/Form/LanguageSelector';
 import { NotesSelector } from '../invoices/Form/NotesSelector';
 import { SignatureSelector } from '../invoices/Form/SignatureSelector';
 import { StyleProfileSelector } from '../invoices/Form/StyleProfileSelector';
+import {
+  applyPresetFieldEvaluation,
+  createPresetDraft,
+  createPresetFieldErrors,
+  isPresetDraftReady
+} from './presetModel';
 
 interface Props {
   preset?: Preset;
   handleChange?: (data: { preset: PresetFromData; isFormValid: boolean; description?: string }) => void;
 }
-export const Form: FC<Props> = ({ handleChange = () => {}, preset }) => {
+
+export const Form: FC<Props> = ({ preset, handleChange = () => {} }) => {
   const storeSettings = useAppSelector(selectSettings);
   const { t } = useTranslation();
-  const initialFormRef = useRef<PresetFromData | undefined>(undefined);
-  const { form, setForm, update } = useForm<PresetFromData>({
-    id: preset?.id,
-    name: preset?.name ?? '',
-    businessId: preset?.businessId,
-    businessName: preset?.businessName,
-    clientId: preset?.clientId,
-    clientName: preset?.clientName,
-    currencyId: preset?.currencyId,
-    currencyCode: preset?.currencyCode,
-    currencySymbol: preset?.currencySymbol,
-    bankId: preset?.bankId,
-    bankName: preset?.bankName,
-    styleProfilesId: preset?.styleProfilesId,
-    styleProfileName: preset?.styleProfileName,
-    customerNotes: preset?.customerNotes,
-    thanksNotes: preset?.thanksNotes,
-    termsConditionNotes: preset?.termsConditionNotes,
-    language: preset?.language,
-    signatureSize: preset?.signatureSize,
-    signatureType: preset?.signatureType,
-    signatureName: preset?.signatureName,
-    signatureData: preset?.signatureData,
-    isArchived: preset?.isArchived ?? false
-  });
+  const baselineRef = useRef<PresetFromData | undefined>(undefined);
+  const { form, setForm, update } = useForm<PresetFromData>(createPresetDraft(preset));
+  const [errors, setErrors] = useState(createPresetFieldErrors);
 
-  const [errors, setErrors] = useState({
-    name: false
-  });
+  const [businessesOpen, setBusinessesOpen] = useState(false);
+  const [clientsOpen, setClientsOpen] = useState(false);
+  const [currenciesOpen, setCurrenciesOpen] = useState(false);
+  const [styleProfilesOpen, setStyleProfilesOpen] = useState(false);
+  const [banksOpen, setBanksOpen] = useState(false);
+  const [languagesOpen, setLanguagesOpen] = useState(false);
 
-  const [isDropdownOpenBusinesses, setIsDropdownOpenBusinesses] = useState<boolean>(false);
-  const [isDropdownOpenClients, setIsDropdownOpenClients] = useState<boolean>(false);
-  const [isDropdownOpenCurrencies, setIsDropdownOpenCurrencies] = useState<boolean>(false);
-  const [isDropdownOpenStyleProfile, setIsDropdownOpenStyleProfile] = useState<boolean>(false);
-  const [isDropdownOpenBanks, setIsDropdownOpenBanks] = useState<boolean>(false);
-  const [isDropdownOpenLanguages, setIsDropdownOpenLanguages] = useState<boolean>(false);
-
-  const signatureFormData = useMemo(
+  const signatureView = useMemo(
     () => ({
       signatureData: form.signatureData ?? undefined,
       signatureName: form.signatureName,
@@ -83,7 +63,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, preset }) => {
     [form.signatureData, form.signatureName, form.signatureSize, form.signatureType]
   );
 
-  const currencyFormData = useMemo(
+  const currencyView = useMemo(
     () => ({
       currencyCode: form.currencyCode,
       currencySymbol: form.currencySymbol
@@ -91,14 +71,9 @@ export const Form: FC<Props> = ({ handleChange = () => {}, preset }) => {
     [form.currencyCode, form.currencySymbol]
   );
 
-  const businessFormData = useMemo(
-    () => ({
-      businessName: form?.businessName
-    }),
-    [form.businessName]
-  );
+  const businessView = useMemo(() => ({ businessName: form?.businessName }), [form.businessName]);
 
-  const notesFormData = useMemo(
+  const notesView = useMemo(
     () => ({
       customerNotes: form.customerNotes,
       thanksNotes: form.thanksNotes,
@@ -107,49 +82,38 @@ export const Form: FC<Props> = ({ handleChange = () => {}, preset }) => {
     [form.termsConditionNotes, form.thanksNotes, form.customerNotes]
   );
 
-  const validateField = (field: keyof typeof errors, value: string) => {
-    if (!validators.required(value) && field === 'name') {
-      setErrors(e => ({ ...e, [field]: true }));
-    } else {
-      setErrors(e => ({ ...e, [field]: false }));
-    }
+  const syncName = (value: string) => {
+    update('name', value);
+    setErrors(prev => applyPresetFieldEvaluation(prev, 'name', value));
   };
 
-  const handleOnOpen = useCallback((setter: React.Dispatch<React.SetStateAction<boolean>>) => {
+  const openMenu = useCallback((setter: React.Dispatch<React.SetStateAction<boolean>>) => {
     setter(true);
   }, []);
 
-  const handleOnClose = useCallback((setter: React.Dispatch<React.SetStateAction<boolean>>) => {
+  const closeMenu = useCallback((setter: React.Dispatch<React.SetStateAction<boolean>>) => {
     setter(false);
   }, []);
 
-  const handleOnClickBusiness = useCallback(
+  const pickBusiness = useCallback(
     (data: Business) => {
-      handleOnClose(setIsDropdownOpenBusinesses);
-      setForm(prev => ({
-        ...prev,
-        businessId: data.id,
-        businessName: data.name
-      }));
+      closeMenu(setBusinessesOpen);
+      setForm(prev => ({ ...prev, businessId: data.id, businessName: data.name }));
     },
-    [handleOnClose, setForm]
+    [closeMenu, setForm]
   );
 
-  const handleOnClickClients = useCallback(
+  const pickClient = useCallback(
     (data: Client) => {
-      handleOnClose(setIsDropdownOpenClients);
-      setForm(prev => ({
-        ...prev,
-        clientId: data.id,
-        clientName: data.name
-      }));
+      closeMenu(setClientsOpen);
+      setForm(prev => ({ ...prev, clientId: data.id, clientName: data.name }));
     },
-    [handleOnClose, setForm]
+    [closeMenu, setForm]
   );
 
-  const handleOnClickCurrencies = useCallback(
+  const pickCurrency = useCallback(
     (data: Currency) => {
-      handleOnClose(setIsDropdownOpenCurrencies);
+      closeMenu(setCurrenciesOpen);
       setForm(prev => ({
         ...prev,
         currencyId: data.id,
@@ -157,57 +121,40 @@ export const Form: FC<Props> = ({ handleChange = () => {}, preset }) => {
         currencySymbol: data.symbol
       }));
     },
-    [handleOnClose, setForm]
+    [closeMenu, setForm]
   );
 
-  const handleOnClickStyleProfile = useCallback(
+  const pickStyleProfile = useCallback(
     (data: StyleProfile) => {
-      handleOnClose(setIsDropdownOpenStyleProfile);
-      setForm(prev => ({
-        ...prev,
-        styleProfilesId: data.id,
-        styleProfileName: data.name
-      }));
+      closeMenu(setStyleProfilesOpen);
+      setForm(prev => ({ ...prev, styleProfilesId: data.id, styleProfileName: data.name }));
     },
-    [handleOnClose, setForm]
+    [closeMenu, setForm]
   );
 
-  const handleOnClickBank = useCallback(
+  const pickBank = useCallback(
     (data: Bank) => {
-      handleOnClose(setIsDropdownOpenBanks);
-      setForm(prev => ({
-        ...prev,
-        bankId: data.id,
-        bankName: data.name
-      }));
+      closeMenu(setBanksOpen);
+      setForm(prev => ({ ...prev, bankId: data.id, bankName: data.name }));
     },
-    [handleOnClose, setForm]
+    [closeMenu, setForm]
   );
 
-  const handleClearBank = useCallback(() => {
-    setForm(prev => ({
-      ...prev,
-      bankId: undefined,
-      bankName: undefined
-    }));
+  const clearBank = useCallback(() => {
+    setForm(prev => ({ ...prev, bankId: undefined, bankName: undefined }));
   }, [setForm]);
 
-  const handleOnClickLanguage = useCallback(
+  const pickLanguage = useCallback(
     (data: Language) => {
-      handleOnClose(setIsDropdownOpenLanguages);
-
-      setForm(prev => ({
-        ...prev,
-        language: data
-      }));
+      closeMenu(setLanguagesOpen);
+      setForm(prev => ({ ...prev, language: data }));
     },
-    [handleOnClose, setForm]
+    [closeMenu, setForm]
   );
 
-  const handleSignature = useCallback(
+  const pickSignature = useCallback(
     (data: SignatureForm) => {
-      handleOnClose(setIsDropdownOpenLanguages);
-
+      closeMenu(setLanguagesOpen);
       setForm(prev => ({
         ...prev,
         signatureData: data.data,
@@ -216,46 +163,21 @@ export const Form: FC<Props> = ({ handleChange = () => {}, preset }) => {
         signatureSize: data.size
       }));
     },
-    [handleOnClose, setForm]
+    [closeMenu, setForm]
   );
 
-  useFormDirtyCheck(form, initialFormRef);
+  useFormDirtyCheck(form, baselineRef);
 
   useEffect(() => {
-    const initial = {
-      id: preset?.id,
-      name: preset?.name ?? '',
-      businessId: preset?.businessId,
-      businessName: preset?.businessName,
-      clientId: preset?.clientId,
-      clientName: preset?.clientName,
-      currencyId: preset?.currencyId,
-      currencyCode: preset?.currencyCode,
-      currencySymbol: preset?.currencySymbol,
-      bankId: preset?.bankId,
-      bankName: preset?.bankName,
-      styleProfilesId: preset?.styleProfilesId,
-      styleProfileName: preset?.styleProfileName,
-      customerNotes: preset?.customerNotes,
-      thanksNotes: preset?.thanksNotes,
-      termsConditionNotes: preset?.termsConditionNotes,
-      language: preset?.language,
-      signatureSize: preset?.signatureSize,
-      signatureType: preset?.signatureType,
-      signatureName: preset?.signatureName,
-      signatureData: preset?.signatureData,
-      isArchived: preset?.isArchived ?? false
-    };
-    initialFormRef.current = initial;
-    setForm(initial);
+    const next = createPresetDraft(preset);
+    baselineRef.current = next;
+    setForm(next);
   }, [preset, setForm]);
 
   useEffect(() => {
-    const valid = form.name.trim() !== '' && !errors.name;
-
     handleChange({
       preset: form,
-      isFormValid: valid,
+      isFormValid: isPresetDraftReady(form, errors),
       description: t('common.invalidForm')
     });
   }, [form, errors, handleChange, t]);
@@ -263,40 +185,40 @@ export const Form: FC<Props> = ({ handleChange = () => {}, preset }) => {
   return (
     <>
       <BusinessesDropdown
-        isOpen={isDropdownOpenBusinesses}
-        onClose={() => handleOnClose(setIsDropdownOpenBusinesses)}
-        onOpen={() => handleOnOpen(setIsDropdownOpenBusinesses)}
-        onClick={handleOnClickBusiness}
+        isOpen={businessesOpen}
+        onClose={() => closeMenu(setBusinessesOpen)}
+        onOpen={() => openMenu(setBusinessesOpen)}
+        onClick={pickBusiness}
       />
       <ClientsDropdown
-        isOpen={isDropdownOpenClients}
-        onClose={() => handleOnClose(setIsDropdownOpenClients)}
-        onOpen={() => handleOnOpen(setIsDropdownOpenClients)}
-        onClick={handleOnClickClients}
+        isOpen={clientsOpen}
+        onClose={() => closeMenu(setClientsOpen)}
+        onOpen={() => openMenu(setClientsOpen)}
+        onClick={pickClient}
       />
       <CurrenciesDropdown
-        isOpen={isDropdownOpenCurrencies}
-        onClose={() => handleOnClose(setIsDropdownOpenCurrencies)}
-        onOpen={() => handleOnOpen(setIsDropdownOpenCurrencies)}
-        onClick={handleOnClickCurrencies}
+        isOpen={currenciesOpen}
+        onClose={() => closeMenu(setCurrenciesOpen)}
+        onOpen={() => openMenu(setCurrenciesOpen)}
+        onClick={pickCurrency}
       />
       <StyleProfilesDropdown
-        isOpen={isDropdownOpenStyleProfile}
-        onClose={() => handleOnClose(setIsDropdownOpenStyleProfile)}
-        onOpen={() => handleOnOpen(setIsDropdownOpenStyleProfile)}
-        onClick={handleOnClickStyleProfile}
+        isOpen={styleProfilesOpen}
+        onClose={() => closeMenu(setStyleProfilesOpen)}
+        onOpen={() => openMenu(setStyleProfilesOpen)}
+        onClick={pickStyleProfile}
       />
       <BanksDropdown
-        isOpen={isDropdownOpenBanks}
-        onClose={() => handleOnClose(setIsDropdownOpenBanks)}
-        onOpen={() => handleOnOpen(setIsDropdownOpenBanks)}
-        onClick={handleOnClickBank}
+        isOpen={banksOpen}
+        onClose={() => closeMenu(setBanksOpen)}
+        onOpen={() => openMenu(setBanksOpen)}
+        onClick={pickBank}
       />
       <LanguageDropdown
-        isOpen={isDropdownOpenLanguages}
-        onClose={() => handleOnClose(setIsDropdownOpenLanguages)}
-        onOpen={() => handleOnOpen(setIsDropdownOpenLanguages)}
-        onClick={handleOnClickLanguage}
+        isOpen={languagesOpen}
+        onClose={() => closeMenu(setLanguagesOpen)}
+        onOpen={() => openMenu(setLanguagesOpen)}
+        onClick={pickLanguage}
       />
 
       <Grid container spacing={2}>
@@ -308,86 +230,54 @@ export const Form: FC<Props> = ({ handleChange = () => {}, preset }) => {
             value={form.name}
             error={errors.name}
             helperText={errors.name ? t('common.fieldRequired') : ''}
-            onChange={e => {
-              update('name', e.target.value);
-              validateField('name', e.target.value);
-            }}
+            onChange={e => syncName(e.target.value)}
           />
         </Grid>
         <Grid size={{ xs: 12, md: 12 }}>
           <Divider flexItem />
         </Grid>
         <Grid size={{ xs: 12, md: storeSettings?.styleProfilesON ? 3 : 4 }}>
-          <CurrencySelector
-            onEdit={() => handleOnOpen(setIsDropdownOpenCurrencies)}
-            data={currencyFormData}
-            isRequired={false}
-          />
+          <CurrencySelector onEdit={() => openMenu(setCurrenciesOpen)} data={currencyView} isRequired={false} />
         </Grid>
         <Grid size={{ xs: 12, md: storeSettings?.styleProfilesON ? 3 : 4 }}>
-          <BankSelector
-            onEdit={() => handleOnOpen(setIsDropdownOpenBanks)}
-            onClear={handleClearBank}
-            name={form.bankName}
-          />
+          <BankSelector onEdit={() => openMenu(setBanksOpen)} onClear={clearBank} name={form.bankName} />
         </Grid>
         {storeSettings?.styleProfilesON && (
           <Grid size={{ xs: 12, md: 3 }}>
-            <StyleProfileSelector
-              onEdit={() => handleOnOpen(setIsDropdownOpenStyleProfile)}
-              name={form.styleProfileName}
-            />
+            <StyleProfileSelector onEdit={() => openMenu(setStyleProfilesOpen)} name={form.styleProfileName} />
           </Grid>
         )}
         <Grid size={{ xs: 12, md: storeSettings?.styleProfilesON ? 3 : 4 }}>
-          <LanguageSelector
-            onEdit={() => handleOnOpen(setIsDropdownOpenLanguages)}
-            language={form.language}
-            isRequired={false}
-          />
+          <LanguageSelector onEdit={() => openMenu(setLanguagesOpen)} language={form.language} isRequired={false} />
         </Grid>
         <Grid size={{ xs: 12, md: 12 }}>
           <Divider flexItem />
         </Grid>
         <Grid size={{ xs: 12, md: 12 }}>
-          <BusinessSelector
-            onEdit={() => handleOnOpen(setIsDropdownOpenBusinesses)}
-            data={businessFormData}
-            isRequired={false}
-          />
+          <BusinessSelector onEdit={() => openMenu(setBusinessesOpen)} data={businessView} isRequired={false} />
         </Grid>
         <Grid size={{ xs: 12, md: 12 }}>
           <Divider flexItem />
         </Grid>
         <Grid size={{ xs: 12, md: 12 }}>
-          <ClientSelector
-            onEdit={() => handleOnOpen(setIsDropdownOpenClients)}
-            clientName={form.clientName}
-            isRequired={false}
-          />
+          <ClientSelector onEdit={() => openMenu(setClientsOpen)} clientName={form.clientName} isRequired={false} />
         </Grid>
         <Grid size={{ xs: 12, md: 12 }}>
           <Divider flexItem />
         </Grid>
         <Grid size={{ xs: 12, md: 12 }}>
           <NotesSelector
-            data={notesFormData}
-            onCustomerNotesChanged={value => {
-              setForm(prev => ({ ...prev, customerNotes: value }));
-            }}
-            onThanksNotesChanged={value => {
-              setForm(prev => ({ ...prev, thanksNotes: value }));
-            }}
-            onTermsConditionsNotesChanged={value => {
-              setForm(prev => ({ ...prev, termsConditionNotes: value }));
-            }}
+            data={notesView}
+            onCustomerNotesChanged={value => setForm(prev => ({ ...prev, customerNotes: value }))}
+            onThanksNotesChanged={value => setForm(prev => ({ ...prev, thanksNotes: value }))}
+            onTermsConditionsNotesChanged={value => setForm(prev => ({ ...prev, termsConditionNotes: value }))}
           />
         </Grid>
         <Grid size={{ xs: 12, md: 12 }}>
           <Divider flexItem />
         </Grid>
         <Grid size={{ xs: 12, md: 12 }}>
-          <SignatureSelector data={signatureFormData} onEdit={handleSignature} />
+          <SignatureSelector data={signatureView} onEdit={pickSignature} />
         </Grid>
         <Grid size={{ xs: 12, md: 12 }}>
           <Divider flexItem />

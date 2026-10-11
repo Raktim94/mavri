@@ -8,6 +8,7 @@ import tseslint from 'typescript-eslint';
 export default [
   {
     ignores: [
+      'rewrite/**',
       'dist-fe/**',
       'release/**',
       'coverage/**',

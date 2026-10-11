@@ -157,4 +157,4 @@ The stack is TypeScript, React and MUI for the interface, Go and SQLite for the 
 
 **Created and led by [Raktim Ranjit](https://raktimranjit.com)** ([@Raktim94](https://github.com/Raktim94)) at [NodeDR Infotech Private Limited](https://nodedr.com). Raktim is the lead maintainer; see [MAINTAINERS.md](MAINTAINERS.md) for contact details. You can support the project through [GitHub Sponsors](https://github.com/sponsors/Raktim94).
 
-Mavri builds on the open-source [Invoice Builder](https://github.com/piratuks/invoice-builder) project by Evaldas L. (piratuks). It is licensed under the [GNU Affero General Public License v3.0](LICENSE). Contributions are welcome under the same license.
+Mavri is licensed under the [GNU Affero General Public License v3.0](LICENSE). Third-party notices are in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md). Contributions are welcome under the same license.

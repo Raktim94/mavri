@@ -6,52 +6,41 @@ import { useForm } from '../../shared/hooks/form/useForm';
 import { useFormDirtyCheck } from '../../shared/hooks/form/useFormDirtyCheck';
 import type { Bank, BankFromData } from '../../shared/types/bank';
 import { toDataUrl, toUint8Array } from '../../shared/utils/dataUrlFunctions';
-import { validators } from '../../shared/utils/validatorFunctions';
+import {
+  applyBankFieldEvaluation,
+  createBankDraft,
+  createBankFieldErrors,
+  isBankDraftReady,
+  type BankFieldErrors,
+  type BankValidationField
+} from './banksModel';
 
 interface Props {
   bank?: Bank;
   handleChange?: (data: { bank: BankFromData; isFormValid: boolean; description?: string }) => void;
 }
-export const Form: FC<Props> = ({ handleChange = () => {}, bank }) => {
-  const { t } = useTranslation();
-  const initialFormRef = useRef<BankFromData | undefined>(undefined);
-  const { form, setForm, update } = useForm<BankFromData>({
-    id: bank?.id,
-    qrCode: bank?.qrCode ?? undefined,
-    name: bank?.name ?? '',
-    bankName: bank?.bankName ?? '',
-    accountNumber: bank?.accountNumber ?? '',
-    swiftCode: bank?.swiftCode ?? '',
-    address: bank?.address ?? '',
-    branchCode: bank?.branchCode ?? '',
-    type: bank?.type ?? '',
-    routingNumber: bank?.routingNumber ?? '',
-    accountHolder: bank?.accountHolder ?? '',
-    sortOrder: bank?.sortOrder ?? '',
-    upiCode: bank?.upiCode ?? '',
-    qrCodeFileSize: bank?.qrCodeFileSize,
-    qrCodeFileType: bank?.qrCodeFileType,
-    qrCodeFileName: bank?.qrCodeFileName,
-    isArchived: bank?.isArchived ?? false
-  });
-  const [errors, setErrors] = useState({
-    name: false,
-    accountNumber: false,
-    swiftCode: false,
-    sortOrder: false,
-    branchCode: false,
-    routingNumber: false,
-    upiCode: false
-  });
-  const [qrCodeUrl, setQrCodeUrl] = useState<string | undefined>(undefined);
 
-  const onUpload = async (file?: Blob, filename?: string) => {
+export const Form: FC<Props> = ({ bank, handleChange = () => {} }) => {
+  const { t } = useTranslation();
+  const baselineRef = useRef<BankFromData | undefined>(undefined);
+  const { form, setForm, update } = useForm<BankFromData>(createBankDraft(bank));
+  const [errors, setErrors] = useState<BankFieldErrors>(createBankFieldErrors);
+  const [qrImageUrl, setQrImageUrl] = useState<string | undefined>(undefined);
+
+  useFormDirtyCheck(form, baselineRef);
+
+  const syncField = (field: BankValidationField, value: string) => {
+    update(field, value);
+    setErrors(prev => applyBankFieldEvaluation(prev, field, value));
+  };
+
+  const handleQrUpload = async (file?: Blob, filename?: string) => {
     if (file) {
-      const fileUnitArray = await toUint8Array(t, file);
-      if (fileUnitArray)
+      const bytes = await toUint8Array(t, file);
+      if (bytes)
         setForm(prev => ({
           ...prev,
-          qrCode: fileUnitArray,
+          qrCode: bytes,
           qrCodeFileSize: file.size,
           qrCodeFileType: file.type,
           qrCodeFileName: filename
@@ -67,70 +56,20 @@ export const Form: FC<Props> = ({ handleChange = () => {}, bank }) => {
     }
   };
 
-  const validateField = (field: keyof typeof errors, value: string) => {
-    if (!validators.required(value) && field === 'name') {
-      setErrors(e => ({ ...e, [field]: true }));
-    } else if (value !== '' && !validators.accountNumber(value) && field === 'accountNumber') {
-      setErrors(e => ({ ...e, [field]: true }));
-    } else if (value !== '' && !validators.swift(value) && field === 'swiftCode') {
-      setErrors(e => ({ ...e, [field]: true }));
-    } else if (value !== '' && !validators.sortCode(value) && field === 'sortOrder') {
-      setErrors(e => ({ ...e, [field]: true }));
-    } else if (value !== '' && !validators.branchCode(value) && field === 'branchCode') {
-      setErrors(e => ({ ...e, [field]: true }));
-    } else if (value !== '' && !validators.routingNumber(value) && field === 'routingNumber') {
-      setErrors(e => ({ ...e, [field]: true }));
-    } else if (value !== '' && !validators.upiOrPix(value) && field === 'upiCode') {
-      setErrors(e => ({ ...e, [field]: true }));
-    } else {
-      setErrors(e => ({ ...e, [field]: false }));
-    }
-  };
-
-  useFormDirtyCheck(form, initialFormRef);
-
   useEffect(() => {
-    const initial = {
-      id: bank?.id,
-      qrCode: bank?.qrCode ?? undefined,
-      name: bank?.name ?? '',
-      bankName: bank?.bankName ?? '',
-      accountNumber: bank?.accountNumber ?? '',
-      swiftCode: bank?.swiftCode ?? '',
-      address: bank?.address ?? '',
-      branchCode: bank?.branchCode ?? '',
-      type: bank?.type ?? '',
-      routingNumber: bank?.routingNumber ?? '',
-      accountHolder: bank?.accountHolder ?? '',
-      sortOrder: bank?.sortOrder ?? '',
-      upiCode: bank?.upiCode ?? '',
-      qrCodeFileSize: bank?.qrCodeFileSize,
-      qrCodeFileType: bank?.qrCodeFileType,
-      qrCodeFileName: bank?.qrCodeFileName,
-      isArchived: bank?.isArchived ?? false
-    };
-    initialFormRef.current = initial;
-    setForm(initial);
-    (async () => {
+    const next = createBankDraft(bank);
+    baselineRef.current = next;
+    setForm(next);
+    void (async () => {
       const url = bank && bank.qrCode ? await toDataUrl(bank.qrCode, bank.qrCodeFileType) : undefined;
-      setQrCodeUrl(url);
+      setQrImageUrl(url);
     })();
   }, [bank, setForm]);
 
   useEffect(() => {
-    const valid =
-      form.name.trim() !== '' &&
-      !errors.name &&
-      !errors.accountNumber &&
-      !errors.swiftCode &&
-      !errors.sortOrder &&
-      !errors.branchCode &&
-      !errors.routingNumber &&
-      !errors.upiCode;
-
     handleChange({
       bank: form,
-      isFormValid: valid,
+      isFormValid: isBankDraftReady(form, errors),
       description: t('common.invalidForm')
     });
   }, [form, errors, handleChange, t]);
@@ -145,10 +84,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, bank }) => {
           value={form.name}
           error={errors.name}
           helperText={errors.name ? t('common.fieldRequired') : ''}
-          onChange={e => {
-            update('name', e.target.value);
-            validateField('name', e.target.value);
-          }}
+          onChange={e => syncField('name', e.target.value)}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
@@ -156,9 +92,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, bank }) => {
           label={t('common.accountHolder')}
           fullWidth
           value={form.accountHolder}
-          onChange={e => {
-            update('accountHolder', e.target.value);
-          }}
+          onChange={e => update('accountHolder', e.target.value)}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
@@ -166,9 +100,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, bank }) => {
           label={t('common.bankName')}
           fullWidth
           value={form.bankName}
-          onChange={e => {
-            update('bankName', e.target.value);
-          }}
+          onChange={e => update('bankName', e.target.value)}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
@@ -176,9 +108,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, bank }) => {
           label={t('common.type')}
           fullWidth
           value={form.type}
-          onChange={e => {
-            update('type', e.target.value);
-          }}
+          onChange={e => update('type', e.target.value)}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
@@ -188,10 +118,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, bank }) => {
           value={form.accountNumber}
           error={errors.accountNumber}
           helperText={errors.accountNumber ? t('common.accountNumberInvalid') : ''}
-          onChange={e => {
-            update('accountNumber', e.target.value);
-            validateField('accountNumber', e.target.value);
-          }}
+          onChange={e => syncField('accountNumber', e.target.value)}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
@@ -201,10 +128,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, bank }) => {
           value={form.swiftCode}
           error={errors.swiftCode}
           helperText={errors.swiftCode ? t('common.swiftCodeInvalid') : ''}
-          onChange={e => {
-            update('swiftCode', e.target.value);
-            validateField('swiftCode', e.target.value);
-          }}
+          onChange={e => syncField('swiftCode', e.target.value)}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
@@ -214,10 +138,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, bank }) => {
           value={form.sortOrder}
           error={errors.sortOrder}
           helperText={errors.sortOrder ? t('common.sortCodeInvalid') : ''}
-          onChange={e => {
-            update('sortOrder', e.target.value);
-            validateField('sortOrder', e.target.value);
-          }}
+          onChange={e => syncField('sortOrder', e.target.value)}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
@@ -225,9 +146,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, bank }) => {
           label={t('common.address')}
           fullWidth
           value={form.address}
-          onChange={e => {
-            update('address', e.target.value);
-          }}
+          onChange={e => update('address', e.target.value)}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
@@ -237,10 +156,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, bank }) => {
           value={form.branchCode}
           error={errors.branchCode}
           helperText={errors.branchCode ? t('common.branchCodeInvalid') : ''}
-          onChange={e => {
-            update('branchCode', e.target.value);
-            validateField('branchCode', e.target.value);
-          }}
+          onChange={e => syncField('branchCode', e.target.value)}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
@@ -250,10 +166,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, bank }) => {
           value={form.routingNumber}
           error={errors.routingNumber}
           helperText={errors.routingNumber ? t('common.routingNumberInvalid') : ''}
-          onChange={e => {
-            update('routingNumber', e.target.value);
-            validateField('routingNumber', e.target.value);
-          }}
+          onChange={e => syncField('routingNumber', e.target.value)}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
@@ -263,10 +176,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, bank }) => {
           value={form.upiCode}
           error={errors.upiCode}
           helperText={errors.upiCode ? t('common.upiCodeInvalid') : ''}
-          onChange={e => {
-            update('upiCode', e.target.value);
-            validateField('upiCode', e.target.value);
-          }}
+          onChange={e => syncField('upiCode', e.target.value)}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
@@ -287,7 +197,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, bank }) => {
             gap: 1
           }}
         >
-          <UploadImage onUpload={onUpload} imgUrl={qrCodeUrl} size={100} />
+          <UploadImage onUpload={handleQrUpload} imgUrl={qrImageUrl} size={100} />
         </Box>
       </Grid>
       <Grid size={{ xs: 12, md: 12 }}>

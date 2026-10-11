@@ -1,5 +1,7 @@
 import type { TFunction } from 'i18next';
+
 import type { FilterType } from '../enums/filterType';
+
 import type { CustomOption } from './customOption';
 
 export interface FilterData {
@@ -7,15 +9,14 @@ export interface FilterData {
   value?: string;
 }
 
-type Options<T extends string | number | symbol> = CustomOption<T>[];
 export interface Filter {
-  value?: string;
   label: string;
+  value?: string;
   description?: string;
-  initial?: boolean;
-  isGroup?: boolean;
   type: FilterType;
   options?: Options<string | number | symbol>;
+  initial?: boolean;
+  isGroup?: boolean;
   shouldCloseOnClick?: boolean;
 }
 
@@ -25,3 +26,5 @@ export interface FilterConfig {
   initial?: FilterType;
   shouldCloseOnClick?: boolean;
 }
+
+type Options<T extends string | number | symbol> = CustomOption<T>[];

@@ -1,7 +1,36 @@
 export type LayoutVisibility = boolean | 'auto';
+
 export type WatermarkOrder = 'default' | 'paidFirst';
+
 export type PaymentSource = 'bank' | 'legacyBusiness';
+
 export type ColumnSizing = 'fixedFlex' | 'proportional';
+
+export type HeaderBlockType =
+  'row' | 'column' | 'title' | 'logo' | 'businessInfo' | 'clientInfo' | 'invoiceMeta' | 'paymentInfo';
+
+export interface HeaderBlock {
+  type: HeaderBlockType;
+  children?: HeaderBlock[];
+  width?: '20%' | '40%' | '50%' | '60%' | '100%';
+  align?: 'start' | 'center' | 'end';
+  justify?: 'between';
+  gap?: 5 | 10;
+  paddingTop?: 10 | 20;
+  paddingBottom?: 20;
+  boxed?: boolean;
+  showTitle?: boolean;
+  showInvoiceLabel?: boolean;
+  paymentSource?: PaymentSource;
+}
+
+export type TotalsRowBlockType = 'paymentInfo' | 'financialTotals' | 'spacer';
+
+export interface TotalsRowBlock {
+  type: TotalsRowBlockType;
+  paymentSource?: PaymentSource;
+}
+
 export type LayoutSectionType =
   | 'watermark'
   | 'header'
@@ -12,27 +41,6 @@ export type LayoutSectionType =
   | 'notes'
   | 'signature'
   | 'pageCounter';
-export type TotalsRowBlockType = 'paymentInfo' | 'financialTotals' | 'spacer';
-export interface TotalsRowBlock {
-  type: TotalsRowBlockType;
-  paymentSource?: PaymentSource;
-}
-export type HeaderBlockType =
-  'row' | 'column' | 'title' | 'logo' | 'businessInfo' | 'clientInfo' | 'invoiceMeta' | 'paymentInfo';
-export interface HeaderBlock {
-  type: HeaderBlockType;
-  children?: HeaderBlock[];
-  width?: '20%' | '40%' | '50%' | '60%' | '100%';
-  align?: 'start' | 'center' | 'end';
-  justify?: 'between';
-  paddingTop?: 10 | 20;
-  paddingBottom?: 20;
-  gap?: 5 | 10;
-  boxed?: boolean;
-  showTitle?: boolean;
-  showInvoiceLabel?: boolean;
-  paymentSource?: PaymentSource;
-}
 
 export interface LayoutSchema {
   schemaVersion: 1;
@@ -64,6 +72,7 @@ export interface LayoutFormData {
 }
 
 export type LayoutAdd = Pick<Layout, 'isArchived' | 'schema'>;
+
 export type LayoutUpdate = Partial<LayoutAdd> & Pick<Layout, 'id'>;
 
 export interface LayoutValidationError {
@@ -73,6 +82,7 @@ export interface LayoutValidationError {
 }
 
 const MAX_LAYOUT_BYTES = 64 * 1024;
+
 const sectionTypes: LayoutSectionType[] = [
   'watermark',
   'header',
@@ -85,23 +95,6 @@ const sectionTypes: LayoutSectionType[] = [
   'pageCounter'
 ];
 
-const isObject = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
-const hasOnly = (value: Record<string, unknown>, keys: string[], path: string, errors: LayoutValidationError[]) => {
-  Object.keys(value)
-    .filter(key => !keys.includes(key))
-    .forEach(key =>
-      errors.push({ path: `${path}.${key}`, message: 'layouts.validation.unknownProperty', params: { property: key } })
-    );
-};
-const enumValue = (value: unknown, values: string[], path: string, errors: LayoutValidationError[]) => {
-  if (value !== undefined && !values.includes(value as string))
-    errors.push({
-      path,
-      message: 'layouts.validation.unsupportedValue',
-      params: { value: String(value) }
-    });
-};
 const headerBlockTypes: HeaderBlockType[] = [
   'row',
   'column',
@@ -112,24 +105,29 @@ const headerBlockTypes: HeaderBlockType[] = [
   'invoiceMeta',
   'paymentInfo'
 ];
+
 const totalsRowBlockTypes: TotalsRowBlockType[] = ['paymentInfo', 'financialTotals', 'spacer'];
-const validateTotalsBlocks = (value: unknown, path: string, errors: LayoutValidationError[]) => {
-  if (!Array.isArray(value)) {
-    errors.push({ path, message: 'layouts.validation.totalsArray' });
-    return;
-  }
-  value.forEach((block, index) => {
-    const blockPath = `${path}[${index}]`;
-    if (!isObject(block)) {
-      errors.push({ path: blockPath, message: 'layouts.validation.object' });
-      return;
-    }
-    hasOnly(block, ['type', 'paymentSource'], blockPath, errors);
-    if (!totalsRowBlockTypes.includes(block.type as TotalsRowBlockType))
-      errors.push({ path: `${blockPath}.type`, message: 'layouts.validation.totalsType' });
-    enumValue(block.paymentSource, ['bank', 'legacyBusiness'], `${blockPath}.paymentSource`, errors);
-  });
+
+const isObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const hasOnly = (value: Record<string, unknown>, keys: string[], path: string, errors: LayoutValidationError[]) => {
+  Object.keys(value)
+    .filter(key => !keys.includes(key))
+    .forEach(key =>
+      errors.push({ path: `${path}.${key}`, message: 'layouts.validation.unknownProperty', params: { property: key } })
+    );
 };
+
+const enumValue = (value: unknown, values: string[], path: string, errors: LayoutValidationError[]) => {
+  if (value !== undefined && !values.includes(value as string))
+    errors.push({
+      path,
+      message: 'layouts.validation.unsupportedValue',
+      params: { value: String(value) }
+    });
+};
+
 const validateHeaderBlocks = (value: unknown, path: string, errors: LayoutValidationError[]) => {
   if (!Array.isArray(value)) {
     errors.push({ path, message: 'layouts.validation.headerArray' });
@@ -178,6 +176,24 @@ const validateHeaderBlocks = (value: unknown, path: string, errors: LayoutValida
       validateHeaderBlocks(block.children, `${blockPath}.children`, errors);
     else if (block.children !== undefined)
       errors.push({ path: `${blockPath}.children`, message: 'layouts.validation.children' });
+  });
+};
+
+const validateTotalsBlocks = (value: unknown, path: string, errors: LayoutValidationError[]) => {
+  if (!Array.isArray(value)) {
+    errors.push({ path, message: 'layouts.validation.totalsArray' });
+    return;
+  }
+  value.forEach((block, index) => {
+    const blockPath = `${path}[${index}]`;
+    if (!isObject(block)) {
+      errors.push({ path: blockPath, message: 'layouts.validation.object' });
+      return;
+    }
+    hasOnly(block, ['type', 'paymentSource'], blockPath, errors);
+    if (!totalsRowBlockTypes.includes(block.type as TotalsRowBlockType))
+      errors.push({ path: `${blockPath}.type`, message: 'layouts.validation.totalsType' });
+    enumValue(block.paymentSource, ['bank', 'legacyBusiness'], `${blockPath}.paymentSource`, errors);
   });
 };
 

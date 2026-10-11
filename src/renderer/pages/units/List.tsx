@@ -8,17 +8,16 @@ interface Props {
   onEdit: (item: Unit) => void;
   onDelete: (id: number) => void;
 }
-export const List: FC<Props> = ({ item, selectedItem, onEdit, onDelete }) => {
-  return (
-    <GenericList
-      item={item}
-      selectedItem={selectedItem}
-      onEdit={onEdit}
-      onDelete={onDelete}
-      getName={c => c.name}
-      getInvoiceCount={c => c.invoiceCount}
-      getQuotesCount={c => c.quotesCount}
-      getIsArchived={c => c.isArchived}
-    />
-  );
-};
+
+export const List: FC<Props> = ({ item, selectedItem, onEdit, onDelete }) => (
+  <GenericList
+    item={item}
+    selectedItem={selectedItem}
+    onEdit={onEdit}
+    onDelete={onDelete}
+    getName={entry => entry.name}
+    getInvoiceCount={entry => entry.invoiceCount}
+    getQuotesCount={entry => entry.quotesCount}
+    getIsArchived={entry => entry.isArchived}
+  />
+);

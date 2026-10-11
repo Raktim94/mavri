@@ -3,10 +3,12 @@ import { setupListeners } from '@reduxjs/toolkit/query';
 import { useDispatch, useSelector, type TypedUseSelectorHook } from 'react-redux';
 import { pageSlice } from './pageSlice';
 
+const rootReducer = {
+  [pageSlice.name]: pageSlice.reducer
+};
+
 export const store = configureStore({
-  reducer: {
-    [pageSlice.name]: pageSlice.reducer
-  },
+  reducer: rootReducer,
   middleware: getDefaultMiddleware => getDefaultMiddleware().concat()
 });
 

@@ -14,7 +14,7 @@ import {
   TextField,
   Tooltip
 } from '@mui/material';
-import { memo, useCallback, useEffect, useState, type FC } from 'react';
+import { memo, useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../../../i18n';
 import { AmountInput } from '../../../../shared/components/inputs/amountInput/AmountInput';
@@ -28,6 +28,15 @@ import type { Response } from '../../../../shared/types/response';
 import { validators } from '../../../../shared/utils/validatorFunctions';
 import { useAppDispatch, useAppSelector } from '../../../../state/configureStore';
 import { addToast, selectSettings } from '../../../../state/pageSlice';
+import {
+  initialItemForm,
+  itemFormValid,
+  mergeHeaderOptions,
+  metadataErrors,
+  metadataPresent,
+  toggleAlignment,
+  type TouchedFields
+} from './itemMetadataModel';
 
 interface Props {
   isOpen: boolean;
@@ -39,6 +48,17 @@ interface Props {
   onCancel?: () => void;
   onSave?: (data: ItemForm) => void;
 }
+
+const EMPTY_TOUCHED: TouchedFields = { header: false, sortOrder: false, value: false, alignment: false };
+const EMPTY_ERRORS = {
+  quantity: false,
+  unitPrice: false,
+  header: false,
+  sortOrder: false,
+  value: false,
+  alignment: false
+};
+
 const ItemMetadataSetterComponent: FC<Props> = ({
   isOpen,
   type,
@@ -51,32 +71,13 @@ const ItemMetadataSetterComponent: FC<Props> = ({
 }) => {
   const { t } = useTranslation();
   const storeSettings = useAppSelector(selectSettings);
-  const [isFormValid, setIsFormValid] = useState(true);
-  const { form, setForm, update } = useForm<ItemForm>({
-    quantity: Number(currQuantity ?? 1),
-    header: customField?.header ?? undefined,
-    value: customField?.value ?? undefined,
-    sortOrder: customField?.sortOrder ?? undefined,
-    alignment: customField?.alignment ?? undefined,
-    unitPrice: Number(currUnitPrice ?? 0)
-  });
-  const [errors, setErrors] = useState({
-    quantity: false,
-    unitPrice: false,
-    header: false,
-    sortOrder: false,
-    value: false,
-    alignment: false
-  });
-  const [touched, setTouched] = useState({
-    header: false,
-    sortOrder: false,
-    value: false,
-    alignment: false
-  });
-
   const dispatch = useAppDispatch();
+
+  const { form, setForm, update } = useForm<ItemForm>(initialItemForm({ currQuantity, currUnitPrice, customField }));
+  const [errors, setErrors] = useState(EMPTY_ERRORS);
+  const [touched, setTouched] = useState<TouchedFields>(EMPTY_TOUCHED);
   const [customHeaders, setCustomHeaders] = useState<CustomFieldMeta[]>([]);
+
   const { execute: retrieveHeaders } = useHeadersRetrieve({
     type: type,
     immediate: false,
@@ -88,103 +89,37 @@ const ItemMetadataSetterComponent: FC<Props> = ({
         } else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
       }
 
-      const unique = [...new Map([...headerOptions, ...(data.data ?? [])].map(h => [h.header, h])).values()];
-
-      setCustomHeaders(unique);
+      setCustomHeaders(mergeHeaderOptions(headerOptions, data.data ?? []));
     }
   });
 
-  const isAnyMetadataPresent = useCallback(() => {
-    return (
-      (form.header !== undefined && form.header !== '') ||
-      (form.value !== undefined && form.value !== '') ||
-      form.sortOrder !== undefined ||
-      form.alignment !== undefined
-    );
-  }, [form]);
+  const present = metadataPresent(form);
 
-  const validateField = (field: keyof typeof errors, value: string) => {
-    if (!validators.required(value) && (field === 'quantity' || field === 'unitPrice')) {
-      setErrors(e => ({ ...e, [field]: true }));
-    } else {
-      setErrors(e => ({ ...e, [field]: false }));
-    }
-  };
-
-  useEffect(() => {
-    const metadataRequired = isAnyMetadataPresent();
-
-    if (!metadataRequired) {
-      setErrors(e => ({ ...e, header: false, value: false, sortOrder: false, alignment: false }));
-      return;
-    }
-
-    const headerStr = form.header ?? '';
-    const valueStr = form.value ?? '';
-    const sortOrderStr = form.sortOrder != undefined ? String(form.sortOrder) : '';
-    const alignmentStr = form.alignment ?? '';
-
-    setErrors(e => ({
-      ...e,
-      header: touched.header ? !validators.required(headerStr) : false,
-      value: touched.value ? !validators.required(valueStr) : false,
-      sortOrder: touched.sortOrder ? !validators.required(sortOrderStr) : false,
-      alignment: touched.alignment ? !validators.required(alignmentStr) : false
-    }));
-  }, [isAnyMetadataPresent, form, touched]);
+  const validateRequired = (value: string) => !validators.required(value);
 
   useEffect(() => {
     if (isOpen) retrieveHeaders();
   }, [isOpen, retrieveHeaders]);
 
   useEffect(() => {
-    const valid = (() => {
-      if (form.quantity === undefined) return false;
-      if (form.unitPrice === undefined) return false;
-
-      const header = form.header;
-      const value = form.value;
-      const sortOrder = form.sortOrder;
-      const alignment = form.alignment;
-
-      const bothEmpty =
-        (header === undefined || header === '') &&
-        (value === undefined || value === '') &&
-        sortOrder === undefined &&
-        alignment === undefined;
-
-      const bothFilled =
-        typeof header === 'string' &&
-        header.trim() !== '' &&
-        typeof value === 'string' &&
-        value.trim() !== '' &&
-        sortOrder != undefined &&
-        alignment != undefined;
-
-      return bothEmpty || bothFilled;
-    })();
-
-    setIsFormValid(valid);
-  }, [form]);
-
-  useEffect(() => {
-    if (isOpen)
-      setForm({
-        quantity: Number(currQuantity ?? 1),
-        header: customField?.header ?? undefined,
-        value: customField?.value ?? undefined,
-        sortOrder: customField?.sortOrder ?? undefined,
-        alignment: customField?.alignment ?? undefined,
-        unitPrice: Number(currUnitPrice ?? 0)
-      });
+    if (isOpen) {
+      setForm(initialItemForm({ currQuantity, currUnitPrice, customField }));
+    }
   }, [currQuantity, currUnitPrice, customField, isOpen, setForm]);
 
   useEffect(() => {
     if (isOpen) {
-      setTouched({ header: false, sortOrder: false, value: false, alignment: false });
-      setErrors(e => ({ ...e, header: false, value: false, sortOrder: false, alignment: false }));
+      setTouched(EMPTY_TOUCHED);
+      setErrors(current => ({ ...current, header: false, value: false, sortOrder: false, alignment: false }));
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    const next = metadataErrors({ form, touched });
+    setErrors(current => ({ ...current, ...next }));
+  }, [form, touched]);
+
+  const isFormValid = itemFormValid(form);
 
   return (
     <Dialog open={isOpen} onClose={onCancel}>
@@ -196,14 +131,7 @@ const ItemMetadataSetterComponent: FC<Props> = ({
         onClose={onCancel}
         onSave={data => {
           onSave(data as ItemForm);
-          setErrors({
-            unitPrice: false,
-            quantity: false,
-            header: false,
-            sortOrder: false,
-            value: false,
-            alignment: false
-          });
+          setErrors(EMPTY_ERRORS);
         }}
       />
       <DialogContent sx={{ minWidth: '300px' }}>
@@ -216,9 +144,12 @@ const ItemMetadataSetterComponent: FC<Props> = ({
               error={errors.quantity}
               helperText={errors.quantity ? t('common.fieldRequired') : ''}
               decimalScale={3}
-              onChange={e => {
-                update('quantity', e);
-                validateField('quantity', e != undefined ? e.toString() : '');
+              onChange={value => {
+                update('quantity', value);
+                setErrors(current => ({
+                  ...current,
+                  quantity: validateRequired(value != undefined ? value.toString() : '')
+                }));
               }}
             />
           </Grid>
@@ -231,9 +162,9 @@ const ItemMetadataSetterComponent: FC<Props> = ({
                 value={form.unitPrice}
                 error={errors.unitPrice}
                 helperText={errors.unitPrice ? t('common.fieldRequired') : ''}
-                onChange={e => {
-                  update('unitPrice', e);
-                  validateField('unitPrice', (e ?? '').toString());
+                onChange={value => {
+                  update('unitPrice', value);
+                  setErrors(current => ({ ...current, unitPrice: validateRequired((value ?? '').toString()) }));
                 }}
               />
             </Grid>
@@ -241,7 +172,7 @@ const ItemMetadataSetterComponent: FC<Props> = ({
           <Grid size={{ xs: 12, md: 6 }}>
             <Autocomplete
               freeSolo
-              options={customHeaders.map(item => item.header)}
+              options={customHeaders.map(entry => entry.header)}
               value={form.header ?? ''}
               renderInput={params => (
                 <TextField
@@ -252,7 +183,7 @@ const ItemMetadataSetterComponent: FC<Props> = ({
                   label={
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                       {t('invoices.customFieldHeader')}
-                      {isAnyMetadataPresent() && ' *'}
+                      {present && ' *'}
                       <Tooltip title={t('invoices.customFieldHeaderTooltip')}>
                         <InfoOutlinedIcon fontSize="small" sx={{ color: 'action.active', cursor: 'pointer' }} />
                       </Tooltip>
@@ -261,15 +192,15 @@ const ItemMetadataSetterComponent: FC<Props> = ({
                   variant="outlined"
                 />
               )}
-              onChange={(_e, newValue) => {
+              onChange={(_event, newValue) => {
                 update('header', newValue ?? '');
-                setTouched(s => ({ ...s, header: true }));
+                setTouched(current => ({ ...current, header: true }));
 
-                const specific = customHeaders.find(item => item.header === newValue);
+                const specific = customHeaders.find(entry => entry.header === newValue);
                 if (specific) {
                   update('sortOrder', specific.sortOrder);
                   update('alignment', specific.alignment);
-                  setTouched(s => ({ ...s, alignment: true, sortOrder: true }));
+                  setTouched(current => ({ ...current, alignment: true, sortOrder: true }));
                 }
               }}
             />
@@ -281,76 +212,52 @@ const ItemMetadataSetterComponent: FC<Props> = ({
               value={form.value ?? ''}
               error={errors.value}
               helperText={errors.value ? t('common.fieldRequired') : ''}
-              required={isAnyMetadataPresent()}
-              onChange={e => {
-                update('value', e.target.value);
-                setTouched(s => ({ ...s, value: true }));
+              required={present}
+              onChange={event => {
+                update('value', event.target.value);
+                setTouched(current => ({ ...current, value: true }));
               }}
             />
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
             <AmountInput
-              required={isAnyMetadataPresent()}
+              required={present}
               label={t('invoices.sortOrder')}
               value={form.sortOrder}
               error={errors.sortOrder}
               helperText={errors.sortOrder ? t('common.fieldRequired') : ''}
-              onChange={e => {
-                update('sortOrder', e);
-                setTouched(s => ({ ...s, sortOrder: true }));
+              onChange={value => {
+                update('sortOrder', value);
+                setTouched(current => ({ ...current, sortOrder: true }));
               }}
             />
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
             <FormControl component="fieldset" error={errors.alignment}>
-              <FormLabel component="legend" required={isAnyMetadataPresent()}>
+              <FormLabel component="legend" required={present}>
                 {t('invoices.customFieldAlignment')}
               </FormLabel>
               <RadioGroup
                 row
                 value={form.alignment ?? ''}
-                onChange={(_e, newValue) => {
-                  if (form.alignment === newValue) {
-                    update('alignment', undefined);
-                  } else {
-                    update('alignment', newValue as Alignment);
-                  }
-                  setTouched(s => ({ ...s, alignment: true }));
+                onChange={(_event, newValue) => {
+                  update('alignment', form.alignment === newValue ? undefined : (newValue as Alignment));
+                  setTouched(current => ({ ...current, alignment: true }));
                 }}
               >
-                <FormControlLabel
-                  onClick={e => {
-                    e.preventDefault();
-                    if (form.alignment === Alignment.left) update('alignment', undefined);
-                    else update('alignment', Alignment.left);
-                    setTouched(s => ({ ...s, alignment: true }));
-                  }}
-                  value={Alignment.left}
-                  control={<Radio />}
-                  label={Alignment.left}
-                />
-                <FormControlLabel
-                  onClick={e => {
-                    e.preventDefault();
-                    if (form.alignment === Alignment.center) update('alignment', undefined);
-                    else update('alignment', Alignment.center);
-                    setTouched(s => ({ ...s, alignment: true }));
-                  }}
-                  value={Alignment.center}
-                  control={<Radio />}
-                  label={Alignment.center}
-                />
-                <FormControlLabel
-                  onClick={e => {
-                    e.preventDefault();
-                    if (form.alignment === Alignment.right) update('alignment', undefined);
-                    else update('alignment', Alignment.right);
-                    setTouched(s => ({ ...s, alignment: true }));
-                  }}
-                  value={Alignment.right}
-                  control={<Radio />}
-                  label={Alignment.right}
-                />
+                {[Alignment.left, Alignment.center, Alignment.right].map(alignment => (
+                  <FormControlLabel
+                    key={alignment}
+                    onClick={event => {
+                      event.preventDefault();
+                      update('alignment', toggleAlignment(form.alignment, alignment));
+                      setTouched(current => ({ ...current, alignment: true }));
+                    }}
+                    value={alignment}
+                    control={<Radio />}
+                    label={alignment}
+                  />
+                ))}
               </RadioGroup>
               <FormHelperText>{errors.alignment ? t('common.fieldRequired') : ''}</FormHelperText>
             </FormControl>
@@ -360,4 +267,5 @@ const ItemMetadataSetterComponent: FC<Props> = ({
     </Dialog>
   );
 };
+
 export const ItemMetadataSetter = memo(ItemMetadataSetterComponent);

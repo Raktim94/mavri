@@ -11,13 +11,12 @@ interface Props {
   onEditInvoiceInfo: () => void;
   type: InvoiceType;
 }
-const ClientInvoiceRowComponent: FC<Props> = ({ invoiceForm, onEditClients, onEditInvoiceInfo, type }) => {
-  return (
-    <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', gap: 2 }}>
-      <ClientSelector onEdit={onEditClients} clientName={invoiceForm?.invoiceClientSnapshot?.clientName} />
 
-      <InvoiceInformationSelector onEdit={onEditInvoiceInfo} type={type} invoiceForm={invoiceForm} />
-    </Box>
-  );
-};
+const ClientInvoiceRowComponent: FC<Props> = ({ invoiceForm, onEditClients, onEditInvoiceInfo, type }) => (
+  <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', gap: 2 }}>
+    <ClientSelector onEdit={onEditClients} clientName={invoiceForm?.invoiceClientSnapshot?.clientName} />
+    <InvoiceInformationSelector onEdit={onEditInvoiceInfo} type={type} invoiceForm={invoiceForm} />
+  </Box>
+);
+
 export const ClientInvoiceRow = memo(ClientInvoiceRowComponent);

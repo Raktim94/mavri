@@ -1,16 +1,16 @@
 export interface BankMeta {
   id: number;
   name: string;
-  bankName?: string;
   accountNumber?: string;
-  swiftCode?: string;
-  address?: string;
-  branchCode?: string;
-  type?: string;
-  routingNumber?: string;
   accountHolder?: string;
-  sortOrder?: string;
+  routingNumber?: string;
+  branchCode?: string;
+  swiftCode?: string;
   upiCode?: string;
+  bankName?: string;
+  address?: string;
+  type?: string;
+  sortOrder?: string;
   qrCodeFileSize?: number;
   qrCodeFileType?: string;
   qrCodeFileName?: string;
@@ -31,16 +31,16 @@ export interface BankWeb extends BankMeta {
 
 export interface BankAddMeta {
   name: string;
-  bankName?: string;
   accountNumber?: string;
-  swiftCode?: string;
-  address?: string;
-  branchCode?: string;
-  type?: string;
-  routingNumber?: string;
   accountHolder?: string;
-  sortOrder?: string;
+  routingNumber?: string;
+  branchCode?: string;
+  swiftCode?: string;
   upiCode?: string;
+  bankName?: string;
+  address?: string;
+  type?: string;
+  sortOrder?: string;
   qrCodeFileSize?: number;
   qrCodeFileType?: string;
   qrCodeFileName?: string;
@@ -51,12 +51,12 @@ export interface BankAdd extends BankAddMeta {
   qrCode?: Uint8Array;
 }
 
-export interface BankUpdate extends BankAdd {
-  id: number;
-}
-
 export interface BankAddWeb extends BankAddMeta {
   qrCode?: string | null;
+}
+
+export interface BankUpdate extends BankAdd {
+  id: number;
 }
 
 export interface BankUpdateWeb extends BankAddWeb {
@@ -66,17 +66,17 @@ export interface BankUpdateWeb extends BankAddWeb {
 export interface BankFromData {
   id?: number;
   name: string;
-  bankName?: string;
   accountNumber?: string;
-  swiftCode?: string;
-  address?: string;
-  branchCode?: string;
-  type?: string;
-  routingNumber?: string;
   accountHolder?: string;
-  sortOrder?: string;
+  routingNumber?: string;
+  branchCode?: string;
+  swiftCode?: string;
   upiCode?: string;
   qrCode?: Uint8Array;
+  bankName?: string;
+  address?: string;
+  type?: string;
+  sortOrder?: string;
   qrCodeFileSize?: number;
   qrCodeFileType?: string;
   qrCodeFileName?: string;

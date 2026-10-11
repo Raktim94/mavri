@@ -3,22 +3,22 @@ export interface Currency {
   code: string;
   symbol: string;
   text: string;
+  subunit: number;
   format: string;
-  createdAt: string;
-  updatedAt: string;
+  isArchived: boolean;
   invoiceCount: number;
   quotesCount: number;
-  isArchived: boolean;
-  subunit: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CurrencyAdd {
   code: string;
   symbol: string;
   text: string;
+  subunit: number;
   format: string;
   isArchived: boolean;
-  subunit: number;
 }
 
 export interface CurrencyUpdate extends CurrencyAdd {
@@ -30,7 +30,7 @@ export interface CurrencyFromData {
   code: string;
   symbol: string;
   text: string;
+  subunit: number;
   format: string;
   isArchived: boolean;
-  subunit: number;
 }

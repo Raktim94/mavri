@@ -12,14 +12,16 @@ interface Props {
   onEdit?: (item: Item) => void;
   onDelete?: (id: number) => void;
 }
+
 export const List: FC<Props> = ({
   item,
   selectedItem,
+  showDeleteButton = true,
   onEdit = () => {},
-  onDelete = () => {},
-  showDeleteButton = true
+  onDelete = () => {}
 }) => {
   const settings = useAppSelector(selectSettings);
+
   return (
     <GenericList
       item={item}
@@ -27,11 +29,11 @@ export const List: FC<Props> = ({
       showDeleteButton={showDeleteButton}
       onEdit={onEdit}
       onDelete={onDelete}
-      getName={c => c.name}
-      getAdditional={c => `${formatAmount(Number(c.amount ?? 0), settings?.amountFormat)}`}
-      getInvoiceCount={c => c.invoiceCount}
-      getQuotesCount={c => c.quotesCount}
-      getIsArchived={c => c.isArchived}
+      getName={entry => entry.name}
+      getAdditional={entry => formatAmount(Number(entry.amount ?? 0), settings?.amountFormat)}
+      getInvoiceCount={entry => entry.invoiceCount}
+      getQuotesCount={entry => entry.quotesCount}
+      getIsArchived={entry => entry.isArchived}
     />
   );
 };

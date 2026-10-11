@@ -8,13 +8,13 @@ import { selectSettings } from '../../state/pageSlice';
 
 type TrendTooltipProps = TooltipContentProps<ValueType, NameType>;
 
-const CustomTooltipComponent: React.FC<TrendTooltipProps> = ({ active, payload, label }) => {
+const TooltipCard = ({ active, payload, label }: TrendTooltipProps) => {
   const theme = useTheme();
   const storeSettings = useAppSelector(selectSettings);
 
   if (!active || !payload || payload.length === 0) return null;
 
-  const value = payload[0].value;
+  const amount = payload[0].value;
 
   return (
     <Paper
@@ -30,9 +30,10 @@ const CustomTooltipComponent: React.FC<TrendTooltipProps> = ({ active, payload, 
       </Typography>
 
       <Typography variant="body2" sx={{ fontWeight: 600 }}>
-        {storeSettings && formatAmount(value as unknown as number, storeSettings.amountFormat)}
+        {storeSettings && formatAmount(amount as unknown as number, storeSettings.amountFormat)}
       </Typography>
     </Paper>
   );
 };
-export const CustomTooltip = memo(CustomTooltipComponent);
+
+export const CustomTooltip = memo(TooltipCard);

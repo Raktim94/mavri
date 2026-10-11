@@ -18,8 +18,8 @@ import { List } from './List';
 
 export const UnitsPage: FC = () => {
   const { t } = useTranslation();
+
   const excelColumns = ['name', 'isArchived'];
-  const excelFileName = 'units';
   const excelTemplateData: Rows = [
     {
       name: 'pcs',
@@ -30,55 +30,41 @@ export const UnitsPage: FC = () => {
       isArchived: false
     }
   ];
+
   const filters: Filter[] = [
     ...createCommonFilters({ t, namespace: 'units', initial: FilterType.active }),
     ...createInvoiceFilters({ t, namespace: 'units' })
   ];
-  const useUnitsCRUDRetrieve = (args: { filter?: FilterData[]; onDone?: (data: Response<Unit[]>) => void }) => {
+
+  const useUnitList = (args: { filter?: FilterData[]; onDone?: (data: Response<Unit[]>) => void }) => {
     const { units, execute } = useUnitsRetrieve({ filter: args.filter, onDone: args.onDone });
     return { items: units, execute };
   };
-  const useUnitCRUDAdd = (args: { item?: UnitAdd; immediate?: boolean; onDone?: (data: Response<Unit>) => void }) => {
-    return useUnitAdd({
-      unit: args.item,
-      immediate: args.immediate,
-      onDone: args.onDone
-    });
-  };
-  const useUnitsCRUDAddBatch = (args: {
+
+  const useUnitCreate = (args: { item?: UnitAdd; immediate?: boolean; onDone?: (data: Response<Unit>) => void }) =>
+    useUnitAdd({ unit: args.item, immediate: args.immediate, onDone: args.onDone });
+
+  const useUnitCreateBatch = (args: {
     item?: UnitAdd[];
     immediate?: boolean;
     onDone?: (data: Response<UnitAdd[]>) => void;
-  }) => {
-    return useUnitAddBatch({
-      units: args.item,
-      immediate: args.immediate,
-      onDone: args.onDone
-    });
-  };
-  const useUnitCRUDUpdate = (args: {
-    item?: UnitUpdate;
-    immediate?: boolean;
-    onDone?: (data: Response<Unit>) => void;
-  }) => {
-    return useUnitUpdate({
-      unit: args.item,
-      immediate: args.immediate,
-      onDone: args.onDone
-    });
-  };
+  }) => useUnitAddBatch({ units: args.item, immediate: args.immediate, onDone: args.onDone });
+
+  const useUnitEdit = (args: { item?: UnitUpdate; immediate?: boolean; onDone?: (data: Response<Unit>) => void }) =>
+    useUnitUpdate({ unit: args.item, immediate: args.immediate, onDone: args.onDone });
+
   return (
     <CRUDPage<Unit, UnitAdd, UnitUpdate>
       componentId="unists"
       title={t('common.unit')}
       filters={filters}
-      excelData={{ excelColumns, excelFileName, excelFormat: 'xlsx', excelTemplateData }}
-      useRetrieve={useUnitsCRUDRetrieve}
-      useAdd={useUnitCRUDAdd}
-      useAddBatch={useUnitsCRUDAddBatch}
-      useUpdate={useUnitCRUDUpdate}
+      excelData={{ excelColumns, excelFileName: 'units', excelFormat: 'xlsx', excelTemplateData }}
+      useRetrieve={useUnitList}
+      useAdd={useUnitCreate}
+      useAddBatch={useUnitCreateBatch}
+      useUpdate={useUnitEdit}
       useDelete={useUnitDelete}
-      searchField={'name'}
+      searchField="name"
       sortOptions={[
         { label: t('common.name'), value: 'name' },
         { label: t('common.lastUpdate'), value: 'updatedAt' }
@@ -86,10 +72,7 @@ export const UnitsPage: FC = () => {
       noItemButtonText={t('units.add')}
       noItemText={t('units.noItem')}
       leftTitle={t('menuItems.units')}
-      validateAndNormalize={async data => {
-        if (!isUnitFromData(data)) return;
-        return data;
-      }}
+      validateAndNormalize={async data => (isUnitFromData(data) ? data : undefined)}
       renderListItem={(item, selectedItem, onEdit, onDelete) => (
         <List
           key={item.id}
@@ -102,12 +85,12 @@ export const UnitsPage: FC = () => {
       form={({ item, onChange }) => (
         <Form
           unit={item}
-          handleChange={d => {
-            if (isUnitFromData(d.unit)) {
+          handleChange={change => {
+            if (isUnitFromData(change.unit)) {
               onChange({
-                changedData: d.unit,
-                isFormValid: d.isFormValid,
-                description: d.description
+                changedData: change.unit,
+                isFormValid: change.isFormValid,
+                description: change.description
               });
             }
           }}

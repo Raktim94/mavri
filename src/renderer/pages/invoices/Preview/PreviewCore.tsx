@@ -18,39 +18,40 @@ import { PDFDocument } from './PDFDocument';
 interface Props {
   invoiceForm?: InvoiceFromData;
 }
+
+interface AssetUrls {
+  logo?: string;
+  watermark?: string;
+  watermarkPaid?: string;
+  attachments: AttachmentURL[];
+  signature?: string;
+  qrCode?: string;
+}
+
+const EMPTY_ASSETS: AssetUrls = { attachments: [] };
+
 const PreviewCoreComponent: FC<Props> = ({ invoiceForm }) => {
   const { t } = useTranslation();
   const storeSettings = useAppSelector(selectSettings);
-  const [logoUrl, setLogoUrl] = useState<string | undefined>();
-  const [watermarkUrl, setWatermarkUrl] = useState<string | undefined>();
-  const [watermarkPaidUrl, setWatermarkPaidUrl] = useState<string | undefined>();
-  const [attachmentUrls, setAttachmentUrls] = useState<AttachmentURL[]>([]);
-  const [signatureUrl, setSignatureUrl] = useState<string | undefined>();
-  const [qrCodeUrl, setQrCodeUrl] = useState<string | undefined>();
+  const [assets, setAssets] = useState<AssetUrls>(EMPTY_ASSETS);
   const [loading, setLoading] = useState(true);
+
   const pdfTextsDefaults = usePdfTexts({
     labelUpperCase: invoiceForm?.invoiceCustomization?.labelUpperCase,
     language: invoiceForm?.language
   });
-  const pdfTexts = useMemo(() => {
-    const customLabels = invoiceForm?.invoiceCustomization?.pdfTexts || {};
 
-    return {
-      ...pdfTextsDefaults,
-      ...customLabels
-    };
-  }, [invoiceForm, pdfTextsDefaults]);
+  const pdfTexts = useMemo(
+    () => ({ ...pdfTextsDefaults, ...(invoiceForm?.invoiceCustomization?.pdfTexts || {}) }),
+    [invoiceForm, pdfTextsDefaults]
+  );
 
   useEffect(() => {
     let cancelled = false;
-    setAttachmentUrls([]);
-    setLogoUrl(undefined);
-    setWatermarkUrl(undefined);
-    setWatermarkPaidUrl(undefined);
-    setQrCodeUrl(undefined);
+    setAssets(EMPTY_ASSETS);
     setLoading(true);
 
-    const loadData = async () => {
+    const loadAssets = async () => {
       const [logo, watermark, watermarkPaid, attachments, signature, qrCode] = await Promise.all([
         getLogoUrl(invoiceForm),
         getWatermarkUrl(invoiceForm),
@@ -61,17 +62,12 @@ const PreviewCoreComponent: FC<Props> = ({ invoiceForm }) => {
       ]);
 
       if (!cancelled) {
-        setLogoUrl(logo);
-        setWatermarkUrl(watermark);
-        setWatermarkPaidUrl(watermarkPaid);
-        setAttachmentUrls(attachments);
-        setSignatureUrl(signature);
-        setQrCodeUrl(qrCode);
+        setAssets({ logo, watermark, watermarkPaid, attachments, signature, qrCode });
         setLoading(false);
       }
     };
 
-    loadData();
+    void loadAssets();
 
     return () => {
       cancelled = true;
@@ -89,16 +85,17 @@ const PreviewCoreComponent: FC<Props> = ({ invoiceForm }) => {
       <PDFDocument
         invoiceForm={invoiceForm}
         storeSettings={storeSettings}
-        logoUrl={logoUrl}
-        qrCodeUrl={qrCodeUrl}
-        attachmentUrls={attachmentUrls}
+        logoUrl={assets.logo}
+        qrCodeUrl={assets.qrCode}
+        attachmentUrls={assets.attachments}
         pdfTexts={pdfTexts}
         layoutRequired={t('common.layoutRequired')}
-        watermarkUrl={watermarkUrl}
-        watermarkPaidUrl={watermarkPaidUrl}
-        signatureUrl={signatureUrl}
+        watermarkUrl={assets.watermark}
+        watermarkPaidUrl={assets.watermarkPaid}
+        signatureUrl={assets.signature}
       />
     </PDFViewer>
   );
 };
+
 export const PreviewCore = memo(PreviewCoreComponent);

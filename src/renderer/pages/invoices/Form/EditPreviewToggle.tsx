@@ -1,39 +1,43 @@
-import Box from '@mui/material/Box';
-import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-import * as React from 'react';
+import { Box, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { memo, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { InvoiceFormMode } from '../../../shared/enums/invoiceFormMode';
 
-interface EditPreviewToggleProps {
+interface Props {
   mode: InvoiceFormMode;
-  setMode: (m: InvoiceFormMode) => void;
+  setMode: (mode: InvoiceFormMode) => void;
 }
 
-export const EditPreviewToggle: React.FC<EditPreviewToggleProps> = ({ mode, setMode }) => {
+const EditPreviewToggleComponent: FC<Props> = ({ mode, setMode }) => {
   const { t } = useTranslation();
 
-  const handleMode = (_event: React.MouseEvent<HTMLElement>, newMode: InvoiceFormMode | null) => {
+  const handleChange = (_event: React.MouseEvent<HTMLElement>, newMode: InvoiceFormMode | null) => {
     if (newMode !== null) setMode(newMode);
   };
+
+  const modes = [
+    { value: InvoiceFormMode.edit, label: t('ariaLabel.edit') },
+    { value: InvoiceFormMode.preview, label: t('ariaLabel.preview') }
+  ];
 
   return (
     <Box sx={{ display: 'grid', gap: 2 }}>
       <ToggleButtonGroup
         value={mode}
         exclusive
-        onChange={handleMode}
+        onChange={handleChange}
         size="small"
         aria-label={t('ariaLabel.editPreview')}
         color="primary"
       >
-        <ToggleButton value={InvoiceFormMode.edit} aria-label={t('ariaLabel.edit')} sx={{ minWidth: 70 }}>
-          {t('ariaLabel.edit')}
-        </ToggleButton>
-        <ToggleButton value={InvoiceFormMode.preview} aria-label={t('ariaLabel.preview')} sx={{ minWidth: 70 }}>
-          {t('ariaLabel.preview')}
-        </ToggleButton>
+        {modes.map(entry => (
+          <ToggleButton key={entry.value} value={entry.value} aria-label={entry.label} sx={{ minWidth: 70 }}>
+            {entry.label}
+          </ToggleButton>
+        ))}
       </ToggleButtonGroup>
     </Box>
   );
 };
+
+export const EditPreviewToggle = memo(EditPreviewToggleComponent);

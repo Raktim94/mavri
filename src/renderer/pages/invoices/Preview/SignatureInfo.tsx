@@ -1,16 +1,19 @@
 import { Image, Text, View } from '@react-pdf/renderer';
 import { memo, type FC } from 'react';
 import type { InvoiceFromData } from '../../../shared/types/invoice';
-import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './constant';
+import { PDF_STYLES, fontScaleFor } from './pdfTheme';
 
 interface Props {
   invoiceForm?: InvoiceFromData;
   signatureUrl?: string;
   authorisedSignatoryLabel: string;
 }
+
 const SignatureInfoComponent: FC<Props> = ({ invoiceForm, signatureUrl, authorisedSignatoryLabel }) => {
   if (!signatureUrl) return null;
   if (!invoiceForm?.signatureData) return null;
+
+  const scale = fontScaleFor(invoiceForm?.invoiceCustomization);
 
   return (
     <View
@@ -19,15 +22,9 @@ const SignatureInfoComponent: FC<Props> = ({ invoiceForm, signatureUrl, authoris
       minPresenceAhead={40}
     >
       <Image src={signatureUrl} style={PDF_STYLES.signature} />
-      <Text
-        style={[
-          PDF_STYLES.businessText,
-          { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].businessText }
-        ]}
-      >
-        {authorisedSignatoryLabel}
-      </Text>
+      <Text style={[PDF_STYLES.businessText, { fontSize: scale.businessText }]}>{authorisedSignatoryLabel}</Text>
     </View>
   );
 };
+
 export const SignatureInfo = memo(SignatureInfoComponent);

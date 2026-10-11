@@ -6,8 +6,8 @@ export interface MenuItem {
   path?: string;
   isSelected: ((item: MenuItem) => boolean) | boolean;
   isToggle: boolean;
-  description?: string;
   checked?: boolean;
+  description?: string;
   onChange?: (item: MenuItem) => void;
   onClick?: (item: MenuItem) => void;
   minHeight?: number;

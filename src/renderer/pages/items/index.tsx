@@ -7,88 +7,57 @@ import { useItemAddBatch } from '../../shared/hooks/items/useItemAddBatch';
 import { useItemDelete } from '../../shared/hooks/items/useItemDelete';
 import { useItemsRetrieve } from '../../shared/hooks/items/useItemsRetrieve';
 import { useItemUpdate } from '../../shared/hooks/items/useItemUpdate';
-import type { Rows } from '../../shared/types/excel';
 import type { Filter, FilterData } from '../../shared/types/filter';
 import type { Item, ItemAdd, ItemUpdate } from '../../shared/types/item';
 import type { Response } from '../../shared/types/response';
 import { createCommonFilters, createInvoiceFilters } from '../../shared/utils/filterSortFunctions';
 import { isItemFromData } from '../../shared/utils/typeGuardFunctions';
 import { Form } from './Form';
+import { ITEM_EXCEL_COLUMNS, ITEM_EXCEL_TEMPLATE } from './itemsModel';
 import { List } from './List';
 
 export const ItemsPage: FC = () => {
   const { t } = useTranslation();
 
-  const excelColumns = ['name', 'amount', 'unitName', 'categoryName', 'description', 'isArchived'];
-  const excelFileName = 'items';
-  const excelTemplateData: Rows = [
-    {
-      name: 'Paper A4',
-      amount: '5',
-      categoryName: 'Goods',
-      unitName: 'pack',
-      description: 'Standard white A4 paper',
-      isArchived: false
-    },
-    {
-      name: 'Pen Blue',
-      amount: '150',
-      categoryName: 'Goods',
-      unitName: 'pcs',
-      description: 'Blue ballpoint pen',
-      isArchived: false
-    }
-  ];
   const filters: Filter[] = [
     ...createCommonFilters({ t, namespace: 'items', initial: FilterType.active }),
     ...createInvoiceFilters({ t, namespace: 'items' })
   ];
-  const useItemsCRUDRetrieve = (args: { filter?: FilterData[]; onDone?: (data: Response<Item[]>) => void }) => {
+
+  const useItemList = (args: { filter?: FilterData[]; onDone?: (data: Response<Item[]>) => void }) => {
     const { items, execute } = useItemsRetrieve({ filter: args.filter, onDone: args.onDone });
-    return { items: items, execute };
+    return { items, execute };
   };
-  const useItemCRUDAdd = (args: { item?: ItemAdd; immediate?: boolean; onDone?: (data: Response<Item>) => void }) => {
-    return useItemAdd({
-      item: args.item,
-      immediate: args.immediate,
-      onDone: args.onDone
-    });
-  };
-  const useItemsCRUDAddBatch = (args: {
+
+  const useItemCreate = (args: { item?: ItemAdd; immediate?: boolean; onDone?: (data: Response<Item>) => void }) =>
+    useItemAdd({ item: args.item, immediate: args.immediate, onDone: args.onDone });
+
+  const useItemCreateBatch = (args: {
     item?: ItemAdd[];
     immediate?: boolean;
     onDone?: (data: Response<ItemAdd[]>) => void;
-  }) => {
-    return useItemAddBatch({
-      items: args.item,
-      immediate: args.immediate,
-      onDone: args.onDone
-    });
-  };
-  const useItemCRUDUpdate = (args: {
-    item?: ItemUpdate;
-    immediate?: boolean;
-    onDone?: (data: Response<Item>) => void;
-  }) => {
-    return useItemUpdate({
-      item: args.item,
-      immediate: args.immediate,
-      onDone: args.onDone
-    });
-  };
+  }) => useItemAddBatch({ items: args.item, immediate: args.immediate, onDone: args.onDone });
+
+  const useItemEdit = (args: { item?: ItemUpdate; immediate?: boolean; onDone?: (data: Response<Item>) => void }) =>
+    useItemUpdate({ item: args.item, immediate: args.immediate, onDone: args.onDone });
 
   return (
     <CRUDPage<Item, ItemAdd, ItemUpdate>
       componentId="items"
       title={t('items.title')}
       filters={filters}
-      excelData={{ excelColumns, excelFileName, excelFormat: 'xlsx', excelTemplateData }}
-      useRetrieve={useItemsCRUDRetrieve}
-      useAdd={useItemCRUDAdd}
-      useAddBatch={useItemsCRUDAddBatch}
-      useUpdate={useItemCRUDUpdate}
+      excelData={{
+        excelColumns: ITEM_EXCEL_COLUMNS,
+        excelFileName: 'items',
+        excelFormat: 'xlsx',
+        excelTemplateData: ITEM_EXCEL_TEMPLATE
+      }}
+      useRetrieve={useItemList}
+      useAdd={useItemCreate}
+      useAddBatch={useItemCreateBatch}
+      useUpdate={useItemEdit}
       useDelete={useItemDelete}
-      searchField={'name'}
+      searchField="name"
       sortOptions={[
         { label: t('common.name'), value: 'name' },
         { label: t('common.lastUpdate'), value: 'updatedAt' }
@@ -96,11 +65,7 @@ export const ItemsPage: FC = () => {
       noItemButtonText={t('items.add')}
       noItemText={t('items.noItem')}
       leftTitle={t('menuItems.items')}
-      validateAndNormalize={async data => {
-        if (!isItemFromData(data)) return;
-
-        return data;
-      }}
+      validateAndNormalize={async data => (isItemFromData(data) ? data : undefined)}
       renderListItem={(item, selectedItem, onEdit, onDelete) => (
         <List
           key={item.id}
@@ -113,12 +78,12 @@ export const ItemsPage: FC = () => {
       form={({ item, onChange }) => (
         <Form
           item={item}
-          handleChange={d => {
-            if (isItemFromData(d.item)) {
+          handleChange={change => {
+            if (isItemFromData(change.item)) {
               onChange({
-                changedData: d.item,
-                isFormValid: d.isFormValid,
-                description: d.description
+                changedData: change.item,
+                isFormValid: change.isFormValid,
+                description: change.description
               });
             }
           }}

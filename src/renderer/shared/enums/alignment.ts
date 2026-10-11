@@ -1,5 +1,5 @@
 export enum Alignment {
-  right = 'right',
+  left = 'left',
   center = 'center',
-  left = 'left'
+  right = 'right'
 }

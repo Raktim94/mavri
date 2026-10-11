@@ -14,26 +14,21 @@ interface Props {
   onCancel?: () => void;
   onSave?: (data: { from: string; to: string }) => void;
 }
-const RangeSetterComponent: FC<Props> = ({ isOpen, fromDate, to, onCancel = () => {}, onSave = () => {} }) => {
+
+const RangeDialog: FC<Props> = ({ isOpen, fromDate, to, onCancel = () => {}, onSave = () => {} }) => {
   const { t } = useTranslation();
   const { form, setForm, update } = useForm<{ from: string; to: string }>({
     from: fromDate,
-    to: to
+    to
   });
   const storeSettings = useAppSelector(selectSettings);
 
   useEffect(() => {
-    setForm(prev => ({
-      ...prev,
-      from: fromDate
-    }));
+    setForm(prev => ({ ...prev, from: fromDate }));
   }, [fromDate, setForm]);
 
   useEffect(() => {
-    setForm(prev => ({
-      ...prev,
-      to: to
-    }));
+    setForm(prev => ({ ...prev, to }));
   }, [to, setForm]);
 
   return (
@@ -43,9 +38,7 @@ const RangeSetterComponent: FC<Props> = ({ isOpen, fromDate, to, onCancel = () =
         isFormValid={true}
         formData={form}
         onClose={onCancel}
-        onSave={data => {
-          onSave(data as { from: string; to: string });
-        }}
+        onSave={data => onSave(data as { from: string; to: string })}
       />
       <DialogContent sx={{ minWidth: '300px' }}>
         <Grid container spacing={2}>
@@ -56,9 +49,7 @@ const RangeSetterComponent: FC<Props> = ({ isOpen, fromDate, to, onCancel = () =
                 label={`${t('common.from')}`}
                 value={form.from}
                 format={storeSettings.dateFormat}
-                onChange={value => {
-                  update('from', value ?? '');
-                }}
+                onChange={value => update('from', value ?? '')}
               />
             )}
           </Grid>
@@ -69,9 +60,7 @@ const RangeSetterComponent: FC<Props> = ({ isOpen, fromDate, to, onCancel = () =
                 label={`${t('common.to')}`}
                 value={form.to}
                 format={storeSettings.dateFormat}
-                onChange={value => {
-                  update('to', value ?? '');
-                }}
+                onChange={value => update('to', value ?? '')}
               />
             )}
           </Grid>
@@ -80,4 +69,5 @@ const RangeSetterComponent: FC<Props> = ({ isOpen, fromDate, to, onCancel = () =
     </Dialog>
   );
 };
-export const RangeSetter = memo(RangeSetterComponent);
+
+export const RangeSetter = memo(RangeDialog);

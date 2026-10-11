@@ -1,15 +1,16 @@
 import { closestCenter, DndContext, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
-import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { Box, IconButton, ListItemButton, ListItemText, Menu, MenuItem, Tooltip, Typography } from '@mui/material';
-import React, { memo, useState, type FC } from 'react';
+import { memo, useState, type FC, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SortableItem } from '../../../shared/components/lists/sortableItem/SortableItem';
 import type { InvoiceFromData, InvoiceItem } from '../../../shared/types/invoice';
 import { getItemFinancialData } from '../../../shared/utils/invoiceFunctions';
 import { useAppSelector } from '../../../state/configureStore';
 import { selectSettings } from '../../../state/pageSlice';
+import { lineDragId, reorderLines } from './lines/lineList';
 
 interface Props {
   invoiceForm?: InvoiceFromData;
@@ -18,43 +19,46 @@ interface Props {
   onEdit?: (item: InvoiceItem) => void;
 }
 
+const SECONDARY_SX = { fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' } as const;
+
 const ItemsListComponent: FC<Props> = ({ invoiceForm, setInvoiceForm, onEdit = () => {}, onDelete = () => {} }) => {
   const storeSettings = useAppSelector(selectSettings);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedItem, setSelectedItem] = useState<InvoiceItem | null>(null);
-  const open = Boolean(anchorEl);
   const { t } = useTranslation();
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, item: InvoiceItem) => {
+  const items = invoiceForm?.invoiceItems ?? [];
+
+  const sensors = useSensors(useSensor(PointerSensor));
+
+  const openMenu = (event: React.MouseEvent<HTMLElement>, item: InvoiceItem) => {
     event.stopPropagation();
     setAnchorEl(event.currentTarget);
     setSelectedItem(item);
   };
 
-  const handleMenuClose = () => {
+  const closeMenu = () => {
     setAnchorEl(null);
     setSelectedItem(null);
   };
 
-  const sensors = useSensors(useSensor(PointerSensor));
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (active.id !== over?.id && invoiceForm?.invoiceItems && setInvoiceForm) {
-      const oldIndex = invoiceForm.invoiceItems.findIndex((i, idx) => `invoice-item-${i.itemId}-${idx}` === active.id);
-      const newIndex = invoiceForm.invoiceItems.findIndex((i, idx) => `invoice-item-${i.itemId}-${idx}` === over?.id);
-      const newItems = arrayMove(invoiceForm.invoiceItems, oldIndex, newIndex);
-      setInvoiceForm({ ...invoiceForm, invoiceItems: newItems });
+  const handleDragEnd = ({ active, over }: DragEndEvent) => {
+    if (active.id === over?.id || !setInvoiceForm) return;
+    const reordered = reorderLines(items, String(active.id), String(over?.id ?? ''));
+    if (reordered !== items) {
+      setInvoiceForm({ ...invoiceForm, invoiceItems: reordered });
     }
   };
 
+  const menuItems: Array<{ label: string; action: (item: InvoiceItem) => void }> = [
+    { label: t('ariaLabel.edit'), action: item => onEdit(item) },
+    { label: t('ariaLabel.remove'), action: item => onDelete(item) }
+  ];
+
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <SortableContext
-        items={invoiceForm?.invoiceItems?.map((i, idx) => `invoice-item-${i.itemId}-${idx}`) ?? []}
-        strategy={verticalListSortingStrategy}
-      >
-        {invoiceForm?.invoiceItems?.map((invoiceItem, index) => {
+      <SortableContext items={items.map(lineDragId)} strategy={verticalListSortingStrategy}>
+        {items.map((invoiceItem, index) => {
           const { quantity, taxType, taxRate, invoiceItemSnapshot, customField } = invoiceItem;
           const { unitPriceCents = '0', itemName } = invoiceItemSnapshot;
 
@@ -69,17 +73,44 @@ const ItemsListComponent: FC<Props> = ({ invoiceForm, setInvoiceForm, onEdit = (
               quantity: Number(quantity),
               taxType,
               taxRate,
-              invoiceItems: invoiceForm?.invoiceItems ?? [],
+              invoiceItems: items,
               discountType: invoiceForm?.discountType,
               discountAmount: Number(invoiceForm?.discountAmountCents ?? 0),
               discountPercent: invoiceForm?.discountPercent
             });
 
+          const secondary: ReactNode = (
+            <>
+              <Typography variant="body2" sx={SECONDARY_SX}>
+                {formattedUnitPrice} {' X '} {quantity}
+              </Typography>
+              {customField && (
+                <Typography variant="body2" sx={SECONDARY_SX}>
+                  {customField.header}: {customField.value}
+                </Typography>
+              )}
+            </>
+          );
+
+          const moneyLines: ReactNode = (
+            <>
+              {invoiceItem.taxType && (
+                <>
+                  {itemDiscountAmount > 0 && (
+                    <Typography component="div" variant="body2" sx={SECONDARY_SX}>
+                      {t('invoices.itemDiscount', { amount: formattedItemDiscountAmount })}
+                    </Typography>
+                  )}
+                  <Typography component="div" variant="body2" sx={SECONDARY_SX}>
+                    {t('invoices.itemTax', { rate: invoiceItem.taxRate, amount: formattedTax })}
+                  </Typography>
+                </>
+              )}
+            </>
+          );
+
           return (
-            <SortableItem
-              key={`invoice-item-${invoiceItem.itemId}-${index}`}
-              id={`invoice-item-${invoiceItem.itemId}-${index}`}
-            >
+            <SortableItem key={lineDragId(invoiceItem, index)} id={lineDragId(invoiceItem, index)}>
               <ListItemButton
                 onClick={() => onEdit(invoiceItem)}
                 sx={{
@@ -97,36 +128,27 @@ const ItemsListComponent: FC<Props> = ({ invoiceForm, setInvoiceForm, onEdit = (
               >
                 <IconButton
                   size="small"
-                  onClick={e => handleMenuOpen(e, invoiceItem)}
-                  onMouseDown={e => e.stopPropagation()}
+                  onClick={event => openMenu(event, invoiceItem)}
+                  onMouseDown={event => event.stopPropagation()}
                 >
                   <MoreVertIcon fontSize="small" />
                 </IconButton>
-                <Menu anchorEl={anchorEl} open={open && selectedItem === invoiceItem} onClose={handleMenuClose}>
-                  <MenuItem
-                    onClick={e => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      if (selectedItem) {
-                        onEdit(selectedItem);
-                        handleMenuClose();
-                      }
-                    }}
-                  >
-                    {t('ariaLabel.edit')}
-                  </MenuItem>
-                  <MenuItem
-                    onClick={e => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      if (selectedItem) {
-                        onDelete(selectedItem);
-                        handleMenuClose();
-                      }
-                    }}
-                  >
-                    {t('ariaLabel.remove')}
-                  </MenuItem>
+                <Menu anchorEl={anchorEl} open={Boolean(anchorEl) && selectedItem === invoiceItem} onClose={closeMenu}>
+                  {menuItems.map(entry => (
+                    <MenuItem
+                      key={entry.label}
+                      onClick={event => {
+                        event.stopPropagation();
+                        event.preventDefault();
+                        if (selectedItem) {
+                          entry.action(selectedItem);
+                          closeMenu();
+                        }
+                      }}
+                    >
+                      {entry.label}
+                    </MenuItem>
+                  ))}
                 </Menu>
 
                 <ListItemText
@@ -146,24 +168,7 @@ const ItemsListComponent: FC<Props> = ({ invoiceForm, setInvoiceForm, onEdit = (
                       {itemName}
                     </Typography>
                   }
-                  secondary={
-                    <>
-                      <Typography
-                        variant="body2"
-                        sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}
-                      >
-                        {formattedUnitPrice} {' X '} {quantity}
-                      </Typography>
-                      {customField && (
-                        <Typography
-                          variant="body2"
-                          sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}
-                        >
-                          {customField.header}: {customField.value}
-                        </Typography>
-                      )}
-                    </>
-                  }
+                  secondary={secondary}
                   disableTypography
                   sx={{ m: 0 }}
                   slotProps={{ primary: { sx: { fontWeight: 500, m: 0 } } }}
@@ -183,48 +188,10 @@ const ItemsListComponent: FC<Props> = ({ invoiceForm, setInvoiceForm, onEdit = (
                   >
                     {formattedTotal}
                   </Typography>
-                  {invoiceItem.taxType && (
-                    <>
-                      {itemDiscountAmount > 0 && (
-                        <Typography
-                          component="div"
-                          variant="body2"
-                          sx={{
-                            fontWeight: 500,
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            display: 'flex',
-                            justifyContent: 'start',
-                            flexDirection: 'row'
-                          }}
-                        >
-                          {t('invoices.itemDiscount', {
-                            amount: formattedItemDiscountAmount
-                          })}
-                        </Typography>
-                      )}
-                      <Typography
-                        component="div"
-                        variant="body2"
-                        sx={{
-                          fontWeight: 500,
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          display: 'flex',
-                          justifyContent: 'start',
-                          flexDirection: 'row'
-                        }}
-                      >
-                        {t('invoices.itemTax', {
-                          rate: invoiceItem.taxRate,
-                          amount: formattedTax
-                        })}
-                      </Typography>
-                    </>
-                  )}
+                  {moneyLines}
                 </Box>
                 <Tooltip title={t('ariaLabel.dragToSort')}>
-                  <IconButton size="small" data-drag-handle onMouseDown={e => e.stopPropagation()}>
+                  <IconButton size="small" data-drag-handle onMouseDown={event => event.stopPropagation()}>
                     <DragIndicatorIcon fontSize="small" />
                   </IconButton>
                 </Tooltip>

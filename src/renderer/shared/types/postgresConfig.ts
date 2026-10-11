@@ -1,8 +1,8 @@
 export interface PostgresConfig {
   host: string;
   port: number;
+  database: string;
   user: string;
   password?: string;
-  database: string;
   ssl: boolean;
 }

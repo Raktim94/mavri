@@ -1,6 +1,6 @@
 import GestureIcon from '@mui/icons-material/Gesture';
 import { Box, IconButton, ListItemButton, ListItemText, Tooltip, Typography } from '@mui/material';
-import { memo, useCallback, useEffect, useState, type FC } from 'react';
+import { memo, useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { UploadImage } from '../../../shared/components/inputs/uploadImage/UploadImage';
 import type { SignatureForm } from '../../../shared/types/invoice';
@@ -16,43 +16,34 @@ interface Props {
   };
   onEdit: (data: SignatureForm) => void;
 }
+
+const HEADING_SX = { fontWeight: 600, color: 'primary.main', overflow: 'hidden', textOverflow: 'ellipsis' } as const;
+
 const SignatureSelectorComponent: FC<Props> = ({ data, onEdit }) => {
   const { signatureData, signatureType, signatureSize, signatureName } = data ?? {};
-
   const { t } = useTranslation();
 
-  const [isDropdownOpenSignature, setIsDropdownOpenSignature] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState<SignatureForm | undefined>(undefined);
   const [signatureUrl, setSignatureUrl] = useState<string | undefined>(undefined);
 
-  const onUpload = async (file?: Blob, filename?: string) => {
+  const clearSignature = (file?: Blob, filename?: string) => {
     if (!file && !filename) {
-      const newFormData = {
-        data: undefined,
-        size: undefined,
-        type: undefined,
-        name: undefined
-      };
-      setFormData(newFormData);
-      onEdit(newFormData);
+      const cleared: SignatureForm = { data: undefined, size: undefined, type: undefined, name: undefined };
+      setFormData(cleared);
+      onEdit(cleared);
     }
   };
 
-  const handleOnOpen = useCallback((setter: React.Dispatch<React.SetStateAction<boolean>>) => {
-    setter(true);
-  }, []);
-
-  const handleOnClose = useCallback((setter: React.Dispatch<React.SetStateAction<boolean>>) => {
-    setter(false);
-  }, []);
-
   useEffect(() => {
+    let cancelled = false;
+
     if (!signatureData) {
       setSignatureUrl(undefined);
     } else {
       (async () => {
-        const url = signatureData ? await toDataUrl(signatureData, signatureType) : undefined;
-        setSignatureUrl(url);
+        const url = await toDataUrl(signatureData, signatureType);
+        if (!cancelled) setSignatureUrl(url);
       })();
     }
 
@@ -62,14 +53,16 @@ const SignatureSelectorComponent: FC<Props> = ({ data, onEdit }) => {
       type: signatureType,
       name: signatureName
     });
+
+    return () => {
+      cancelled = true;
+    };
   }, [signatureData, signatureSize, signatureType, signatureName]);
 
   return (
     <>
       <ListItemButton
-        onClick={() => {
-          handleOnOpen(setIsDropdownOpenSignature);
-        }}
+        onClick={() => setIsOpen(true)}
         sx={{
           pt: 2,
           pb: 2,
@@ -85,23 +78,13 @@ const SignatureSelectorComponent: FC<Props> = ({ data, onEdit }) => {
       >
         <ListItemText
           primary={
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center'
-              }}
-            >
+            <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
               <Tooltip title={t('common.signature')}>
-                <IconButton size="small" data-drag-handle onMouseDown={e => e.stopPropagation()}>
+                <IconButton size="small" onMouseDown={event => event.stopPropagation()}>
                   <GestureIcon fontSize="small" />
                 </IconButton>
               </Tooltip>
-              <Typography
-                component="div"
-                variant="body1"
-                sx={{ fontWeight: 600, color: 'primary.main', overflow: 'hidden', textOverflow: 'ellipsis' }}
-              >
+              <Typography component="div" variant="body1" sx={HEADING_SX}>
                 {t('common.signature').toUpperCase()}
               </Typography>
             </Box>
@@ -113,33 +96,24 @@ const SignatureSelectorComponent: FC<Props> = ({ data, onEdit }) => {
       </ListItemButton>
 
       {signatureUrl && (
-        <Box
-          sx={{
-            display: 'flex',
-            position: 'relative',
-            width: '100%',
-            paddingLeft: 2,
-            paddingRight: 2,
-            paddingBottom: 2
-          }}
-        >
+        <Box sx={{ display: 'flex', position: 'relative', width: '100%', px: 2, pb: 2 }}>
           <UploadImage
             imgUrl={signatureUrl}
             size={200}
             disableEdit={true}
-            onUpload={(file?: Blob, filename?: string) => onUpload(file, filename)}
+            onUpload={(file?: Blob, filename?: string) => clearSignature(file, filename)}
           />
         </Box>
       )}
 
       {formData && (
         <SignatureDropdown
-          isOpen={isDropdownOpenSignature}
-          onClose={() => handleOnClose(setIsDropdownOpenSignature)}
-          onOpen={() => handleOnOpen(setIsDropdownOpenSignature)}
-          onClick={data => {
-            onEdit(data);
-            handleOnClose(setIsDropdownOpenSignature);
+          isOpen={isOpen}
+          onClose={() => setIsOpen(false)}
+          onOpen={() => setIsOpen(true)}
+          onClick={saved => {
+            onEdit(saved);
+            setIsOpen(false);
           }}
           form={formData}
         />
@@ -147,4 +121,5 @@ const SignatureSelectorComponent: FC<Props> = ({ data, onEdit }) => {
     </>
   );
 };
+
 export const SignatureSelector = memo(SignatureSelectorComponent);

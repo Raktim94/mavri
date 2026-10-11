@@ -8,7 +8,6 @@ import type { BusinessAdd, BusinessUpdate, BusinessWeb } from '../types/business
 import type { Category, CategoryAdd, CategoryUpdate } from '../types/category';
 import type { Client, ClientAdd, ClientUpdate } from '../types/client';
 import type { Currency, CurrencyAdd, CurrencyUpdate } from '../types/currency';
-import type { DBSelector } from '../types/dbSelector';
 import type { ExportMeta } from '../types/exportMeta';
 import type { FilterData } from '../types/filter';
 import type {
@@ -23,7 +22,7 @@ import type {
 import type { Item, ItemAdd, ItemUpdate } from '../types/item';
 import type { Layout, LayoutAdd, LayoutUpdate } from '../types/layouts';
 import type { PostgresConfig } from '../types/postgresConfig';
-import type { PresetAdd, PresetUpdate, PresetUpdateWeb, PresetWeb } from '../types/preset';
+import type { Preset, PresetAdd, PresetUpdate, PresetUpdateWeb, PresetWeb } from '../types/preset';
 import type { Response } from '../types/response';
 import type { Settings, SettingsUpdate } from '../types/settings';
 import type {
@@ -33,153 +32,151 @@ import type {
   StyleProfileWeb
 } from '../types/styleProfiles';
 import type { Unit, UnitAdd, UnitUpdate } from '../types/unit';
-import type { ProgressInfo } from '../types/updater';
 import { base64ToBytes, toDataUrl } from '../utils/dataUrlFunctions';
 
-const fileToBase64 = async (file?: Uint8Array | null) => {
+const encodeFileToBase64 = async (file?: Uint8Array | null) => {
   if (!file) return null;
   const dataUrl = await toDataUrl(file);
   return dataUrl.split(',')[1] ?? null;
 };
 
-const base64ToBytesOrUndef = (b64?: string | null) => (b64 ? base64ToBytes(b64) : undefined);
+const decodeBase64Field = (encoded?: string | null) => (encoded ? base64ToBytes(encoded) : undefined);
 
-const mapBankFromWeb = <T extends BankWeb | BankUpdateWeb>(b: T) => ({
-  ...b,
-  qrCode: base64ToBytesOrUndef(b.qrCode)
+const bankFromWire = <T extends BankWeb | BankUpdateWeb>(wire: T) => ({
+  ...wire,
+  qrCode: decodeBase64Field(wire.qrCode)
 });
 
-const mapBankToWeb = async <T extends BankUpdate | BankAdd>(data: T) => ({
+const bankToWire = async <T extends BankUpdate | BankAdd>(data: T) => ({
   ...data,
-  qrCode: await fileToBase64(data.qrCode)
+  qrCode: await encodeFileToBase64(data.qrCode)
 });
 
-const mapPresetFromWeb2 = <T extends PresetWeb>(b: T) => ({
-  ...b,
-  signatureData: base64ToBytesOrUndef(b.signatureData),
-  businessLogo: base64ToBytesOrUndef(b.businessLogo),
-  qrCode: base64ToBytesOrUndef(b.qrCode),
-  styleProfileWatermarkFileData: base64ToBytesOrUndef(b.styleProfileWatermarkFileData),
-  styleProfilePaidWatermarkFileData: base64ToBytesOrUndef(b.styleProfilePaidWatermarkFileData)
+const presetFromWireFull = <T extends PresetWeb>(wire: T) => ({
+  ...wire,
+  signatureData: decodeBase64Field(wire.signatureData),
+  businessLogo: decodeBase64Field(wire.businessLogo),
+  qrCode: decodeBase64Field(wire.qrCode),
+  styleProfileWatermarkFileData: decodeBase64Field(wire.styleProfileWatermarkFileData),
+  styleProfilePaidWatermarkFileData: decodeBase64Field(wire.styleProfilePaidWatermarkFileData)
 });
 
-const mapPresetFromWeb1 = <T extends PresetUpdateWeb>(b: T) => ({
-  ...b,
-  signatureData: base64ToBytesOrUndef(b.signatureData)
+const presetFromWireWrite = <T extends PresetUpdateWeb>(wire: T) => ({
+  ...wire,
+  signatureData: decodeBase64Field(wire.signatureData)
 });
 
-const mapPresetToWeb = async <T extends PresetUpdate | PresetAdd>(data: T) => ({
+const presetToWire = async <T extends PresetUpdate | PresetAdd>(data: T) => ({
   ...data,
-  signatureData: await fileToBase64(data.signatureData)
+  signatureData: await encodeFileToBase64(data.signatureData)
 });
 
-const mapStyleProfileFromWeb = <T extends StyleProfileWeb | StyleProfileUpdateWeb>(sp: T) => ({
-  ...sp,
-  paidWatermarkFileData: base64ToBytesOrUndef(sp.paidWatermarkFileData),
-  watermarkFileData: base64ToBytesOrUndef(sp.watermarkFileData)
+const presetWriteResponse = (response: Response<PresetWeb>): Response<Preset> => ({
+  ...response,
+  data: response.data ? (presetFromWireWrite(response.data) as unknown as Preset) : undefined
 });
 
-const mapStyleProfileToWeb = async <T extends StyleProfileUpdate | StyleProfileAdd>(data: T) => ({
+const styleProfileFromWire = <T extends StyleProfileWeb | StyleProfileUpdateWeb>(wire: T) => ({
+  ...wire,
+  paidWatermarkFileData: decodeBase64Field(wire.paidWatermarkFileData),
+  watermarkFileData: decodeBase64Field(wire.watermarkFileData)
+});
+
+const styleProfileToWire = async <T extends StyleProfileUpdate | StyleProfileAdd>(data: T) => ({
   ...data,
-  paidWatermarkFileData: await fileToBase64(data.paidWatermarkFileData),
-  watermarkFileData: await fileToBase64(data.watermarkFileData)
+  paidWatermarkFileData: await encodeFileToBase64(data.paidWatermarkFileData),
+  watermarkFileData: await encodeFileToBase64(data.watermarkFileData)
 });
 
-const mapAttachmentFromWeb = (ia: InvoiceAttachmentWeb) => ({
-  ...ia,
-  data: base64ToBytes(ia.data)
+const attachmentFromWire = (attachment: InvoiceAttachmentWeb) => ({
+  ...attachment,
+  data: base64ToBytes(attachment.data)
 });
 
-const mapAttachmentToWeb = async (ia: InvoiceAttachment) => ({
-  ...ia,
-  data: await fileToBase64(ia.data)
+const attachmentToWire = async (attachment: InvoiceAttachment) => ({
+  ...attachment,
+  data: await encodeFileToBase64(attachment.data)
 });
 
-const mapInvoiceFromWeb = (i: InvoiceWeb) => ({
-  ...i,
-  signatureData: base64ToBytesOrUndef(i.signatureData),
-  invoiceBusinessSnapshot: i.invoiceBusinessSnapshot
+const invoiceFromWire = (invoice: InvoiceWeb) => ({
+  ...invoice,
+  signatureData: decodeBase64Field(invoice.signatureData),
+  invoiceBusinessSnapshot: invoice.invoiceBusinessSnapshot
     ? {
-        ...i.invoiceBusinessSnapshot,
-        businessLogo: base64ToBytesOrUndef(i.invoiceBusinessSnapshot?.businessLogo)
+        ...invoice.invoiceBusinessSnapshot,
+        businessLogo: decodeBase64Field(invoice.invoiceBusinessSnapshot.businessLogo)
       }
-    : i.invoiceBusinessSnapshot,
-  invoiceBankSnapshot: i.invoiceBankSnapshot
+    : invoice.invoiceBusinessSnapshot,
+  invoiceBankSnapshot: invoice.invoiceBankSnapshot
     ? {
-        ...i.invoiceBankSnapshot,
-        qrCode: base64ToBytesOrUndef(i.invoiceBankSnapshot?.qrCode)
+        ...invoice.invoiceBankSnapshot,
+        qrCode: decodeBase64Field(invoice.invoiceBankSnapshot.qrCode)
       }
-    : i.invoiceBankSnapshot,
-  invoiceCustomization: i.invoiceCustomization
+    : invoice.invoiceBankSnapshot,
+  invoiceCustomization: invoice.invoiceCustomization
     ? {
-        ...i.invoiceCustomization,
-        paidWatermarkFileData: base64ToBytesOrUndef(i.invoiceCustomization?.paidWatermarkFileData),
-        watermarkFileData: base64ToBytesOrUndef(i.invoiceCustomization?.watermarkFileData)
+        ...invoice.invoiceCustomization,
+        paidWatermarkFileData: decodeBase64Field(invoice.invoiceCustomization.paidWatermarkFileData),
+        watermarkFileData: decodeBase64Field(invoice.invoiceCustomization.watermarkFileData)
       }
-    : i.invoiceCustomization,
-  invoiceAttachments: (i.invoiceAttachments ?? []).map(mapAttachmentFromWeb)
+    : invoice.invoiceCustomization,
+  invoiceAttachments: (invoice.invoiceAttachments ?? []).map(attachmentFromWire)
 });
 
-const mapInvoiceToWeb = async (data: InvoiceUpdate | InvoiceAdd) => ({
+const invoiceToWire = async (data: InvoiceUpdate | InvoiceAdd) => ({
   ...data,
-  signatureData: await fileToBase64(data.signatureData),
+  signatureData: await encodeFileToBase64(data.signatureData),
   invoiceBusinessSnapshot: data.invoiceBusinessSnapshot
     ? {
         ...data.invoiceBusinessSnapshot,
-        businessLogo: await fileToBase64(data.invoiceBusinessSnapshot?.businessLogo)
+        businessLogo: await encodeFileToBase64(data.invoiceBusinessSnapshot.businessLogo)
       }
     : data.invoiceBusinessSnapshot,
   invoiceBankSnapshot: data.invoiceBankSnapshot
     ? {
         ...data.invoiceBankSnapshot,
-        qrCode: await fileToBase64(data.invoiceBankSnapshot?.qrCode)
+        qrCode: await encodeFileToBase64(data.invoiceBankSnapshot.qrCode)
       }
     : data.invoiceBankSnapshot,
   invoiceCustomization: data.invoiceCustomization
     ? {
         ...data.invoiceCustomization,
-        paidWatermarkFileData: await fileToBase64(data.invoiceCustomization?.paidWatermarkFileData),
-        watermarkFileData: await fileToBase64(data.invoiceCustomization?.watermarkFileData)
+        paidWatermarkFileData: await encodeFileToBase64(data.invoiceCustomization.paidWatermarkFileData),
+        watermarkFileData: await encodeFileToBase64(data.invoiceCustomization.watermarkFileData)
       }
     : data.invoiceCustomization,
 
-  invoiceAttachments: await Promise.all((data.invoiceAttachments ?? []).map(mapAttachmentToWeb))
+  invoiceAttachments: await Promise.all((data.invoiceAttachments ?? []).map(attachmentToWire))
 });
 
-const baseUrl = (): string => {
+const apiOrigin = (): string => {
   if (typeof window === 'undefined') return '';
-  // Fall back to window.location.origin so relative /api/* URLs work when
-  // VITE_API_URL is not set (e.g. Docker + nginx reverse-proxy setup).
   return (import.meta.env.VITE_API_URL as string) || window.location.origin;
 };
 
-const apiGet = async <T>(path: string, params?: Record<string, string>): Promise<T> => {
-  const url = new URL(path, baseUrl());
+const withQueryParams = (path: string, params?: Record<string, string>) => {
+  const url = new URL(path, apiOrigin());
   if (params) {
-    Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+    Object.entries(params).forEach(([key, value]) => url.searchParams.set(key, value));
   }
-  const res = await fetch(url.toString(), { credentials: 'include' });
+  return url.toString();
+};
+
+const apiGet = async <T>(path: string, params?: Record<string, string>): Promise<T> => {
+  const res = await fetch(withQueryParams(path, params), { credentials: 'include' });
   return res.json() as Promise<T>;
 };
 
 const apiGetBlob = async (path: string, params?: Record<string, string>): Promise<Response<Uint8Array | undefined>> => {
-  const url = new URL(path, baseUrl());
-  if (params) {
-    Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
-  }
-
-  const res = await fetch(url.toString(), { credentials: 'include' });
+  const res = await fetch(withQueryParams(path, params), { credentials: 'include' });
   if (res.ok) {
     const buffer = await res.arrayBuffer();
     return { success: true, data: new Uint8Array(buffer) } as Response<Uint8Array | undefined>;
-  } else {
-    return { success: false };
   }
+  return { success: false };
 };
 
 const apiPost = async <T>(path: string, body?: unknown): Promise<T> => {
-  const url = baseUrl() + path;
-
   const options: RequestInit = { method: 'POST', credentials: 'include' };
 
   if (body instanceof FormData) {
@@ -189,13 +186,12 @@ const apiPost = async <T>(path: string, body?: unknown): Promise<T> => {
     options.body = JSON.stringify(body);
   }
 
-  const res = await fetch(url, options);
+  const res = await fetch(apiOrigin() + path, options);
   return res.json() as Promise<T>;
 };
 
 const apiPut = async <T>(path: string, body?: unknown): Promise<T> => {
-  const url = baseUrl() + path;
-  const res = await fetch(url, {
+  const res = await fetch(apiOrigin() + path, {
     method: 'PUT',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
@@ -205,15 +201,22 @@ const apiPut = async <T>(path: string, body?: unknown): Promise<T> => {
 };
 
 const apiDelete = async <T>(path: string): Promise<T> => {
-  const url = baseUrl() + path;
-  const res = await fetch(url, { method: 'DELETE', credentials: 'include' });
+  const res = await fetch(apiOrigin() + path, { method: 'DELETE', credentials: 'include' });
   return res.json() as Promise<T>;
 };
 
-// Auth is only relevant in web mode (the REST API) — Electron talks to the
-// database directly over IPC and never needs a session. Kept separate from
-// the Api/webApi() contract below since Electron's preload has no
-// equivalent of these calls.
+const downloadJsonFile = (contents: unknown, fileName: string, space?: number) => {
+  const blob = new Blob([JSON.stringify(contents, null, space)], { type: 'application/json' });
+  const anchor = document.createElement('a');
+  anchor.href = URL.createObjectURL(blob);
+  anchor.download = fileName;
+  anchor.click();
+  URL.revokeObjectURL(anchor.href);
+  return anchor.download;
+};
+
+const safeFileName = (name: string, fallback: string) => name.replace(/[^a-z0-9_-]/gi, '_') || fallback;
+
 export interface AuthStatus {
   needsSetup: boolean;
 }
@@ -238,33 +241,10 @@ export const webApi = () => {
 
     getAppVersion: () => apiGet<{ version: string }>('/api/version').then(r => r.version),
 
-    checkForUpdates: () => Promise.resolve(),
-    restartApp: () => {},
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    onUpdateProgress: (_callback: (data: ProgressInfo) => void) => () => {
-      console.warn('Not supported for WEB API');
-    },
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    onUpdateAvailable: (_callback: () => void) => () => {
-      console.warn('Not supported for WEB API');
-    },
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    onUpdateNotAvailable: (_callback: () => void) => () => {
-      console.warn('Not supported for WEB API');
-    },
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    onUpdateDownloaded: (_callback: (version: string) => void) => () => {
-      console.warn('Not supported for WEB API');
-    },
-
     openUrl: (url: string) => {
       window.open(url, '_blank');
       return Promise.resolve();
     },
-    selectDatabase: () =>
-      Promise.resolve({ success: true, data: { canceled: true, filePath: '' } } as Response<DBSelector>),
-    openDatabase: () =>
-      Promise.resolve({ success: true, data: { canceled: true, filePath: '' } } as Response<DBSelector>),
     initializeDatabase: (data: {
       postgresConfig?: PostgresConfig;
       dbType: DatabaseType;
@@ -285,9 +265,9 @@ export const webApi = () => {
       return {
         ...response,
         data: response.data
-          ? response.data.map(b => ({
-              ...b,
-              logo: base64ToBytesOrUndef(b.logo)
+          ? response.data.map(business => ({
+              ...business,
+              logo: decodeBase64Field(business.logo)
             }))
           : response.data
       };
@@ -295,7 +275,7 @@ export const webApi = () => {
     updateBusiness: async (data: BusinessUpdate) => {
       const response = await apiPut<Response<BusinessWeb>>('/api/businesses', {
         ...data,
-        logo: await fileToBase64(data.logo)
+        logo: await encodeFileToBase64(data.logo)
       });
 
       return {
@@ -303,7 +283,7 @@ export const webApi = () => {
         data: response.data
           ? {
               ...response.data,
-              logo: base64ToBytesOrUndef(response.data.logo)
+              logo: decodeBase64Field(response.data.logo)
             }
           : response.data
       };
@@ -311,7 +291,7 @@ export const webApi = () => {
     addBusiness: async (data: BusinessAdd) => {
       const response = await apiPost<Response<BusinessWeb>>('/api/businesses', {
         ...data,
-        logo: await fileToBase64(data.logo)
+        logo: await encodeFileToBase64(data.logo)
       });
 
       return {
@@ -319,7 +299,7 @@ export const webApi = () => {
         data: response.data
           ? {
               ...response.data,
-              logo: base64ToBytesOrUndef(response.data.logo)
+              logo: decodeBase64Field(response.data.logo)
             }
           : response.data
       };
@@ -335,23 +315,23 @@ export const webApi = () => {
 
       return {
         ...response,
-        data: response.data?.map(mapStyleProfileFromWeb) ?? []
+        data: response.data?.map(styleProfileFromWire) ?? []
       };
     },
     updateStyleProfile: async (data: StyleProfileUpdate) => {
-      const response = await apiPut<Response<StyleProfileWeb>>('/api/styleProfiles', await mapStyleProfileToWeb(data));
+      const response = await apiPut<Response<StyleProfileWeb>>('/api/styleProfiles', await styleProfileToWire(data));
 
       return {
         ...response,
-        data: response.data && mapStyleProfileFromWeb(response.data)
+        data: response.data && styleProfileFromWire(response.data)
       };
     },
     addStyleProfile: async (data: StyleProfileAdd) => {
-      const response = await apiPost<Response<StyleProfileWeb>>('/api/styleProfiles', await mapStyleProfileToWeb(data));
+      const response = await apiPost<Response<StyleProfileWeb>>('/api/styleProfiles', await styleProfileToWire(data));
 
       return {
         ...response,
-        data: response.data && mapStyleProfileFromWeb(response.data)
+        data: response.data && styleProfileFromWire(response.data)
       };
     },
     deleteStyleProfile: (id: number) => apiDelete<Response<unknown>>(`/api/styleProfiles/${id}`),
@@ -366,13 +346,10 @@ export const webApi = () => {
     exportLayout: async (id: number): Promise<Response<ExportMeta>> => {
       const result = await apiGet<{ success: boolean; data?: Layout }>(`/api/layouts/export/${id}`);
       if (!result.success || !result.data) return result as Response<ExportMeta>;
-      const blob = new Blob([JSON.stringify(result.data.schema, null, 2)], { type: 'application/json' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `${result.data.schema.meta.name.replace(/[^a-z0-9_-]/gi, '_') || 'layout'}.json`;
-      a.click();
-      URL.revokeObjectURL(a.href);
-      return { success: true, data: { filePath: a.download } };
+
+      const fileName = `${safeFileName(result.data.schema.meta.name, 'layout')}.json`;
+      downloadJsonFile(result.data.schema, fileName, 2);
+      return { success: true, data: { filePath: fileName } };
     },
 
     getAllClients: (filter?: FilterData[]) =>
@@ -418,23 +395,23 @@ export const webApi = () => {
 
       return {
         ...response,
-        data: response.data?.map(mapBankFromWeb) ?? []
+        data: response.data?.map(bankFromWire) ?? []
       };
     },
     updateBank: async (data: BankUpdate) => {
-      const response = await apiPut<Response<BankWeb>>('/api/banks', await mapBankToWeb(data));
+      const response = await apiPut<Response<BankWeb>>('/api/banks', await bankToWire(data));
 
       return {
         ...response,
-        data: response.data && mapBankFromWeb(response.data)
+        data: response.data && bankFromWire(response.data)
       };
     },
     addBank: async (data: BankAdd) => {
-      const response = await apiPost<Response<BankWeb>>('/api/banks', await mapBankToWeb(data));
+      const response = await apiPost<Response<BankWeb>>('/api/banks', await bankToWire(data));
 
       return {
         ...response,
-        data: response.data && mapBankFromWeb(response.data)
+        data: response.data && bankFromWire(response.data)
       };
     },
     deleteBank: (id: number) => apiDelete<Response<unknown>>(`/api/banks/${id}`),
@@ -448,24 +425,18 @@ export const webApi = () => {
 
       return {
         ...response,
-        data: response.data?.map(mapPresetFromWeb2) ?? []
+        data: response.data?.map(presetFromWireFull) ?? []
       };
     },
-    updatePreset: async (data: PresetUpdate) => {
-      const response = await apiPut<Response<PresetWeb>>('/api/presets', await mapPresetToWeb(data));
+    updatePreset: async (data: PresetUpdate): Promise<Response<Preset>> => {
+      const response = await apiPut<Response<PresetWeb>>('/api/presets', await presetToWire(data));
 
-      return {
-        ...response,
-        data: response.data && mapPresetFromWeb1(response.data)
-      };
+      return presetWriteResponse(response);
     },
-    addPreset: async (data: PresetAdd) => {
-      const response = await apiPost<Response<PresetWeb>>('/api/presets', await mapPresetToWeb(data));
+    addPreset: async (data: PresetAdd): Promise<Response<Preset>> => {
+      const response = await apiPost<Response<PresetWeb>>('/api/presets', await presetToWire(data));
 
-      return {
-        ...response,
-        data: response.data && mapPresetFromWeb1(response.data)
-      };
+      return presetWriteResponse(response);
     },
     deletePreset: (id: number) => apiDelete<Response<unknown>>(`/api/presets/${id}`),
     addBatchPreset: (data: PresetAdd[]) => apiPost<Response<PresetAdd[]>>('/api/presets/batch', data),
@@ -495,23 +466,23 @@ export const webApi = () => {
 
       return {
         ...response,
-        data: response.data?.map(mapInvoiceFromWeb)
+        data: response.data?.map(invoiceFromWire)
       };
     },
     updateInvoice: async (data: InvoiceUpdate) => {
-      const response = await apiPut<Response<InvoiceWeb>>('/api/invoices', await mapInvoiceToWeb(data));
+      const response = await apiPut<Response<InvoiceWeb>>('/api/invoices', await invoiceToWire(data));
 
       return {
         ...response,
-        data: response.data && mapInvoiceFromWeb(response.data)
+        data: response.data && invoiceFromWire(response.data)
       };
     },
     addInvoice: async (data: InvoiceAdd) => {
-      const response = await apiPost<Response<InvoiceWeb>>('/api/invoices', await mapInvoiceToWeb(data));
+      const response = await apiPost<Response<InvoiceWeb>>('/api/invoices', await invoiceToWire(data));
 
       return {
         ...response,
-        data: response.data && mapInvoiceFromWeb(response.data)
+        data: response.data && invoiceFromWire(response.data)
       };
     },
     duplicateInvoice: async (id: number, invoiceType: InvoiceType) => {
@@ -522,7 +493,7 @@ export const webApi = () => {
 
       return {
         ...response,
-        data: response.data && mapInvoiceFromWeb(response.data)
+        data: response.data && invoiceFromWire(response.data)
       };
     },
     deleteInvoice: (id: number) => apiDelete<Response<unknown>>(`/api/invoices/${id}`),
@@ -530,13 +501,10 @@ export const webApi = () => {
     exportAllData: async (): Promise<Response<ExportMeta>> => {
       const result = await apiGet<{ success: boolean; data?: unknown }>('/api/export');
       if (!result.success || !result.data) return result as Response<ExportMeta>;
-      const blob = new Blob([JSON.stringify(result.data, null, 2)], { type: 'application/json' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `invoice-builder-backup-${new Date().toISOString().slice(0, 10)}.json`;
-      a.click();
-      URL.revokeObjectURL(a.href);
-      return { success: true, data: { filePath: a.download } };
+
+      const fileName = `mavri-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      downloadJsonFile(result.data, fileName, 2);
+      return { success: true, data: { filePath: fileName } };
     },
 
     importAllData: (): Promise<Response<unknown>> => {
@@ -559,9 +527,7 @@ export const webApi = () => {
             return;
           }
 
-          const jsonString = JSON.stringify(parsed);
-          const compressed = gzip(jsonString);
-
+          const compressed = gzip(JSON.stringify(parsed));
           const blob = new Blob([compressed], { type: 'application/gzip' });
           const formData = new FormData();
           formData.append('file', blob, file.name + '.gz');

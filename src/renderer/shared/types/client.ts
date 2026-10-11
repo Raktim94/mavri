@@ -7,19 +7,19 @@ export interface Client {
   phone?: string;
   code?: string;
   additional?: string;
+  description?: string;
   vatCode?: string;
-  peppolEndpointId?: string;
   countryCode?: string;
+  peppolEndpointId?: string;
   peppolEndpointSchemeId?: string;
   buyerReference?: string;
   taxExempt?: boolean;
   taxExemptionCertificate?: string;
+  isArchived: boolean;
   invoiceCount: number;
   quotesCount: number;
   createdAt: string;
   updatedAt: string;
-  description?: string;
-  isArchived: boolean;
 }
 
 export interface ClientAdd {
@@ -30,14 +30,14 @@ export interface ClientAdd {
   phone?: string;
   code?: string;
   additional?: string;
+  description?: string;
   vatCode?: string;
-  peppolEndpointId?: string;
   countryCode?: string;
+  peppolEndpointId?: string;
   peppolEndpointSchemeId?: string;
   buyerReference?: string;
   taxExempt?: boolean;
   taxExemptionCertificate?: string;
-  description?: string;
   isArchived: boolean;
 }
 
@@ -47,20 +47,20 @@ export interface ClientUpdate extends ClientAdd {
 
 export interface ClientFromData {
   id?: number;
-  email?: string;
-  phone?: string;
   name: string;
   shortName: string;
   address?: string;
+  email?: string;
+  phone?: string;
   code?: string;
   additional?: string;
+  description?: string;
   vatCode?: string;
-  peppolEndpointId?: string;
   countryCode?: string;
+  peppolEndpointId?: string;
   peppolEndpointSchemeId?: string;
   buyerReference?: string;
   taxExempt?: boolean;
   taxExemptionCertificate?: string;
-  description?: string;
   isArchived: boolean;
 }

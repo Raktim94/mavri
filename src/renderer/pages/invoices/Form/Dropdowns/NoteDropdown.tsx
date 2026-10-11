@@ -1,7 +1,7 @@
-import { Box, Grid, SwipeableDrawer, TextField, useMediaQuery, useTheme } from '@mui/material';
+import { Grid, TextField } from '@mui/material';
 import { memo, useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PageHeader } from '../../../../shared/components/layout/pageHeader/PageHeader';
+import { PageFormDrawer } from '../drawers/PageFormDrawer';
 
 interface Props {
   isOpen: boolean;
@@ -11,11 +11,9 @@ interface Props {
   onClick?: (note: string) => void;
   currentNote?: string;
 }
+
 const NoteDropdownComponent: FC<Props> = ({ isOpen, title, currentNote, onClose, onOpen, onClick }) => {
   const { t } = useTranslation();
-  const theme = useTheme();
-  const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
-
   const [note, setNote] = useState<string>(currentNote ?? '');
 
   useEffect(() => {
@@ -25,57 +23,31 @@ const NoteDropdownComponent: FC<Props> = ({ isOpen, title, currentNote, onClose,
   }, [isOpen, currentNote]);
 
   return (
-    <>
-      <SwipeableDrawer
-        anchor="bottom"
-        open={isOpen}
-        onClose={() => onClose?.()}
-        onOpen={() => onOpen?.()}
-        slotProps={{
-          paper: {
-            sx: {
-              maxWidth: isDesktop ? '40%' : '100%',
-              height: isDesktop ? '30%' : '40%',
-              mx: 'auto',
-              borderTopLeftRadius: 16,
-              borderTopRightRadius: 16,
-              borderBottomLeftRadius: 0,
-              borderBottomRightRadius: 0,
-              p: 3
-            }
-          }
-        }}
-      >
-        <Box sx={{ mb: 2 }}>
-          <PageHeader
-            title={t('invoices.addNote')}
-            showBack={false}
-            showSave={true}
-            showClose={false}
-            formData={note}
-            isFormValid={true}
-            onClose={onClose}
-            onSave={data => {
-              onClick?.(data as string);
-            }}
+    <PageFormDrawer
+      isOpen={isOpen}
+      onClose={onClose}
+      onOpen={onOpen}
+      title={t('invoices.addNote')}
+      formData={note}
+      isFormValid={true}
+      onSave={data => onClick?.(data as string)}
+      height="30%"
+      mobileHeight="40%"
+    >
+      <Grid container spacing={2}>
+        <Grid size={{ xs: 12, md: 12 }}>
+          <TextField
+            label={title}
+            fullWidth
+            value={note}
+            multiline
+            rows={5}
+            onChange={event => setNote(event.target.value)}
           />
-        </Box>
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12, md: 12 }}>
-            <TextField
-              label={title}
-              fullWidth
-              value={note}
-              multiline
-              rows={5}
-              onChange={e => {
-                setNote(e.target.value);
-              }}
-            />
-          </Grid>
         </Grid>
-      </SwipeableDrawer>
-    </>
+      </Grid>
+    </PageFormDrawer>
   );
 };
+
 export const NoteDropdown = memo(NoteDropdownComponent);

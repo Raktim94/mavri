@@ -3,7 +3,6 @@ import CodeIcon from '@mui/icons-material/Code';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
-import PrintIcon from '@mui/icons-material/Print';
 import {
   Box,
   ListItem,
@@ -12,16 +11,16 @@ import {
   ListItemText,
   SwipeableDrawer,
   Tooltip,
-  Typography,
-  useMediaQuery,
-  useTheme
+  Typography
 } from '@mui/material';
-import { memo, type FC } from 'react';
+import { memo, type FC, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '../../../../shared/components/layout/pageHeader/PageHeader';
-import { InvoiceType } from '../../../../shared/enums/invoiceType';
+import type { InvoiceType } from '../../../../shared/enums/invoiceType';
 import { useAppSelector } from '../../../../state/configureStore';
 import { selectSettings } from '../../../../state/pageSlice';
+import { drawerPaperSx, useIsDesktop } from '../drawers/drawerSx';
+import { moreActionEntries, type MoreActionEntry, type MoreActionIcon } from '../drawers/moreActionsModel';
 
 interface Props {
   isOpen: boolean;
@@ -34,13 +33,21 @@ interface Props {
   onDelete?: () => void;
   onDuplicate?: () => void;
   onMakeInvoice?: () => void;
-  onPrintReceipt?: () => void;
   showDelete?: boolean;
   showDuplicate?: boolean;
   showMakeInvoice?: boolean;
   isPDFReady?: boolean;
   type: InvoiceType;
 }
+
+const ICONS: Record<MoreActionIcon, ReactNode> = {
+  addCircle: <AddCircleIcon />,
+  pdf: <PictureAsPdfIcon color="error" />,
+  code: <CodeIcon color="primary" />,
+  copy: <FileCopyIcon color="primary" />,
+  delete: <DeleteIcon color="error" />
+};
+
 const MoreActionDropdownComponent: FC<Props> = ({
   isOpen,
   showDelete = true,
@@ -51,7 +58,6 @@ const MoreActionDropdownComponent: FC<Props> = ({
   onClose,
   onOpen,
   onExportPDF,
-  onPrintReceipt,
   onExportPDFUBL,
   onExportUBLXML,
   onExportXRechnungXML,
@@ -60,324 +66,90 @@ const MoreActionDropdownComponent: FC<Props> = ({
   onMakeInvoice
 }) => {
   const { t } = useTranslation();
-  const theme = useTheme();
-  const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
+  const isDesktop = useIsDesktop();
   const storeSettings = useAppSelector(selectSettings);
 
-  return (
-    <>
-      <SwipeableDrawer
-        anchor="bottom"
-        open={isOpen}
-        onClose={() => onClose?.()}
-        onOpen={() => onOpen?.()}
-        slotProps={{
-          paper: {
-            sx: {
-              maxWidth: isDesktop ? '40%' : '100%',
-              height: '40%',
-              mx: 'auto',
-              borderTopLeftRadius: 16,
-              borderTopRightRadius: 16,
-              borderBottomLeftRadius: 0,
-              borderBottomRightRadius: 0,
-              p: 3
-            }
-          }
-        }}
-      >
-        <Box sx={{ mb: 2, mt: 2, display: 'flex', gap: 2, flexDirection: 'column' }}>
-          <PageHeader
-            title={t('ariaLabel.moreActions')}
-            showBack={false}
-            showSave={false}
-            showClose={true}
-            onClose={onClose}
-          />
-          <Box>
-            {showMakeInvoice && (
-              <ListItemButton
-                onClick={onMakeInvoice}
-                sx={{
-                  width: '100%',
-                  borderRadius: 1,
-                  display: 'flex',
-                  justifyContent: 'start',
-                  alignItems: 'start',
-                  flexDirection: 'column'
-                }}
-              >
-                <ListItem sx={{ p: 0 }}>
-                  <ListItemIcon sx={{ minWidth: 'auto', mr: 1 }}>
-                    <AddCircleIcon />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={
-                      <Typography
-                        component="div"
-                        variant="body1"
-                        sx={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis' }}
-                      >
-                        {t('common.makeInvoice')}
-                      </Typography>
-                    }
-                    disableTypography
-                    sx={{ m: 0 }}
-                    slotProps={{ primary: { sx: { fontWeight: 600, m: 0 } } }}
-                  />
-                </ListItem>
-              </ListItemButton>
-            )}
-            <ListItemButton
-              onClick={onExportPDF}
-              sx={{
-                width: '100%',
-                borderRadius: 1,
-                display: 'flex',
-                justifyContent: 'start',
-                alignItems: 'start',
-                flexDirection: 'column'
-              }}
+  const entries = moreActionEntries(t, {
+    showDelete,
+    showDuplicate,
+    showMakeInvoice,
+    isPDFReady,
+    type,
+    ublON: storeSettings?.ublON,
+    xrechnungON: storeSettings?.xrechnungON,
+    onExportPDF,
+    onExportPDFUBL,
+    onExportUBLXML,
+    onExportXRechnungXML,
+    onDelete,
+    onDuplicate,
+    onMakeInvoice
+  });
+
+  const renderEntry = (entry: MoreActionEntry) => (
+    <ListItemButton
+      key={entry.id}
+      onClick={entry.onClick}
+      disabled={entry.disabled}
+      sx={{
+        width: '100%',
+        borderRadius: 1,
+        display: 'flex',
+        justifyContent: 'start',
+        alignItems: 'start',
+        flexDirection: 'column'
+      }}
+    >
+      <ListItem sx={{ p: 0 }}>
+        <ListItemIcon sx={{ minWidth: 'auto', mr: 1 }}>{ICONS[entry.icon]}</ListItemIcon>
+        <ListItemText
+          primary={
+            <Typography
+              component="div"
+              variant="body1"
+              sx={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis' }}
             >
-              <ListItem sx={{ p: 0 }}>
-                <ListItemIcon sx={{ minWidth: 'auto', mr: 1 }}>
-                  <PictureAsPdfIcon color="error" />
-                </ListItemIcon>
-                <ListItemText
-                  primary={
-                    <Typography
-                      component="div"
-                      variant="body1"
-                      sx={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis' }}
-                    >
-                      {t('common.exportPDF')}
-                    </Typography>
-                  }
-                  disableTypography
-                  sx={{ m: 0 }}
-                  slotProps={{ primary: { sx: { fontWeight: 600, m: 0 } } }}
-                />
-              </ListItem>
-            </ListItemButton>
-            {storeSettings?.receiptPrintingOn && type === InvoiceType.invoice && (
-              <ListItemButton
-                onClick={onPrintReceipt}
-                sx={{
-                  width: '100%',
-                  borderRadius: 1,
-                  display: 'flex',
-                  justifyContent: 'start',
-                  alignItems: 'start',
-                  flexDirection: 'column'
-                }}
-              >
-                <ListItem sx={{ p: 0 }}>
-                  <ListItemIcon sx={{ minWidth: 'auto', mr: 1 }}>
-                    <PrintIcon color="primary" />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={
-                      <Typography
-                        component="div"
-                        variant="body1"
-                        sx={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis' }}
-                      >
-                        {t('common.printReceipt')}
-                      </Typography>
-                    }
-                    disableTypography
-                    sx={{ m: 0 }}
-                    slotProps={{ primary: { sx: { fontWeight: 600, m: 0 } } }}
-                  />
-                </ListItem>
-              </ListItemButton>
-            )}
-            {storeSettings?.ublON && type === InvoiceType.invoice && (
-              <>
-                <Tooltip title={t('common.tooltipPDFXML')}>
-                  <Box>
-                    <ListItemButton
-                      onClick={onExportPDFUBL}
-                      disabled={!isPDFReady}
-                      sx={{
-                        width: '100%',
-                        borderRadius: 1,
-                        display: 'flex',
-                        justifyContent: 'start',
-                        alignItems: 'start',
-                        flexDirection: 'column'
-                      }}
-                    >
-                      <ListItem sx={{ p: 0 }}>
-                        <ListItemIcon sx={{ minWidth: 'auto', mr: 1 }}>
-                          <PictureAsPdfIcon color="error" />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={
-                            <Typography
-                              component="div"
-                              variant="body1"
-                              sx={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis' }}
-                            >
-                              {t('common.exportPDFEmbeddedUBL')}
-                            </Typography>
-                          }
-                          disableTypography
-                          sx={{ m: 0 }}
-                          slotProps={{ primary: { sx: { fontWeight: 600, m: 0 } } }}
-                        />
-                      </ListItem>
-                    </ListItemButton>
-                  </Box>
-                </Tooltip>
-                <Tooltip title={t('common.tooltipXML')}>
-                  <Box>
-                    <ListItemButton
-                      onClick={onExportUBLXML}
-                      disabled={!isPDFReady}
-                      sx={{
-                        width: '100%',
-                        borderRadius: 1,
-                        display: 'flex',
-                        justifyContent: 'start',
-                        alignItems: 'start',
-                        flexDirection: 'column'
-                      }}
-                    >
-                      <ListItem sx={{ p: 0 }}>
-                        <ListItemIcon sx={{ minWidth: 'auto', mr: 1 }}>
-                          <CodeIcon color="primary" />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={
-                            <Typography
-                              component="div"
-                              variant="body1"
-                              sx={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis' }}
-                            >
-                              {t('common.exportUBLXML')}
-                            </Typography>
-                          }
-                          disableTypography
-                          sx={{ m: 0 }}
-                          slotProps={{ primary: { sx: { fontWeight: 600, m: 0 } } }}
-                        />
-                      </ListItem>
-                    </ListItemButton>
-                  </Box>
-                </Tooltip>
-              </>
-            )}
-            {storeSettings?.xrechnungON && type === InvoiceType.invoice && (
-              <>
-                <Tooltip title={t('common.tooltipXML')}>
-                  <Box>
-                    <ListItemButton
-                      onClick={onExportXRechnungXML}
-                      disabled={!isPDFReady}
-                      sx={{
-                        width: '100%',
-                        borderRadius: 1,
-                        display: 'flex',
-                        justifyContent: 'start',
-                        alignItems: 'start',
-                        flexDirection: 'column'
-                      }}
-                    >
-                      <ListItem sx={{ p: 0 }}>
-                        <ListItemIcon sx={{ minWidth: 'auto', mr: 1 }}>
-                          <CodeIcon color="primary" />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={
-                            <Typography
-                              component="div"
-                              variant="body1"
-                              sx={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis' }}
-                            >
-                              {t('common.exportXRechnungXML')}
-                            </Typography>
-                          }
-                          disableTypography
-                          sx={{ m: 0 }}
-                          slotProps={{ primary: { sx: { fontWeight: 600, m: 0 } } }}
-                        />
-                      </ListItem>
-                    </ListItemButton>
-                  </Box>
-                </Tooltip>
-              </>
-            )}
-            {showDuplicate && (
-              <ListItemButton
-                onClick={onDuplicate}
-                sx={{
-                  width: '100%',
-                  borderRadius: 1,
-                  display: 'flex',
-                  justifyContent: 'start',
-                  alignItems: 'start',
-                  flexDirection: 'column'
-                }}
-              >
-                <ListItem sx={{ p: 0 }}>
-                  <ListItemIcon sx={{ minWidth: 'auto', mr: 1 }}>
-                    <FileCopyIcon color="primary" />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={
-                      <Typography
-                        component="div"
-                        variant="body1"
-                        sx={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis' }}
-                      >
-                        {t('common.duplicate')}
-                      </Typography>
-                    }
-                    disableTypography
-                    sx={{ m: 0 }}
-                    slotProps={{ primary: { sx: { fontWeight: 600, m: 0 } } }}
-                  />
-                </ListItem>
-              </ListItemButton>
-            )}
-            {showDelete && (
-              <ListItemButton
-                onClick={onDelete}
-                sx={{
-                  width: '100%',
-                  borderRadius: 1,
-                  display: 'flex',
-                  justifyContent: 'start',
-                  alignItems: 'start',
-                  flexDirection: 'column'
-                }}
-              >
-                <ListItem sx={{ p: 0 }}>
-                  <ListItemIcon sx={{ minWidth: 'auto', mr: 1 }}>
-                    <DeleteIcon color="error" />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={
-                      <Typography
-                        component="div"
-                        variant="body1"
-                        sx={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis' }}
-                      >
-                        {t('ariaLabel.delete')}
-                      </Typography>
-                    }
-                    disableTypography
-                    sx={{ m: 0 }}
-                    slotProps={{ primary: { sx: { fontWeight: 600, m: 0 } } }}
-                  />
-                </ListItem>
-              </ListItemButton>
-            )}
-          </Box>
+              {entry.label}
+            </Typography>
+          }
+          disableTypography
+          sx={{ m: 0 }}
+          slotProps={{ primary: { sx: { fontWeight: 600, m: 0 } } }}
+        />
+      </ListItem>
+    </ListItemButton>
+  );
+
+  return (
+    <SwipeableDrawer
+      anchor="bottom"
+      open={isOpen}
+      onClose={() => onClose?.()}
+      onOpen={() => onOpen?.()}
+      slotProps={{ paper: { sx: drawerPaperSx({ isDesktop, height: '40%' }) } }}
+    >
+      <Box sx={{ mb: 2, mt: 2, display: 'flex', gap: 2, flexDirection: 'column' }}>
+        <PageHeader
+          title={t('ariaLabel.moreActions')}
+          showBack={false}
+          showSave={false}
+          showClose={true}
+          onClose={onClose}
+        />
+        <Box>
+          {entries.map(entry =>
+            entry.tooltip ? (
+              <Tooltip key={entry.id} title={entry.tooltip}>
+                <Box>{renderEntry(entry)}</Box>
+              </Tooltip>
+            ) : (
+              renderEntry(entry)
+            )
+          )}
         </Box>
-      </SwipeableDrawer>
-    </>
+      </Box>
+    </SwipeableDrawer>
   );
 };
+
 export const MoreActionDropdown = memo(MoreActionDropdownComponent);

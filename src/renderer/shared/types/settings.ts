@@ -14,12 +14,12 @@ export interface Settings {
   shouldIncludeMonth: boolean;
   shouldIncludeBusinessName: boolean;
   quotesON: boolean;
-  styleProfilesON: boolean;
-  ublON: boolean;
-  xrechnungON: boolean;
-  receiptPrintingOn: boolean;
   presetsON: boolean;
   reportsON: boolean;
+  styleProfilesON: boolean;
+  receiptPrintingOn: boolean;
+  ublON: boolean;
+  xrechnungON: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -35,10 +35,10 @@ export interface SettingsUpdate {
   shouldIncludeMonth?: boolean;
   shouldIncludeBusinessName?: boolean;
   quotesON?: boolean;
-  receiptPrintingOn?: boolean;
-  styleProfilesON?: boolean;
-  ublON?: boolean;
-  xrechnungON?: boolean;
   presetsON?: boolean;
   reportsON?: boolean;
+  styleProfilesON?: boolean;
+  receiptPrintingOn?: boolean;
+  ublON?: boolean;
+  xrechnungON?: boolean;
 }

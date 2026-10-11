@@ -11,25 +11,28 @@ interface Props {
   onAttach: (attachment: AttachmentForm) => void;
   onClear: (id: number) => void;
 }
+
+const HEADING_SX = { fontWeight: 600, color: 'primary.main', overflow: 'hidden', textOverflow: 'ellipsis' } as const;
+
 const AttachmentsListComponent: FC<Props> = ({ invoiceForm, onAttach, onClear }) => {
   const { t } = useTranslation();
+  const [attachmentUrls, setAttachmentUrls] = useState<Array<{ id: number; url?: string }>>([]);
 
-  const onUpload = async (file?: Blob, filename?: string, id?: number) => {
+  const uploadAttachment = async (file?: Blob, filename?: string, id?: number) => {
     if (file && filename) {
-      const fileUnitArray = await toUint8Array(t, file);
-      if (fileUnitArray)
+      const bytes = await toUint8Array(t, file);
+      if (bytes) {
         onAttach({
-          data: fileUnitArray,
+          data: bytes,
           fileSize: file.size,
           fileType: file.type,
           fileName: filename
         });
+      }
     } else if (!file && !filename && id) {
       onClear(id);
     }
   };
-
-  const [attachmentUrls, setAttachmentUrls] = useState<Array<{ id: number; url?: string }>>([]);
 
   useEffect(() => {
     const attachments = invoiceForm?.invoiceAttachments ?? [];
@@ -39,17 +42,20 @@ const AttachmentsListComponent: FC<Props> = ({ invoiceForm, onAttach, onClear })
       return;
     }
 
+    let cancelled = false;
     (async () => {
-      const list = await Promise.all(
-        attachments.map(async attachment => {
-          const url = attachment.data ? await toDataUrl(attachment.data, attachment.fileType) : undefined;
-
-          return { id: attachment.id as number, url };
-        })
+      const urls = await Promise.all(
+        attachments.map(async attachment => ({
+          id: attachment.id as number,
+          url: attachment.data ? await toDataUrl(attachment.data, attachment.fileType) : undefined
+        }))
       );
-
-      setAttachmentUrls(list);
+      if (!cancelled) setAttachmentUrls(urls);
     })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [invoiceForm?.invoiceAttachments]);
 
   return (
@@ -66,23 +72,13 @@ const AttachmentsListComponent: FC<Props> = ({ invoiceForm, onAttach, onClear })
     >
       <ListItemText
         primary={
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center'
-            }}
-          >
+          <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
             <Tooltip title={t('invoices.attachments')}>
-              <IconButton size="small" data-drag-handle onMouseDown={e => e.stopPropagation()}>
+              <IconButton size="small" onMouseDown={event => event.stopPropagation()}>
                 <PhotoLibraryIcon fontSize="small" />
               </IconButton>
             </Tooltip>
-            <Typography
-              component="div"
-              variant="body1"
-              sx={{ fontWeight: 600, color: 'primary.main', overflow: 'hidden', textOverflow: 'ellipsis' }}
-            >
+            <Typography component="div" variant="body1" sx={HEADING_SX}>
               {t('invoices.attachments').toUpperCase()}
             </Typography>
           </Box>
@@ -105,15 +101,16 @@ const AttachmentsListComponent: FC<Props> = ({ invoiceForm, onAttach, onClear })
         {attachmentUrls.map(attachment => (
           <UploadImage
             key={attachment.id}
-            onUpload={(file?: Blob, filename?: string) => onUpload(file, filename, attachment.id)}
+            onUpload={(file?: Blob, filename?: string) => uploadAttachment(file, filename, attachment.id)}
             imgUrl={attachment.url}
             size={100}
             disableEdit={true}
           />
         ))}
-        <UploadImage onUpload={onUpload} size={100} imgUrl={undefined} alwaysShowAddIcon={true} />
+        <UploadImage onUpload={uploadAttachment} size={100} imgUrl={undefined} alwaysShowAddIcon={true} />
       </Box>
     </Box>
   );
 };
+
 export const AttachmentsList = memo(AttachmentsListComponent);

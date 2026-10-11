@@ -8,93 +8,62 @@ import { useCurrencyAddBatch } from '../../shared/hooks/currencies/useCurrencyAd
 import { useCurrencyDelete } from '../../shared/hooks/currencies/useCurrencyDelete';
 import { useCurrencyUpdate } from '../../shared/hooks/currencies/useCurrencyUpdate';
 import type { Currency, CurrencyAdd, CurrencyUpdate } from '../../shared/types/currency';
-import type { Rows } from '../../shared/types/excel';
 import type { Filter, FilterData } from '../../shared/types/filter';
 import type { Response } from '../../shared/types/response';
 import { createCommonFilters, createInvoiceFilters } from '../../shared/utils/filterSortFunctions';
 import { isCurrencyFromData } from '../../shared/utils/typeGuardFunctions';
+import { CURRENCY_EXCEL_COLUMNS, CURRENCY_EXCEL_TEMPLATE } from './currencyModel';
 import { Form } from './Form';
 import { List } from './List';
 
 export const CurrenciesPage: FC = () => {
   const { t } = useTranslation();
-  const excelColumns = ['code', 'symbol', 'text', 'format', 'subunit', 'isArchived'];
-  const excelFileName = 'currencies';
-  const excelTemplateData: Rows = [
-    {
-      code: 'USD',
-      symbol: '$',
-      text: 'United States Dollar',
-      format: '{symbol}{amount}',
-      subunit: 100,
-      isArchived: false
-    },
-    {
-      code: 'EUR',
-      symbol: '€',
-      text: 'Euro',
-      subunit: 100,
-      format: '{symbol}{amount}',
-      isArchived: false
-    }
-  ];
+
   const filters: Filter[] = [
     ...createCommonFilters({ t, namespace: 'currencies', initial: FilterType.active }),
     ...createInvoiceFilters({ t, namespace: 'currencies' })
   ];
-  const useCurrenciesCRUDRetrieve = (args: {
-    filter?: FilterData[];
-    onDone?: (data: Response<Currency[]>) => void;
-  }) => {
+
+  const useCurrencyList = (args: { filter?: FilterData[]; onDone?: (data: Response<Currency[]>) => void }) => {
     const { currencies, execute } = useCurrenciesRetrieve({ filter: args.filter, onDone: args.onDone });
     return { items: currencies, execute };
   };
-  const useCurrencyCRUDAdd = (args: {
+
+  const useCurrencyCreate = (args: {
     item?: CurrencyAdd;
     immediate?: boolean;
     onDone?: (data: Response<Currency>) => void;
-  }) => {
-    return useCurrencyAdd({
-      currency: args.item,
-      immediate: args.immediate,
-      onDone: args.onDone
-    });
-  };
-  const useCurrenciesCRUDAddBatch = (args: {
+  }) => useCurrencyAdd({ currency: args.item, immediate: args.immediate, onDone: args.onDone });
+
+  const useCurrencyCreateBatch = (args: {
     item?: CurrencyAdd[];
     immediate?: boolean;
     onDone?: (data: Response<CurrencyAdd[]>) => void;
-  }) => {
-    return useCurrencyAddBatch({
-      currencies: args.item,
-      immediate: args.immediate,
-      onDone: args.onDone
-    });
-  };
-  const useCurrencyCRUDUpdate = (args: {
+  }) => useCurrencyAddBatch({ currencies: args.item, immediate: args.immediate, onDone: args.onDone });
+
+  const useCurrencyEdit = (args: {
     item?: CurrencyUpdate;
     immediate?: boolean;
     onDone?: (data: Response<Currency>) => void;
-  }) => {
-    return useCurrencyUpdate({
-      currency: args.item,
-      immediate: args.immediate,
-      onDone: args.onDone
-    });
-  };
+  }) => useCurrencyUpdate({ currency: args.item, immediate: args.immediate, onDone: args.onDone });
 
   return (
     <CRUDPage<Currency, CurrencyAdd, CurrencyUpdate>
       componentId="currencies"
       title={t('common.currency')}
       filters={filters}
-      excelData={{ excelColumns, excelFileName, excelFormat: 'xlsx', excelTemplateData }}
-      useRetrieve={useCurrenciesCRUDRetrieve}
-      useAdd={useCurrencyCRUDAdd}
-      useAddBatch={useCurrenciesCRUDAddBatch}
-      useUpdate={useCurrencyCRUDUpdate}
+      excelData={{
+        excelColumns: CURRENCY_EXCEL_COLUMNS,
+        excelFileName: 'currencies',
+        excelFormat: 'xlsx',
+        excelTemplateData: CURRENCY_EXCEL_TEMPLATE
+      }}
+      useRetrieve={useCurrencyList}
+      useAdd={useCurrencyCreate}
+      useAddBatch={useCurrencyCreateBatch}
+      useUpdate={useCurrencyEdit}
       useDelete={useCurrencyDelete}
-      searchField={'text'}
+      searchField="text"
       sortOptions={[
         { label: t('common.text'), value: 'text' },
         { label: t('common.lastUpdate'), value: 'updatedAt' }
@@ -102,10 +71,7 @@ export const CurrenciesPage: FC = () => {
       noItemButtonText={t('currencies.add')}
       noItemText={t('currencies.noItem')}
       leftTitle={t('menuItems.currencies')}
-      validateAndNormalize={async data => {
-        if (!isCurrencyFromData(data)) return;
-        return data;
-      }}
+      validateAndNormalize={async data => (isCurrencyFromData(data) ? data : undefined)}
       renderListItem={(item, selectedItem, onEdit, onDelete) => (
         <List
           key={item.id}
@@ -118,12 +84,12 @@ export const CurrenciesPage: FC = () => {
       form={({ item, onChange }) => (
         <Form
           currency={item}
-          handleChange={d => {
-            if (isCurrencyFromData(d.currency)) {
+          handleChange={change => {
+            if (isCurrencyFromData(change.currency)) {
               onChange({
-                changedData: d.currency,
-                isFormValid: d.isFormValid,
-                description: d.description
+                changedData: change.currency,
+                isFormValid: change.isFormValid,
+                description: change.description
               });
             }
           }}

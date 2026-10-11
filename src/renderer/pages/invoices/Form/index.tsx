@@ -4,35 +4,29 @@ import { memo, useCallback, useEffect, useMemo, useState, useTransition, type FC
 import { useTranslation } from 'react-i18next';
 import i18n from '../../../i18n';
 import { EInvoice } from '../../../shared/enums/einvoice';
-import { InvoiceStatus } from '../../../shared/enums/invoiceStatus';
 import { InvoiceType } from '../../../shared/enums/invoiceType';
 import type { Language } from '../../../shared/enums/language';
 import { useExportPdf } from '../../../shared/hooks/fileExport/useExportPdf';
 import { useExportPdfWithXml } from '../../../shared/hooks/fileExport/useExportPdfWithXml';
 import { useExportXML } from '../../../shared/hooks/fileExport/useExportXML';
 import { useGetEInvoiceXML } from '../../../shared/hooks/invoices/useGetEInvoiceXML';
-import { usePrintReceipt } from '../../../shared/hooks/print/usePrintReceipt';
 import type { Bank } from '../../../shared/types/bank';
 import type { Business } from '../../../shared/types/business';
 import type { Client } from '../../../shared/types/client';
 import type { Currency } from '../../../shared/types/currency';
 import type {
   AttachmentForm,
-  CustomFieldMeta,
-  DiscountForm,
   InvoiceFromData,
   InvoiceInfo,
   InvoiceItem,
   ItemForm,
   PaymentForm,
   SignatureForm,
-  SurchargeForm,
   TaxForm
 } from '../../../shared/types/invoice';
 import type { Item } from '../../../shared/types/item';
 import type { Response } from '../../../shared/types/response';
 import type { StyleProfile } from '../../../shared/types/styleProfiles';
-import { getInvoiceTotal, getPaidAmount } from '../../../shared/utils/invoiceFunctions';
 import { useAppDispatch, useAppSelector } from '../../../state/configureStore';
 import { addToast, selectSettings } from '../../../state/pageSlice';
 import { NotesSelector } from './../Form/NotesSelector';
@@ -51,6 +45,32 @@ import { MoreActionDropdown } from './Dropdowns/MoreActionDropdown';
 import { StyleProfilesDropdown } from './Dropdowns/StyleProfilesDropdown';
 import { FinancialInfo } from './FinancialInfo';
 import { ItemSelector } from './ItemSelector';
+import {
+  applyCurrencyToDraft,
+  applyDiscountToDraft,
+  applyInvoiceInfoToDraft,
+  applyShippingFeeToDraft,
+  applySurchargeToDraft,
+  businessSlice,
+  customFieldOptionsFrom,
+  invoiceHeaderSlice,
+  notesSlice,
+  signatureSlice,
+  unitPriceInDisplayUnits,
+  withAddedItem,
+  withAppendedAttachment,
+  withRemovedAttachment,
+  withRemovedItem,
+  withRemovedPayment,
+  withSavedPayment,
+  withSelectedBank,
+  withSelectedBusiness,
+  withSelectedClient,
+  withSelectedLanguage,
+  withSelectedStyleProfile,
+  withUpdatedItemMetadata,
+  withoutBank
+} from './invoiceDraft';
 import { ItemsList } from './ItemsList';
 import { ItemMetadataSetter } from './Modals/ItemMetadataSetter';
 import { SignatureSelector } from './SignatureSelector';
@@ -63,7 +83,19 @@ interface Props {
   handleDelete?: (id: number) => void;
   handleDuplicate?: (id: number, invoiceType: InvoiceType) => void;
 }
-const InvoiceFormComponent: FC<Props> = ({
+
+type PickerId =
+  | 'language'
+  | 'businesses'
+  | 'currencies'
+  | 'styleProfiles'
+  | 'banks'
+  | 'clients'
+  | 'invoiceInfo'
+  | 'moreActions'
+  | 'items';
+
+const InvoiceEditor: FC<Props> = ({
   invoiceForm,
   type,
   setInvoiceForm = () => {},
@@ -71,812 +103,258 @@ const InvoiceFormComponent: FC<Props> = ({
   handleDuplicate = () => {}
 }) => {
   const { t } = useTranslation();
+  const dispatch = useAppDispatch();
   const storeSettings = useAppSelector(selectSettings);
-
-  const { exportPdf } = useExportPdf({ invoiceForm, storeSettings });
-
-  const [isDropdownOpenLanguages, setIsDropdownOpenLanguages] = useState<boolean>(false);
-  const [isDropdownOpenBusinesses, setIsDropdownOpenBusinesses] = useState<boolean>(false);
-  const [isDropdownOpenCurrencies, setIsDropdownOpenCurrencies] = useState<boolean>(false);
-  const [isDropdownOpenStyleProfile, setIsDropdownOpenStyleProfile] = useState<boolean>(false);
-  const [isDropdownOpenBanks, setIsDropdownOpenBanks] = useState<boolean>(false);
-  const [isDropdownOpenClients, setIsDropdownOpenClients] = useState<boolean>(false);
-  const [isDropdownOpenInvoiceInfo, setIsDropdownOpenInvoiceInfo] = useState<boolean>(false);
-  const [isDropdownOpenMoreAction, setMoreActionDropdown] = useState<boolean>(false);
-  const [isDropdownOpenItems, setIsDropdownOpenItems] = useState<boolean>(false);
-  const [isModalItemMetadataOpen, setIsModalItemMetadataOpen] = useState<boolean>(false);
   const [, startTransition] = useTransition();
 
-  const [selectedInvoiceItem, setSelectedInvoiceItem] = useState<InvoiceItem | undefined>(undefined);
-
-  const [xmlData, setXMLData] = useState<
-    { invoiceId: number; einvoice: EInvoice; type: 'singleFile' | 'embeddedFile' } | undefined
-  >(undefined);
+  const { exportPdf } = useExportPdf({ invoiceForm, storeSettings });
   const { exportXML } = useExportXML({ invoiceForm, storeSettings });
   const { exportPdfWithXml } = useExportPdfWithXml({ invoiceForm, storeSettings });
-  const { printReceipt } = usePrintReceipt({ invoiceForm, storeSettings });
 
-  const dispatch = useAppDispatch();
+  const [openPicker, setOpenPicker] = useState<Record<PickerId, boolean>>({
+    language: false,
+    businesses: false,
+    currencies: false,
+    styleProfiles: false,
+    banks: false,
+    clients: false,
+    invoiceInfo: false,
+    moreActions: false,
+    items: false
+  });
+  const [isMetadataModalOpen, setIsMetadataModalOpen] = useState(false);
+  const [editedLine, setEditedLine] = useState<InvoiceItem | undefined>(undefined);
+  const [xmlRequest, setXmlRequest] = useState<
+    { invoiceId: number; einvoice: EInvoice; type: 'singleFile' | 'embeddedFile' } | undefined
+  >(undefined);
+
+  const openPickerId = useCallback((id: PickerId) => setOpenPicker(current => ({ ...current, [id]: true })), []);
+  const closePickerId = useCallback((id: PickerId) => setOpenPicker(current => ({ ...current, [id]: false })), []);
+
   const { execute: retrieveXML } = useGetEInvoiceXML({
-    params: xmlData,
+    params: xmlRequest,
     immediate: false,
     onDone: (data: Response<Uint8Array | undefined>) => {
       if (!data.success) {
         if (data.message) {
           const message = i18n.exists(data.message) ? t(data.message) : data.message;
-          dispatch(addToast({ message: message, severity: 'error' }));
-        } else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
+          dispatch(addToast({ message, severity: 'error' }));
+        } else if (data.key) {
+          dispatch(addToast({ message: t(data.key), severity: 'error' }));
+        }
       }
 
-      if (xmlData && data.data && xmlData.type === 'singleFile') {
-        exportXML(data.data, xmlData?.einvoice);
-      } else if (xmlData && data.data && xmlData.type === 'embeddedFile') {
+      if (!xmlRequest || !data.data) return;
+
+      if (xmlRequest.type === 'singleFile') {
+        exportXML(data.data, xmlRequest.einvoice);
+      } else if (xmlRequest.type === 'embeddedFile') {
         exportPdfWithXml(data.data);
       }
     }
   });
 
-  const invoiceInformation = useMemo(
-    () => ({
-      id: invoiceForm?.id,
-      invoiceType: invoiceForm?.invoiceType,
-      issuedAt: invoiceForm?.issuedAt,
-      invoiceNumber: invoiceForm?.invoiceNumber,
-      dueDate: invoiceForm?.dueDate,
-      invoicePrefix: invoiceForm?.invoicePrefix,
-      invoiceSuffix: invoiceForm?.invoiceSuffix,
-      businessId: invoiceForm?.businessId,
-      clientId: invoiceForm?.clientId
-    }),
-    [
-      invoiceForm?.id,
-      invoiceForm?.invoiceType,
-      invoiceForm?.issuedAt,
-      invoiceForm?.invoiceNumber,
-      invoiceForm?.dueDate,
-      invoiceForm?.invoicePrefix,
-      invoiceForm?.invoiceSuffix,
-      invoiceForm?.businessId,
-      invoiceForm?.clientId
-    ]
-  );
-
-  const businessFormData = useMemo(
-    () => ({
-      businessLogo: invoiceForm?.invoiceBusinessSnapshot?.businessLogo,
-      businessFileType: invoiceForm?.invoiceBusinessSnapshot?.businessFileType,
-      businessName: invoiceForm?.invoiceBusinessSnapshot?.businessName,
-      businessShortName: invoiceForm?.invoiceBusinessSnapshot?.businessShortName
-    }),
-    [invoiceForm?.invoiceBusinessSnapshot]
-  );
-
-  const signatureFormData = useMemo(
-    () => ({
-      signatureData: invoiceForm?.signatureData,
-      signatureName: invoiceForm?.signatureName,
-      signatureSize: invoiceForm?.signatureSize,
-      signatureType: invoiceForm?.signatureType
-    }),
-    [invoiceForm?.signatureData, invoiceForm?.signatureName, invoiceForm?.signatureSize, invoiceForm?.signatureType]
-  );
-
-  const notesFormData = useMemo(
-    () => ({
-      customerNotes: invoiceForm?.customerNotes,
-      thanksNotes: invoiceForm?.thanksNotes,
-      termsConditionNotes: invoiceForm?.termsConditionNotes
-    }),
-    [invoiceForm?.termsConditionNotes, invoiceForm?.thanksNotes, invoiceForm?.customerNotes]
-  );
-
-  const customFieldHeaders = useMemo(() => {
-    const headers =
-      invoiceForm?.invoiceItems
-        ?.map(item => {
-          if (!item.customField) return undefined;
-          return {
-            header: item.customField.header,
-            sortOrder: item.customField.sortOrder,
-            alignment: item.customField.alignment
-          };
-        })
-        .filter((item): item is CustomFieldMeta => typeof item === 'object' && item != null) ?? [];
-
-    const uniqueHeaders = [...new Map(headers.map(h => [h.header, h])).values()];
-
-    return uniqueHeaders;
-  }, [invoiceForm?.invoiceItems]);
-
-  const handleOnOpen = useCallback((setter: React.Dispatch<React.SetStateAction<boolean>>) => {
-    setter(true);
-  }, []);
-
-  const handleOnClose = useCallback((setter: React.Dispatch<React.SetStateAction<boolean>>) => {
-    setter(false);
-  }, []);
-
-  const handleOnClickBusiness = useCallback(
-    (data: Business) => {
-      handleOnClose(setIsDropdownOpenBusinesses);
-
-      if (!invoiceForm) return;
-
-      startTransition(() => {
-        setInvoiceForm({
-          ...invoiceForm,
-          businessId: data.id,
-          invoiceBusinessSnapshot: {
-            ...invoiceForm?.invoiceBusinessSnapshot,
-            parentInvoiceId: invoiceForm?.id,
-            businessName: data.name,
-            businessAddress: data.address,
-            businessRole: data.role,
-            businessShortName: data.shortName,
-            businessEmail: data.email,
-            businessPhone: data.phone,
-            businessAdditional: data.additional,
-            // Legacy payment info. New payment info is via Bank
-            businessPaymentInformation: data.paymentInformation,
-            businessLogo: data.logo ?? undefined,
-            businessFileSize: data.fileSize,
-            businessFileType: data.fileType,
-            businessFileName: data.fileName,
-            businessVatCode: data.vatCode,
-            businessCountryCode: data.countryCode,
-            businessCode: data.code,
-            businessPeppolEndpointId: data.peppolEndpointId,
-            businessPeppolEndpointSchemeId: data.peppolEndpointSchemeId
-          }
-        });
-      });
-    },
-    [handleOnClose, setInvoiceForm, invoiceForm]
-  );
-
-  const handleOnClickBank = useCallback(
-    (data: Bank) => {
-      handleOnClose(setIsDropdownOpenBanks);
-
-      if (!invoiceForm) return;
-
-      startTransition(() => {
-        setInvoiceForm({
-          ...invoiceForm,
-          bankId: data.id,
-          invoiceBankSnapshot: {
-            ...invoiceForm?.invoiceBankSnapshot,
-            parentInvoiceId: invoiceForm?.id,
-            name: data.name,
-            bankName: data.bankName,
-            accountNumber: data.accountNumber,
-            swiftCode: data.swiftCode,
-            address: data.address,
-            branchCode: data.branchCode,
-            type: data.type,
-            routingNumber: data.routingNumber,
-            sortOrder: data.sortOrder,
-            accountHolder: data.accountHolder,
-            qrCode: data.qrCode ?? undefined,
-            qrCodeFileSize: data.qrCodeFileSize,
-            qrCodeFileType: data.qrCodeFileType,
-            qrCodeFileName: data.qrCodeFileName
-          }
-        });
-      });
-    },
-    [handleOnClose, setInvoiceForm, invoiceForm]
-  );
-
-  const handleClearBank = useCallback(() => {
-    if (!invoiceForm) return;
-
-    startTransition(() => {
-      setInvoiceForm({
-        ...invoiceForm,
-        bankId: undefined,
-        invoiceBankSnapshot: undefined
-      });
-    });
-  }, [setInvoiceForm, invoiceForm]);
-
-  const handleOnClickStyleProfile = useCallback(
-    (data: StyleProfile) => {
-      handleOnClose(setIsDropdownOpenStyleProfile);
-
-      if (!invoiceForm) return;
-
-      startTransition(() => {
-        setInvoiceForm({
-          ...invoiceForm,
-          styleProfilesId: data.id,
-          layoutId: data.layoutId,
-          invoiceLayoutSnapshot: {
-            ...invoiceForm?.invoiceLayoutSnapshot,
-            parentInvoiceId: invoiceForm?.id,
-            layoutSchema: data.layoutSchema
-          },
-          invoiceStyleProfileSnapshot: {
-            ...invoiceForm?.invoiceStyleProfileSnapshot,
-            parentInvoiceId: invoiceForm?.id,
-            styleProfileName: data.name
-          },
-          invoiceCustomization: {
-            ...invoiceForm?.invoiceCustomization,
-            parentInvoiceId: invoiceForm?.id,
-            color: data.color ?? invoiceForm.invoiceCustomization!.color,
-            logoSize: data.logoSize ?? invoiceForm.invoiceCustomization!.logoSize,
-            fontSize: data.fontSize ?? invoiceForm.invoiceCustomization!.fontSize,
-            fontFamily: data.fontFamily ?? invoiceForm.invoiceCustomization!.fontFamily,
-            tableHeaderStyle: data.tableHeaderStyle ?? invoiceForm.invoiceCustomization!.tableHeaderStyle,
-            tableRowStyle: data.tableRowStyle ?? invoiceForm.invoiceCustomization!.tableRowStyle,
-            pageFormat: data.pageFormat ?? invoiceForm.invoiceCustomization!.pageFormat,
-            labelUpperCase: data.labelUpperCase,
-            watermarkFileName: data.watermarkFileName ?? invoiceForm.invoiceCustomization?.watermarkFileName,
-            watermarkFileType: data.watermarkFileType ?? invoiceForm.invoiceCustomization?.watermarkFileType,
-            watermarkFileSize: data.watermarkFileSize ?? invoiceForm.invoiceCustomization?.watermarkFileSize,
-            watermarkFileData: data.watermarkFileData ?? invoiceForm.invoiceCustomization?.watermarkFileData,
-            paidWatermarkFileName:
-              data.paidWatermarkFileName ?? invoiceForm.invoiceCustomization?.paidWatermarkFileName,
-            paidWatermarkFileType:
-              data.paidWatermarkFileType ?? invoiceForm.invoiceCustomization?.paidWatermarkFileType,
-            paidWatermarkFileSize:
-              data.paidWatermarkFileSize ?? invoiceForm.invoiceCustomization?.paidWatermarkFileSize,
-            paidWatermarkFileData:
-              data.paidWatermarkFileData ?? invoiceForm.invoiceCustomization?.paidWatermarkFileData,
-            showQuantity: data.showQuantity,
-            showUnit: data.showUnit,
-            showRowNo: data.showRowNo,
-            fieldSortOrders: data.fieldSortOrders,
-            pdfTexts: data.pdfTexts
-          }
-        });
-      });
-    },
-    [handleOnClose, setInvoiceForm, invoiceForm]
-  );
-
-  const handleOnClickCurrencies = useCallback(
-    (data: Currency) => {
-      handleOnClose(setIsDropdownOpenCurrencies);
-
-      if (!invoiceForm) return;
-
-      const prevSubunit = invoiceForm.invoiceCurrencySnapshot?.currencySubunit;
-      const newSubunit = data.subunit;
-
-      const convert = (raw: string | undefined) => {
-        const value = Number(raw ?? 0);
-        let result = value;
-
-        if (prevSubunit === undefined && newSubunit !== undefined) {
-          result = value * newSubunit;
-        } else if (prevSubunit !== undefined && newSubunit !== undefined) {
-          result = value * (newSubunit / prevSubunit);
-        } else if (prevSubunit !== undefined && newSubunit === undefined) {
-          result = value / prevSubunit;
-        }
-
-        if (!Number.isFinite(result) || Number.isNaN(result)) {
-          return '0';
-        }
-
-        return result.toString();
-      };
-
-      const updatedItems = invoiceForm.invoiceItems?.map(it => {
-        return {
-          ...it,
-          invoiceItemSnapshot: {
-            ...it.invoiceItemSnapshot,
-            unitPriceCents: convert(it.invoiceItemSnapshot.unitPriceCents)
-          }
-        };
-      });
-
-      const updatedPayments = invoiceForm.invoicePayments?.map(it => {
-        return {
-          ...it,
-          amountCents: convert(it.amountCents)
-        };
-      });
-
-      const updatedShippingFee = convert(invoiceForm?.shippingFeeCents);
-      const updatedSurchargeAmount = convert(invoiceForm?.surchargeAmountCents);
-      const updatedDiscountAmount = convert(invoiceForm?.discountAmountCents);
-
-      startTransition(() => {
-        setInvoiceForm({
-          ...invoiceForm,
-          currencyId: data.id,
-          invoiceCurrencySnapshot: {
-            ...invoiceForm.invoiceCurrencySnapshot,
-            parentInvoiceId: invoiceForm.id!,
-            currencyCode: data.code,
-            currencySymbol: data.symbol,
-            currencySubunit: data.subunit
-          },
-          currencyFormat: data.format,
-          invoiceItems: updatedItems ?? invoiceForm.invoiceItems,
-          invoicePayments: updatedPayments ?? invoiceForm.invoicePayments,
-          shippingFeeCents: updatedShippingFee,
-          surchargeAmountCents: updatedSurchargeAmount,
-          discountAmountCents: updatedDiscountAmount
-        });
-      });
-    },
-    [handleOnClose, setInvoiceForm, invoiceForm]
-  );
-
-  const handleOnClickClients = useCallback(
-    (data: Client) => {
-      handleOnClose(setIsDropdownOpenClients);
-
-      startTransition(() => {
-        setInvoiceForm({
-          ...invoiceForm,
-          clientId: data.id,
-          invoiceClientSnapshot: {
-            ...invoiceForm?.invoiceClientSnapshot,
-            clientName: data.name,
-            clientAddress: data.address,
-            clientEmail: data.email,
-            clientPhone: data.phone,
-            clientCode: data.code,
-            clientAdditional: data.additional,
-            clientVatCode: data.vatCode,
-            clientCountryCode: data.countryCode,
-            clientPeppolEndpointId: data.peppolEndpointId,
-            clientPeppolEndpointSchemeId: data.peppolEndpointSchemeId,
-            clientBuyerReference: data.buyerReference
-          }
-        });
-      });
-    },
-    [handleOnClose, setInvoiceForm, invoiceForm]
-  );
-
-  const handleClickItems = useCallback(
-    (item: Item, data: ItemForm) => {
-      handleOnClose(setIsDropdownOpenItems);
-
-      if (!invoiceForm) return;
-
-      const { quantity, header, value, alignment, sortOrder, unitPrice } = data;
-
-      const unitPriceCents =
-        invoiceForm.invoiceCurrencySnapshot?.currencySubunit && unitPrice != undefined
-          ? unitPrice * invoiceForm.invoiceCurrencySnapshot?.currencySubunit
-          : (unitPrice ?? 0);
-
-      const newItemID = Date.now();
-      const newItem = {
-        id: newItemID,
-        itemId: item.id,
-        invoiceItemSnapshot: {
-          parentInvoiceItemId: newItemID,
-          itemName: item.name,
-          unitName: item.unitName,
-          unitPriceCents: unitPriceCents.toString()
-        },
-        customField:
-          header && value && alignment && sortOrder != undefined
-            ? {
-                header: header,
-                value: value,
-                alignment: alignment,
-                sortOrder: sortOrder
-              }
-            : undefined,
-        quantity: quantity?.toString() ?? '0',
-        taxName: undefined,
-        taxRate: 0,
-        taxType: undefined
-      };
-
-      startTransition(() => {
-        setInvoiceForm(prev => {
-          if (!prev) return prev;
-
-          const updatedItems = [...(prev.invoiceItems ?? []), newItem];
-
-          if (header && alignment) {
-            for (let i = 0; i < updatedItems.length; i++) {
-              const cf = updatedItems[i].customField;
-              if (cf?.header === header) {
-                updatedItems[i] = {
-                  ...updatedItems[i],
-                  customField: {
-                    ...cf,
-                    alignment
-                  }
-                };
-              }
-            }
-          }
-
-          return {
-            ...prev,
-            invoiceItems: updatedItems
-          };
-        });
-      });
-    },
-    [handleOnClose, setInvoiceForm, invoiceForm]
-  );
-
-  const handleDeleteItem = useCallback(
-    (itemToRemove: InvoiceItem) => {
-      if (!invoiceForm) return;
-
-      startTransition(() => {
-        setInvoiceForm(prev => {
-          if (!prev) return prev;
-          return {
-            ...prev,
-            invoiceItems: (prev.invoiceItems ?? []).filter(i => i.id !== itemToRemove.id)
-          };
-        });
-      });
-    },
-    [setInvoiceForm, invoiceForm]
-  );
-
-  const handleEditItem = useCallback(
-    (itemToEdit: InvoiceItem) => {
-      if (!invoiceForm) return;
-
-      setSelectedInvoiceItem(itemToEdit);
-      handleOnOpen(setIsModalItemMetadataOpen);
-    },
-    [invoiceForm, handleOnOpen]
-  );
-
-  const handleEditMetadataItem = useCallback(
-    (data: ItemForm) => {
-      if (!selectedInvoiceItem || !invoiceForm) return;
-
-      const { quantity, header, value, alignment, sortOrder, unitPrice } = data;
-      const unitPriceCents =
-        invoiceForm.invoiceCurrencySnapshot?.currencySubunit && unitPrice != undefined
-          ? unitPrice * invoiceForm.invoiceCurrencySnapshot?.currencySubunit
-          : (unitPrice ?? 0);
-
-      startTransition(() => {
-        setInvoiceForm(prev => {
-          if (!prev) return prev;
-          return {
-            ...prev,
-            invoiceItems: (prev.invoiceItems ?? []).map(item => {
-              const isSelected = item.id === selectedInvoiceItem.id;
-              const hasSameHeader = item.customField?.header === header;
-
-              if (isSelected) {
-                return {
-                  ...item,
-                  ...(quantity !== undefined && { quantity: quantity.toString() }),
-                  invoiceItemSnapshot: {
-                    ...item.invoiceItemSnapshot,
-                    unitPriceCents: unitPriceCents.toString()
-                  },
-                  customField:
-                    header && value && alignment && sortOrder != undefined
-                      ? { header, value, alignment, sortOrder }
-                      : item.customField
-                };
-              }
-              if (hasSameHeader && alignment) {
-                return {
-                  ...item,
-                  customField: {
-                    ...item.customField!,
-                    alignment
-                  }
-                };
-              }
-
-              return item;
-            })
-          };
-        });
-      });
-
-      setSelectedInvoiceItem(undefined);
-      handleOnClose(setIsModalItemMetadataOpen);
-    },
-    [invoiceForm, selectedInvoiceItem, setInvoiceForm, handleOnClose, setSelectedInvoiceItem]
-  );
-
-  const handleOnClickInvoiceInformation = useCallback(
-    (data: InvoiceInfo) => {
-      handleOnClose(setIsDropdownOpenInvoiceInfo);
-      startTransition(() => {
-        setInvoiceForm({
-          ...invoiceForm,
-          issuedAt: data.issuedAt ?? '',
-          invoiceNumber: data.invoiceNumber ?? '',
-          dueDate: data.dueDate,
-          invoicePrefix: data.invoicePrefix,
-          invoiceSuffix: data.invoiceSuffix
-        });
-      });
-    },
-    [handleOnClose, setInvoiceForm, invoiceForm]
-  );
-
-  const handleOnClickShippingFees = useCallback(
-    (data: number) => {
-      if (!invoiceForm) return;
-
-      const fee = invoiceForm.invoiceCurrencySnapshot?.currencySubunit
-        ? data * invoiceForm.invoiceCurrencySnapshot?.currencySubunit
-        : data;
-      startTransition(() => {
-        setInvoiceForm({
-          ...invoiceForm,
-          shippingFeeCents: fee.toString()
-        });
-      });
-    },
-    [setInvoiceForm, invoiceForm]
-  );
-
-  const handleOnClickDiscount = useCallback(
-    (data: DiscountForm) => {
-      if (!invoiceForm) return;
-
-      const discountAmount = invoiceForm.invoiceCurrencySnapshot?.currencySubunit
-        ? (data.discountAmount ?? 0) * invoiceForm.invoiceCurrencySnapshot?.currencySubunit
-        : data.discountAmount;
-      startTransition(() => {
-        setInvoiceForm({
-          ...invoiceForm,
-          discountName: data.discountName,
-          discountType: data.discountType,
-          discountPercent: data.discountRate ?? 0,
-          discountAmountCents: discountAmount?.toString() ?? '0'
-        });
-      });
-    },
-    [setInvoiceForm, invoiceForm]
-  );
-
-  const handleOnClickSurcharge = useCallback(
-    (data: SurchargeForm) => {
-      if (!invoiceForm) return;
-
-      const surchargeAmount = invoiceForm.invoiceCurrencySnapshot?.currencySubunit
-        ? (data.surchargeAmount ?? 0) * invoiceForm.invoiceCurrencySnapshot.currencySubunit
-        : data.surchargeAmount;
-      startTransition(() => {
-        setInvoiceForm({
-          ...invoiceForm,
-          surchargeName: data.surchargeName,
-          surchargeType: data.surchargeType,
-          surchargePercent: data.surchargeRate ?? 0,
-          surchargeAmountCents: surchargeAmount?.toString() ?? '0'
-        });
-      });
-    },
-    [setInvoiceForm, invoiceForm]
-  );
-
-  const getStatus = useCallback((newInvoiceForm: InvoiceFromData) => {
-    const totalAmountPaid = getPaidAmount(newInvoiceForm?.invoicePayments ?? []);
-    const totalAmount = getInvoiceTotal({
-      taxRate: newInvoiceForm?.taxRate ?? 0,
-      taxType: newInvoiceForm?.taxType,
-      invoiceItems: newInvoiceForm?.invoiceItems ?? [],
-      discountType: newInvoiceForm?.discountType,
-      discountAmount: Number(newInvoiceForm?.discountAmountCents ?? 0),
-      discountPercent: newInvoiceForm?.discountPercent,
-      shippingFee: Number(newInvoiceForm?.shippingFeeCents ?? 0),
-      surchargeType: newInvoiceForm?.surchargeType,
-      surchargeAmount: Number(newInvoiceForm?.surchargeAmountCents ?? 0),
-      surchargePercent: newInvoiceForm?.surchargePercent
-    });
-
-    if (totalAmountPaid < totalAmount && totalAmountPaid > 0) {
-      return InvoiceStatus.partiallyPaid;
-    } else if (totalAmountPaid >= totalAmount) {
-      return InvoiceStatus.paid;
-    }
-
-    return InvoiceStatus.unpaid;
-  }, []);
-
-  const handleOnClickRemovePayment = useCallback(
-    (data: PaymentForm) => {
-      if (!invoiceForm) return;
-
-      const newInvoiceForm = {
-        ...invoiceForm,
-        invoicePayments: invoiceForm.invoicePayments?.filter(item => item.id !== data.id)
-      };
-      newInvoiceForm.status = getStatus(newInvoiceForm);
-      startTransition(() => {
-        setInvoiceForm(newInvoiceForm);
-      });
-    },
-    [invoiceForm, setInvoiceForm, getStatus]
-  );
-
-  const handleOnClickAddPayment = useCallback(
-    (data: PaymentForm) => {
-      if (!invoiceForm) return;
-      if (!data.paidAmount || !data.paidAt || !data.paymentMethod) return;
-
-      const paidAmount = invoiceForm.invoiceCurrencySnapshot?.currencySubunit
-        ? (data.paidAmount ?? 0) * invoiceForm.invoiceCurrencySnapshot?.currencySubunit
-        : data.paidAmount;
-
-      const payment = {
-        id: Date.now(),
-        paidAt: data.paidAt,
-        paymentMethod: data.paymentMethod,
-        notes: data.notes,
-        amountCents: paidAmount
-      };
-
-      const invoicePayments = invoiceForm.invoicePayments ? [...invoiceForm.invoicePayments] : [];
-
-      if (data.id) {
-        const index = invoicePayments.findIndex(item => item.id === data.id);
-        if (index !== -1) {
-          invoicePayments[index] = {
-            ...invoicePayments[index],
-            amountCents: payment.amountCents?.toString() ?? '0'
-          };
-        } else {
-          invoicePayments.push({
-            id: payment.id,
-            paidAt: payment.paidAt,
-            paymentMethod: payment.paymentMethod,
-            notes: payment.notes,
-            amountCents: payment.amountCents?.toString() ?? '0'
-          });
-        }
-      } else {
-        invoicePayments.push({
-          id: payment.id,
-          paidAt: payment.paidAt,
-          paymentMethod: payment.paymentMethod,
-          notes: payment.notes,
-          amountCents: payment.amountCents?.toString() ?? '0'
-        });
-      }
-
-      const newInvoiceForm = {
-        ...invoiceForm,
-        invoicePayments
-      };
-      newInvoiceForm.status = getStatus(newInvoiceForm);
-      startTransition(() => {
-        setInvoiceForm(newInvoiceForm);
-      });
-    },
-    [invoiceForm, setInvoiceForm, getStatus]
-  );
-
-  const handleOnClickTax = useCallback(
-    (data: TaxForm) => {
-      if (!invoiceForm) return;
-      startTransition(() => {
-        setInvoiceForm({
-          ...invoiceForm,
-          taxName: data.taxName,
-          taxRate: data.taxRate,
-          taxType: data.taxType,
-          invoiceItems: data.invoiceItems
-        });
-      });
-    },
-    [setInvoiceForm, invoiceForm]
-  );
-
-  const handleSignature = useCallback(
-    (data: SignatureForm) => {
-      if (!invoiceForm) return;
-
-      startTransition(() => {
-        setInvoiceForm({
-          ...invoiceForm,
-          signatureData: data.data,
-          signatureName: data.name,
-          signatureType: data.type,
-          signatureSize: data.size
-        });
-      });
-    },
-    [setInvoiceForm, invoiceForm]
-  );
-
-  const handleAttachments = useCallback(
-    (data: AttachmentForm) => {
-      if (!invoiceForm) return;
-
-      const invoiceAttachments = invoiceForm.invoiceAttachments ? [...invoiceForm.invoiceAttachments] : [];
-
-      invoiceAttachments.push({
-        id: Date.now(),
-        fileName: data.fileName,
-        fileType: data.fileType,
-        fileSize: data.fileSize,
-        data: data.data
-      });
-      startTransition(() => {
-        setInvoiceForm({
-          ...invoiceForm,
-          invoiceAttachments: invoiceAttachments
-        });
-      });
-    },
-    [setInvoiceForm, invoiceForm]
-  );
-
-  const handleRemoveAttachment = useCallback(
-    (data: number) => {
-      if (!invoiceForm) return;
-
-      const invoiceAttachments = invoiceForm.invoiceAttachments
-        ? [...invoiceForm.invoiceAttachments.filter(ia => ia.id !== data)]
-        : [];
-      startTransition(() => {
-        setInvoiceForm({
-          ...invoiceForm,
-          invoiceAttachments: invoiceAttachments
-        });
-      });
-    },
-    [setInvoiceForm, invoiceForm]
-  );
-
-  const handleOnClickLanguage = useCallback(
-    (data: Language) => {
-      handleOnClose(setIsDropdownOpenLanguages);
-
-      if (!invoiceForm) return;
-
-      startTransition(() => {
-        setInvoiceForm({
-          ...invoiceForm,
-          language: data
-        });
-      });
-    },
-    [setInvoiceForm, invoiceForm, handleOnClose]
-  );
-
   useEffect(() => {
-    if (xmlData) {
-      retrieveXML();
-    }
-  }, [xmlData, retrieveXML]);
+    if (xmlRequest) retrieveXML();
+  }, [xmlRequest, retrieveXML]);
+
+  const updateDraft = useCallback(
+    (next: InvoiceFromData | undefined) => {
+      startTransition(() => setInvoiceForm(next));
+    },
+    [setInvoiceForm, startTransition]
+  );
+
+  const updateDraftFrom = useCallback(
+    (change: (current: InvoiceFromData) => InvoiceFromData) => {
+      if (!invoiceForm) return;
+      updateDraft(change(invoiceForm));
+    },
+    [invoiceForm, updateDraft]
+  );
+
+  const headerInfo = useMemo(() => invoiceHeaderSlice(invoiceForm), [invoiceForm]);
+  const businessSummary = useMemo(() => businessSlice(invoiceForm), [invoiceForm]);
+  const signatureSummary = useMemo(() => signatureSlice(invoiceForm), [invoiceForm]);
+  const notesSummary = useMemo(() => notesSlice(invoiceForm), [invoiceForm]);
+  const customFieldHeaders = useMemo(() => customFieldOptionsFrom(invoiceForm), [invoiceForm]);
+
+  const pickBusiness = useCallback(
+    (business: Business) => {
+      closePickerId('businesses');
+      updateDraftFrom(current => withSelectedBusiness(current, business));
+    },
+    [closePickerId, updateDraftFrom]
+  );
+
+  const pickBank = useCallback(
+    (bank: Bank) => {
+      closePickerId('banks');
+      updateDraftFrom(current => withSelectedBank(current, bank));
+    },
+    [closePickerId, updateDraftFrom]
+  );
+
+  const clearBank = useCallback(() => updateDraftFrom(withoutBank), [updateDraftFrom]);
+
+  const pickStyleProfile = useCallback(
+    (profile: StyleProfile) => {
+      closePickerId('styleProfiles');
+      updateDraftFrom(current => withSelectedStyleProfile(current, profile));
+    },
+    [closePickerId, updateDraftFrom]
+  );
+
+  const pickCurrency = useCallback(
+    (currency: Currency) => {
+      closePickerId('currencies');
+      updateDraftFrom(current => applyCurrencyToDraft(current, currency));
+    },
+    [closePickerId, updateDraftFrom]
+  );
+
+  const pickClient = useCallback(
+    (client: Client) => {
+      closePickerId('clients');
+      updateDraft(withSelectedClient(invoiceForm, client));
+    },
+    [closePickerId, invoiceForm, updateDraft]
+  );
+
+  const addLine = useCallback(
+    (catalogItem: Item, form: ItemForm) => {
+      closePickerId('items');
+      updateDraftFrom(current => withAddedItem(current, catalogItem, form));
+    },
+    [closePickerId, updateDraftFrom]
+  );
+
+  const removeLine = useCallback(
+    (line: InvoiceItem) => updateDraftFrom(current => withRemovedItem(current, line.id as number)),
+    [updateDraftFrom]
+  );
+
+  const beginLineEdit = useCallback(
+    (line: InvoiceItem) => {
+      setEditedLine(line);
+      setIsMetadataModalOpen(true);
+    },
+    [setEditedLine, setIsMetadataModalOpen]
+  );
+
+  const saveLineMetadata = useCallback(
+    (form: ItemForm) => {
+      if (!editedLine || !invoiceForm) return;
+
+      updateDraft(withUpdatedItemMetadata(invoiceForm, editedLine.id as number, form));
+      setEditedLine(undefined);
+      setIsMetadataModalOpen(false);
+    },
+    [editedLine, invoiceForm, updateDraft]
+  );
+
+  const pickInvoiceInfo = useCallback(
+    (info: InvoiceInfo) => {
+      closePickerId('invoiceInfo');
+      updateDraftFrom(current => applyInvoiceInfoToDraft(current, info));
+    },
+    [closePickerId, updateDraftFrom]
+  );
+
+  const setShippingFee = useCallback(
+    (fee: number) => updateDraftFrom(current => applyShippingFeeToDraft(current, fee)),
+    [updateDraftFrom]
+  );
+
+  const setDiscount = useCallback(
+    (discount: Parameters<typeof applyDiscountToDraft>[1]) =>
+      updateDraftFrom(current => applyDiscountToDraft(current, discount)),
+    [updateDraftFrom]
+  );
+
+  const setSurcharge = useCallback(
+    (surcharge: Parameters<typeof applySurchargeToDraft>[1]) =>
+      updateDraftFrom(current => applySurchargeToDraft(current, surcharge)),
+    [updateDraftFrom]
+  );
+
+  const setTax = useCallback(
+    (tax: TaxForm) =>
+      updateDraftFrom(current => ({
+        ...current,
+        taxName: tax.taxName,
+        taxRate: tax.taxRate,
+        taxType: tax.taxType,
+        invoiceItems: tax.invoiceItems
+      })),
+    [updateDraftFrom]
+  );
+
+  const savePayment = useCallback(
+    (payment: PaymentForm) => updateDraftFrom(current => withSavedPayment(current, payment)),
+    [updateDraftFrom]
+  );
+
+  const deletePayment = useCallback(
+    (payment: PaymentForm) => updateDraftFrom(current => withRemovedPayment(current, payment.id)),
+    [updateDraftFrom]
+  );
+
+  const saveSignature = useCallback(
+    (signature: SignatureForm) =>
+      updateDraftFrom(current => ({
+        ...current,
+        signatureData: signature.data,
+        signatureName: signature.name,
+        signatureType: signature.type,
+        signatureSize: signature.size
+      })),
+    [updateDraftFrom]
+  );
+
+  const addAttachment = useCallback(
+    (attachment: AttachmentForm) => updateDraftFrom(current => withAppendedAttachment(current, attachment)),
+    [updateDraftFrom]
+  );
+
+  const removeAttachment = useCallback(
+    (attachmentId: number) => updateDraftFrom(current => withRemovedAttachment(current, attachmentId)),
+    [updateDraftFrom]
+  );
+
+  const pickLanguage = useCallback(
+    (language: Language) => {
+      closePickerId('language');
+      updateDraftFrom(current => withSelectedLanguage(current, language));
+    },
+    [closePickerId, updateDraftFrom]
+  );
+
+  const requestXml = (einvoice: EInvoice, packaging: 'singleFile' | 'embeddedFile') => {
+    closePickerId('moreActions');
+    if (invoiceForm?.id) setXmlRequest({ invoiceId: invoiceForm.id, einvoice, type: packaging });
+  };
+
+  const hasLines = Boolean(invoiceForm?.invoiceItems && invoiceForm.invoiceItems.length > 0);
+  const isSaved = invoiceForm?.id !== undefined;
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        width: '100%',
-        gap: 2
-      }}
-    >
+    <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', gap: 2 }}>
       <Divider flexItem />
       <TopRow
-        onEditBank={() => handleOnOpen(setIsDropdownOpenBanks)}
-        onEditCurrency={() => handleOnOpen(setIsDropdownOpenCurrencies)}
-        onEditLanguage={() => handleOnOpen(setIsDropdownOpenLanguages)}
-        onEditStyleProfile={() => handleOnOpen(setIsDropdownOpenStyleProfile)}
-        onClearBank={handleClearBank}
+        onEditBank={() => openPickerId('banks')}
+        onEditCurrency={() => openPickerId('currencies')}
+        onEditLanguage={() => openPickerId('language')}
+        onEditStyleProfile={() => openPickerId('styleProfiles')}
+        onClearBank={clearBank}
         invoiceForm={invoiceForm}
       />
       <Divider flexItem />
-      <BusinessSelector onEdit={() => handleOnOpen(setIsDropdownOpenBusinesses)} data={businessFormData} />
+      <BusinessSelector onEdit={() => openPickerId('businesses')} data={businessSummary} />
       <Divider flexItem />
       <ClientInvoiceRow
-        onEditClients={() => handleOnOpen(setIsDropdownOpenClients)}
-        onEditInvoiceInfo={() => handleOnOpen(setIsDropdownOpenInvoiceInfo)}
+        onEditClients={() => openPickerId('clients')}
+        onEditInvoiceInfo={() => openPickerId('invoiceInfo')}
         invoiceForm={invoiceForm}
         type={type}
       />
@@ -886,191 +364,159 @@ const InvoiceFormComponent: FC<Props> = ({
       <ItemsList
         invoiceForm={invoiceForm}
         setInvoiceForm={setInvoiceForm}
-        onEdit={handleEditItem}
-        onDelete={handleDeleteItem}
+        onEdit={beginLineEdit}
+        onDelete={removeLine}
       />
 
-      {invoiceForm?.invoiceItems && invoiceForm?.invoiceItems?.length > 0 && <Divider flexItem />}
+      {hasLines && <Divider flexItem />}
 
-      <ItemSelector onEdit={() => handleOnOpen(setIsDropdownOpenItems)} />
+      <ItemSelector onEdit={() => openPickerId('items')} />
 
-      {invoiceForm?.invoiceItems && invoiceForm?.invoiceItems?.length > 0 && (
+      {hasLines && (
         <>
           <FinancialInfo
             invoiceForm={invoiceForm}
-            onShippingFeesClick={handleOnClickShippingFees}
-            onDiscountClick={handleOnClickDiscount}
-            onTaxesClick={handleOnClickTax}
-            onSurchargeClick={handleOnClickSurcharge}
-            onAddPaymentClicked={handleOnClickAddPayment}
-            onRemovePaymentClicked={handleOnClickRemovePayment}
+            onShippingFeesClick={setShippingFee}
+            onDiscountClick={setDiscount}
+            onTaxesClick={setTax}
+            onSurchargeClick={setSurcharge}
+            onAddPaymentClicked={savePayment}
+            onRemovePaymentClicked={deletePayment}
           />
           <Divider flexItem />
           <StatusSelector
             invoiceForm={invoiceForm}
             onArchivedChanged={value => {
-              startTransition(() => {
-                setInvoiceForm(prev => ({ ...prev, isArchived: value }));
-              });
+              startTransition(() => setInvoiceForm(current => ({ ...current, isArchived: value })));
             }}
             onStatusChanged={value => {
-              startTransition(() => {
-                setInvoiceForm(prev => ({ ...prev, status: value }));
-              });
+              startTransition(() => setInvoiceForm(current => ({ ...current, status: value })));
             }}
           />
           <Divider flexItem />
           <NotesSelector
-            data={notesFormData}
+            data={notesSummary}
             onCustomerNotesChanged={value => {
-              startTransition(() => {
-                setInvoiceForm(prev => ({ ...prev, customerNotes: value }));
-              });
+              startTransition(() => setInvoiceForm(current => ({ ...current, customerNotes: value })));
             }}
             onThanksNotesChanged={value => {
-              startTransition(() => {
-                setInvoiceForm(prev => ({ ...prev, thanksNotes: value }));
-              });
+              startTransition(() => setInvoiceForm(current => ({ ...current, thanksNotes: value })));
             }}
             onTermsConditionsNotesChanged={value => {
-              startTransition(() => {
-                setInvoiceForm(prev => ({ ...prev, termsConditionNotes: value }));
-              });
+              startTransition(() => setInvoiceForm(current => ({ ...current, termsConditionNotes: value })));
             }}
           />
-          <SignatureSelector data={signatureFormData} onEdit={handleSignature} />
+          <SignatureSelector data={signatureSummary} onEdit={saveSignature} />
 
           <Divider flexItem />
 
-          <AttachmentsList invoiceForm={invoiceForm} onAttach={handleAttachments} onClear={handleRemoveAttachment} />
+          <AttachmentsList invoiceForm={invoiceForm} onAttach={addAttachment} onClear={removeAttachment} />
         </>
       )}
 
       <LanguageDropdown
-        isOpen={isDropdownOpenLanguages}
-        onClose={() => handleOnClose(setIsDropdownOpenLanguages)}
-        onOpen={() => handleOnOpen(setIsDropdownOpenLanguages)}
-        onClick={handleOnClickLanguage}
+        isOpen={openPicker.language}
+        onClose={() => closePickerId('language')}
+        onOpen={() => openPickerId('language')}
+        onClick={pickLanguage}
       />
       <BusinessesDropdown
-        isOpen={isDropdownOpenBusinesses}
-        onClose={() => handleOnClose(setIsDropdownOpenBusinesses)}
-        onOpen={() => handleOnOpen(setIsDropdownOpenBusinesses)}
-        onClick={handleOnClickBusiness}
+        isOpen={openPicker.businesses}
+        onClose={() => closePickerId('businesses')}
+        onOpen={() => openPickerId('businesses')}
+        onClick={pickBusiness}
       />
       <StyleProfilesDropdown
-        isOpen={isDropdownOpenStyleProfile}
-        onClose={() => handleOnClose(setIsDropdownOpenStyleProfile)}
-        onOpen={() => handleOnOpen(setIsDropdownOpenStyleProfile)}
-        onClick={handleOnClickStyleProfile}
+        isOpen={openPicker.styleProfiles}
+        onClose={() => closePickerId('styleProfiles')}
+        onOpen={() => openPickerId('styleProfiles')}
+        onClick={pickStyleProfile}
       />
       <BanksDropdown
-        isOpen={isDropdownOpenBanks}
-        onClose={() => handleOnClose(setIsDropdownOpenBanks)}
-        onOpen={() => handleOnOpen(setIsDropdownOpenBanks)}
-        onClick={handleOnClickBank}
+        isOpen={openPicker.banks}
+        onClose={() => closePickerId('banks')}
+        onOpen={() => openPickerId('banks')}
+        onClick={pickBank}
       />
       <CurrenciesDropdown
-        isOpen={isDropdownOpenCurrencies}
-        onClose={() => handleOnClose(setIsDropdownOpenCurrencies)}
-        onOpen={() => handleOnOpen(setIsDropdownOpenCurrencies)}
-        onClick={handleOnClickCurrencies}
+        isOpen={openPicker.currencies}
+        onClose={() => closePickerId('currencies')}
+        onOpen={() => openPickerId('currencies')}
+        onClick={pickCurrency}
       />
       <ClientsDropdown
-        isOpen={isDropdownOpenClients}
-        onClose={() => handleOnClose(setIsDropdownOpenClients)}
-        onOpen={() => handleOnOpen(setIsDropdownOpenClients)}
-        onClick={handleOnClickClients}
+        isOpen={openPicker.clients}
+        onClose={() => closePickerId('clients')}
+        onOpen={() => openPickerId('clients')}
+        onClick={pickClient}
       />
       <ItemsDropdown
-        isOpen={isDropdownOpenItems}
+        isOpen={openPicker.items}
         type={type}
         headerOptions={customFieldHeaders}
-        onClose={() => handleOnClose(setIsDropdownOpenItems)}
-        onOpen={() => handleOnOpen(setIsDropdownOpenItems)}
-        onClick={handleClickItems}
+        onClose={() => closePickerId('items')}
+        onOpen={() => openPickerId('items')}
+        onClick={addLine}
       />
-      {isDropdownOpenInvoiceInfo && (
+      {openPicker.invoiceInfo && (
         <InvoiceInformationDropdown
-          information={invoiceInformation}
-          isOpen={isDropdownOpenInvoiceInfo}
-          onClose={() => handleOnClose(setIsDropdownOpenInvoiceInfo)}
-          onOpen={() => handleOnOpen(setIsDropdownOpenInvoiceInfo)}
-          onClick={handleOnClickInvoiceInformation}
+          information={headerInfo}
+          isOpen={openPicker.invoiceInfo}
+          onClose={() => closePickerId('invoiceInfo')}
+          onOpen={() => openPickerId('invoiceInfo')}
+          onClick={pickInvoiceInfo}
         />
       )}
       <MoreActionDropdown
         type={type}
-        isOpen={isDropdownOpenMoreAction}
-        isPDFReady={invoiceForm?.id != undefined}
-        onClose={() => handleOnClose(setMoreActionDropdown)}
-        onOpen={() => handleOnOpen(setMoreActionDropdown)}
-        onPrintReceipt={() => {
-          handleOnClose(setMoreActionDropdown);
-          if (invoiceForm?.id !== undefined) printReceipt();
-        }}
+        isOpen={openPicker.moreActions}
+        isPDFReady={isSaved}
+        onClose={() => closePickerId('moreActions')}
+        onOpen={() => openPickerId('moreActions')}
         onDelete={() => {
-          handleOnClose(setMoreActionDropdown);
+          closePickerId('moreActions');
           if (invoiceForm?.id !== undefined) handleDelete(invoiceForm.id);
         }}
         onDuplicate={() => {
-          handleOnClose(setMoreActionDropdown);
+          closePickerId('moreActions');
           if (invoiceForm?.id !== undefined) handleDuplicate(invoiceForm.id, type);
         }}
         onMakeInvoice={() => {
-          handleOnClose(setMoreActionDropdown);
+          closePickerId('moreActions');
           if (invoiceForm?.id !== undefined) handleDuplicate(invoiceForm.id, InvoiceType.invoice);
         }}
         onExportPDF={() => {
-          handleOnClose(setMoreActionDropdown);
+          closePickerId('moreActions');
           exportPdf();
         }}
-        onExportPDFUBL={() => {
-          handleOnClose(setMoreActionDropdown);
-          if (invoiceForm?.id)
-            setXMLData({ invoiceId: invoiceForm.id, einvoice: EInvoice.ubl21, type: 'embeddedFile' });
-        }}
-        onExportUBLXML={() => {
-          handleOnClose(setMoreActionDropdown);
-          if (invoiceForm?.id) setXMLData({ invoiceId: invoiceForm.id, einvoice: EInvoice.ubl21, type: 'singleFile' });
-        }}
-        onExportXRechnungXML={() => {
-          handleOnClose(setMoreActionDropdown);
-          if (invoiceForm?.id)
-            setXMLData({ invoiceId: invoiceForm.id, einvoice: EInvoice.xrechnung, type: 'singleFile' });
-        }}
-        showDelete={invoiceForm?.id !== undefined}
-        showDuplicate={invoiceForm?.id !== undefined}
-        showMakeInvoice={invoiceForm?.id !== undefined && invoiceForm.invoiceType === InvoiceType.quotation}
+        onExportPDFUBL={() => requestXml(EInvoice.ubl21, 'embeddedFile')}
+        onExportUBLXML={() => requestXml(EInvoice.ubl21, 'singleFile')}
+        onExportXRechnungXML={() => requestXml(EInvoice.xrechnung, 'singleFile')}
+        showDelete={isSaved}
+        showDuplicate={isSaved}
+        showMakeInvoice={isSaved && invoiceForm?.invoiceType === InvoiceType.quotation}
       />
 
       <ItemMetadataSetter
-        isOpen={isModalItemMetadataOpen}
-        onCancel={() => handleOnClose(setIsModalItemMetadataOpen)}
-        currQuantity={selectedInvoiceItem?.quantity}
-        currUnitPrice={Number(
-          invoiceForm?.invoiceCurrencySnapshot?.currencySubunit != undefined
-            ? Number(selectedInvoiceItem?.invoiceItemSnapshot.unitPriceCents ?? 0) /
-                invoiceForm?.invoiceCurrencySnapshot?.currencySubunit
-            : 0
+        isOpen={isMetadataModalOpen}
+        onCancel={() => setIsMetadataModalOpen(false)}
+        currQuantity={editedLine?.quantity}
+        currUnitPrice={unitPriceInDisplayUnits(
+          editedLine?.invoiceItemSnapshot.unitPriceCents,
+          invoiceForm?.invoiceCurrencySnapshot?.currencySubunit
         )}
-        customField={selectedInvoiceItem?.customField}
+        customField={editedLine?.customField}
         type={type}
         headerOptions={customFieldHeaders}
-        onSave={handleEditMetadataItem}
+        onSave={saveLineMetadata}
       />
 
       <Tooltip title={t('ariaLabel.moreActions')}>
         <Fab
           color="primary"
           aria-label={t('ariaLabel.moreActions')}
-          onClick={() => handleOnOpen(setMoreActionDropdown)}
-          sx={{
-            position: 'fixed',
-            bottom: 40,
-            right: 40,
-            zIndex: 1000
-          }}
+          onClick={() => openPickerId('moreActions')}
+          sx={{ position: 'fixed', bottom: 40, right: 40, zIndex: 1000 }}
         >
           <MoreVertIcon />
         </Fab>
@@ -1079,4 +525,4 @@ const InvoiceFormComponent: FC<Props> = ({
   );
 };
 
-export const InvoiceForm = memo(InvoiceFormComponent);
+export const InvoiceForm = memo(InvoiceEditor);

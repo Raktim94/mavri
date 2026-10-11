@@ -5,6 +5,7 @@ import { PageHeader } from '../../../shared/components/layout/pageHeader/PageHea
 import { validateOnlyNumbersLetters } from '../../../shared/utils/validatorFunctions';
 import { useAppSelector } from '../../../state/configureStore';
 import { selectSettings } from '../../../state/pageSlice';
+import { applyInvoiceNumberingToggle, type InvoiceNumbering, type InvoiceNumberingToggle } from '../settingsModel';
 
 interface Props {
   showBack: boolean;
@@ -17,72 +18,64 @@ interface Props {
     includeBusinessName: boolean;
   }) => void;
 }
+
+const EMIT_DELAY_MS = 500;
+
 export const CustomizeInvoice: FC<Props> = ({ showBack, onCustomizedInvoice = () => {}, onBack = () => {} }) => {
   const { t } = useTranslation();
   const storeSettings = useAppSelector(selectSettings);
 
-  const [suffix, setSuffix] = useState<string>(storeSettings?.invoiceSuffix ?? '');
   const [prefix, setPrefix] = useState<string>(storeSettings?.invoicePrefix ?? '');
+  const [suffix, setSuffix] = useState<string>(storeSettings?.invoiceSuffix ?? '');
   const [includeMonth, setIncludeMonth] = useState<boolean>(storeSettings?.shouldIncludeMonth ?? true);
   const [includeYear, setIncludeYear] = useState<boolean>(storeSettings?.shouldIncludeYear ?? true);
   const [includeBusinessName, setIncludeBusinessName] = useState<boolean>(
     storeSettings?.shouldIncludeBusinessName ?? true
   );
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const emitTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Debounced emit; ref access happens only inside this event-triggered callback, never during render.
-  const emitDebounced = useCallback(
-    (data: {
-      prefix: string;
-      suffix: string;
-      includeMonth: boolean;
-      includeYear: boolean;
-      includeBusinessName: boolean;
-    }) => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
+  const emitLater = useCallback(
+    (numbering: InvoiceNumbering) => {
+      if (emitTimerRef.current) {
+        clearTimeout(emitTimerRef.current);
       }
-      debounceRef.current = setTimeout(() => {
-        onCustomizedInvoice(data);
-      }, 500);
+      emitTimerRef.current = setTimeout(() => {
+        onCustomizedInvoice(numbering);
+      }, EMIT_DELAY_MS);
     },
     [onCustomizedInvoice]
   );
 
-  const handlePrefixChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
+  const changePrefix = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
     if (validateOnlyNumbersLetters(value)) {
       setPrefix(value);
-      emitDebounced({ prefix: value, suffix, includeMonth, includeYear, includeBusinessName });
+      emitLater({ prefix: value, suffix, includeMonth, includeYear, includeBusinessName });
     }
   };
 
-  const handleSuffixChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
+  const changeSuffix = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
     if (validateOnlyNumbersLetters(value)) {
       setSuffix(value);
-      emitDebounced({ prefix, suffix: value, includeMonth, includeYear, includeBusinessName });
+      emitLater({ prefix, suffix: value, includeMonth, includeYear, includeBusinessName });
     }
   };
 
-  const handleSwitchChange =
-    (setter: (val: boolean) => void, key: 'includeMonth' | 'includeYear' | 'includeBusinessName') =>
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const checked = e.target.checked;
+  const toggleNumbering =
+    (setter: (value: boolean) => void, toggle: InvoiceNumberingToggle) =>
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const checked = event.target.checked;
       setter(checked);
-      onCustomizedInvoice({
-        prefix,
-        suffix,
-        includeMonth: key === 'includeMonth' ? checked : includeMonth,
-        includeYear: key === 'includeYear' ? checked : includeYear,
-        includeBusinessName: key === 'includeBusinessName' ? checked : includeBusinessName
-      });
+      onCustomizedInvoice(
+        applyInvoiceNumberingToggle({ prefix, suffix, includeMonth, includeYear, includeBusinessName }, toggle, checked)
+      );
     };
 
   useEffect(() => {
     const timeout = setTimeout(() => {
       onCustomizedInvoice({ prefix, suffix, includeMonth, includeYear, includeBusinessName });
-    }, 500);
+    }, EMIT_DELAY_MS);
 
     return () => clearTimeout(timeout);
   }, [prefix, suffix, includeMonth, includeYear, includeBusinessName, onCustomizedInvoice]);
@@ -97,7 +90,7 @@ export const CustomizeInvoice: FC<Props> = ({ showBack, onCustomizedInvoice = ()
             label={t('common.invoicePrefix')}
             fullWidth
             placeholder="e.g. INV"
-            onChange={handlePrefixChange}
+            onChange={changePrefix}
             value={prefix}
             helperText={t('customizeInvoice.lettersAndNumbers')}
           />
@@ -108,24 +101,24 @@ export const CustomizeInvoice: FC<Props> = ({ showBack, onCustomizedInvoice = ()
             fullWidth
             placeholder="e.g. ALPHA"
             value={suffix}
-            onChange={handleSuffixChange}
+            onChange={changeSuffix}
             helperText={t('customizeInvoice.lettersAndNumbers')}
           />
         </Grid>
         <Grid size={{ xs: 12, md: 12 }}>
           <FormControlLabel
-            control={<Switch checked={includeYear} onChange={handleSwitchChange(setIncludeYear, 'includeYear')} />}
+            control={<Switch checked={includeYear} onChange={toggleNumbering(setIncludeYear, 'includeYear')} />}
             label={t('customizeInvoice.includeYear')}
           />
           <FormControlLabel
-            control={<Switch checked={includeMonth} onChange={handleSwitchChange(setIncludeMonth, 'includeMonth')} />}
+            control={<Switch checked={includeMonth} onChange={toggleNumbering(setIncludeMonth, 'includeMonth')} />}
             label={t('customizeInvoice.includeMonth')}
           />
           <FormControlLabel
             control={
               <Switch
                 checked={includeBusinessName}
-                onChange={handleSwitchChange(setIncludeBusinessName, 'includeBusinessName')}
+                onChange={toggleNumbering(setIncludeBusinessName, 'includeBusinessName')}
               />
             }
             label={t('customizeInvoice.includeBusinessName')}

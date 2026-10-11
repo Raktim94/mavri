@@ -15,7 +15,6 @@ import { useSettingsRetrieve } from '../../shared/hooks/settings/useSettingsRetr
 import { useSettingsUpdate } from '../../shared/hooks/settings/useSettingsUpdate';
 import type { ExportMeta } from '../../shared/types/exportMeta';
 import type { Response } from '../../shared/types/response';
-import type { Settings } from '../../shared/types/settings';
 import { useAppDispatch, useAppSelector } from '../../state/configureStore';
 import {
   addToast,
@@ -27,7 +26,6 @@ import {
   setMode,
   setPresets,
   setQuotes,
-  setReceiptPrintingOn,
   setReports,
   setStyleProfiles
 } from '../../state/pageSlice';
@@ -38,52 +36,48 @@ import { Menu } from './menu/Menu';
 export const SettingsPage = () => {
   const theme = useTheme();
   const { t } = useTranslation();
-  const [currentMenuItem, setCurrentMenuItem] = useState<MenuItemSettings | undefined>(undefined);
-  const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
   const dispatch = useAppDispatch();
   const storeSettings = useAppSelector(selectSettings);
-  const hasInitialized = useRef(false);
-  const stableSettings = useMemo(() => storeSettings ?? {}, [storeSettings]);
+  const [currentTab, setCurrentTab] = useState<MenuItemSettings | undefined>(undefined);
   const [showImportConfirm, setShowImportConfirm] = useState(false);
+  const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
+  const initializedRef = useRef(false);
+  const stableSettings = useMemo(() => storeSettings ?? {}, [storeSettings]);
 
-  const { execute: getSettings } = useSettingsRetrieve({
-    immediate: false,
-    onDone: (data: Response<Settings>) => {
-      if (!data.success) {
-        if (data.message) {
-          const message = i18n.exists(data.message) ? t(data.message) : data.message;
-          dispatch(addToast({ message: message, severity: 'error' }));
-        } else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
+  const toastFailure = useCallback(
+    (data: Response<unknown>) => {
+      if (data.success) return;
+      if (data.message) {
+        const message = i18n.exists(data.message) ? t(data.message) : data.message;
+        dispatch(addToast({ message, severity: 'error' }));
+      } else if (data.key) {
+        dispatch(addToast({ message: t(data.key), severity: 'error' }));
       }
-    }
+    },
+    [dispatch, t]
+  );
+
+  const { execute: reloadSettings } = useSettingsRetrieve({
+    immediate: false,
+    onDone: toastFailure
   });
 
-  const { execute } = useSettingsUpdate({
+  const { execute: persistSettings } = useSettingsUpdate({
     newSettings: stableSettings ?? {},
     immediate: false,
-    onDone: (data: Response<unknown>) => {
-      if (!data.success) {
-        if (data.message) {
-          const message = i18n.exists(data.message) ? t(data.message) : data.message;
-          dispatch(addToast({ message: message, severity: 'error' }));
-        } else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
-      }
-    }
+    onDone: toastFailure
   });
 
-  const { execute: exportJSONBackup } = useExportJson({
+  const { execute: runExport } = useExportJson({
     immediate: false,
     onDone: (data: Response<ExportMeta>) => {
       if (!data.success) {
-        if (data.message) {
-          const message = i18n.exists(data.message) ? t(data.message) : data.message;
-          dispatch(addToast({ message: message, severity: 'error' }));
-        } else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
-      } else if (data?.success) {
+        toastFailure(data);
+      } else {
         const path = data.data?.filePath;
         dispatch(
           addToast({
-            message: path ? t('common.exportedTo', { path: path }) : t('common.exported'),
+            message: path ? t('common.exportedTo', { path }) : t('common.exported'),
             severity: 'success'
           })
         );
@@ -91,95 +85,44 @@ export const SettingsPage = () => {
     }
   });
 
-  const { execute: importJSON } = useImportJson({
+  const { execute: runImport } = useImportJson({
     immediate: false,
     onDone: (data: Response<unknown>) => {
       if (!data.success) {
-        if (data.message) {
-          const message = i18n.exists(data.message) ? t(data.message) : data.message;
-          dispatch(addToast({ message: message, severity: 'error' }));
-        } else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
+        toastFailure(data);
       } else {
         dispatch(addToast({ message: t('common.imported'), severity: 'success' }));
-        getSettings();
+        reloadSettings();
       }
     }
   });
 
-  const onModeChange = useCallback(
-    (isDark: boolean) => {
-      dispatch(setMode(isDark));
-    },
-    [dispatch]
-  );
+  const changeMode = useCallback((isDark: boolean) => dispatch(setMode(isDark)), [dispatch]);
+  const changeQuotes = useCallback((value: boolean) => dispatch(setQuotes(value)), [dispatch]);
+  const changeStyleProfiles = useCallback((value: boolean) => dispatch(setStyleProfiles(value)), [dispatch]);
+  const changePresets = useCallback((value: boolean) => dispatch(setPresets(value)), [dispatch]);
+  const changeUBL = useCallback((value: boolean) => dispatch(setEInvoiceUBL(value)), [dispatch]);
+  const changeXRechnung = useCallback((value: boolean) => dispatch(setEInvoiceXRechnung(value)), [dispatch]);
+  const changeReports = useCallback((value: boolean) => dispatch(setReports(value)), [dispatch]);
 
-  const toggleQuotes = useCallback(
-    (value: boolean) => {
-      dispatch(setQuotes(value));
-    },
-    [dispatch]
-  );
+  const requestExport = useCallback(() => {
+    runExport();
+  }, [runExport]);
 
-  const toggleStyleProfiles = useCallback(
-    (value: boolean) => {
-      dispatch(setStyleProfiles(value));
-    },
-    [dispatch]
-  );
-
-  const toggleReceiptPrinting = useCallback(
-    (value: boolean) => {
-      dispatch(setReceiptPrintingOn(value));
-    },
-    [dispatch]
-  );
-
-  const togglePresets = useCallback(
-    (value: boolean) => {
-      dispatch(setPresets(value));
-    },
-    [dispatch]
-  );
-
-  const toggleUBL = useCallback(
-    (value: boolean) => {
-      dispatch(setEInvoiceUBL(value));
-    },
-    [dispatch]
-  );
-
-  const toggleXRechnung = useCallback(
-    (value: boolean) => {
-      dispatch(setEInvoiceXRechnung(value));
-    },
-    [dispatch]
-  );
-
-  const toggleReports = useCallback(
-    (value: boolean) => {
-      dispatch(setReports(value));
-    },
-    [dispatch]
-  );
-
-  const exportJSON = useCallback(() => {
-    exportJSONBackup();
-  }, [exportJSONBackup]);
-
-  const importJSONCallback = useCallback(() => {
+  const requestImport = useCallback(() => {
     setShowImportConfirm(true);
   }, []);
 
-  const handleCancelImport = useCallback(() => {
+  const cancelImport = useCallback(() => {
     setShowImportConfirm(false);
   }, []);
 
-  const handleConfirmImport = useCallback(() => {
-    handleCancelImport();
-    importJSON();
-  }, [handleCancelImport, importJSON]);
+  const confirmImport = useCallback(() => {
+    cancelImport();
+    runImport();
+  }, [cancelImport, runImport]);
 
-  const onCustomizedInvoice = useCallback(
+  const applyInvoiceNumbering = useCallback(
     (data: {
       suffix?: string;
       prefix?: string;
@@ -200,7 +143,7 @@ export const SettingsPage = () => {
     [dispatch]
   );
 
-  const onLanguageFormat = useCallback(
+  const applyLanguageFormat = useCallback(
     (data: { language: Language; amountFormat: AmountFormat; dateFormat: DateFormat }) => {
       i18n.changeLanguage(data.language);
       localStorage.setItem('lastUsedLanguage', data.language);
@@ -217,55 +160,56 @@ export const SettingsPage = () => {
   );
 
   useEffect(() => {
-    if (!hasInitialized.current) {
-      hasInitialized.current = true;
+    if (!initializedRef.current) {
+      initializedRef.current = true;
       return;
     }
 
-    execute();
-  }, [stableSettings, execute]);
+    persistSettings();
+  }, [stableSettings, persistSettings]);
 
-  const onSelected = useCallback((item: MenuItemSettings | undefined) => {
-    setCurrentMenuItem(item);
+  const selectTab = useCallback((item: MenuItemSettings | undefined) => {
+    setCurrentTab(item);
   }, []);
 
-  const onBack = useCallback(() => {
-    setCurrentMenuItem(undefined);
+  const returnToMenu = useCallback(() => {
+    setCurrentTab(undefined);
   }, []);
 
-  let rightColumn: ReactNode;
-  if (typeof currentMenuItem === 'undefined') {
-    rightColumn = <NoItem text={t('app.noItems')} />;
+  let detailPane: ReactNode;
+  if (typeof currentTab === 'undefined') {
+    detailPane = <NoItem text={t('app.noItems')} />;
   } else {
-    switch (currentMenuItem) {
+    switch (currentTab) {
       case MenuItemSettings.Receipt:
-        rightColumn = (
-          <CustomizeInvoice onCustomizedInvoice={onCustomizedInvoice} showBack={!isDesktop} onBack={onBack} />
+        detailPane = (
+          <CustomizeInvoice onCustomizedInvoice={applyInvoiceNumbering} showBack={!isDesktop} onBack={returnToMenu} />
         );
         break;
       case MenuItemSettings.LanguageFormat:
-        rightColumn = <LanguageFormat onLanguageFormat={onLanguageFormat} showBack={!isDesktop} onBack={onBack} />;
+        detailPane = (
+          <LanguageFormat onLanguageFormat={applyLanguageFormat} showBack={!isDesktop} onBack={returnToMenu} />
+        );
         break;
       default:
-        rightColumn = <NoItem text={t('app.noItems')} />;
+        detailPane = <NoItem text={t('app.noItems')} />;
         break;
     }
   }
 
-  const leftColumnMenu = (
+  const menuPane = (
     <Menu
-      onSelected={onSelected}
-      selectedMenu={currentMenuItem}
-      onModeChange={onModeChange}
-      toggleQuotes={toggleQuotes}
-      toggleReports={toggleReports}
-      toggleReceiptPrinting={toggleReceiptPrinting}
-      toggleStyleProfiles={toggleStyleProfiles}
-      togglePresets={togglePresets}
-      toggleUBL={toggleUBL}
-      toggleXRechnung={toggleXRechnung}
-      onExportJSON={exportJSON}
-      onImportJSON={importJSONCallback}
+      onSelected={selectTab}
+      selectedMenu={currentTab}
+      onModeChange={changeMode}
+      toggleQuotes={changeQuotes}
+      toggleReports={changeReports}
+      toggleStyleProfiles={changeStyleProfiles}
+      togglePresets={changePresets}
+      toggleUBL={changeUBL}
+      toggleXRechnung={changeXRechnung}
+      onExportJSON={requestExport}
+      onImportJSON={requestImport}
     />
   );
 
@@ -277,18 +221,18 @@ export const SettingsPage = () => {
       sx={{ height: '100%', justifyContent: 'center', alignItems: 'stretch' }}
     >
       <Confirmation
-        onCancel={handleCancelImport}
-        onConfirm={handleConfirmImport}
+        onCancel={cancelImport}
+        onConfirm={confirmImport}
         isOpen={showImportConfirm}
         text={t('settingsMenuItems.importConfirmText')}
       />
       {isDesktop ? (
         <>
-          {leftColumnMenu}
-          <Content node={rightColumn} />
+          {menuPane}
+          <Content node={detailPane} />
         </>
       ) : (
-        <>{typeof currentMenuItem === 'undefined' ? leftColumnMenu : <Content node={rightColumn} />}</>
+        <>{typeof currentTab === 'undefined' ? menuPane : <Content node={detailPane} />}</>
       )}
     </Grid>
   );

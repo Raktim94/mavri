@@ -1,11 +1,13 @@
-import { Box, ListItemButton, ListItemText, Typography } from '@mui/material';
-import { memo, type FC } from 'react';
+import { Typography } from '@mui/material';
+import { memo, type FC, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { DateFormat } from '../../../shared/enums/dateFormat';
 import { InvoiceType } from '../../../shared/enums/invoiceType';
 import type { InvoiceFromData } from '../../../shared/types/invoice';
 import { formatDate } from '../../../shared/utils/formatFunctions';
 import { useAppSelector } from '../../../state/configureStore';
 import { selectSettings } from '../../../state/pageSlice';
+import { FieldChip } from './fields/FieldChip';
 
 interface Props {
   type: InvoiceType;
@@ -13,77 +15,55 @@ interface Props {
   onEdit: () => void;
 }
 
+const LINE_SX = { fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' } as const;
+
+export const invoiceInfoLines = (
+  t: (key: string, opts?: Record<string, unknown>) => string,
+  invoiceForm: InvoiceFromData | undefined,
+  dateFormat?: DateFormat
+): ReactNode => {
+  const lines: ReactNode[] = [
+    <Typography key="number" component="div" variant="body2" sx={LINE_SX}>
+      {invoiceForm?.invoicePrefix}
+      {invoiceForm?.invoiceNumber}
+      {invoiceForm?.invoiceSuffix}
+    </Typography>
+  ];
+
+  if (dateFormat && invoiceForm?.issuedAt) {
+    lines.push(
+      <Typography key="issued" component="div" variant="body2" sx={LINE_SX}>
+        {t('invoices.issuedAt', { date: formatDate(invoiceForm.issuedAt, dateFormat) })}
+      </Typography>
+    );
+  }
+
+  if (dateFormat && invoiceForm?.dueDate) {
+    lines.push(
+      <Typography key="due" component="div" variant="body2" sx={LINE_SX}>
+        {t('invoices.dueDateAt', { date: formatDate(invoiceForm.dueDate, dateFormat) })}
+      </Typography>
+    );
+  }
+
+  return <>{lines}</>;
+};
+
 const InvoiceInformationSelectorComponent: FC<Props> = ({ type, invoiceForm, onEdit }) => {
   const { t } = useTranslation();
   const storeSettings = useAppSelector(selectSettings);
 
+  const label = type === InvoiceType.quotation ? t('invoices.quoteInfo') : t('invoices.invoiceInfo');
+
   return (
-    <Box sx={{ width: 'fit-content' }}>
-      <ListItemButton
-        onClick={onEdit}
-        sx={{
-          pt: 2,
-          pb: 2,
-          pl: 2,
-          pr: 2,
-          width: '100%',
-          borderRadius: 1,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'start',
-          flexDirection: 'column'
-        }}
-      >
-        <ListItemText
-          primary={
-            <Typography
-              component="div"
-              variant="body1"
-              sx={{ fontWeight: 600, color: 'primary.main', overflow: 'hidden', textOverflow: 'ellipsis' }}
-            >
-              {type === InvoiceType.quotation
-                ? t('invoices.quoteInfo').toUpperCase()
-                : t('invoices.invoiceInfo').toUpperCase()}{' '}
-              *
-            </Typography>
-          }
-          secondary={
-            <>
-              <Typography
-                component="div"
-                variant="body2"
-                sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}
-              >
-                {invoiceForm?.invoicePrefix}
-                {invoiceForm?.invoiceNumber}
-                {invoiceForm?.invoiceSuffix}
-              </Typography>
-              {storeSettings && invoiceForm?.issuedAt && (
-                <Typography
-                  component="div"
-                  variant="body2"
-                  sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}
-                >
-                  {t('invoices.issuedAt', { date: formatDate(invoiceForm.issuedAt, storeSettings.dateFormat) })}
-                </Typography>
-              )}
-              {storeSettings && invoiceForm?.dueDate && (
-                <Typography
-                  component="div"
-                  variant="body2"
-                  sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}
-                >
-                  {t('invoices.dueDateAt', { date: formatDate(invoiceForm.dueDate, storeSettings.dateFormat) })}
-                </Typography>
-              )}
-            </>
-          }
-          disableTypography
-          sx={{ m: 0, textAlign: 'end' }}
-          slotProps={{ primary: { sx: { fontWeight: 500, m: 0 } } }}
-        />
-      </ListItemButton>
-    </Box>
+    <FieldChip
+      label={label}
+      required
+      align="end"
+      secondary={invoiceInfoLines(t, invoiceForm, storeSettings?.dateFormat)}
+      onEdit={onEdit}
+    />
   );
 };
+
 export const InvoiceInformationSelector = memo(InvoiceInformationSelectorComponent);

@@ -9,25 +9,24 @@ interface Props {
   onEdit?: (item: Bank) => void;
   onDelete?: (id: number) => void;
 }
+
 export const List: FC<Props> = ({
   item,
   selectedItem,
+  showDeleteButton = true,
   onEdit = () => {},
-  onDelete = () => {},
-  showDeleteButton = true
-}) => {
-  return (
-    <GenericList
-      item={item}
-      selectedItem={selectedItem}
-      showDeleteButton={showDeleteButton}
-      onEdit={onEdit}
-      onDelete={onDelete}
-      getName={c => c.name}
-      getAdditional={c => c.bankName}
-      getInvoiceCount={c => c.invoiceCount}
-      getQuotesCount={c => c.quotesCount}
-      getIsArchived={c => c.isArchived}
-    />
-  );
-};
+  onDelete = () => {}
+}) => (
+  <GenericList
+    item={item}
+    selectedItem={selectedItem}
+    showDeleteButton={showDeleteButton}
+    onEdit={onEdit}
+    onDelete={onDelete}
+    getName={entry => entry.name}
+    getAdditional={entry => entry.bankName}
+    getInvoiceCount={entry => entry.invoiceCount}
+    getQuotesCount={entry => entry.quotesCount}
+    getIsArchived={entry => entry.isArchived}
+  />
+);

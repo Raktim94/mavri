@@ -6,22 +6,19 @@ import { ReportDateType } from '../../shared/enums/reportDateType';
 import { useInvoicesRetrieve } from '../../shared/hooks/invoices/useInvoicesRetrieve';
 import type { Invoice } from '../../shared/types/invoice';
 import type { Response } from '../../shared/types/response';
-import { aggregateInvoicesByCurrency } from '../../shared/utils/invoiceFunctions';
 import { useAppDispatch } from '../../state/configureStore';
 import { addToast } from '../../state/pageSlice';
 import { Header } from './Header';
 import { Overview } from './Overview';
+import { buildReportGroupedMeta, createReportDateRange } from './reportModel';
 
 export const ReportsPage: FC = () => {
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
 
-  const [reportDateType, setReportDateType] = useState<ReportDateType>(ReportDateType.issuedAt);
-  const [dates, setDates] = useState<{ from: string; to: string }>({
-    from: new Date().toISOString(),
-    to: new Date().toISOString()
-  });
-  const [selectedCurrencyCode, setSelectedCurrencyCode] = useState<string>('');
+  const [dateType, setDateType] = useState<ReportDateType>(ReportDateType.issuedAt);
+  const [dateRange, setDateRange] = useState(createReportDateRange);
+  const [currencyCode, setCurrencyCode] = useState('');
 
   const { invoices } = useInvoicesRetrieve({
     type: InvoiceType.invoice,
@@ -29,46 +26,40 @@ export const ReportsPage: FC = () => {
       if (!data.success) {
         if (data.message) {
           const message = i18n.exists(data.message) ? t(data.message) : data.message;
-          dispatch(addToast({ message: message, severity: 'error' }));
-        } else if (data.key) dispatch(addToast({ message: t(data.key), severity: 'error' }));
+          dispatch(addToast({ message, severity: 'error' }));
+        } else if (data.key) {
+          dispatch(addToast({ message: t(data.key), severity: 'error' }));
+        }
       }
     }
   });
 
-  const handleCurrencyChange = useCallback((data: string) => {
-    setSelectedCurrencyCode(data);
+  const selectCurrency = useCallback((code: string) => {
+    setCurrencyCode(code);
   }, []);
 
-  const handleOnDateTypeChange = useCallback((value: ReportDateType) => {
-    setReportDateType(value);
+  const selectDateType = useCallback((value: ReportDateType) => {
+    setDateType(value);
   }, []);
 
-  const handleOnDateChange = useCallback((data: { from: string; to: string }) => {
-    setDates({
-      from: data.from,
-      to: data.to
-    });
+  const selectDateRange = useCallback((range: { from: string; to: string }) => {
+    setDateRange({ from: range.from, to: range.to });
   }, []);
 
-  const groupedMeta = useMemo(() => {
-    if (!invoices) return { groups: {}, invoices: [] };
-    return { groups: aggregateInvoicesByCurrency(invoices, dates.from, dates.to, reportDateType), invoices: invoices };
-  }, [invoices, dates, reportDateType]);
+  const groupedMeta = useMemo(
+    () => buildReportGroupedMeta(invoices, dateRange, dateType),
+    [invoices, dateRange, dateType]
+  );
 
   return (
     <>
       <Header
-        onCurrencyChange={handleCurrencyChange}
-        onDateChange={handleOnDateChange}
-        onDateTypeChange={handleOnDateTypeChange}
+        onCurrencyChange={selectCurrency}
+        onDateChange={selectDateRange}
+        onDateTypeChange={selectDateType}
         currencies={groupedMeta.groups}
       />
-      <Overview
-        reportDateType={reportDateType}
-        groupedMeta={groupedMeta}
-        dates={dates}
-        currencyCode={selectedCurrencyCode}
-      />
+      <Overview reportDateType={dateType} groupedMeta={groupedMeta} dates={dateRange} currencyCode={currencyCode} />
     </>
   );
 };

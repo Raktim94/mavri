@@ -10,6 +10,7 @@ import type { SizeType } from '../enums/sizeType';
 import type { TableHeaderStyle } from '../enums/tableHeaderStyle';
 import type { TableRowStyle } from '../enums/tableRowStyle';
 import type { InvoiceItemTaxType, InvoiceTaxType } from '../enums/taxType';
+
 import type { LayoutSchema } from './layouts';
 import type { PDFText } from './pdfText';
 import type { SortOrder } from './sortOrder';
@@ -20,67 +21,44 @@ export interface CustomFieldMeta {
   sortOrder: number;
 }
 
+export interface CustomField extends CustomFieldMeta {
+  value: string;
+}
+
 export interface NextSequenceData {
   nextSequence: number;
   formattedSequence: string;
 }
 
-export interface CustomField extends CustomFieldMeta {
-  value: string;
-}
-
 export interface PdfTexts {
-  billTo: string;
   invoiceNo: string;
   quoteNo: string;
   date: string;
   dueDate: string;
+  billTo: string;
   customerNote: string;
   termsConditions: string;
-  of: string;
-  page: string;
-  paymentInfo: string;
   pdfINVOICE: string;
   pdfQUOTE: string;
+  page: string;
+  of: string;
+  paymentInfo: string;
   subTotalLabel: string;
-  discountLabel: string;
-  surchargeLabel: string;
-  incLabel: string;
-  taxLabel: string;
-  taxExclusivePerItemLabel: string;
-  taxInclusivePerItemLabel: string;
-  shippingFeeLabel: string;
   totalLabel: string;
   paidLabel: string;
   balanceDueLabel: string;
+  discountLabel: string;
+  surchargeLabel: string;
+  incLabel: string;
+  shippingFeeLabel: string;
+  taxLabel: string;
+  taxExclusivePerItemLabel: string;
+  taxInclusivePerItemLabel: string;
   itemLabel: string;
   unitLabel: string;
   qtyLabel: string;
   unitCostLabel: string;
   authorisedSignatoryLabel: string;
-}
-
-export interface AttachmentURL {
-  id: number;
-  url?: string;
-}
-
-export interface InvoicesByCurrencyMeta {
-  currencyCode: string;
-  currencySymbol: string;
-  totalAmount: number;
-  totalAmountPaid: number;
-  balanceDue: number;
-  invoiceCount: number;
-  overdueCount: number;
-  collectionRate: number;
-  avgPerInvoice: number;
-  issuedAt: string;
-  paidAt?: string;
-  currencyId: number;
-}
-export interface InvoicesByCurrency {
-  [currencyCode: string]: InvoicesByCurrencyMeta;
 }
 
 export interface ItemForm {
@@ -106,17 +84,141 @@ export interface PaymentForm {
   paidAt?: string;
   notes?: string;
 }
+
 export interface TaxForm {
   taxType?: InvoiceTaxType;
   taxRate?: number;
   taxName?: string;
   invoiceItems: InvoiceItem[];
 }
+
+export interface DiscountForm {
+  discountType?: DiscountType;
+  discountAmount?: number;
+  discountRate?: number;
+  discountName?: string;
+}
+
+export interface SurchargeForm {
+  surchargeType?: DiscountType;
+  surchargeAmount?: number;
+  surchargeRate?: number;
+  surchargeName?: string;
+}
+
 export interface AttachmentForm {
   fileSize: number;
   fileType: string;
   fileName: string;
   data: Uint8Array;
+}
+
+export interface AttachmentURL {
+  id: number;
+  url?: string;
+}
+
+export interface InvoiceAttachmentMeta {
+  id?: number;
+  parentInvoiceId?: number;
+  fileSize: number;
+  fileType: string;
+  fileName: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface InvoiceAttachment extends InvoiceAttachmentMeta {
+  data: Uint8Array;
+}
+
+export interface InvoiceAttachmentWeb extends InvoiceAttachmentMeta {
+  data: string;
+}
+
+export interface InvoicePayment {
+  id?: number;
+  parentInvoiceId?: number;
+  amountCents: string;
+  paidAt: string;
+  paymentMethod: PaymentType;
+  notes?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface InvoiceItemSnapshots {
+  parentInvoiceItemId: number;
+  id?: number;
+  itemName: string;
+  unitPriceCents: string;
+  unitName?: string;
+}
+
+export interface InvoiceItem {
+  id?: number;
+  parentInvoiceId?: number;
+  itemId: number;
+  invoiceItemSnapshot: InvoiceItemSnapshots;
+  quantity: string;
+  taxRate: number;
+  taxType?: InvoiceItemTaxType;
+  customField?: CustomField;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface InvoiceCurrencySnapshots {
+  parentInvoiceId?: number;
+  id?: number;
+  currencyCode: string;
+  currencySymbol: string;
+  currencySubunit: number;
+}
+
+export interface InvoiceClientSnapshots {
+  parentInvoiceId?: number;
+  id?: number;
+  clientName?: string;
+  clientAddress?: string;
+  clientEmail?: string;
+  clientPhone?: string;
+  clientCode?: string;
+  clientAdditional?: string;
+  clientVatCode?: string;
+  clientCountryCode?: string;
+  clientPeppolEndpointId?: string;
+  clientPeppolEndpointSchemeId?: string;
+  clientBuyerReference?: string;
+}
+
+export interface InvoiceBusinessSnapshotsMeta {
+  parentInvoiceId?: number;
+  id?: number;
+  businessName: string;
+  businessShortName: string;
+  businessAddress?: string;
+  businessRole?: string;
+  businessEmail?: string;
+  businessPhone?: string;
+  businessAdditional?: string;
+  businessPaymentInformation?: string;
+  businessVatCode?: string;
+  businessCountryCode?: string;
+  businessCode?: string;
+  businessPeppolEndpointId?: string;
+  businessPeppolEndpointSchemeId?: string;
+  businessFileSize?: number;
+  businessFileType?: string;
+  businessFileName?: string;
+}
+
+export interface InvoiceBusinessSnapshots extends InvoiceBusinessSnapshotsMeta {
+  businessLogo?: Uint8Array;
+}
+
+export interface InvoiceBusinessSnapshotsWeb extends InvoiceBusinessSnapshotsMeta {
+  businessLogo?: string;
 }
 
 export interface InvoiceBankSnapshotsMeta {
@@ -125,14 +227,14 @@ export interface InvoiceBankSnapshotsMeta {
   name?: string;
   bankName?: string;
   accountNumber?: string;
-  swiftCode?: string;
-  address?: string;
-  branchCode?: string;
-  type?: string;
-  routingNumber?: string;
   accountHolder?: string;
-  sortOrder?: string;
+  routingNumber?: string;
+  branchCode?: string;
+  swiftCode?: string;
   upiCode?: string;
+  address?: string;
+  type?: string;
+  sortOrder?: string;
   qrCodeFileSize?: number;
   qrCodeFileType?: string;
   qrCodeFileName?: string;
@@ -146,40 +248,40 @@ export interface InvoiceBankSnapshotsWeb extends InvoiceBankSnapshotsMeta {
   qrCode?: string;
 }
 
-export interface InvoiceStyleProfileSnapshots {
-  parentInvoiceId?: number;
-  id?: number;
-  styleProfileName?: string;
-}
-
 export interface InvoiceLayoutSnapshots {
   parentInvoiceId?: number;
   id?: number;
   layoutSchema?: LayoutSchema;
 }
 
+export interface InvoiceStyleProfileSnapshots {
+  parentInvoiceId?: number;
+  id?: number;
+  styleProfileName?: string;
+}
+
 export interface InvoiceCustomizationMeta {
   parentInvoiceId?: number;
   id?: number;
   color?: string;
-  logoSize?: SizeType;
+  pageFormat?: PageFormat;
   fontSize?: SizeType;
   fontFamily?: FontFamily;
+  labelUpperCase?: boolean;
   tableHeaderStyle?: TableHeaderStyle;
   tableRowStyle?: TableRowStyle;
-  pageFormat?: PageFormat;
-  labelUpperCase?: boolean;
+  showQuantity?: boolean;
+  showUnit?: boolean;
+  showRowNo?: boolean;
+  fieldSortOrders: SortOrder;
+  pdfTexts?: PDFText;
+  logoSize?: SizeType;
   watermarkFileName?: string;
   watermarkFileType?: string;
   watermarkFileSize?: number;
   paidWatermarkFileName?: string;
   paidWatermarkFileType?: string;
   paidWatermarkFileSize?: number;
-  showQuantity?: boolean;
-  showUnit?: boolean;
-  showRowNo?: boolean;
-  fieldSortOrders: SortOrder;
-  pdfTexts?: PDFText;
 }
 
 export interface InvoiceCustomization extends InvoiceCustomizationMeta {
@@ -229,14 +331,20 @@ export interface CustomizationFormTypographyLabels {
 }
 
 export interface CustomizationForm {
-  color?: string;
-  logoSize?: SizeType;
+  pageFormat?: PageFormat;
   fontSize?: SizeType;
   fontFamily?: FontFamily;
+  labelUpperCase?: boolean;
   tableHeaderStyle?: TableHeaderStyle;
   tableRowStyle?: TableRowStyle;
-  pageFormat?: PageFormat;
-  labelUpperCase?: boolean;
+  showQuantity?: boolean;
+  showUnit?: boolean;
+  showRowNo?: boolean;
+  fieldSortOrders?: SortOrder;
+  pdfTexts?: PDFText;
+  customField?: CustomField[];
+  color?: string;
+  logoSize?: SizeType;
   watermarkFileName?: string;
   watermarkFileType?: string;
   watermarkFileSize?: number;
@@ -245,130 +353,27 @@ export interface CustomizationForm {
   paidWatermarkFileType?: string;
   paidWatermarkFileSize?: number;
   paidWatermarkFileData?: Uint8Array;
-  showQuantity?: boolean;
-  showUnit?: boolean;
-  showRowNo?: boolean;
-  fieldSortOrders?: SortOrder;
-  pdfTexts?: PDFText;
-  customField?: CustomField[];
   layoutId?: number;
   layoutSchema?: LayoutSchema;
 }
 
-export interface DiscountForm {
-  discountType?: DiscountType;
-  discountAmount?: number;
-  discountRate?: number;
-  discountName?: string;
-}
-export interface SurchargeForm {
-  surchargeType?: DiscountType;
-  surchargeAmount?: number;
-  surchargeRate?: number;
-  surchargeName?: string;
-}
-export interface InvoicePayment {
-  id?: number;
-  parentInvoiceId?: number;
-  amountCents: string;
-  paidAt: string;
-  paymentMethod: PaymentType;
-  notes?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface InvoiceAttachmentMeta {
-  id?: number;
-  parentInvoiceId?: number;
-  fileSize: number;
-  fileType: string;
-  fileName: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface InvoiceAttachment extends InvoiceAttachmentMeta {
-  data: Uint8Array;
-}
-
-export interface InvoiceAttachmentWeb extends InvoiceAttachmentMeta {
-  data: string;
-}
-
-export interface InvoiceItemSnapshots {
-  parentInvoiceItemId: number;
-  id?: number;
-  itemName: string;
-  unitPriceCents: string;
-  unitName?: string;
-}
-
-export interface InvoiceItem {
-  id?: number;
-  parentInvoiceId?: number;
-  itemId: number;
-  invoiceItemSnapshot: InvoiceItemSnapshots;
-  quantity: string;
-  customField?: CustomField;
-  createdAt?: string;
-  updatedAt?: string;
-  taxRate: number;
-  taxType?: InvoiceItemTaxType;
-}
-
-export interface InvoiceCurrencySnapshots {
-  parentInvoiceId?: number;
-  id?: number;
+export interface InvoicesByCurrencyMeta {
+  currencyId: number;
   currencyCode: string;
   currencySymbol: string;
-  currencySubunit: number;
+  totalAmount: number;
+  totalAmountPaid: number;
+  balanceDue: number;
+  invoiceCount: number;
+  overdueCount: number;
+  collectionRate: number;
+  avgPerInvoice: number;
+  issuedAt: string;
+  paidAt?: string;
 }
 
-export interface InvoiceClientSnapshots {
-  parentInvoiceId?: number;
-  id?: number;
-  clientName?: string;
-  clientAddress?: string;
-  clientEmail?: string;
-  clientPhone?: string;
-  clientCode?: string;
-  clientAdditional?: string;
-  clientVatCode?: string;
-  clientPeppolEndpointId?: string;
-  clientCountryCode?: string;
-  clientPeppolEndpointSchemeId?: string;
-  clientBuyerReference?: string;
-}
-
-export interface InvoiceBusinessSnapshotsMeta {
-  parentInvoiceId?: number;
-  id?: number;
-  businessName: string;
-  businessAddress?: string;
-  businessRole?: string;
-  businessShortName: string;
-  businessEmail?: string;
-  businessPhone?: string;
-  businessAdditional?: string;
-  // Legacy payment info. New payment info is via Bank
-  businessPaymentInformation?: string;
-  businessFileSize?: number;
-  businessFileType?: string;
-  businessFileName?: string;
-  businessVatCode?: string;
-  businessPeppolEndpointId?: string;
-  businessCountryCode?: string;
-  businessCode?: string;
-  businessPeppolEndpointSchemeId?: string;
-}
-
-export interface InvoiceBusinessSnapshots extends InvoiceBusinessSnapshotsMeta {
-  businessLogo?: Uint8Array;
-}
-
-export interface InvoiceBusinessSnapshotsWeb extends InvoiceBusinessSnapshotsMeta {
-  businessLogo?: string;
+export interface InvoicesByCurrency {
+  [currencyCode: string]: InvoicesByCurrencyMeta;
 }
 
 export interface InvoiceMeta {
@@ -376,31 +381,33 @@ export interface InvoiceMeta {
   invoiceType: InvoiceType;
   convertedFromQuotationId?: number;
   invoiceFullNumber: string;
+  invoiceNumber: string;
+  invoicePrefix?: string;
+  invoiceSuffix?: string;
   businessId: number;
-  bankId?: number;
   clientId: number;
+  bankId?: number;
   layoutId?: number;
   currencyId: number;
-  createdAt: string;
-  updatedAt: string;
   issuedAt: string;
   dueDate?: string;
-  invoiceNumber: string;
-  isArchived: boolean;
+  createdAt: string;
+  updatedAt: string;
+  paidAt?: string;
+  closedAt?: string;
   status: InvoiceStatus;
+  isArchived: boolean;
   customerNotes?: string;
   thanksNotes?: string;
   termsConditionNotes?: string;
   discountName?: string;
-  invoicePrefix?: string;
-  invoiceSuffix?: string;
   discountType?: DiscountType;
   discountAmountCents: string;
   discountPercent: number;
+  surchargeName?: string;
   surchargeType?: DiscountType;
   surchargeAmountCents: string;
   surchargePercent: number;
-  surchargeName?: string;
   shippingFeeCents: string;
   taxName?: string;
   taxRate: number;
@@ -417,8 +424,6 @@ export interface InvoiceMeta {
   invoiceStyleProfileSnapshot?: InvoiceStyleProfileSnapshots;
   invoiceClientSnapshot?: InvoiceClientSnapshots;
   invoiceCurrencySnapshot?: InvoiceCurrencySnapshots;
-  paidAt?: string;
-  closedAt?: string;
 }
 
 export interface Invoice extends InvoiceMeta {
@@ -436,33 +441,36 @@ export interface InvoiceWeb extends InvoiceMeta {
   invoiceCustomization?: InvoiceCustomizationWeb;
   invoiceBankSnapshot?: InvoiceBankSnapshotsWeb;
 }
+
 export interface InvoiceAddMeta {
   invoiceType?: InvoiceType;
   convertedFromQuotationId?: number;
   businessId?: number;
-  bankId?: number;
   clientId?: number;
+  bankId?: number;
   layoutId?: number;
   currencyId?: number;
-  issuedAt?: string;
-  dueDate?: string;
   invoiceNumber?: string;
-  isArchived?: boolean;
-  status?: InvoiceStatus;
-  customerNotes?: string;
-  thanksNotes?: string;
   invoicePrefix?: string;
   invoiceSuffix?: string;
+  issuedAt?: string;
+  dueDate?: string;
+  paidAt?: string;
+  closedAt?: string;
+  status?: InvoiceStatus;
+  isArchived?: boolean;
+  customerNotes?: string;
+  thanksNotes?: string;
   termsConditionNotes?: string;
   discountName?: string;
   discountType?: DiscountType;
   discountAmountCents?: string;
   discountPercent?: number;
-  shippingFeeCents?: string;
   surchargeName?: string;
-  surchargeAmountCents?: string;
   surchargeType?: DiscountType;
+  surchargeAmountCents?: string;
   surchargePercent?: number;
+  shippingFeeCents?: string;
   taxName?: string;
   taxRate?: number;
   taxType?: InvoiceTaxType;
@@ -478,8 +486,6 @@ export interface InvoiceAddMeta {
   invoiceStyleProfileSnapshot?: InvoiceStyleProfileSnapshots;
   invoiceClientSnapshot?: InvoiceClientSnapshots;
   invoiceCurrencySnapshot?: InvoiceCurrencySnapshots;
-  paidAt?: string;
-  closedAt?: string;
 }
 
 export interface InvoiceAdd extends InvoiceAddMeta {
@@ -490,16 +496,16 @@ export interface InvoiceAdd extends InvoiceAddMeta {
   invoiceBankSnapshot?: InvoiceBankSnapshots;
 }
 
-export interface InvoiceUpdate extends InvoiceAdd {
-  id: number;
-}
-
 export interface InvoiceAddWeb extends InvoiceAddMeta {
   signatureData?: string | null;
   invoiceAttachments?: InvoiceAttachmentWeb[];
   invoiceBusinessSnapshot?: InvoiceBusinessSnapshotsWeb;
   invoiceCustomization?: InvoiceCustomizationWeb;
   invoiceBankSnapshot?: InvoiceBankSnapshotsWeb;
+}
+
+export interface InvoiceUpdate extends InvoiceAdd {
+  id: number;
 }
 
 export interface InvoiceUpdateWeb extends InvoiceAddWeb {
@@ -511,41 +517,44 @@ export interface InvoiceFromData {
   invoiceType?: InvoiceType;
   convertedFromQuotationId?: number;
   businessId?: number;
-  bankId?: number;
   clientId?: number;
+  bankId?: number;
   layoutId?: number;
   currencyId?: number;
-  issuedAt?: string;
-  dueDate?: string;
   invoiceNumber?: string;
-  isArchived?: boolean;
-  status?: InvoiceStatus;
-  customerNotes?: string;
-  thanksNotes?: string;
   invoicePrefix?: string;
   invoiceSuffix?: string;
+  issuedAt?: string;
+  dueDate?: string;
+  paidAt?: string;
+  closedAt?: string;
+  status?: InvoiceStatus;
+  isArchived?: boolean;
+  customerNotes?: string;
+  thanksNotes?: string;
   termsConditionNotes?: string;
   discountName?: string;
   discountType?: DiscountType;
   discountAmountCents?: string;
   discountPercent?: number;
-  shippingFeeCents?: string;
   surchargeName?: string;
-  surchargeAmountCents?: string;
   surchargeType?: DiscountType;
+  surchargeAmountCents?: string;
   surchargePercent?: number;
+  shippingFeeCents?: string;
   taxName?: string;
   taxRate?: number;
   taxType?: InvoiceTaxType;
   invoicePayments?: InvoicePayment[];
   invoiceItems?: InvoiceItem[];
   invoiceAttachments?: InvoiceAttachment[];
-  invoiceBankSnapshot?: InvoiceBankSnapshots;
   invoiceBusinessSnapshot?: InvoiceBusinessSnapshots;
   invoiceClientSnapshot?: InvoiceClientSnapshots;
   invoiceCurrencySnapshot?: InvoiceCurrencySnapshots;
   invoiceCustomization?: InvoiceCustomization;
+  invoiceBankSnapshot?: InvoiceBankSnapshots;
   invoiceStyleProfileSnapshot?: InvoiceStyleProfileSnapshots;
+  invoiceLayoutSnapshot?: InvoiceLayoutSnapshots;
   currencyFormat?: string;
   language?: Language;
   signatureData?: Uint8Array;
@@ -553,18 +562,16 @@ export interface InvoiceFromData {
   signatureType?: string;
   signatureName?: string;
   styleProfilesId?: number;
-  invoiceLayoutSnapshot?: InvoiceLayoutSnapshots;
-  paidAt?: string;
-  closedAt?: string;
 }
+
 export interface InvoiceInfo {
   id?: number;
-  issuedAt?: string;
   invoiceType?: InvoiceType;
   invoiceNumber?: string;
-  dueDate?: string;
   invoicePrefix?: string;
   invoiceSuffix?: string;
   businessId?: number;
   clientId?: number;
+  issuedAt?: string;
+  dueDate?: string;
 }

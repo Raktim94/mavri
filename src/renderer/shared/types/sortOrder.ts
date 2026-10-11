@@ -1,9 +1,9 @@
 export interface SortOrder {
+  [key: string]: number;
   no: number;
   item: number;
-  unit: number;
   quantity: number;
+  unit: number;
   unitCost: number;
   total: number;
-  [key: string]: number;
 }

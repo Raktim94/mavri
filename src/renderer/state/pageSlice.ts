@@ -8,6 +8,9 @@ import type { Settings } from '../shared/types/settings';
 import type { ToastProps } from '../shared/types/toastProps';
 import type { RootState } from './configureStore';
 
+type OptionPair = { label: string; value: number };
+type SnapshotOptionPair = { label: string; value: string };
+
 const initialState: PageState = {
   isLoading: false,
   dbReady: false,
@@ -21,6 +24,14 @@ const initialState: PageState = {
   updateMessage: undefined,
   newVersion: undefined,
   isAllowedToLeave: true
+};
+
+const applySettingsPatch = (state: PageState, patch: Partial<Settings>) => {
+  if (!state.settings) return;
+  state.settings = {
+    ...state.settings,
+    ...patch
+  };
 };
 
 export const pageSlice = createSlice({
@@ -74,73 +85,41 @@ export const pageSlice = createSlice({
     setSettings: (state, action: PayloadAction<Settings>) => {
       state.settings = action.payload;
     },
-    setUnitOptions: (state, action: PayloadAction<Array<{ label: string; value: number }>>) => {
+    setUnitOptions: (state, action: PayloadAction<OptionPair[]>) => {
       state.unitOptions = action.payload;
     },
-    setCategoryOptions: (state, action: PayloadAction<Array<{ label: string; value: number }>>) => {
+    setCategoryOptions: (state, action: PayloadAction<OptionPair[]>) => {
       state.categoryOptions = action.payload;
     },
-    setClientSnapshotOptions: (state, action: PayloadAction<Array<{ label: string; value: string }>>) => {
+    setClientSnapshotOptions: (state, action: PayloadAction<SnapshotOptionPair[]>) => {
       state.clientSnapshotOptions = action.payload;
     },
-    setBusinessSnapshotOptions: (state, action: PayloadAction<Array<{ label: string; value: string }>>) => {
+    setBusinessSnapshotOptions: (state, action: PayloadAction<SnapshotOptionPair[]>) => {
       state.businessSnapshotOptions = action.payload;
     },
     setMode: (state, action: PayloadAction<boolean>) => {
-      if (!state.settings) return;
-      state.settings = {
-        ...state.settings,
-        isDarkMode: action.payload
-      };
+      applySettingsPatch(state, { isDarkMode: action.payload });
     },
     setPresets: (state, action: PayloadAction<boolean>) => {
-      if (!state.settings) return;
-      state.settings = {
-        ...state.settings,
-        presetsON: action.payload
-      };
+      applySettingsPatch(state, { presetsON: action.payload });
     },
     setStyleProfiles: (state, action: PayloadAction<boolean>) => {
-      if (!state.settings) return;
-      state.settings = {
-        ...state.settings,
-        styleProfilesON: action.payload
-      };
+      applySettingsPatch(state, { styleProfilesON: action.payload });
     },
     setEInvoiceUBL: (state, action: PayloadAction<boolean>) => {
-      if (!state.settings) return;
-      state.settings = {
-        ...state.settings,
-        ublON: action.payload
-      };
+      applySettingsPatch(state, { ublON: action.payload });
     },
     setEInvoiceXRechnung: (state, action: PayloadAction<boolean>) => {
-      if (!state.settings) return;
-      state.settings = {
-        ...state.settings,
-        xrechnungON: action.payload
-      };
+      applySettingsPatch(state, { xrechnungON: action.payload });
     },
     setQuotes: (state, action: PayloadAction<boolean>) => {
-      if (!state.settings) return;
-      state.settings = {
-        ...state.settings,
-        quotesON: action.payload
-      };
+      applySettingsPatch(state, { quotesON: action.payload });
     },
     setReceiptPrintingOn: (state, action: PayloadAction<boolean>) => {
-      if (!state.settings) return;
-      state.settings = {
-        ...state.settings,
-        receiptPrintingOn: action.payload
-      };
+      applySettingsPatch(state, { receiptPrintingOn: action.payload });
     },
     setReports: (state, action: PayloadAction<boolean>) => {
-      if (!state.settings) return;
-      state.settings = {
-        ...state.settings,
-        reportsON: action.payload
-      };
+      applySettingsPatch(state, { reportsON: action.payload });
     },
     setCustomInvoiseSettings: (
       state,
@@ -152,15 +131,13 @@ export const pageSlice = createSlice({
         shouldIncludeBusinessName: boolean;
       }>
     ) => {
-      if (!state.settings) return;
-      state.settings = {
-        ...state.settings,
+      applySettingsPatch(state, {
         invoicePrefix: action.payload.invoicePrefix,
         invoiceSuffix: action.payload.invoiceSuffix,
         shouldIncludeMonth: action.payload.shouldIncludeMonth,
         shouldIncludeYear: action.payload.shouldIncludeYear,
         shouldIncludeBusinessName: action.payload.shouldIncludeBusinessName
-      };
+      });
     },
     setLanguageDate: (
       state,
@@ -170,13 +147,11 @@ export const pageSlice = createSlice({
         dateFormat: DateFormat;
       }>
     ) => {
-      if (!state.settings) return;
-      state.settings = {
-        ...state.settings,
+      applySettingsPatch(state, {
         language: action.payload.language,
         amountFormat: action.payload.amountFormat,
         dateFormat: action.payload.dateFormat
-      };
+      });
     }
   }
 });

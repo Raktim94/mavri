@@ -1,27 +1,27 @@
 export interface Item {
   id: number;
   name: string;
+  description?: string;
   amount?: string;
   unitId?: number;
-  categoryId?: number;
   unitName?: string;
+  categoryId?: number;
   categoryName?: string;
-  description?: string;
-  createdAt: string;
-  updatedAt: string;
+  isArchived: boolean;
   invoiceCount: number;
   quotesCount: number;
-  isArchived: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ItemAdd {
   name: string;
+  description?: string;
   amount?: string;
   unitId?: number;
-  categoryId?: number;
-  description?: string;
-  categoryName?: string;
   unitName?: string;
+  categoryId?: number;
+  categoryName?: string;
   isArchived: boolean;
 }
 
@@ -32,9 +32,9 @@ export interface ItemUpdate extends ItemAdd {
 export interface ItemFromData {
   id?: number;
   name: string;
+  description?: string;
   amount?: string;
   unitId?: number;
   categoryId?: number;
-  description?: string;
   isArchived: boolean;
 }

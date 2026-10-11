@@ -5,7 +5,9 @@ type BeforeUnloadContextType = {
   setBlocked?: (v: boolean) => void;
 };
 
-const BeforeUnloadContext = createContext<BeforeUnloadContextType>({});
+const emptyContextValue: BeforeUnloadContextType = {};
+
+const BeforeUnloadContext = createContext<BeforeUnloadContextType>(emptyContextValue);
 
 export const BeforeUnloadProvider = BeforeUnloadContext.Provider;
 

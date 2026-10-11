@@ -1,10 +1,14 @@
 import { store } from './state/configureStore';
 import { addToast } from './state/pageSlice';
 
+const pushErrorToast = (message: string) => {
+  store.dispatch(addToast({ message, severity: 'error' }));
+};
+
 window.addEventListener('unhandledrejection', event => {
-  store.dispatch(addToast({ message: String(event.reason), severity: 'error' }));
+  pushErrorToast(String(event.reason));
 });
 
 window.addEventListener('error', event => {
-  store.dispatch(addToast({ message: event.error?.message || event.message, severity: 'error' }));
+  pushErrorToast(event.error?.message || event.message);
 });

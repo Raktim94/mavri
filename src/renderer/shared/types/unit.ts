@@ -1,11 +1,11 @@
 export interface Unit {
   id: number;
   name: string;
-  createdAt: string;
-  updatedAt: string;
+  isArchived: boolean;
   invoiceCount: number;
   quotesCount: number;
-  isArchived: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface UnitAdd {

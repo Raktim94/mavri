@@ -1,15 +1,4 @@
-// The e-commerce integration API is web-only by design: a Shopify/WooCommerce
-// webhook needs a publicly reachable URL to call, which only exists when
-// this app is running as the self-hosted web server (Docker), not the
-// offline Electron desktop app. So this talks to the REST API directly
-// rather than going through the Electron-IPC `getApi()` abstraction used
-// everywhere else — there is deliberately no Electron equivalent to add.
 export type EcommercePlatform = 'shopify' | 'woocommerce' | 'generic';
-
-const baseUrl = (): string => {
-  if (typeof window === 'undefined') return '';
-  return (import.meta.env.VITE_API_URL as string) || window.location.origin;
-};
 
 export interface PublicEcommerceIntegration {
   id: number;
@@ -49,35 +38,36 @@ interface ApiResponse<T> {
   message?: string;
 }
 
-export const listEcommerceIntegrations = async (): Promise<ApiResponse<PublicEcommerceIntegration[]>> => {
-  const res = await fetch(`${baseUrl()}/api/ecommerce/integrations`, { credentials: 'include' });
+const INTEGRATIONS_PATH = '/api/ecommerce/integrations';
+
+const apiOrigin = (): string => {
+  if (typeof window === 'undefined') return '';
+  return (import.meta.env.VITE_API_URL as string) || window.location.origin;
+};
+
+const requestJson = async <T>(path: string, init?: RequestInit): Promise<ApiResponse<T>> => {
+  const res = await fetch(`${apiOrigin()}${path}`, { credentials: 'include', ...init });
   return res.json();
+};
+
+export const listEcommerceIntegrations = async (): Promise<ApiResponse<PublicEcommerceIntegration[]>> => {
+  return requestJson<PublicEcommerceIntegration[]>(INTEGRATIONS_PATH);
 };
 
 export const createEcommerceIntegration = async (
   payload: CreateIntegrationPayload
 ): Promise<ApiResponse<CreateIntegrationResult>> => {
-  const res = await fetch(`${baseUrl()}/api/ecommerce/integrations`, {
+  return requestJson<CreateIntegrationResult>(INTEGRATIONS_PATH, {
     method: 'POST',
-    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
   });
-  return res.json();
 };
 
 export const deactivateEcommerceIntegration = async (id: number): Promise<ApiResponse<undefined>> => {
-  const res = await fetch(`${baseUrl()}/api/ecommerce/integrations/${id}/deactivate`, {
-    method: 'POST',
-    credentials: 'include'
-  });
-  return res.json();
+  return requestJson<undefined>(`${INTEGRATIONS_PATH}/${id}/deactivate`, { method: 'POST' });
 };
 
 export const deleteEcommerceIntegration = async (id: number): Promise<ApiResponse<undefined>> => {
-  const res = await fetch(`${baseUrl()}/api/ecommerce/integrations/${id}`, {
-    method: 'DELETE',
-    credentials: 'include'
-  });
-  return res.json();
+  return requestJson<undefined>(`${INTEGRATIONS_PATH}/${id}`, { method: 'DELETE' });
 };

@@ -5,78 +5,51 @@ import { useForm } from '../../shared/hooks/form/useForm';
 import { useFormDirtyCheck } from '../../shared/hooks/form/useFormDirtyCheck';
 import type { Currency, CurrencyFromData } from '../../shared/types/currency';
 import { getFormattedLabel } from '../../shared/utils/formatFunctions';
-import { validators } from '../../shared/utils/validatorFunctions';
 import { CURRENCY_FORMAT_ITEMS_ARRAY } from '../../state/constant';
+import {
+  applyCurrencyFieldEvaluation,
+  createCurrencyDraft,
+  createCurrencyFieldErrors,
+  hasCurrencyFormat,
+  isCurrencyDraftReady,
+  isCurrencyFormatLocked,
+  type CurrencyFieldErrors,
+  type CurrencyValidationField
+} from './currencyModel';
 
 interface Props {
   currency?: Currency;
   handleChange?: (data: { currency: CurrencyFromData; isFormValid: boolean; description?: string }) => void;
 }
-export const Form: FC<Props> = ({ handleChange = () => {}, currency }) => {
+
+export const Form: FC<Props> = ({ currency, handleChange = () => {} }) => {
   const { t } = useTranslation();
-  const initialFormRef = useRef<CurrencyFromData | undefined>(undefined);
-  const optionsCurrencyFormat = CURRENCY_FORMAT_ITEMS_ARRAY;
-  const { form, setForm, update } = useForm<CurrencyFromData>({
-    id: currency?.id,
-    code: currency?.code ?? '',
-    symbol: currency?.symbol ?? '',
-    text: currency?.text ?? '',
-    format: currency?.format ?? '',
-    isArchived: currency?.isArchived ?? false,
-    subunit: currency?.subunit ?? 0
-  });
-  const [errors, setErrors] = useState({
-    code: false,
-    symbol: false,
-    text: false,
-    format: false,
-    subunit: false
-  });
+  const baselineRef = useRef<CurrencyFromData | undefined>(undefined);
+  const { form, setForm, update } = useForm<CurrencyFromData>(createCurrencyDraft(currency));
+  const [errors, setErrors] = useState<CurrencyFieldErrors>(createCurrencyFieldErrors);
 
-  const isFormatDisabled = form.code.trim() === '' || form.symbol.trim() === '';
-  const hasSelectedFormat = form.format.trim() !== '';
+  useFormDirtyCheck(form, baselineRef);
 
-  const validateField = (field: keyof typeof errors, value: string) => {
-    if (
-      !validators.required(value) &&
-      (field === 'code' || field === 'symbol' || field === 'text' || field === 'format' || field === 'subunit')
-    ) {
-      setErrors(e => ({ ...e, [field]: true }));
-    } else {
-      setErrors(e => ({ ...e, [field]: false }));
-    }
+  const syncField = (field: CurrencyValidationField, value: string) => {
+    update(field, value);
+    setErrors(prev => applyCurrencyFieldEvaluation(prev, field, value));
   };
 
-  useFormDirtyCheck(form, initialFormRef);
-
   useEffect(() => {
-    const initial = {
-      id: currency?.id,
-      code: currency?.code ?? '',
-      symbol: currency?.symbol ?? '',
-      text: currency?.text ?? '',
-      format: currency?.format ?? '',
-      isArchived: currency?.isArchived ?? false,
-      subunit: currency?.subunit ?? 0
-    };
-    initialFormRef.current = initial;
-    setForm(initial);
+    const next = createCurrencyDraft(currency);
+    baselineRef.current = next;
+    setForm(next);
   }, [currency, setForm]);
 
   useEffect(() => {
-    const valid =
-      form.code.trim() !== '' &&
-      form.symbol.trim() !== '' &&
-      form.text.trim() !== '' &&
-      form.format.trim() !== '' &&
-      form.subunit.toString().trim() !== '';
-
     handleChange({
       currency: form,
-      isFormValid: valid,
+      isFormValid: isCurrencyDraftReady(form),
       description: t('common.invalidForm')
     });
   }, [form, errors, handleChange, t]);
+
+  const formatPreview = (label: string) => getFormattedLabel({ label, symbol: form.symbol, code: form.code });
 
   return (
     <Grid container spacing={2}>
@@ -88,10 +61,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, currency }) => {
           value={form.code}
           error={errors.code}
           helperText={errors.code ? t('common.fieldRequired') : ''}
-          onChange={e => {
-            update('code', e.target.value);
-            validateField('code', e.target.value);
-          }}
+          onChange={e => syncField('code', e.target.value)}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 4 }}>
@@ -102,32 +72,26 @@ export const Form: FC<Props> = ({ handleChange = () => {}, currency }) => {
           value={form.symbol}
           error={errors.symbol}
           helperText={errors.symbol ? t('common.fieldRequired') : ''}
-          onChange={e => {
-            update('symbol', e.target.value);
-            validateField('symbol', e.target.value);
-          }}
+          onChange={e => syncField('symbol', e.target.value)}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 4 }}>
         <Autocomplete
           fullWidth
-          disabled={isFormatDisabled}
-          options={optionsCurrencyFormat}
-          getOptionLabel={option => getFormattedLabel({ label: option.label, symbol: form.symbol, code: form.code })}
-          disableClearable={hasSelectedFormat}
-          value={optionsCurrencyFormat.find(opt => opt.value === form.format) ?? null}
-          onChange={(_e, newValue) => {
-            if (!newValue) return;
-            update('format', newValue.value);
-            validateField('format', newValue.value);
+          disabled={isCurrencyFormatLocked(form)}
+          options={CURRENCY_FORMAT_ITEMS_ARRAY}
+          getOptionLabel={option => formatPreview(option.label)}
+          disableClearable={hasCurrencyFormat(form)}
+          value={CURRENCY_FORMAT_ITEMS_ARRAY.find(opt => opt.value === form.format) ?? null}
+          onChange={(_e, selected) => {
+            if (!selected) return;
+            syncField('format', selected.value);
           }}
-          renderOption={(props, option) => {
-            return (
-              <li {...props} key={option.value}>
-                {getFormattedLabel({ label: option.label, symbol: form.symbol, code: form.code })}
-              </li>
-            );
-          }}
+          renderOption={(props, option) => (
+            <li {...props} key={option.value}>
+              {formatPreview(option.label)}
+            </li>
+          )}
           renderInput={params => (
             <TextField
               {...params}
@@ -151,7 +115,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, currency }) => {
           helperText={errors.subunit ? t('common.fieldRequired') : ''}
           onChange={e => {
             update('subunit', Number(e.target.value));
-            validateField('subunit', e.target.value);
+            setErrors(prev => applyCurrencyFieldEvaluation(prev, 'subunit', e.target.value));
           }}
         />
       </Grid>
@@ -163,10 +127,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, currency }) => {
           value={form.text}
           error={errors.text}
           helperText={errors.text ? t('common.fieldRequired') : ''}
-          onChange={e => {
-            update('text', e.target.value);
-            validateField('text', e.target.value);
-          }}
+          onChange={e => syncField('text', e.target.value)}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 12 }}>

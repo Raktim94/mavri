@@ -18,8 +18,8 @@ import { List } from './List';
 
 export const CategoriesPage: FC = () => {
   const { t } = useTranslation();
+
   const excelColumns = ['name', 'isArchived'];
-  const excelFileName = 'categories';
   const excelTemplateData: Rows = [
     {
       name: 'Goods',
@@ -30,63 +30,47 @@ export const CategoriesPage: FC = () => {
       isArchived: false
     }
   ];
+
   const filters: Filter[] = [
     ...createCommonFilters({ t, namespace: 'categories', initial: FilterType.active }),
     ...createInvoiceFilters({ t, namespace: 'categories' })
   ];
-  const useCategoriesCRUDRetrieve = (args: {
-    filter?: FilterData[];
-    onDone?: (data: Response<Category[]>) => void;
-  }) => {
+
+  const useCategoryList = (args: { filter?: FilterData[]; onDone?: (data: Response<Category[]>) => void }) => {
     const { categories, execute } = useCategoriesRetrieve({ filter: args.filter, onDone: args.onDone });
     return { items: categories, execute };
   };
-  const useCategoryCRUDAdd = (args: {
+
+  const useCategoryCreate = (args: {
     item?: CategoryAdd;
     immediate?: boolean;
     onDone?: (data: Response<Category>) => void;
-  }) => {
-    return useCategoryAdd({
-      category: args.item,
-      immediate: args.immediate,
-      onDone: args.onDone
-    });
-  };
-  const useCategoriesCRUDAddBatch = (args: {
+  }) => useCategoryAdd({ category: args.item, immediate: args.immediate, onDone: args.onDone });
+
+  const useCategoryCreateBatch = (args: {
     item?: CategoryAdd[];
     immediate?: boolean;
     onDone?: (data: Response<CategoryAdd[]>) => void;
-  }) => {
-    return useCategoryAddBatch({
-      categories: args.item,
-      immediate: args.immediate,
-      onDone: args.onDone
-    });
-  };
-  const useCategoryCRUDUpdate = (args: {
+  }) => useCategoryAddBatch({ categories: args.item, immediate: args.immediate, onDone: args.onDone });
+
+  const useCategoryEdit = (args: {
     item?: CategoryUpdate;
     immediate?: boolean;
     onDone?: (data: Response<Category>) => void;
-  }) => {
-    return useCategoryUpdate({
-      category: args.item,
-      immediate: args.immediate,
-      onDone: args.onDone
-    });
-  };
+  }) => useCategoryUpdate({ category: args.item, immediate: args.immediate, onDone: args.onDone });
 
   return (
     <CRUDPage<Category, CategoryAdd, CategoryUpdate>
       componentId="categories"
       title={t('common.category')}
       filters={filters}
-      excelData={{ excelColumns, excelFileName, excelFormat: 'xlsx', excelTemplateData }}
-      useRetrieve={useCategoriesCRUDRetrieve}
-      useAdd={useCategoryCRUDAdd}
-      useAddBatch={useCategoriesCRUDAddBatch}
-      useUpdate={useCategoryCRUDUpdate}
+      excelData={{ excelColumns, excelFileName: 'categories', excelFormat: 'xlsx', excelTemplateData }}
+      useRetrieve={useCategoryList}
+      useAdd={useCategoryCreate}
+      useAddBatch={useCategoryCreateBatch}
+      useUpdate={useCategoryEdit}
       useDelete={useCategoryDelete}
-      searchField={'name'}
+      searchField="name"
       sortOptions={[
         { label: t('common.name'), value: 'name' },
         { label: t('common.lastUpdate'), value: 'updatedAt' }
@@ -94,10 +78,7 @@ export const CategoriesPage: FC = () => {
       noItemButtonText={t('categories.add')}
       noItemText={t('categories.noItem')}
       leftTitle={t('menuItems.categories')}
-      validateAndNormalize={async data => {
-        if (!isCategoryFromData(data)) return;
-        return data;
-      }}
+      validateAndNormalize={async data => (isCategoryFromData(data) ? data : undefined)}
       renderListItem={(item, selectedItem, onEdit, onDelete) => (
         <List
           key={item.id}
@@ -110,12 +91,12 @@ export const CategoriesPage: FC = () => {
       form={({ item, onChange }) => (
         <Form
           category={item}
-          handleChange={d => {
-            if (isCategoryFromData(d.category)) {
+          handleChange={change => {
+            if (isCategoryFromData(change.category)) {
               onChange({
-                changedData: d.category,
-                isFormValid: d.isFormValid,
-                description: d.description
+                changedData: change.category,
+                isFormValid: change.isFormValid,
+                description: change.description
               });
             }
           }}

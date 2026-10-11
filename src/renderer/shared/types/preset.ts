@@ -4,6 +4,7 @@ import type { PageFormat } from '../enums/pageFormat';
 import type { SizeType } from '../enums/sizeType';
 import type { TableHeaderStyle } from '../enums/tableHeaderStyle';
 import type { TableRowStyle } from '../enums/tableRowStyle';
+
 import type { LayoutSchema } from './layouts';
 import type { PDFText } from './pdfText';
 import type { SortOrder } from './sortOrder';
@@ -11,7 +12,9 @@ import type { SortOrder } from './sortOrder';
 export interface PresetMeta {
   id: number;
   name: string;
-  //business
+  isArchived: boolean;
+  createdAt: string;
+  updatedAt: string;
   businessId?: number;
   businessName?: string;
   businessAddress?: string;
@@ -20,11 +23,10 @@ export interface PresetMeta {
   businessEmail?: string;
   businessPhone?: string;
   businessAdditional?: string;
+  businessVatCode?: string;
   businessFileSize?: number;
   businessFileType?: string;
   businessFileName?: string;
-  businessVatCode?: string;
-  //client
   clientId?: number;
   clientName?: string;
   clientAddress?: string;
@@ -33,32 +35,27 @@ export interface PresetMeta {
   clientCode?: string;
   clientAdditional?: string;
   clientVatCode?: string;
-  //currency
   currencyId?: number;
   currencyCode?: string;
   currencySymbol?: string;
   currencySubunit?: number;
   currencyFormat?: string;
-  //bank
   bankId?: number;
   bankLabel?: string;
   bankName?: string;
   accountNumber?: string;
-  swiftCode?: string;
-  address?: string;
-  branchCode?: string;
-  type?: string;
-  routingNumber?: string;
   accountHolder?: string;
-  sortOrder?: string;
+  routingNumber?: string;
+  branchCode?: string;
+  swiftCode?: string;
   upiCode?: string;
+  address?: string;
+  type?: string;
+  sortOrder?: string;
   qrCodeFileSize?: number;
   qrCodeFileType?: string;
   qrCodeFileName?: string;
-  //style profile
   styleProfilesId?: number;
-  layoutId?: number;
-  layoutSchema?: LayoutSchema;
   styleProfileName?: string;
   styleProfileColor?: string;
   styleProfileLogoSize?: SizeType;
@@ -68,18 +65,19 @@ export interface PresetMeta {
   styleProfileTableRowStyle?: TableRowStyle;
   styleProfilePageFormat?: PageFormat;
   styleProfileLabelUpperCase?: boolean;
+  styleProfileShowQuantity?: boolean;
+  styleProfileShowUnit?: boolean;
+  styleProfileShowRowNo?: boolean;
+  styleProfileFieldSortOrders?: SortOrder;
+  styleProfilePdfTexts?: PDFText;
   styleProfileWatermarkFileName?: string;
   styleProfileWatermarkFileType?: string;
   styleProfileWatermarkFileSize?: number;
   styleProfilePaidWatermarkFileName?: string;
   styleProfilePaidWatermarkFileType?: string;
   styleProfilePaidWatermarkFileSize?: number;
-  styleProfileShowQuantity?: boolean;
-  styleProfileShowUnit?: boolean;
-  styleProfileShowRowNo?: boolean;
-  styleProfileFieldSortOrders?: SortOrder;
-  styleProfilePdfTexts?: PDFText;
-  //the rest
+  layoutId?: number;
+  layoutSchema?: LayoutSchema;
   customerNotes?: string;
   thanksNotes?: string;
   termsConditionNotes?: string;
@@ -87,9 +85,6 @@ export interface PresetMeta {
   signatureSize?: number;
   signatureType?: string;
   signatureName?: string;
-  isArchived: boolean;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface Preset extends PresetMeta {
@@ -110,6 +105,7 @@ export interface PresetWeb extends PresetMeta {
 
 export interface PresetAddMeta {
   name: string;
+  isArchived: boolean;
   businessId?: number;
   clientId?: number;
   currencyId?: number;
@@ -124,19 +120,18 @@ export interface PresetAddMeta {
   signatureSize?: number;
   signatureType?: string;
   signatureName?: string;
-  isArchived: boolean;
 }
 
 export interface PresetAdd extends PresetAddMeta {
   signatureData?: Uint8Array | null;
 }
 
-export interface PresetUpdate extends PresetAdd {
-  id: number;
-}
-
 export interface PresetAddWeb extends PresetAddMeta {
   signatureData?: string | null;
+}
+
+export interface PresetUpdate extends PresetAdd {
+  id: number;
 }
 
 export interface PresetUpdateWeb extends PresetAddWeb {
@@ -146,6 +141,7 @@ export interface PresetUpdateWeb extends PresetAddWeb {
 export interface PresetFromData {
   id?: number;
   name: string;
+  isArchived: boolean;
   businessId?: number;
   businessName?: string;
   clientId?: number;
@@ -157,13 +153,12 @@ export interface PresetFromData {
   bankName?: string;
   styleProfilesId?: number;
   styleProfileName?: string;
-  language?: Language;
-  isArchived: boolean;
   layoutId?: number;
   layoutSchema?: LayoutSchema;
   customerNotes?: string;
   thanksNotes?: string;
   termsConditionNotes?: string;
+  language?: Language;
   signatureData?: Uint8Array | null;
   signatureSize?: number;
   signatureType?: string;

@@ -10,48 +10,39 @@ interface Props {
   unit?: Unit;
   handleChange?: (data: { unit: UnitFromData; isFormValid: boolean; description?: string }) => void;
 }
-export const Form: FC<Props> = ({ handleChange = () => {}, unit }) => {
+
+const createDraft = (unit?: Unit): UnitFromData => ({
+  id: unit?.id,
+  name: unit?.name ?? '',
+  isArchived: unit?.isArchived ?? false
+});
+
+export const Form: FC<Props> = ({ unit, handleChange = () => {} }) => {
   const { t } = useTranslation();
-  const initialFormRef = useRef<UnitFromData | undefined>(undefined);
+  const baselineRef = useRef<UnitFromData | undefined>(undefined);
+  const { form, setForm, update } = useForm<UnitFromData>(createDraft(unit));
+  const [nameError, setNameError] = useState(false);
 
-  const { form, setForm, update } = useForm<UnitFromData>({
-    id: unit?.id,
-    name: unit?.name ?? '',
-    isArchived: unit?.isArchived ?? false
-  });
-  const [errors, setErrors] = useState({
-    name: false
-  });
+  useFormDirtyCheck(form, baselineRef);
 
-  const validateField = (field: keyof typeof errors, value: string) => {
-    if (!validators.required(value) && field === 'name') {
-      setErrors(e => ({ ...e, [field]: true }));
-    } else {
-      setErrors(e => ({ ...e, [field]: false }));
-    }
+  const syncName = (value: string) => {
+    update('name', value);
+    setNameError(!validators.required(value));
   };
 
-  useFormDirtyCheck(form, initialFormRef);
-
   useEffect(() => {
-    const initial = {
-      id: unit?.id,
-      name: unit?.name ?? '',
-      isArchived: unit?.isArchived ?? false
-    };
-    initialFormRef.current = initial;
-    setForm(initial);
+    const next = createDraft(unit);
+    baselineRef.current = next;
+    setForm(next);
   }, [unit, setForm]);
 
   useEffect(() => {
-    const valid = form.name.trim() !== '' && !errors.name;
-
     handleChange({
       unit: form,
-      isFormValid: valid,
+      isFormValid: form.name.trim() !== '' && !nameError,
       description: t('common.invalidForm')
     });
-  }, [form, errors, handleChange, t]);
+  }, [form, nameError, handleChange, t]);
 
   return (
     <Grid container spacing={2}>
@@ -61,12 +52,9 @@ export const Form: FC<Props> = ({ handleChange = () => {}, unit }) => {
           fullWidth
           required
           value={form.name}
-          error={errors.name}
-          helperText={errors.name ? t('common.fieldRequired') : ''}
-          onChange={e => {
-            update('name', e.target.value);
-            validateField('name', e.target.value);
-          }}
+          error={nameError}
+          helperText={nameError ? t('common.fieldRequired') : ''}
+          onChange={e => syncName(e.target.value)}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 12 }}>

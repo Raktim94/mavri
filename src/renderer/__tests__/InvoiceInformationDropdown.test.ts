@@ -1,4 +1,4 @@
-import { shouldAutoFillInvoiceNumber } from '../pages/invoices/Form/Dropdowns/InvoiceInformationDropdown';
+import { shouldAutoFillInvoiceNumber } from '../pages/invoices/Form/drawers/invoiceInfoModel';
 
 describe('shouldAutoFillInvoiceNumber', () => {
   it('returns true when invoice number is empty and a sequence is provided', () => {

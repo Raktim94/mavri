@@ -1,11 +1,12 @@
 import type { TFunction } from 'i18next';
 
-export const toDataUrl = (input: Blob | Uint8Array, mimeType: string = 'image/png'): Promise<string> => {
-  mimeType = mimeType ?? 'image/png';
+const DEFAULT_MIME_TYPE = 'image/png';
+const DATA_URL_PATTERN = /^data:[\w/+.-]+;base64,[A-Za-z0-9+/=]+$/;
 
-  const blob = input instanceof Blob ? input : new Blob([new Uint8Array(input).buffer], { type: mimeType });
+const copyToArrayBuffer = (bytes: Uint8Array) => new Uint8Array(bytes).buffer;
 
-  return new Promise((resolve, reject) => {
+const readAsDataUrl = (blob: Blob): Promise<string> =>
+  new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onloadend = () => {
       if (typeof reader.result === 'string') resolve(reader.result);
@@ -14,17 +15,23 @@ export const toDataUrl = (input: Blob | Uint8Array, mimeType: string = 'image/pn
     reader.onerror = reject;
     reader.readAsDataURL(blob);
   });
+
+export const toDataUrl = (input: Blob | Uint8Array, mimeType: string = DEFAULT_MIME_TYPE): Promise<string> => {
+  const resolvedMimeType = mimeType ?? DEFAULT_MIME_TYPE;
+
+  const blob = input instanceof Blob ? input : new Blob([copyToArrayBuffer(input)], { type: resolvedMimeType });
+
+  return readAsDataUrl(blob);
 };
 
 export const isDataUrl = (value: unknown): value is string => {
-  return typeof value === 'string' && /^data:[\w/+.-]+;base64,[A-Za-z0-9+/=]+$/.test(value);
+  return typeof value === 'string' && DATA_URL_PATTERN.test(value);
 };
 
 export const base64ToBytes = (base64: string): Uint8Array => {
   const binary = atob(base64);
-  const len = binary.length;
-  const bytes = new Uint8Array(len);
-  for (let i = 0; i < len; i++) {
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
     bytes[i] = binary.charCodeAt(i);
   }
   return bytes;

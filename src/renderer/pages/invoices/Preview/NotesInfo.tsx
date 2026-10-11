@@ -1,73 +1,42 @@
 import { Text, View } from '@react-pdf/renderer';
 import { memo, type FC } from 'react';
 import type { InvoiceFromData } from '../../../shared/types/invoice';
-import { DEFAULT_FONT_SIZES, FONT_SIZES, PDF_STYLES } from './constant';
+import { notesSections } from './models/infoLinesModel';
+import { PDF_STYLES, fontScaleFor } from './pdfTheme';
 
-interface PropsLabels {
-  customerNoteLabel: string;
-  termsConditionsLabel: string;
-}
 interface Props {
   invoiceForm?: InvoiceFromData;
-  labels: PropsLabels;
+  labels: { customerNoteLabel: string; termsConditionsLabel: string };
 }
+
 const NotesInfoComponent: FC<Props> = ({ invoiceForm, labels }) => {
-  const { customerNoteLabel, termsConditionsLabel } = labels;
+  const scale = fontScaleFor(invoiceForm?.invoiceCustomization);
+  const sections = notesSections(invoiceForm, labels);
 
   return (
     <View style={[PDF_STYLES.pt20]}>
-      {invoiceForm?.thanksNotes && (
-        <View
-          style={[
-            PDF_STYLES.regular,
-            PDF_STYLES.italic,
-            { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regular }
-          ]}
-        >
-          <Text>{invoiceForm?.thanksNotes}</Text>
-        </View>
-      )}
-      {invoiceForm?.customerNotes && (
-        <View style={[PDF_STYLES.pt10]}>
-          <View
-            style={[
-              PDF_STYLES.regularBold,
-              { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regularBold }
-            ]}
-          >
-            <Text>{customerNoteLabel}</Text>
+      {sections.map(section => {
+        if (section.kind === 'thanks') {
+          return (
+            <View key="thanks" style={[PDF_STYLES.regular, PDF_STYLES.italic, { fontSize: scale.regular }]}>
+              <Text>{section.text}</Text>
+            </View>
+          );
+        }
+
+        return (
+          <View key={section.kind} style={[PDF_STYLES.pt10]}>
+            <View style={[PDF_STYLES.regularBold, { fontSize: scale.regularBold }]}>
+              <Text>{section.label}</Text>
+            </View>
+            <View style={[PDF_STYLES.regular, { fontSize: scale.regular }]}>
+              <Text>{section.text}</Text>
+            </View>
           </View>
-          <View
-            style={[
-              PDF_STYLES.regular,
-              { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regular }
-            ]}
-          >
-            <Text>{invoiceForm?.customerNotes}</Text>
-          </View>
-        </View>
-      )}
-      {invoiceForm?.termsConditionNotes && (
-        <View style={[PDF_STYLES.pt10]}>
-          <View
-            style={[
-              PDF_STYLES.regularBold,
-              { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regularBold }
-            ]}
-          >
-            <Text>{termsConditionsLabel}</Text>
-          </View>
-          <View
-            style={[
-              PDF_STYLES.regular,
-              { fontSize: FONT_SIZES[invoiceForm?.invoiceCustomization?.fontSize ?? DEFAULT_FONT_SIZES].regular }
-            ]}
-          >
-            <Text>{invoiceForm?.termsConditionNotes}</Text>
-          </View>
-        </View>
-      )}
+        );
+      })}
     </View>
   );
 };
+
 export const NotesInfo = memo(NotesInfoComponent);

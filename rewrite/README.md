@@ -8,9 +8,8 @@ desktop app" if you need it).
 
 It was written against the behaviour recorded in
 [`docs/rewrite/PARITY_MATRIX.md`](../docs/rewrite/PARITY_MATRIX.md), not
-translated line by line. The project still builds on the upstream Invoice
-Builder project, so the repository `LICENSE` and attribution in the root
-`README.md` stay in place.
+translated line by line, and contains no code from the project Mavri began as
+(see `THIRD-PARTY-NOTICES.md` in the repository root).
 
 ## Layout
 

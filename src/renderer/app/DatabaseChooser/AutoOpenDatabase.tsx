@@ -1,6 +1,5 @@
 import { useEffect, useState, type FC } from 'react';
 import { getDatabaseReady } from '../../shared/api/platformApi';
-import { isWebMode } from '../../shared/api/restApi';
 import { DatabaseChooser } from './DatabaseChooser';
 
 interface Props {
@@ -8,13 +7,12 @@ interface Props {
 }
 
 // Docker/CasaOS servers open a default database themselves. In that case skip
-// the chooser entirely; otherwise (desktop app, or a server without a default
-// database) fall back to the normal chooser.
+// the chooser entirely; otherwise (a server without a default database) fall
+// back to the normal chooser.
 export const AutoOpenDatabase: FC<Props> = ({ onDatabaseRead }) => {
-  const [checking, setChecking] = useState(isWebMode());
+  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    if (!isWebMode()) return;
     let cancelled = false;
     getDatabaseReady()
       .then(res => {

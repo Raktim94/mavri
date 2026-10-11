@@ -2,27 +2,26 @@ export interface BusinessMeta {
   id: number;
   name: string;
   shortName: string;
-  address?: string;
   role?: string;
+  address?: string;
   email?: string;
   phone?: string;
   website?: string;
   additional?: string;
+  description?: string;
   vatCode?: string;
-  peppolEndpointId?: string;
   countryCode?: string;
   code?: string;
+  peppolEndpointId?: string;
   peppolEndpointSchemeId?: string;
-  // Legacy payment info. New payment info is via Bank
   paymentInformation?: string;
+  fileSize?: number;
+  fileType?: string;
+  fileName?: string;
   invoiceCount: number;
   quotesCount: number;
   createdAt: string;
   updatedAt: string;
-  fileSize?: number;
-  fileType?: string;
-  fileName?: string;
-  description?: string;
   isArchived: boolean;
 }
 
@@ -37,23 +36,22 @@ export interface BusinessWeb extends BusinessMeta {
 export interface BusinessAddMeta {
   name: string;
   shortName: string;
-  address?: string;
   role?: string;
+  address?: string;
   email?: string;
   phone?: string;
   website?: string;
   additional?: string;
+  description?: string;
   vatCode?: string;
-  peppolEndpointId?: string;
   countryCode?: string;
   code?: string;
+  peppolEndpointId?: string;
   peppolEndpointSchemeId?: string;
-  // Legacy payment info. New payment info is via Bank
   paymentInformation?: string;
   fileSize?: number;
   fileType?: string;
   fileName?: string;
-  description?: string;
   isArchived: boolean;
 }
 
@@ -61,12 +59,12 @@ export interface BusinessAdd extends BusinessAddMeta {
   logo?: Uint8Array | null;
 }
 
-export interface BusinessUpdate extends BusinessAdd {
-  id: number;
-}
-
 export interface BusinessAddWeb extends BusinessAddMeta {
   logo?: string | null;
+}
+
+export interface BusinessUpdate extends BusinessAdd {
+  id: number;
 }
 
 export interface BusinessUpdateWeb extends BusinessAddWeb {
@@ -76,24 +74,23 @@ export interface BusinessUpdateWeb extends BusinessAddWeb {
 export interface BusinessFromData {
   id?: number;
   logo?: Uint8Array;
-  email?: string;
-  phone?: string;
   name: string;
   shortName: string;
   role?: string;
   address?: string;
+  email?: string;
+  phone?: string;
   website?: string;
   additional?: string;
+  description?: string;
   vatCode?: string;
-  peppolEndpointId?: string;
   countryCode?: string;
   code?: string;
+  peppolEndpointId?: string;
   peppolEndpointSchemeId?: string;
-  // Legacy payment info. New payment info is via Bank
   paymentInformation?: string;
   fileSize?: number;
   fileType?: string;
   fileName?: string;
-  description?: string;
   isArchived: boolean;
 }

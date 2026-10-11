@@ -2,20 +2,11 @@ import ArticleIcon from '@mui/icons-material/Article';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import NoteIcon from '@mui/icons-material/Note';
 import { Box, IconButton, ListItemButton, ListItemText, Tooltip, Typography } from '@mui/material';
-import { memo, useCallback, useState, type FC } from 'react';
+import { memo, useState, type FC, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NoteDropdown } from './Dropdowns/NoteDropdown';
+import { noteEntries, NoteKind, type NoteEntry } from './notes/noteEntries';
 
-enum NoteFormType {
-  customer,
-  thankyou,
-  termsconditions
-}
-interface NoteForm {
-  currentNote?: string;
-  title: string;
-  type: NoteFormType;
-}
 interface Props {
   data: {
     customerNotes?: string;
@@ -26,59 +17,50 @@ interface Props {
   onThanksNotesChanged: (value?: string) => void;
   onTermsConditionsNotesChanged: (value?: string) => void;
 }
+
+const NOTE_ICONS: Record<NoteKind, ReactNode> = {
+  [NoteKind.customer]: <NoteIcon fontSize="small" />,
+  [NoteKind.thankyou]: <FavoriteIcon fontSize="small" />,
+  [NoteKind.termsconditions]: <ArticleIcon fontSize="small" />
+};
+
+const LABEL_SX = { fontWeight: 600, color: 'primary.main', overflow: 'hidden', textOverflow: 'ellipsis' } as const;
+const VALUE_SX = { fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' } as const;
+
 const NotesSelectorComponent: FC<Props> = ({
   data,
   onCustomerNotesChanged,
   onThanksNotesChanged,
   onTermsConditionsNotesChanged
 }) => {
-  const { customerNotes, thanksNotes, termsConditionNotes } = data;
   const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState<NoteEntry | undefined>(undefined);
 
-  const [isDropdownOpenNotes, setIsDropdownOpenNotes] = useState<boolean>(false);
-  const [formData, setFormData] = useState<NoteForm | undefined>(undefined);
+  const entries = noteEntries(t, data);
 
-  const handleOnOpen = useCallback((setter: React.Dispatch<React.SetStateAction<boolean>>) => {
-    setter(true);
-  }, []);
-
-  const handleOnClose = useCallback((setter: React.Dispatch<React.SetStateAction<boolean>>) => {
-    setter(false);
-  }, []);
-
-  const notesConfig = [
-    {
-      type: NoteFormType.customer,
-      label: t('invoices.customerNote'),
-      value: customerNotes,
-      icon: <NoteIcon fontSize="small" />
-    },
-    {
-      type: NoteFormType.thankyou,
-      label: t('invoices.thankNote'),
-      value: thanksNotes,
-      icon: <FavoriteIcon fontSize="small" />
-    },
-    {
-      type: NoteFormType.termsconditions,
-      label: t('invoices.termsConditions'),
-      value: termsConditionNotes,
-      icon: <ArticleIcon fontSize="small" />
+  const routeChange = (kind: NoteKind, value: string) => {
+    switch (kind) {
+      case NoteKind.customer:
+        onCustomerNotesChanged(value);
+        break;
+      case NoteKind.thankyou:
+        onThanksNotesChanged(value);
+        break;
+      case NoteKind.termsconditions:
+        onTermsConditionsNotesChanged(value);
+        break;
     }
-  ];
+  };
 
   return (
     <>
-      {notesConfig.map(note => (
+      {entries.map(entry => (
         <ListItemButton
-          key={note.type}
+          key={entry.kind}
           onClick={() => {
-            setFormData({
-              currentNote: note.value,
-              title: note.label,
-              type: note.type
-            });
-            handleOnOpen(setIsDropdownOpenNotes);
+            setActive(entry);
+            setOpen(true);
           }}
           sx={{
             pt: 2,
@@ -93,51 +75,23 @@ const NotesSelectorComponent: FC<Props> = ({
             flexDirection: 'column'
           }}
         >
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'start',
-              alignItems: 'center',
-              width: '100%',
-              gap: 2
-            }}
-          >
+          <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '100%', gap: 2 }}>
             <ListItemText
               primary={
-                <Box
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    alignItems: 'center'
-                  }}
-                >
-                  <Tooltip title={note.label}>
-                    <IconButton size="small" data-drag-handle onMouseDown={e => e.stopPropagation()}>
-                      {note.icon}
+                <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                  <Tooltip title={entry.label}>
+                    <IconButton size="small" onMouseDown={event => event.stopPropagation()}>
+                      {NOTE_ICONS[entry.kind]}
                     </IconButton>
                   </Tooltip>
-                  <Typography
-                    component="div"
-                    variant="body1"
-                    sx={{
-                      fontWeight: 600,
-                      color: 'primary.main',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis'
-                    }}
-                  >
-                    {note.label.toUpperCase()}
+                  <Typography component="div" variant="body1" sx={LABEL_SX}>
+                    {entry.label.toUpperCase()}
                   </Typography>
                 </Box>
               }
               secondary={
-                <Typography
-                  component="div"
-                  variant="body2"
-                  sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}
-                >
-                  {note.value}
+                <Typography component="div" variant="body2" sx={VALUE_SX}>
+                  {entry.value}
                 </Typography>
               }
               disableTypography
@@ -148,30 +102,21 @@ const NotesSelectorComponent: FC<Props> = ({
         </ListItemButton>
       ))}
 
-      {formData && (
+      {active && (
         <NoteDropdown
-          isOpen={isDropdownOpenNotes}
-          onClose={() => handleOnClose(setIsDropdownOpenNotes)}
-          onOpen={() => handleOnOpen(setIsDropdownOpenNotes)}
-          onClick={data => {
-            switch (formData.type) {
-              case NoteFormType.customer:
-                onCustomerNotesChanged(data);
-                break;
-              case NoteFormType.thankyou:
-                onThanksNotesChanged(data);
-                break;
-              case NoteFormType.termsconditions:
-                onTermsConditionsNotesChanged(data);
-                break;
-            }
-            handleOnClose(setIsDropdownOpenNotes);
+          isOpen={open}
+          onClose={() => setOpen(false)}
+          onOpen={() => setOpen(true)}
+          onClick={value => {
+            routeChange(active.kind, value);
+            setOpen(false);
           }}
-          currentNote={formData?.currentNote}
-          title={formData.title}
+          currentNote={active.value}
+          title={active.label}
         />
       )}
     </>
   );
 };
+
 export const NotesSelector = memo(NotesSelectorComponent);

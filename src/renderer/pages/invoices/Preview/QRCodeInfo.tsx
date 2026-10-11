@@ -6,10 +6,12 @@ interface Props {
   invoiceForm?: InvoiceFromData;
   qrCodeUrl?: string;
 }
+
 const QRCodeInfoComponent: FC<Props> = ({ invoiceForm, qrCodeUrl }) => {
   if (!qrCodeUrl) return null;
   if (!invoiceForm?.invoiceBankSnapshot?.qrCode) return null;
 
-  return <Image style={[{ width: 64, height: 64 }]} src={qrCodeUrl} />;
+  return <Image style={{ width: 64, height: 64 }} src={qrCodeUrl} />;
 };
+
 export const QRCodeInfo = memo(QRCodeInfoComponent);

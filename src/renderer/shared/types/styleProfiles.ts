@@ -3,6 +3,7 @@ import type { PageFormat } from '../enums/pageFormat';
 import type { SizeType } from '../enums/sizeType';
 import type { TableHeaderStyle } from '../enums/tableHeaderStyle';
 import type { TableRowStyle } from '../enums/tableRowStyle';
+
 import type { LayoutSchema } from './layouts';
 import type { PDFText } from './pdfText';
 import type { SortOrder } from './sortOrder';
@@ -10,32 +11,32 @@ import type { SortOrder } from './sortOrder';
 export interface StyleProfileMeta {
   id: number;
   name: string;
+  isArchived: boolean;
+  invoiceCount: number;
+  quotesCount: number;
+  createdAt: string;
+  updatedAt: string;
   color?: string;
   logoSize?: SizeType;
   fontSize?: SizeType;
   fontFamily?: FontFamily;
-  layoutId?: number;
-  layoutSchema?: LayoutSchema;
+  labelUpperCase: boolean;
   tableHeaderStyle?: TableHeaderStyle;
   tableRowStyle?: TableRowStyle;
-  pageFormat?: PageFormat;
-  labelUpperCase: boolean;
+  showQuantity: boolean;
+  showUnit: boolean;
+  showRowNo: boolean;
+  fieldSortOrders: SortOrder;
+  pdfTexts?: PDFText;
   watermarkFileName?: string;
   watermarkFileType?: string;
   watermarkFileSize?: number;
   paidWatermarkFileName?: string;
   paidWatermarkFileType?: string;
   paidWatermarkFileSize?: number;
-  isArchived: boolean;
-  invoiceCount: number;
-  quotesCount: number;
-  createdAt: string;
-  updatedAt: string;
-  showQuantity: boolean;
-  showUnit: boolean;
-  showRowNo: boolean;
-  fieldSortOrders: SortOrder;
-  pdfTexts?: PDFText;
+  pageFormat?: PageFormat;
+  layoutId?: number;
+  layoutSchema?: LayoutSchema;
 }
 
 export interface StyleProfile extends StyleProfileMeta {
@@ -50,28 +51,28 @@ export interface StyleProfileWeb extends StyleProfileMeta {
 
 export interface StyleProfileAddMeta {
   name: string;
+  isArchived: boolean;
   color?: string;
   logoSize?: SizeType;
   fontSize?: SizeType;
   fontFamily?: FontFamily;
-  layoutId?: number;
-  layoutSchema?: LayoutSchema;
+  labelUpperCase: boolean;
   tableHeaderStyle?: TableHeaderStyle;
   tableRowStyle?: TableRowStyle;
-  pageFormat?: PageFormat;
-  labelUpperCase: boolean;
+  showQuantity: boolean;
+  showUnit: boolean;
+  showRowNo: boolean;
+  fieldSortOrders: SortOrder;
+  pdfTexts?: PDFText;
   watermarkFileName?: string;
   watermarkFileType?: string;
   watermarkFileSize?: number;
   paidWatermarkFileName?: string;
   paidWatermarkFileType?: string;
   paidWatermarkFileSize?: number;
-  isArchived: boolean;
-  showQuantity: boolean;
-  showUnit: boolean;
-  showRowNo: boolean;
-  fieldSortOrders: SortOrder;
-  pdfTexts?: PDFText;
+  pageFormat?: PageFormat;
+  layoutId?: number;
+  layoutSchema?: LayoutSchema;
 }
 
 export interface StyleProfileAdd extends StyleProfileAddMeta {
@@ -79,13 +80,13 @@ export interface StyleProfileAdd extends StyleProfileAddMeta {
   paidWatermarkFileData?: Uint8Array;
 }
 
-export interface StyleProfileUpdate extends StyleProfileAdd {
-  id: number;
-}
-
 export interface StyleProfileAddWeb extends StyleProfileAddMeta {
   watermarkFileData?: string | null;
   paidWatermarkFileData?: string | null;
+}
+
+export interface StyleProfileUpdate extends StyleProfileAdd {
+  id: number;
 }
 
 export interface StyleProfileUpdateWeb extends StyleProfileAddWeb {
@@ -95,16 +96,19 @@ export interface StyleProfileUpdateWeb extends StyleProfileAddWeb {
 export interface StyleProfileFromData {
   id?: number;
   name: string;
+  isArchived: boolean;
   color?: string;
   logoSize?: SizeType;
   fontSize?: SizeType;
   fontFamily?: FontFamily;
-  layoutId?: number;
-  layoutSchema?: LayoutSchema;
+  labelUpperCase: boolean;
   tableHeaderStyle?: TableHeaderStyle;
   tableRowStyle?: TableRowStyle;
-  pageFormat?: PageFormat;
-  labelUpperCase: boolean;
+  showQuantity: boolean;
+  showUnit: boolean;
+  showRowNo: boolean;
+  fieldSortOrders: SortOrder;
+  pdfTexts?: PDFText;
   watermarkFileName?: string;
   watermarkFileType?: string;
   watermarkFileSize?: number;
@@ -113,10 +117,7 @@ export interface StyleProfileFromData {
   paidWatermarkFileType?: string;
   paidWatermarkFileSize?: number;
   paidWatermarkFileData?: Uint8Array;
-  isArchived: boolean;
-  showQuantity: boolean;
-  showUnit: boolean;
-  showRowNo: boolean;
-  fieldSortOrders: SortOrder;
-  pdfTexts?: PDFText;
+  pageFormat?: PageFormat;
+  layoutId?: number;
+  layoutSchema?: LayoutSchema;
 }

@@ -28,11 +28,12 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { useCallback, useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { getApi, isWebMode } from '../shared/api/restApi';
+import { getApi } from '../shared/api/restApi';
 import { MenuList } from '../shared/components/lists/menuList/MenuList';
 import { Confirmation } from '../shared/components/modals/confirmation';
 import type { MenuItem } from '../shared/types/menuItem';
 import { useAppDispatch, useAppSelector } from '../state/configureStore';
+import { postAuthLogout } from '../shared/api/platformApi';
 import { logout, selectSettings, selectVersion, setVersion } from '../state/pageSlice';
 const DRAWER_WIDTH = 240;
 const COLLAPSED_WIDTH = 60;
@@ -75,9 +76,13 @@ export const Sidebar: FC = () => {
     setIsLogoutConfirmOpen(false);
   }, []);
 
-  const handleLogoutConfirm = useCallback(() => {
+  const handleLogoutConfirm = useCallback(async () => {
     setIsLogoutConfirmOpen(false);
-    dispatch(logout());
+    try {
+      await postAuthLogout(); // end the server session, not just the screen state
+    } finally {
+      dispatch(logout());
+    }
   }, [dispatch]);
 
   const menuItems = [
@@ -221,22 +226,15 @@ export const Sidebar: FC = () => {
           isSelected: isSelected,
           onClick: onClickNavigate
         },
-        // Web-only: connecting a Shopify/WooCommerce store needs this
-        // instance to have a public URL for the platform to call, which
-        // isn't meaningful for the offline Electron app.
-        ...(isWebMode()
-          ? [
-              {
-                text: t('menuItems.integrations'),
-                icon: <StorefrontIcon />,
-                path: '/integrations',
-                isToggle: false,
-                minHeight: 50,
-                isSelected: isSelected,
-                onClick: onClickNavigate
-              }
-            ]
-          : [])
+        {
+          text: t('menuItems.integrations'),
+          icon: <StorefrontIcon />,
+          path: '/integrations',
+          isToggle: false,
+          minHeight: 50,
+          isSelected: isSelected,
+          onClick: onClickNavigate
+        }
       ]
     },
     {

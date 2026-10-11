@@ -8,117 +8,62 @@ import { useClientDelete } from '../../shared/hooks/clients/useClientDelete';
 import { useClientsRetrieve } from '../../shared/hooks/clients/useClientsRetrieve';
 import { useClientUpdate } from '../../shared/hooks/clients/useClientUpdate';
 import type { Client, ClientAdd, ClientUpdate } from '../../shared/types/client';
-import type { Rows } from '../../shared/types/excel';
 import type { Filter, FilterData } from '../../shared/types/filter';
 import type { Response } from '../../shared/types/response';
 import { createCommonFilters, createInvoiceFilters } from '../../shared/utils/filterSortFunctions';
 import { isClientFromData } from '../../shared/utils/typeGuardFunctions';
+import { CLIENT_EXCEL_COLUMNS, CLIENT_EXCEL_TEMPLATE } from './clientModel';
 import { Form } from './Form';
 import { List } from './List';
 
 export const ClientsPage: FC = () => {
   const { t } = useTranslation();
-  const excelColumns = [
-    'name',
-    'shortName',
-    'address',
-    'email',
-    'phone',
-    'code',
-    'description',
-    'additional',
-    'vatCode',
-    'isArchived',
-    'peppolEndpointId',
-    'countryCode',
-    'peppolEndpointSchemeId',
-    'buyerReference'
-  ];
-  const excelFileName = 'clients';
-  const excelTemplateData: Rows = [
-    {
-      name: 'John Doe',
-      shortName: 'JD',
-      address: '123 Main St, Springfield',
-      email: 'john.doe@email.com',
-      phone: '+14155552671',
-      code: 'A001',
-      description: 'Some description',
-      vatCode: 'VAT DE123456789',
-      isArchived: false,
-      peppolEndpointId: '0192',
-      countryCode: 'GB',
-      peppolEndpointSchemeId: '123456785',
-      buyerReference: 'Accounting'
-    },
-    {
-      name: 'Jane Smith',
-      shortName: 'JS',
-      address: '456 Elm St, Shelbyville',
-      email: 'jane.smith@email.com',
-      phone: '+14155552671',
-      code: 'B002',
-      isArchived: false,
-      peppolEndpointId: '0192',
-      countryCode: 'GB',
-      peppolEndpointSchemeId: '123456785',
-      buyerReference: 'Accounting'
-    }
-  ];
+
   const filters: Filter[] = [
     ...createCommonFilters({ t, namespace: 'clients', initial: FilterType.active }),
     ...createInvoiceFilters({ t, namespace: 'clients' })
   ];
-  const useClientsCRUDRetrieve = (args: { filter?: FilterData[]; onDone?: (data: Response<Client[]>) => void }) => {
+
+  const useClientList = (args: { filter?: FilterData[]; onDone?: (data: Response<Client[]>) => void }) => {
     const { clients, execute } = useClientsRetrieve({ filter: args.filter, onDone: args.onDone });
     return { items: clients, execute };
   };
-  const useClientCRUDAdd = (args: {
+
+  const useClientCreate = (args: {
     item?: ClientAdd;
     immediate?: boolean;
     onDone?: (data: Response<Client>) => void;
-  }) => {
-    return useClientAdd({
-      client: args.item,
-      immediate: args.immediate,
-      onDone: args.onDone
-    });
-  };
-  const useClientsCRUDAddBatch = (args: {
+  }) => useClientAdd({ client: args.item, immediate: args.immediate, onDone: args.onDone });
+
+  const useClientCreateBatch = (args: {
     item?: ClientAdd[];
     immediate?: boolean;
     onDone?: (data: Response<ClientAdd[]>) => void;
-  }) => {
-    return useClientAddBatch({
-      clients: args.item,
-      immediate: args.immediate,
-      onDone: args.onDone
-    });
-  };
-  const useClientCRUDUpdate = (args: {
+  }) => useClientAddBatch({ clients: args.item, immediate: args.immediate, onDone: args.onDone });
+
+  const useClientEdit = (args: {
     item?: ClientUpdate;
     immediate?: boolean;
     onDone?: (data: Response<Client>) => void;
-  }) => {
-    return useClientUpdate({
-      client: args.item,
-      immediate: args.immediate,
-      onDone: args.onDone
-    });
-  };
+  }) => useClientUpdate({ client: args.item, immediate: args.immediate, onDone: args.onDone });
 
   return (
     <CRUDPage<Client, ClientAdd, ClientUpdate>
       componentId="clients"
       title={t('common.client')}
       filters={filters}
-      excelData={{ excelColumns, excelFileName, excelFormat: 'xlsx', excelTemplateData }}
-      useRetrieve={useClientsCRUDRetrieve}
-      useAdd={useClientCRUDAdd}
-      useAddBatch={useClientsCRUDAddBatch}
-      useUpdate={useClientCRUDUpdate}
+      excelData={{
+        excelColumns: CLIENT_EXCEL_COLUMNS,
+        excelFileName: 'clients',
+        excelFormat: 'xlsx',
+        excelTemplateData: CLIENT_EXCEL_TEMPLATE
+      }}
+      useRetrieve={useClientList}
+      useAdd={useClientCreate}
+      useAddBatch={useClientCreateBatch}
+      useUpdate={useClientEdit}
       useDelete={useClientDelete}
-      searchField={'name'}
+      searchField="name"
       sortOptions={[
         { label: t('common.name'), value: 'name' },
         { label: t('common.lastUpdate'), value: 'updatedAt' }
@@ -126,10 +71,7 @@ export const ClientsPage: FC = () => {
       noItemButtonText={t('clients.add')}
       noItemText={t('clients.noItem')}
       leftTitle={t('menuItems.clients')}
-      validateAndNormalize={async data => {
-        if (!isClientFromData(data)) return;
-        return data;
-      }}
+      validateAndNormalize={async data => (isClientFromData(data) ? data : undefined)}
       renderListItem={(item, selectedItem, onEdit, onDelete) => (
         <List
           key={item.id}
@@ -142,12 +84,12 @@ export const ClientsPage: FC = () => {
       form={({ item, onChange }) => (
         <Form
           client={item}
-          handleChange={d => {
-            if (isClientFromData(d.client)) {
+          handleChange={change => {
+            if (isClientFromData(change.client)) {
               onChange({
-                changedData: d.client,
-                isFormValid: d.isFormValid,
-                description: d.description
+                changedData: change.client,
+                isFormValid: change.isFormValid,
+                description: change.description
               });
             }
           }}

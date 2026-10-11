@@ -1,27 +1,11 @@
-import CloseIcon from '@mui/icons-material/Close';
-import {
-  Box,
-  Button,
-  Divider,
-  IconButton,
-  ListItemButton,
-  ListItemText,
-  Paper,
-  Tooltip,
-  Typography,
-  useTheme
-} from '@mui/material';
+import { Box, Button, Divider, ListItemButton, ListItemText, Paper, Typography, useTheme } from '@mui/material';
 import { useCallback, useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../i18n';
-import { isWebMode } from '../../shared/api/restApi';
 import { DatabaseType } from '../../shared/enums/databaseType';
 import { DBInitType } from '../../shared/enums/dbInitType';
 import { useDBInit } from '../../shared/hooks/dbSelector/useDBInit';
 import { useDBListSelector } from '../../shared/hooks/dbSelector/useDBListSelector';
-import { useDBOpener } from '../../shared/hooks/dbSelector/useDBOpener';
-import { useDBSelector } from '../../shared/hooks/dbSelector/useDBSelector';
-import type { DBSelector } from '../../shared/types/dbSelector';
 import type { Response } from '../../shared/types/response';
 import { useAppDispatch } from '../../state/configureStore';
 import { addToast } from '../../state/pageSlice';
@@ -45,26 +29,6 @@ export const LocalDatabase: FC<Props> = ({ onDatabaseRead }) => {
     onDone: (results: Response<string[]>) => {
       if (results.data) {
         setSavedDbs(results.data);
-      }
-    }
-  });
-
-  const { execute: selectDB } = useDBSelector({
-    immediate: false,
-    onDone: (results: Response<DBSelector>) => {
-      if (results.data && !results.data.canceled && results.data.filePath) {
-        setSelectionMode(DBInitType.create);
-        setSelectedPath(results.data.filePath);
-      }
-    }
-  });
-
-  const { execute: openDB } = useDBOpener({
-    immediate: false,
-    onDone: (results: Response<DBSelector>) => {
-      if (results.data && !results.data.canceled && results.data.filePath) {
-        setSelectionMode(DBInitType.open);
-        setSelectedPath(results.data.filePath);
       }
     }
   });
@@ -111,21 +75,8 @@ export const LocalDatabase: FC<Props> = ({ onDatabaseRead }) => {
     [savedDbs, initDB, saveDbList]
   );
 
-  const handleSelectPath = async () => {
-    if (isWebMode()) {
-      setIsDBSetterModalOpen(true);
-    } else {
-      selectDB();
-    }
-  };
-
-  const handleOpenPath = () => {
-    openDB();
-  };
-
-  const handleForget = (fullPath: string) => {
-    const updated = savedDbs.filter(p => p !== fullPath);
-    saveDbList(updated);
+  const handleSelectPath = () => {
+    setIsDBSetterModalOpen(true);
   };
 
   const getFileName = (fullPath: string) => fullPath.split(/[/\\]/).pop() ?? fullPath;
@@ -151,7 +102,7 @@ export const LocalDatabase: FC<Props> = ({ onDatabaseRead }) => {
   }, [dispatch]);
 
   useEffect(() => {
-    if (isWebMode()) getDBList();
+    getDBList();
   }, [getDBList]);
 
   return (
@@ -164,7 +115,7 @@ export const LocalDatabase: FC<Props> = ({ onDatabaseRead }) => {
         gap: 3
       }}
     >
-      {isWebMode() && isDBSetterModalOpen && (
+      {isDBSetterModalOpen && (
         <>
           <NameSetter
             isOpen={isDBSetterModalOpen}
@@ -179,12 +130,10 @@ export const LocalDatabase: FC<Props> = ({ onDatabaseRead }) => {
       )}
 
       <Typography variant="h5" noWrap component="div" sx={{ color: theme.palette.secondary.main }}>
-        {!isWebMode() && <>{t('databaseChooser.title')}</>}
-        {isWebMode() && <>{t('databaseChooser.titleWeb')}</>}
+        {t('databaseChooser.titleWeb')}
       </Typography>
       <Typography variant="body1" noWrap component="div" sx={{ whiteSpace: 'pre-wrap' }}>
-        {!isWebMode() && <>{t('databaseChooser.description')}</>}
-        {isWebMode() && <>{t('databaseChooser.descriptionWeb')}</>}
+        {t('databaseChooser.descriptionWeb')}
       </Typography>
 
       <Box
@@ -199,11 +148,6 @@ export const LocalDatabase: FC<Props> = ({ onDatabaseRead }) => {
         <Button variant="contained" onClick={handleSelectPath} disabled={isInitializing}>
           {t('databaseChooser.createNew')}
         </Button>
-        {!isWebMode() && (
-          <Button variant="contained" onClick={handleOpenPath} disabled={isInitializing}>
-            {t('databaseChooser.openExisting')}
-          </Button>
-        )}
       </Box>
 
       {savedDbs.length > 0 && (
@@ -296,23 +240,6 @@ export const LocalDatabase: FC<Props> = ({ onDatabaseRead }) => {
                   <Box sx={{ flexGrow: 1 }} />
 
                   <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
-
-                  {!isWebMode() && (
-                    <Box sx={{ display: 'flex', gap: 0.5 }}>
-                      <Tooltip title={t('ariaLabel.remove')}>
-                        <IconButton
-                          size="small"
-                          color="error"
-                          onClick={e => {
-                            e.stopPropagation();
-                            handleForget(item);
-                          }}
-                        >
-                          <CloseIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
-                  )}
                 </Box>
               </ListItemButton>
             </Paper>

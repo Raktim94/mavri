@@ -2,6 +2,7 @@ import { pdf } from '@react-pdf/renderer';
 import { parseISO } from 'date-fns';
 import { useCallback, useMemo } from 'react';
 import { PDFDocument } from '../../../pages/invoices/Preview/PDFDocument';
+import i18next from '../../../i18n';
 import { MONTH_NAMES } from '../../../state/constant';
 import { InvoiceType } from '../../enums/invoiceType';
 import type { AttachmentURL, InvoiceFromData, PdfTexts } from '../../types/invoice';
@@ -119,6 +120,7 @@ export const createPdfBlob = async (invoiceForm: InvoiceFromData, storeSettings:
       watermarkUrl={watermarkUrl}
       watermarkPaidUrl={watermarkPaidUrl}
       signatureUrl={signatureUrl}
+      layoutRequired={i18next.t('common.layoutRequired')}
     />
   ).toBlob();
 

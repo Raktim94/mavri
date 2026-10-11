@@ -21,40 +21,32 @@ export const LayoutsPage: FC = () => {
     ...createCommonFilters({ t, namespace: 'layouts', initial: FilterType.active }),
     ...createInvoiceFilters({ t, namespace: 'layouts' })
   ];
-  const useLayoutsCRUDRetrieve = (args: { filter?: FilterData[]; onDone?: (data: Response<Layout[]>) => void }) => {
+
+  const useLayoutList = (args: { filter?: FilterData[]; onDone?: (data: Response<Layout[]>) => void }) => {
     const { layouts, execute } = useLayoutsRetrieve({ filter: args.filter, onDone: args.onDone });
     return { items: layouts, execute };
   };
-  const useLayoutCRUDAdd = (args: {
+
+  const useLayoutCreate = (args: {
     item?: LayoutAdd;
     immediate?: boolean;
     onDone?: (data: Response<Layout>) => void;
-  }) => {
-    return useLayoutAdd({
-      layout: args.item,
-      immediate: args.immediate,
-      onDone: args.onDone
-    });
-  };
-  const useLayoutCRUDUpdate = (args: {
+  }) => useLayoutAdd({ layout: args.item, immediate: args.immediate, onDone: args.onDone });
+
+  const useLayoutEdit = (args: {
     item?: LayoutUpdate;
     immediate?: boolean;
     onDone?: (data: Response<Layout>) => void;
-  }) => {
-    return useLayoutUpdate({
-      layout: args.item,
-      immediate: args.immediate,
-      onDone: args.onDone
-    });
-  };
+  }) => useLayoutUpdate({ layout: args.item, immediate: args.immediate, onDone: args.onDone });
+
   return (
     <CRUDPage<Layout, LayoutAdd, LayoutUpdate>
       componentId="layouts"
       title={t('common.layout')}
       filters={filters}
-      useRetrieve={useLayoutsCRUDRetrieve}
-      useAdd={useLayoutCRUDAdd}
-      useUpdate={useLayoutCRUDUpdate}
+      useRetrieve={useLayoutList}
+      useAdd={useLayoutCreate}
+      useUpdate={useLayoutEdit}
       useDelete={useLayoutDelete}
       searchField={layout => layout.schema.meta.name}
       sortOptions={[
@@ -64,10 +56,7 @@ export const LayoutsPage: FC = () => {
       noItemButtonText={t('layouts.add')}
       noItemText={t('layouts.noItem')}
       leftTitle={t('menuItems.layouts')}
-      validateAndNormalize={async data => {
-        if (!isLayoutData(data)) return;
-        return data;
-      }}
+      validateAndNormalize={async data => (isLayoutData(data) ? data : undefined)}
       renderListItem={(item, selectedItem, onEdit, onDelete) => (
         <List
           key={item.id}
@@ -80,12 +69,12 @@ export const LayoutsPage: FC = () => {
       form={({ item, onChange }) => (
         <Form
           item={item}
-          handleChange={d => {
-            if (isLayoutData(d.layout)) {
+          handleChange={change => {
+            if (isLayoutData(change.layout)) {
               onChange({
-                changedData: d.layout,
-                isFormValid: d.isFormValid,
-                description: d.description
+                changedData: change.layout,
+                isFormValid: change.isFormValid,
+                description: change.description
               });
             }
           }}

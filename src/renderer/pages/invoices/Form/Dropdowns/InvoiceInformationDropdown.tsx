@@ -1,9 +1,8 @@
-import { Box, Grid, SwipeableDrawer, TextField, useMediaQuery, useTheme } from '@mui/material';
+import { Grid, TextField } from '@mui/material';
 import { memo, useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../../../i18n';
 import { Datepicker } from '../../../../shared/components/inputs/datepicker/Datepicker';
-import { PageHeader } from '../../../../shared/components/layout/pageHeader/PageHeader';
 import { InvoiceType } from '../../../../shared/enums/invoiceType';
 import { useForm } from '../../../../shared/hooks/form/useForm';
 import { useGetNextSequence } from '../../../../shared/hooks/invoices/useGetNextSequence';
@@ -12,6 +11,8 @@ import type { Response } from '../../../../shared/types/response';
 import { validators } from '../../../../shared/utils/validatorFunctions';
 import { useAppDispatch, useAppSelector } from '../../../../state/configureStore';
 import { addToast, selectSettings } from '../../../../state/pageSlice';
+import { PageFormDrawer } from '../drawers/PageFormDrawer';
+import { invoiceInfoFormValid, shouldAutoFillInvoiceNumber } from '../drawers/invoiceInfoModel';
 
 interface Props {
   isOpen: boolean;
@@ -21,22 +22,11 @@ interface Props {
   onClick?: (data: InvoiceInfo) => void;
 }
 
-export const shouldAutoFillInvoiceNumber = (
-  currentInvoiceNumber: string | undefined,
-  nextSequence: string | undefined
-): nextSequence is string => {
-  return (
-    nextSequence != undefined &&
-    (currentInvoiceNumber == undefined || currentInvoiceNumber === '') &&
-    currentInvoiceNumber !== nextSequence
-  );
-};
-
 const InvoiceInformationDropdownComponent: FC<Props> = ({ isOpen, onClose, onOpen, onClick, information }) => {
   const { t } = useTranslation();
   const storeSettings = useAppSelector(selectSettings);
-  const theme = useTheme();
-  const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
+  const dispatch = useAppDispatch();
+
   const { form, setForm, update } = useForm<InvoiceInfo>({
     issuedAt: information?.issuedAt ?? new Date().toISOString(),
     invoiceNumber: information?.invoiceNumber ?? '',
@@ -44,12 +34,7 @@ const InvoiceInformationDropdownComponent: FC<Props> = ({ isOpen, onClose, onOpe
     invoicePrefix: information.id ? (information?.invoicePrefix ?? '') : (storeSettings?.invoicePrefix ?? ''),
     invoiceSuffix: information.id ? (information?.invoiceSuffix ?? '') : (storeSettings?.invoiceSuffix ?? '')
   });
-  const [errors, setErrors] = useState({
-    issuedAt: false,
-    invoiceNumber: false
-  });
-  const [isFormValid, setIsFormValid] = useState(false);
-  const dispatch = useAppDispatch();
+  const [errors, setErrors] = useState({ issuedAt: false, invoiceNumber: false });
 
   const { execute: retrieveSequence } = useGetNextSequence({
     seqData: {
@@ -70,18 +55,10 @@ const InvoiceInformationDropdownComponent: FC<Props> = ({ isOpen, onClose, onOpe
 
       if (shouldAutoFillInvoiceNumber(form.invoiceNumber, nextSequence)) {
         update('invoiceNumber', nextSequence);
-        validateField('invoiceNumber', nextSequence);
+        setErrors(current => ({ ...current, invoiceNumber: !validators.required(nextSequence) }));
       }
     }
   });
-
-  const validateField = (field: keyof typeof errors, value: string) => {
-    if (!validators.required(value) && (field === 'invoiceNumber' || field === 'issuedAt')) {
-      setErrors(e => ({ ...e, [field]: true }));
-    } else {
-      setErrors(e => ({ ...e, [field]: false }));
-    }
-  };
 
   useEffect(() => {
     if (form.invoiceNumber == undefined || form.invoiceNumber === '') {
@@ -101,126 +78,83 @@ const InvoiceInformationDropdownComponent: FC<Props> = ({ isOpen, onClose, onOpe
     });
   }, [information, setForm, storeSettings]);
 
-  useEffect(() => {
-    const valid =
-      typeof form.issuedAt !== 'undefined' &&
-      form.issuedAt?.trim() !== '' &&
-      !errors.issuedAt &&
-      form.invoiceNumber?.trim() !== '' &&
-      !errors.invoiceNumber;
+  const validateField = (field: 'issuedAt' | 'invoiceNumber', value: string) => {
+    setErrors(current => ({ ...current, [field]: !validators.required(value) }));
+  };
 
-    setIsFormValid(valid);
-  }, [form, errors]);
+  const isQuotation = information.invoiceType === InvoiceType.quotation;
 
   return (
-    <>
-      <SwipeableDrawer
-        anchor="bottom"
-        open={isOpen}
-        onClose={() => onClose?.()}
-        onOpen={() => onOpen?.()}
-        slotProps={{
-          paper: {
-            sx: {
-              maxWidth: isDesktop ? '40%' : '100%',
-              height: isDesktop ? '40%' : '80%',
-              mx: 'auto',
-              borderTopLeftRadius: 16,
-              borderTopRightRadius: 16,
-              borderBottomLeftRadius: 0,
-              borderBottomRightRadius: 0,
-              p: 3
-            }
-          }
-        }}
-      >
-        <Box sx={{ mb: 2 }}>
-          <PageHeader
-            title={
-              information.invoiceType === InvoiceType.quotation ? t('invoices.quoteInfo') : t('invoices.invoiceInfo')
-            }
-            showBack={false}
-            showSave={true}
-            formData={form}
-            isFormValid={isFormValid}
-            onSave={data => {
-              onClick?.(data as InvoiceInfo);
+    <PageFormDrawer
+      isOpen={isOpen}
+      onClose={onClose}
+      onOpen={onOpen}
+      title={isQuotation ? t('invoices.quoteInfo') : t('invoices.invoiceInfo')}
+      formData={form}
+      isFormValid={invoiceInfoFormValid(form, errors)}
+      onSave={data => onClick?.(data as InvoiceInfo)}
+      height="40%"
+      mobileHeight="80%"
+    >
+      <Grid container spacing={2}>
+        <Grid size={{ xs: 12, md: 4 }}>
+          <TextField
+            label={isQuotation ? t('common.quotePrefix') : t('common.invoicePrefix')}
+            fullWidth
+            value={form.invoicePrefix}
+            onChange={event => update('invoicePrefix', event.target.value)}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, md: 4 }}>
+          <TextField
+            label={isQuotation ? t('common.quoteNumber') : t('common.invoiceNumber')}
+            fullWidth
+            required
+            value={form.invoiceNumber}
+            error={errors.invoiceNumber}
+            helperText={errors.invoiceNumber ? t('common.fieldRequired') : ''}
+            onChange={event => {
+              update('invoiceNumber', event.target.value);
+              validateField('invoiceNumber', event.target.value);
             }}
           />
-        </Box>
-
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12, md: 4 }}>
-            <TextField
-              label={
-                information.invoiceType === InvoiceType.quotation ? t('common.quotePrefix') : t('common.invoicePrefix')
-              }
-              fullWidth
-              value={form.invoicePrefix}
-              onChange={e => {
-                update('invoicePrefix', e.target.value);
-              }}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, md: 4 }}>
-            <TextField
-              label={
-                information.invoiceType === InvoiceType.quotation ? t('common.quoteNumber') : t('common.invoiceNumber')
-              }
-              fullWidth
-              required
-              value={form.invoiceNumber}
-              error={errors.invoiceNumber}
-              helperText={errors.invoiceNumber ? t('common.fieldRequired') : ''}
-              onChange={e => {
-                update('invoiceNumber', e.target.value);
-                validateField('invoiceNumber', e.target.value);
-              }}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, md: 4 }}>
-            <TextField
-              label={
-                information.invoiceType === InvoiceType.quotation ? t('common.quoteSuffix') : t('common.invoiceSuffix')
-              }
-              fullWidth
-              value={form.invoiceSuffix}
-              onChange={e => {
-                update('invoiceSuffix', e.target.value);
-              }}
-            />
-          </Grid>
-
-          {storeSettings && (
-            <Grid size={{ xs: 12, md: 6 }}>
-              <Datepicker
-                label={`${t('common.issuedAt')}`}
-                error={errors.issuedAt}
-                required={true}
-                value={form.issuedAt}
-                format={storeSettings.dateFormat}
-                onChange={value => {
-                  update('issuedAt', value);
-                  validateField('issuedAt', value ?? '');
-                }}
-              />
-            </Grid>
-          )}
-          {storeSettings && (
-            <Grid size={{ xs: 12, md: 6 }}>
-              <Datepicker
-                label={`${t('common.dueDate')}`}
-                value={form.dueDate}
-                format={storeSettings.dateFormat}
-                onChange={value => {
-                  update('dueDate', value);
-                }}
-              />
-            </Grid>
-          )}
         </Grid>
-      </SwipeableDrawer>
-    </>
+        <Grid size={{ xs: 12, md: 4 }}>
+          <TextField
+            label={isQuotation ? t('common.quoteSuffix') : t('common.invoiceSuffix')}
+            fullWidth
+            value={form.invoiceSuffix}
+            onChange={event => update('invoiceSuffix', event.target.value)}
+          />
+        </Grid>
+
+        {storeSettings && (
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Datepicker
+              label={`${t('common.issuedAt')}`}
+              error={errors.issuedAt}
+              required={true}
+              value={form.issuedAt}
+              format={storeSettings.dateFormat}
+              onChange={value => {
+                update('issuedAt', value);
+                validateField('issuedAt', value ?? '');
+              }}
+            />
+          </Grid>
+        )}
+        {storeSettings && (
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Datepicker
+              label={`${t('common.dueDate')}`}
+              value={form.dueDate}
+              format={storeSettings.dateFormat}
+              onChange={value => update('dueDate', value)}
+            />
+          </Grid>
+        )}
+      </Grid>
+    </PageFormDrawer>
   );
 };
 

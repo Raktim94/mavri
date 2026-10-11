@@ -7,61 +7,44 @@ import { useForm } from '../../shared/hooks/form/useForm';
 import { useFormDirtyCheck } from '../../shared/hooks/form/useFormDirtyCheck';
 import type { Business, BusinessFromData } from '../../shared/types/business';
 import { toDataUrl, toUint8Array } from '../../shared/utils/dataUrlFunctions';
-import { validators } from '../../shared/utils/validatorFunctions';
 import { useAppSelector } from '../../state/configureStore';
 import { selectSettings } from '../../state/pageSlice';
+import {
+  applyBusinessFieldEvaluation,
+  createBusinessDraft,
+  createBusinessFieldErrors,
+  isBusinessDraftReady,
+  type BusinessFieldErrors,
+  type BusinessValidationField
+} from './businessModel';
 
 interface Props {
   business?: Business;
   handleChange?: (data: { business: BusinessFromData; isFormValid: boolean; description?: string }) => void;
 }
-export const Form: FC<Props> = ({ handleChange = () => {}, business }) => {
+
+export const Form: FC<Props> = ({ business, handleChange = () => {} }) => {
   const { t } = useTranslation();
-  const initialFormRef = useRef<BusinessFromData | undefined>(undefined);
+  const baselineRef = useRef<BusinessFromData | undefined>(undefined);
   const settings = useAppSelector(selectSettings);
-  const { form, setForm, update } = useForm<BusinessFromData>({
-    id: business?.id,
-    logo: business?.logo ?? undefined,
-    email: business?.email ?? '',
-    phone: business?.phone ?? '',
-    name: business?.name ?? '',
-    shortName: business?.shortName ?? '',
-    role: business?.role ?? '',
-    address: business?.address ?? '',
-    website: business?.website ?? '',
-    additional: business?.additional ?? '',
-    vatCode: business?.vatCode ?? '',
-    // Legacy payment info. New payment info is via Bank
-    paymentInformation: business?.paymentInformation ?? '',
-    fileSize: business?.fileSize,
-    fileType: business?.fileType,
-    fileName: business?.fileName,
-    description: business?.description ?? '',
-    peppolEndpointSchemeId: business?.peppolEndpointSchemeId ?? '',
-    peppolEndpointId: business?.peppolEndpointId ?? '',
-    countryCode: business?.countryCode ?? '',
-    code: business?.code ?? '',
-    isArchived: business?.isArchived ?? false
-  });
+  const { form, setForm, update } = useForm<BusinessFromData>(createBusinessDraft(business));
+  const [errors, setErrors] = useState<BusinessFieldErrors>(createBusinessFieldErrors);
+  const [logoImageUrl, setLogoImageUrl] = useState<string | undefined>(undefined);
 
-  const [errors, setErrors] = useState({
-    email: false,
-    phone: false,
-    name: false,
-    shortName: false,
-    peppolEndpointSchemeId: false,
-    peppolEndpointId: false,
-    countryCode: false
-  });
-  const [logoUrl, setLogoUrl] = useState<string | undefined>(undefined);
+  useFormDirtyCheck(form, baselineRef);
 
-  const onUpload = async (file?: Blob, filename?: string) => {
+  const syncField = (field: BusinessValidationField, value: string) => {
+    update(field, value);
+    setErrors(prev => applyBusinessFieldEvaluation(prev, field, value));
+  };
+
+  const handleLogoUpload = async (file?: Blob, filename?: string) => {
     if (file) {
-      const fileUnitArray = await toUint8Array(t, file);
-      if (fileUnitArray)
+      const bytes = await toUint8Array(t, file);
+      if (bytes)
         setForm(prev => ({
           ...prev,
-          logo: fileUnitArray,
+          logo: bytes,
           fileSize: file.size,
           fileType: file.type,
           fileName: filename
@@ -71,83 +54,30 @@ export const Form: FC<Props> = ({ handleChange = () => {}, business }) => {
     }
   };
 
-  const validateField = (field: keyof typeof errors, value: string) => {
-    if (!validators.required(value) && (field === 'name' || field === 'shortName')) {
-      setErrors(e => ({ ...e, [field]: true }));
-    } else if (field === 'email') {
-      setErrors(e => ({ ...e, email: value !== '' && !validators.email(value) }));
-    } else if (field === 'peppolEndpointSchemeId') {
-      setErrors(e => ({ ...e, peppolEndpointSchemeId: value !== '' && !validators.peppolEndpointSchemeId(value) }));
-    } else if (field === 'peppolEndpointId') {
-      setErrors(e => ({ ...e, peppolEndpointId: value !== '' && !validators.peppolEndpointId(value) }));
-    } else if (field === 'countryCode') {
-      setErrors(e => ({ ...e, countryCode: value !== '' && !validators.countryCode(value) }));
-    } else if (field === 'phone') {
-      setErrors(e => ({ ...e, phone: value !== '' && !validators.phone(value) }));
-    } else {
-      setErrors(e => ({ ...e, [field]: false }));
-    }
-  };
-
-  useFormDirtyCheck(form, initialFormRef);
-
   useEffect(() => {
-    const initial = {
-      id: business?.id,
-      logo: business?.logo ?? undefined,
-      email: business?.email ?? '',
-      phone: business?.phone ?? '',
-      name: business?.name ?? '',
-      shortName: business?.shortName ?? '',
-      role: business?.role ?? '',
-      address: business?.address ?? '',
-      website: business?.website ?? '',
-      additional: business?.additional ?? '',
-      vatCode: business?.vatCode ?? '',
-      // Legacy payment info. New payment info is via Bank
-      paymentInformation: business?.paymentInformation ?? '',
-      fileSize: business?.fileSize,
-      fileType: business?.fileType,
-      fileName: business?.fileName,
-      description: business?.description ?? '',
-      peppolEndpointSchemeId: business?.peppolEndpointSchemeId ?? '',
-      peppolEndpointId: business?.peppolEndpointId ?? '',
-      countryCode: business?.countryCode ?? '',
-      code: business?.code ?? '',
-      isArchived: business?.isArchived ?? false
-    };
-    initialFormRef.current = initial;
-    setForm(initial);
-
-    (async () => {
+    const next = createBusinessDraft(business);
+    baselineRef.current = next;
+    setForm(next);
+    void (async () => {
       const url = business && business.logo ? await toDataUrl(business.logo, business.fileType) : undefined;
-      setLogoUrl(url);
+      setLogoImageUrl(url);
     })();
   }, [business, setForm]);
 
   useEffect(() => {
-    const valid =
-      form.name.trim() !== '' &&
-      form.shortName.trim() !== '' &&
-      !errors.email &&
-      !errors.phone &&
-      !errors.name &&
-      !errors.shortName &&
-      !errors.countryCode &&
-      !errors.peppolEndpointId &&
-      !errors.peppolEndpointSchemeId;
-
     handleChange({
       business: form,
-      isFormValid: valid,
+      isFormValid: isBusinessDraftReady(form, errors),
       description: t('common.invalidForm')
     });
   }, [form, errors, handleChange, t]);
 
+  const eInvoiceOn = Boolean(settings?.ublON || settings?.xrechnungON);
+
   return (
     <Grid container spacing={2}>
       <Grid size={{ xs: 12, md: 12 }} sx={{ display: 'flex', justifyContent: 'center' }}>
-        <UploadImage onUpload={onUpload} imgUrl={logoUrl} />
+        <UploadImage onUpload={handleLogoUpload} imgUrl={logoImageUrl} />
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
         <TextField
@@ -157,10 +87,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, business }) => {
           value={form.name}
           error={errors.name}
           helperText={errors.name ? t('common.fieldRequired') : ''}
-          onChange={e => {
-            update('name', e.target.value);
-            validateField('name', e.target.value);
-          }}
+          onChange={e => syncField('name', e.target.value)}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
@@ -171,10 +98,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, business }) => {
           value={form.shortName}
           error={errors.shortName}
           helperText={errors.shortName ? t('common.fieldRequired') : t('common.shortNameHelper')}
-          onChange={e => {
-            update('shortName', e.target.value);
-            validateField('shortName', e.target.value);
-          }}
+          onChange={e => syncField('shortName', e.target.value)}
           slotProps={{
             htmlInput: {
               maxLength: 2
@@ -213,12 +137,9 @@ export const Form: FC<Props> = ({ handleChange = () => {}, business }) => {
           label={t('common.email')}
           fullWidth
           value={form.email}
-          onChange={e => {
-            update('email', e.target.value);
-            validateField('email', e.target.value);
-          }}
           error={errors.email}
           helperText={errors.email ? t('common.invalidEmail') : ''}
+          onChange={e => syncField('email', e.target.value)}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
@@ -226,12 +147,9 @@ export const Form: FC<Props> = ({ handleChange = () => {}, business }) => {
           label={t('common.phone')}
           fullWidth
           value={form.phone}
-          onChange={e => {
-            update('phone', e.target.value);
-            validateField('phone', e.target.value);
-          }}
           error={errors.phone}
           helperText={errors.phone ? t('common.invalidPhone') : t('common.phoneHelper')}
+          onChange={e => syncField('phone', e.target.value)}
           slotProps={{
             htmlInput: {
               maxLength: 20
@@ -265,7 +183,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, business }) => {
           onChange={e => update('vatCode', e.target.value)}
         />
       </Grid>
-      {(settings?.ublON || settings?.xrechnungON) && (
+      {eInvoiceOn && (
         <Grid size={{ xs: 12, md: 6 }}>
           <TextField
             label={t('common.peppolEndpointId')}
@@ -275,14 +193,11 @@ export const Form: FC<Props> = ({ handleChange = () => {}, business }) => {
             helperText={
               errors.peppolEndpointId ? t('common.invalidPeppolEndpointId') : t('common.peppolEndpointIdHelper')
             }
-            onChange={e => {
-              update('peppolEndpointId', e.target.value);
-              validateField('peppolEndpointId', e.target.value);
-            }}
+            onChange={e => syncField('peppolEndpointId', e.target.value)}
           />
         </Grid>
       )}
-      {(settings?.ublON || settings?.xrechnungON) && (
+      {eInvoiceOn && (
         <Grid size={{ xs: 12, md: 6 }}>
           <TextField
             label={t('common.peppolEndpointSchemeId')}
@@ -294,10 +209,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, business }) => {
                 ? t('common.invalidPeppolEndpointSchemeId')
                 : t('common.peppolEndpointSchemeIdHelper')
             }
-            onChange={e => {
-              update('peppolEndpointSchemeId', e.target.value);
-              validateField('peppolEndpointSchemeId', e.target.value);
-            }}
+            onChange={e => syncField('peppolEndpointSchemeId', e.target.value)}
           />
         </Grid>
       )}
@@ -308,10 +220,7 @@ export const Form: FC<Props> = ({ handleChange = () => {}, business }) => {
           value={form.countryCode}
           error={errors.countryCode}
           helperText={errors.countryCode ? t('common.invalidCountryCode') : t('common.countryCodeHelper')}
-          onChange={e => {
-            update('countryCode', e.target.value);
-            validateField('countryCode', e.target.value);
-          }}
+          onChange={e => syncField('countryCode', e.target.value)}
           slotProps={{
             htmlInput: {
               maxLength: 2
@@ -331,7 +240,6 @@ export const Form: FC<Props> = ({ handleChange = () => {}, business }) => {
       </Grid>
       {form.paymentInformation && (
         <Grid size={{ xs: 12, md: 12 }}>
-          {/* Legacy payment info. New payment info is via Bank */}
           <TextField
             multiline
             rows={5}

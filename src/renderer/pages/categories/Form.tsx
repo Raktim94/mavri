@@ -10,47 +10,39 @@ interface Props {
   category?: Category;
   handleChange?: (data: { category: CategoryFromData; isFormValid: boolean; description?: string }) => void;
 }
-export const Form: FC<Props> = ({ handleChange = () => {}, category }) => {
-  const { t } = useTranslation();
-  const initialFormRef = useRef<CategoryFromData | undefined>(undefined);
-  const { form, setForm, update } = useForm<CategoryFromData>({
-    id: category?.id,
-    name: category?.name ?? '',
-    isArchived: category?.isArchived ?? false
-  });
-  const [errors, setErrors] = useState({
-    name: false
-  });
 
-  const validateField = (field: keyof typeof errors, value: string) => {
-    if (!validators.required(value) && field === 'name') {
-      setErrors(e => ({ ...e, [field]: true }));
-    } else {
-      setErrors(e => ({ ...e, [field]: false }));
-    }
+const createDraft = (category?: Category): CategoryFromData => ({
+  id: category?.id,
+  name: category?.name ?? '',
+  isArchived: category?.isArchived ?? false
+});
+
+export const Form: FC<Props> = ({ category, handleChange = () => {} }) => {
+  const { t } = useTranslation();
+  const baselineRef = useRef<CategoryFromData | undefined>(undefined);
+  const { form, setForm, update } = useForm<CategoryFromData>(createDraft(category));
+  const [nameError, setNameError] = useState(false);
+
+  useFormDirtyCheck(form, baselineRef);
+
+  const syncName = (value: string) => {
+    update('name', value);
+    setNameError(!validators.required(value));
   };
 
-  useFormDirtyCheck(form, initialFormRef);
-
   useEffect(() => {
-    const initial = {
-      id: category?.id,
-      name: category?.name ?? '',
-      isArchived: category?.isArchived ?? false
-    };
-    initialFormRef.current = initial;
-    setForm(initial);
+    const next = createDraft(category);
+    baselineRef.current = next;
+    setForm(next);
   }, [category, setForm]);
 
   useEffect(() => {
-    const valid = form.name.trim() !== '' && !errors.name;
-
     handleChange({
       category: form,
-      isFormValid: valid,
+      isFormValid: form.name.trim() !== '' && !nameError,
       description: t('common.invalidForm')
     });
-  }, [form, errors, handleChange, t]);
+  }, [form, nameError, handleChange, t]);
 
   return (
     <Grid container spacing={2}>
@@ -60,12 +52,9 @@ export const Form: FC<Props> = ({ handleChange = () => {}, category }) => {
           fullWidth
           required
           value={form.name}
-          error={errors.name}
-          helperText={errors.name ? t('common.fieldRequired') : ''}
-          onChange={e => {
-            update('name', e.target.value);
-            validateField('name', e.target.value);
-          }}
+          error={nameError}
+          helperText={nameError ? t('common.fieldRequired') : ''}
+          onChange={e => syncName(e.target.value)}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 12 }}>
