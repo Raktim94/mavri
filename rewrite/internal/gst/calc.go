@@ -62,6 +62,7 @@ type Input struct {
 
 // LineResult is the outcome for one line; amounts are whole paise.
 type LineResult struct {
+	Code                   string // HSN or SAC the line was taxed under
 	Taxable                *big.Int
 	Class                  Class
 	RuleID                 string
@@ -152,7 +153,7 @@ func Calculate(in Input) (Result, error) {
 		if taxableVal.Sign() < 0 {
 			return Result{}, ErrNegativeValue
 		}
-		lr := LineResult{Taxable: taxableVal, CGST: newInt(), SGST: newInt(), IGST: newInt(), Cess: newInt(), Class: Taxable}
+		lr := LineResult{Code: l.Code, Taxable: taxableVal, CGST: newInt(), SGST: newInt(), IGST: newInt(), Cess: newInt(), Class: Taxable}
 		if collectsTax {
 			rule, err := in.Rules.Resolve(l.Code, in.Date)
 			if err != nil {

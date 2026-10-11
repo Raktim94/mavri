@@ -305,3 +305,27 @@ func TestStateTable(t *testing.T) {
 		t.Fatal("96 is deliberately unlisted until verified")
 	}
 }
+
+func TestHSNSummary(t *testing.T) {
+	one, _ := Calculate(base(LineInput{Code: "998313", Gross: r("10000")}))
+	in := base(LineInput{})
+	in.Lines = []LineInput{{Code: "998313", Gross: r("2000")}, {Code: "1001", Gross: r("1000")}, {Code: "010121", Gross: r("500")}}
+	two, _ := Calculate(in)
+	rows := HSNSummary([]Result{one, two})
+	if len(rows) != 3 {
+		t.Fatalf("%+v", rows)
+	}
+	var svc SummaryRow
+	for _, row := range rows {
+		if row.Code == "998313" {
+			svc = row
+		}
+	}
+	// 10000 + 2000 taxable at 18%: CGST = SGST = 900 + 180.
+	if svc.Lines != 2 || svc.Taxable.Int64() != 12000 || svc.CGST.Int64() != 1080 || svc.SGST.Int64() != 1080 || svc.Rate != "18" {
+		t.Fatalf("%+v", svc)
+	}
+	if rows[0].Code > rows[1].Code || rows[1].Code > rows[2].Code {
+		t.Fatal("rows must be sorted by code")
+	}
+}
