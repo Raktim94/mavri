@@ -10,7 +10,7 @@ export const initImportExportHandlers = (db: DatabaseAdapter) => {
     try {
       const payload = await importExportService.exportAllData(db);
 
-      const defaultFileName = `invoice-builder-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      const defaultFileName = `mavri-backup-${new Date().toISOString().slice(0, 10)}.json`;
       const result = await dialog.showSaveDialog({
         title: 'Export',
         defaultPath: join(process.env.USERPROFILE || process.cwd(), defaultFileName),

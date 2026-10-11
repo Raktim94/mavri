@@ -36,6 +36,7 @@ Builder project, so the repository `LICENSE` and attribution in the root
 | `internal/transfer` | Whole-database JSON export and import (all or nothing) |
 | `internal/invoices` | Invoice service: read with everything attached, save/update with snapshots, items, payments and attachments in one transaction, duplicate and quotation conversion, numbering |
 | `internal/entity` | Generic list/create/update/delete/batch engine for the simple resources (banks, businesses, clients, currencies, categories, units, items) |
+| `tools/e2e` | `run.sh` builds the Docker image and `ui_flow.py` drives the real web app in Chrome against it, failing on any unexpected HTTP, console or page error |
 | `tools/contract` | `run.sh`: starts the TS server and the Go server on copies of one database, runs the same 257-call conversation against both and diffs every response (timestamps and random key secrets masked) |
 | `tools/difftest` | Script that generates the TS reference cases (run outside the repo) |
 | `internal/ecommerce` | Webhook signature schemes and verification |
@@ -84,13 +85,21 @@ sh tools/contract/run.sh        # REST API: 257 responses
 sh tools/contract/run_mcp.sh    # MCP: 60 replies
 ```
 
-Both report 0 differences. They mask timestamps and random secrets, ignore list
+A third script drives the real web app in Chrome against the Go server in its
+Docker image (account, records, invoice, PDF preview, payment, duplicate, quote
+to invoice, backup and re-import, every page):
+
+```sh
+sh tools/e2e/run.sh             # needs docker, python3 + playwright, Google Chrome
+```
+
+The two contract scripts report 0 differences. They mask timestamps and random secrets, ignore list
 order (it depends on the second a row was created) and list, rather than fail on,
 the places where the TypeScript server crashes and Go answers cleanly.
 
 ## Status
 
-**Everything the TypeScript web backend does is implemented**, on SQLite: all 86
+**Everything the TypeScript web backend does is implemented**, on SQLite, and the real web app runs on it: all 86
 REST routes, the 20 MCP tools, the schema and its 33 migrations (as one
 baseline, plus a runner for later changes), sessions, API keys, encrypted
 webhook secrets, import/export, e-commerce webhooks and the e-invoice XML.
