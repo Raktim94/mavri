@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -78,16 +79,36 @@ func toPublicKey(k store.APIKey) publicKey {
 
 // authAPI holds the dependencies of the /api/auth routes.
 type authAPI struct {
-	st        store.Store
+	mu        sync.RWMutex
+	st        store.Store // current database; nil until one is opened
 	now       func() time.Time
 	secure    bool
 	dummyOnce sync.Once
 	dummyHash string
 }
 
+// cur is the database in use right now. It changes when /api/databases opens
+// another file, so handlers must not hold on to it across requests.
+func (a *authAPI) cur() store.Store {
+	a.mu.RLock()
+	defer a.mu.RUnlock()
+	return a.st
+}
+
+// swap installs a new database and closes the previous one.
+func (a *authAPI) swap(next store.Store) {
+	a.mu.Lock()
+	old := a.st
+	a.st = next
+	a.mu.Unlock()
+	if c, ok := old.(io.Closer); ok {
+		_ = c.Close()
+	}
+}
+
 func (a *authAPI) requireDB(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if a.st == nil {
+		if a.cur() == nil {
 			httpx.Fail(w, http.StatusBadRequest, "error.databaseNotInitialized")
 			return
 		}
@@ -98,12 +119,12 @@ func (a *authAPI) requireDB(next http.HandlerFunc) http.HandlerFunc {
 // requireAuth accepts a live session cookie or a Bearer API key.
 func (a *authAPI) requireAuth(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if a.st == nil {
+		if a.cur() == nil {
 			httpx.Fail(w, http.StatusUnauthorized, "error.unauthorized")
 			return
 		}
 		if c, err := r.Cookie(sessionCookie); err == nil && c.Value != "" {
-			if id, ok, err := a.st.SessionUser(r.Context(), c.Value, a.now()); err == nil && ok {
+			if id, ok, err := a.cur().SessionUser(r.Context(), c.Value, a.now()); err == nil && ok {
 				next(w, r.WithContext(context.WithValue(r.Context(), ctxKey{}, principal{kind: bySession, userID: id})))
 				return
 			}
@@ -112,7 +133,7 @@ func (a *authAPI) requireAuth(next http.HandlerFunc) http.HandlerFunc {
 			raw := strings.TrimSpace(h[len(bearerPrefix):])
 			if auth.LooksLikeAPIKey(raw) {
 				if hash, err := auth.HashAPIKey(raw); err == nil {
-					k, err := a.st.ActiveAPIKeyByHash(r.Context(), hash, auth.FormatTimestamp(a.now()))
+					k, err := a.cur().ActiveAPIKeyByHash(r.Context(), hash, auth.FormatTimestamp(a.now()))
 					if err == nil && k != nil {
 						next(w, r.WithContext(context.WithValue(r.Context(), ctxKey{}, principal{kind: byAPIKey, name: k.Name})))
 						return
@@ -141,7 +162,7 @@ func (a *authAPI) startSession(w http.ResponseWriter, r *http.Request, userID in
 		return err
 	}
 	sid := base64.RawURLEncoding.EncodeToString(b)
-	if err := a.st.CreateSession(r.Context(), sid, userID, a.now().Add(sessionTTL)); err != nil {
+	if err := a.cur().CreateSession(r.Context(), sid, userID, a.now().Add(sessionTTL)); err != nil {
 		return err
 	}
 	http.SetCookie(w, &http.Cookie{Name: sessionCookie, Value: sid, Path: "/", HttpOnly: true, Secure: a.secure,
@@ -168,7 +189,7 @@ func serverError(w http.ResponseWriter) {
 }
 
 func (a *authAPI) status(w http.ResponseWriter, r *http.Request) {
-	n, err := a.st.CountUsers(r.Context())
+	n, err := a.cur().CountUsers(r.Context())
 	if err != nil {
 		serverError(w)
 		return
@@ -179,7 +200,7 @@ func (a *authAPI) status(w http.ResponseWriter, r *http.Request) {
 // setup creates the owner account. It only works while no user exists, so it
 // cannot be used afterwards to add an unauthorised account.
 func (a *authAPI) setup(w http.ResponseWriter, r *http.Request) {
-	n, err := a.st.CountUsers(r.Context())
+	n, err := a.cur().CountUsers(r.Context())
 	if err != nil {
 		serverError(w)
 		return
@@ -207,7 +228,7 @@ func (a *authAPI) setup(w http.ResponseWriter, r *http.Request) {
 		serverError(w)
 		return
 	}
-	u, err := a.st.CreateUser(r.Context(), email, hash, "owner")
+	u, err := a.cur().CreateUser(r.Context(), email, hash, "owner")
 	if err == store.ErrDuplicate {
 		httpx.Fail(w, http.StatusForbidden, "error.alreadySetUp")
 		return
@@ -225,7 +246,7 @@ func (a *authAPI) login(w http.ResponseWriter, r *http.Request) {
 		httpx.Fail(w, http.StatusBadRequest, "error.missingFields")
 		return
 	}
-	u, err := a.st.UserByEmail(r.Context(), c.Email)
+	u, err := a.cur().UserByEmail(r.Context(), c.Email)
 	if err != nil {
 		serverError(w)
 		return
@@ -250,7 +271,7 @@ func (a *authAPI) login(w http.ResponseWriter, r *http.Request) {
 		if until != nil {
 			locked = auth.FormatTimestamp(*until)
 		}
-		if err := a.st.RecordLoginFailure(r.Context(), u.ID, count, locked); err != nil {
+		if err := a.cur().RecordLoginFailure(r.Context(), u.ID, count, locked); err != nil {
 			serverError(w)
 			return
 		}
@@ -258,7 +279,7 @@ func (a *authAPI) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	at := auth.FormatTimestamp(now)
-	if err := a.st.RecordLoginSuccess(r.Context(), u.ID, at); err != nil || a.startSession(w, r, u.ID) != nil {
+	if err := a.cur().RecordLoginSuccess(r.Context(), u.ID, at); err != nil || a.startSession(w, r, u.ID) != nil {
 		serverError(w)
 		return
 	}
@@ -268,8 +289,8 @@ func (a *authAPI) login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *authAPI) logout(w http.ResponseWriter, r *http.Request) {
-	if c, err := r.Cookie(sessionCookie); err == nil && a.st != nil {
-		_ = a.st.DeleteSession(r.Context(), c.Value)
+	if c, err := r.Cookie(sessionCookie); err == nil && a.cur() != nil {
+		_ = a.cur().DeleteSession(r.Context(), c.Value)
 	}
 	http.SetCookie(w, &http.Cookie{Name: sessionCookie, Value: "", Path: "/", HttpOnly: true, Secure: a.secure,
 		SameSite: http.SameSiteLaxMode, MaxAge: -1})
@@ -282,7 +303,7 @@ func (a *authAPI) me(w http.ResponseWriter, r *http.Request) {
 		httpx.OK(w, map[string]any{"apiKey": true, "name": p.name})
 		return
 	}
-	u, err := a.st.UserByID(r.Context(), p.userID)
+	u, err := a.cur().UserByID(r.Context(), p.userID)
 	if err != nil {
 		serverError(w)
 		return
@@ -295,7 +316,7 @@ func (a *authAPI) me(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *authAPI) listKeys(w http.ResponseWriter, r *http.Request) {
-	keys, err := a.st.ListAPIKeys(r.Context())
+	keys, err := a.cur().ListAPIKeys(r.Context())
 	if err != nil {
 		serverError(w)
 		return
@@ -328,7 +349,7 @@ func (a *authAPI) createKey(w http.ResponseWriter, r *http.Request) {
 		serverError(w)
 		return
 	}
-	k, err := a.st.CreateAPIKey(r.Context(), name, prefix, hash, principalFrom(r.Context()).userID)
+	k, err := a.cur().CreateAPIKey(r.Context(), name, prefix, hash, principalFrom(r.Context()).userID)
 	if err != nil {
 		serverError(w)
 		return
@@ -339,7 +360,7 @@ func (a *authAPI) createKey(w http.ResponseWriter, r *http.Request) {
 func (a *authAPI) revokeKey(w http.ResponseWriter, r *http.Request) {
 	// A non-numeric id matches no key, which is still a success (as before).
 	if id, err := strconv.ParseInt(r.PathValue("id"), 10, 64); err == nil {
-		if err := a.st.RevokeAPIKey(r.Context(), id, auth.FormatTimestamp(a.now())); err != nil {
+		if err := a.cur().RevokeAPIKey(r.Context(), id, auth.FormatTimestamp(a.now())); err != nil {
 			serverError(w)
 			return
 		}

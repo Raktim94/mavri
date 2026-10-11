@@ -13,7 +13,7 @@ import (
 
 func handler() http.Handler {
 	cfg := config.LoadFrom(func(string) string { return "" })
-	return NewHandler(cfg, slog.New(slog.NewJSONHandler(io.Discard, nil)), nil)
+	return NewHandler(cfg, slog.New(slog.NewJSONHandler(io.Discard, nil)), nil, nil)
 }
 
 func get(t *testing.T, path string) *httptest.ResponseRecorder {

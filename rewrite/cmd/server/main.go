@@ -45,7 +45,7 @@ func main() {
 
 	srv := &http.Server{
 		Addr:              net.JoinHostPort(cfg.Host, strconv.Itoa(cfg.Port)),
-		Handler:           api.NewHandler(cfg, log, st),
+		Handler:           api.NewHandler(cfg, log, st, func(path string) (store.Store, error) { return sqlitestore.Open(path) }),
 		ReadHeaderTimeout: 10 * time.Second,
 		ReadTimeout:       5 * time.Minute, // large JSON imports
 		WriteTimeout:      5 * time.Minute,

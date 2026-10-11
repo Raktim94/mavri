@@ -17,7 +17,7 @@ Builder project, so the repository `LICENSE` and attribution in the root
 | `cmd/server` | HTTP server entry point, graceful shutdown |
 | `internal/config` | Environment settings (same variable names as the TS server) |
 | `internal/httpx` | Response envelope, security headers, CORS, body limit, rate limiter |
-| `internal/api` | Route wiring and the `/api/auth/*` handlers (setup, login, logout, me, API keys) |
+| `internal/api` | Route wiring, `/api/auth/*`, the database chooser (`/api/databases`, which can switch the open SQLite file at runtime) and the resource handlers |
 | `internal/schema` | `baseline.sql`: full schema and seed rows after TS migration 32, applied to an empty database; existing databases are only checked. Verified both ways: the TS server opens a Go-created database and logs in the Go-created account (in dev mode it records its own `.ts` migration names, which is harmless) |
 | `internal/store` | Persistence interface for users, API keys and sessions, plus an in-memory version for tests. `sqlitestore` is the SQLite version (same tables as the TS backend); PostgreSQL is still to do. Both pass one shared contract test (`storetest`) |
 | `internal/scrypt` | scrypt (RFC 7914), standard library only, checked against Node |
@@ -29,7 +29,7 @@ Builder project, so the repository `LICENSE` and attribution in the root
 | `internal/rbac` | Roles, permissions, approval thresholds |
 | `internal/audit` | Tamper-evident hash-chained audit log |
 | `internal/entity` | Generic list/create/update/delete/batch engine for the simple resources (banks, businesses, clients, currencies, categories, units, items) |
-| `tools/contract` | `run.sh`: starts the TS server and the Go server on copies of one database, runs the same 124-call conversation against both and diffs every response (timestamps and random key secrets masked) |
+| `tools/contract` | `run.sh`: starts the TS server and the Go server on copies of one database, runs the same 129-call conversation against both and diffs every response (timestamps and random key secrets masked) |
 | `tools/difftest` | Script that generates the TS reference cases (run outside the repo) |
 | `internal/ecommerce` | Webhook signature schemes and verification |
 
@@ -65,11 +65,11 @@ GST (India) logic with tests: see the matrix for what is unverified. Rates are
 never built in; they come from rules the business loads.
 The auth routes and the simple resource routes (banks, businesses,
 clients, currencies, categories, units, items) run on SQLite and answer
-identically to the TypeScript server, as do settings, the US tax lookups, style profiles, layouts and presets: `tools/contract/run.sh` compares 124
+identically to the TypeScript server, as do settings, the US tax lookups, style profiles, layouts and presets: `tools/contract/run.sh` compares 129
 responses (status and body) and reports 0 differences. It does not cover rate
 limits, response headers, or PostgreSQL.
 
-Known, deliberate differences: a field left out of a create request takes the
+Known, deliberate differences: opening a database with mode `create` refuses to overwrite an existing file (the old server deleted it); an empty database name is refused; PostgreSQL answers "not supported"; a field left out of a create request takes the
 column default instead of failing on NULL; batch imports decode base64 logos
 and QR codes instead of storing the base64 text.
 

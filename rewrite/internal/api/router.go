@@ -21,11 +21,11 @@ const maxJSONBody = 50 << 20 // 50 MB, same as the TypeScript server
 // global /api rate limit (300 requests per minute per client). st may be nil
 // while no database is configured: auth routes then answer
 // error.databaseNotInitialized and /api/databases/ready reports false.
-func NewHandler(cfg config.Config, log *slog.Logger, st store.Store) http.Handler {
-	return newHandler(cfg, log, st, time.Now)
+func NewHandler(cfg config.Config, log *slog.Logger, st store.Store, open Opener) http.Handler {
+	return newHandler(cfg, log, st, open, time.Now)
 }
 
-func newHandler(cfg config.Config, log *slog.Logger, st store.Store, now func() time.Time) http.Handler {
+func newHandler(cfg config.Config, log *slog.Logger, st store.Store, open Opener, now func() time.Time) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/health", func(w http.ResponseWriter, _ *http.Request) {
 		httpx.WriteJSON(w, http.StatusOK, map[string]bool{"ok": true})
@@ -34,11 +34,11 @@ func newHandler(cfg config.Config, log *slog.Logger, st store.Store, now func() 
 		httpx.WriteJSON(w, http.StatusOK, map[string]string{"version": cfg.Version})
 	})
 	// The renderer uses this to decide whether to show the database chooser.
-	mux.HandleFunc("GET /api/databases/ready", func(w http.ResponseWriter, _ *http.Request) {
-		httpx.OK(w, map[string]bool{"ready": st != nil})
-	})
-
 	a := &authAPI{st: st, now: now, secure: cfg.CookieSecure}
+	mux.HandleFunc("GET /api/databases/ready", func(w http.ResponseWriter, _ *http.Request) {
+		httpx.OK(w, map[string]bool{"ready": a.cur() != nil})
+	})
+	a.mountDatabases(mux, cfg.DataDir, open, cfg.TrustedProxies)
 	loginLimit := httpx.NewLimiter(15*time.Minute, 10, cfg.TrustedProxies)
 	setupLimit := httpx.NewLimiter(time.Hour, 5, cfg.TrustedProxies)
 	limited := func(l *httpx.Limiter, h http.HandlerFunc) http.HandlerFunc { return l.Middleware(h).ServeHTTP }

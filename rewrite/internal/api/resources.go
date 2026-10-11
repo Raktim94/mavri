@@ -23,7 +23,7 @@ type resourceAPI struct {
 }
 
 func (a *authAPI) repo() (entity.Repo, bool) {
-	if p, ok := a.st.(sqlProvider); ok {
+	if p, ok := a.cur().(sqlProvider); ok {
 		return entity.Repo{DB: p.DB()}, true
 	}
 	return entity.Repo{}, false

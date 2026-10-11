@@ -41,10 +41,10 @@ Generated from the TypeScript backend at commit `1308d57` by an extraction scrip
 | 31 | PUT | `/api/currencies` | session or Bearer API key |  | currencies.ts | DONE: identical to TS in tools/contract |
 | 32 | DELETE | `/api/currencies/:id` | session or Bearer API key |  | currencies.ts | DONE: identical to TS in tools/contract |
 | 33 | POST | `/api/currencies/batch` | session or Bearer API key |  | currencies.ts | DONE: identical to TS in tools/contract |
-| 34 | GET | `/api/databases` | public until first user exists | listDbLimiter | database.ts | TODO |
-| 35 | POST | `/api/databases` | public until first user exists | listDbLimiter | database.ts | TODO |
+| 34 | GET | `/api/databases` | public until first user exists | listDbLimiter | database.ts | DONE for SQLite: identical to TS in tools/contract; PostgreSQL not supported |
+| 35 | POST | `/api/databases` | public until first user exists | listDbLimiter | database.ts | DONE for SQLite: identical to TS in tools/contract; PostgreSQL not supported |
 | 36 | GET | `/api/databases/ready` | public |  | main.ts | IN PROGRESS: unit-tested, TS contract check pending |
-| 37 | POST | `/api/databases/test` | public until first user exists | listDbLimiter | database.ts | TODO |
+| 37 | POST | `/api/databases/test` | public until first user exists | listDbLimiter | database.ts | DONE for SQLite: identical to TS in tools/contract; PostgreSQL not supported |
 | 38 | GET | `/api/ecommerce/integrations` | session or Bearer API key |  | ecommerceIntegrations.ts | TODO |
 | 39 | POST | `/api/ecommerce/integrations` | session or Bearer API key |  | ecommerceIntegrations.ts | TODO |
 | 40 | DELETE | `/api/ecommerce/integrations/:id` | session or Bearer API key |  | ecommerceIntegrations.ts | TODO |

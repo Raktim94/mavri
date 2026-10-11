@@ -24,13 +24,14 @@ type env struct {
 	st    *store.Memory
 	clock time.Time
 	sql   *sqlitestore.Store
+	dir   string
 }
 
 func newEnv(t *testing.T) *env {
 	e := &env{t: t, st: store.NewMemory(), clock: time.Date(2026, 10, 11, 9, 0, 0, 0, time.UTC)}
 	e.st.Now = func() time.Time { return e.clock }
 	cfg := config.LoadFrom(func(string) string { return "" })
-	e.h = newHandler(cfg, slog.New(slog.NewJSONHandler(io.Discard, nil)), e.st, func() time.Time { return e.clock })
+	e.h = newHandler(cfg, slog.New(slog.NewJSONHandler(io.Discard, nil)), e.st, nil, func() time.Time { return e.clock })
 	return e
 }
 

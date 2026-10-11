@@ -13,20 +13,28 @@ import (
 	"time"
 
 	"github.com/Raktim94/nodedr-invoice/rewrite/internal/config"
+	"github.com/Raktim94/nodedr-invoice/rewrite/internal/store"
 	"github.com/Raktim94/nodedr-invoice/rewrite/internal/store/sqlitestore"
 )
 
 // sqlEnv is an env backed by a real SQLite database with a signed-in owner.
 func sqlEnv(t *testing.T) (*env, *http.Cookie) {
 	t.Helper()
-	db, err := sqlitestore.Open(filepath.Join(t.TempDir(), "t.db"))
+	dir := t.TempDir()
+	db, err := sqlitestore.Open(filepath.Join(dir, "t.db"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { db.Close() })
-	e := &env{t: t, clock: time.Date(2026, 10, 11, 9, 0, 0, 0, time.UTC)}
-	cfg := config.LoadFrom(func(string) string { return "" })
-	e.h = newHandler(cfg, slog.New(slog.NewJSONHandler(io.Discard, nil)), db, func() time.Time { return e.clock })
+	e := &env{t: t, clock: time.Date(2026, 10, 11, 9, 0, 0, 0, time.UTC), dir: dir}
+	cfg := config.LoadFrom(func(k string) string {
+		if k == "DB_DIRECTORY" {
+			return dir
+		}
+		return ""
+	})
+	open := func(p string) (store.Store, error) { return sqlitestore.Open(p) }
+	e.h = newHandler(cfg, slog.New(slog.NewJSONHandler(io.Discard, nil)), db, open, func() time.Time { return e.clock })
 	e.sql = db
 	return e, e.setup()
 }
@@ -382,5 +390,87 @@ func TestPresetsCarryBorrowedData(t *testing.T) {
 	}
 	if r := e.do("PUT", "/api/presets", `{"id":999,"name":"x"}`, nil, ck); r.Body["success"] != true || r.Body["data"] != nil {
 		t.Errorf("update unknown id: %v", r.Body)
+	}
+}
+
+func TestResolveDBFile(t *testing.T) {
+	dir := t.TempDir()
+	for _, bad := range []string{"../evil.db", "/etc/passwd", "", "a/../../x.db", "..", ".", "a/../.."} {
+		if got, ok := resolveDBFile(dir, bad); ok {
+			t.Errorf("%q must be refused, got %s", bad, got)
+		}
+	}
+	for name, want := range map[string]string{"x.db": filepath.Join(dir, "x.db"), "sub/y.db": filepath.Join(dir, "sub/y.db"),
+		filepath.Join(dir, "z.db"): filepath.Join(dir, "z.db")} {
+		if got, ok := resolveDBFile(dir, name); !ok || got != want {
+			t.Errorf("%q -> %q %v, want %q", name, got, ok, want)
+		}
+	}
+}
+
+func TestDatabaseListNeedsAuthOnceConfigured(t *testing.T) {
+	e, ck := sqlEnv(t)
+	if r := e.do("GET", "/api/databases", "", nil, nil); r.Code != 401 {
+		t.Errorf("a configured server needs auth: %d", r.Code)
+	}
+	l := e.do("GET", "/api/databases", "", nil, ck)
+	if names, _ := l.Body["data"].([]any); len(names) != 1 || names[0] != "t.db" {
+		t.Errorf("list: %v", l.Body)
+	}
+}
+
+func TestDatabaseOpenErrors(t *testing.T) {
+	e, ck := sqlEnv(t)
+	if r := e.do("POST", "/api/databases", `{"fullPath":"../evil.db","mode":"create"}`, nil, ck); r.Code != 400 || r.key() != "error.invalidDBName" {
+		t.Errorf("outside the directory: %d %v", r.Code, r.Body)
+	}
+	if r := e.do("POST", "/api/databases", `{"fullPath":"missing.db","mode":"open"}`, nil, ck); r.Code != 500 || r.Body["message"] != "error.databaseFileNotExist" {
+		t.Errorf("open missing: %d %v", r.Code, r.Body)
+	}
+	if r := e.do("POST", "/api/databases", `{"fullPath":"t.db","mode":"create"}`, nil, ck); r.Code != 500 || r.Body["message"] != "error.databaseFileExists" {
+		t.Errorf("create must not wipe an existing file: %d %v", r.Code, r.Body)
+	}
+	if r := e.do("POST", "/api/databases/test", `{"host":"x"}`, nil, ck); r.Code != 500 {
+		t.Errorf("postgres test: %d", r.Code)
+	}
+	if r := e.do("POST", "/api/databases", `{"fullPath":"x","dbType":"PostgreSQL"}`, nil, ck); r.Code != 500 {
+		t.Errorf("postgres open: %d", r.Code)
+	}
+}
+
+func TestSwitchingDatabases(t *testing.T) {
+	e, ck := sqlEnv(t)
+	if r := e.do("POST", "/api/databases", `{"fullPath":"second.db","mode":"create"}`, nil, ck); r.Code != 200 || r.Body["success"] != true {
+		t.Fatalf("create: %v", r.Body)
+	}
+	if st := e.do("GET", "/api/auth/status", "", nil, nil); st.data()["needsSetup"] != true {
+		t.Errorf("the new database has no owner yet: %v", st.Body)
+	}
+	if r := e.do("GET", "/api/auth/me", "", nil, ck); r.Code != 401 {
+		t.Errorf("sessions belong to the old database: %d", r.Code)
+	}
+	// With no account yet the chooser is open, as on a fresh install.
+	if r := e.do("POST", "/api/databases", `{"fullPath":"t.db","mode":"open"}`, nil, nil); r.Code != 200 {
+		t.Fatalf("reopen: %d %v", r.Code, r.Body)
+	}
+	if r := e.do("POST", "/api/auth/login", creds("owner@example.com", goodPassword), nil, nil); r.Code != 200 {
+		t.Errorf("login after reopen: %d %v", r.Code, r.Body)
+	}
+	if r := e.do("POST", "/api/databases", `{"fullPath":"third.db","mode":"create"}`, nil, nil); r.Code != 401 {
+		t.Errorf("once the owner exists the chooser needs auth: %d", r.Code)
+	}
+}
+
+func TestDatabaseRoutesAreRateLimited(t *testing.T) {
+	e, ck := sqlEnv(t)
+	for i := 1; i <= 6; i++ {
+		r := e.do("GET", "/api/databases", "", nil, ck)
+		want := 200
+		if i == 6 {
+			want = 429
+		}
+		if r.Code != want {
+			t.Fatalf("request %d: %d", i, r.Code)
+		}
 	}
 }
