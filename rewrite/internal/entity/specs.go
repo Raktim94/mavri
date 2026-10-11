@@ -98,3 +98,61 @@ func resolveItemRelations(ctx context.Context, tx *sql.Tx, row Row) error {
 }
 
 func itoa(i int64) string { return json.Number(formatInt(i)).String() }
+
+// StyleProfiles carry two JSON columns and, on lists, the schema of the
+// layout they point at.
+var StyleProfiles = func() *Spec {
+	s := direct("style_profiles", []string{"name", "color", "logoSize", "fontSize", "fontFamily", "layoutId",
+		"tableHeaderStyle", "tableRowStyle", "pageFormat", "labelUpperCase", "watermarkFileName", "watermarkFileType",
+		"watermarkFileSize", "watermarkFileData", "paidWatermarkFileName", "paidWatermarkFileType",
+		"paidWatermarkFileSize", "paidWatermarkFileData", "isArchived", "showQuantity", "showUnit", "showRowNo",
+		"fieldSortOrders", "pdfTexts"}, []string{"watermarkFileData", "paidWatermarkFileData"}, "styleProfilesId")
+	s.JSONFields = []string{"fieldSortOrders", "pdfTexts"}
+	s.AfterList = func(ctx context.Context, db *sql.DB, rows []Row) error {
+		res, err := db.QueryContext(ctx, `SELECT "id", "schema" FROM layouts`)
+		if err != nil {
+			return err
+		}
+		defer res.Close()
+		schemas := map[int64]json.RawMessage{}
+		for res.Next() {
+			var id int64
+			var schema string
+			if err := res.Scan(&id, &schema); err != nil {
+				return err
+			}
+			if json.Valid([]byte(schema)) {
+				schemas[id] = json.RawMessage(schema)
+			}
+		}
+		if err := res.Err(); err != nil {
+			return err
+		}
+		for _, row := range rows {
+			if id, ok := row["layoutId"].(int64); ok {
+				if sc, found := schemas[id]; found {
+					row["layoutSchema"] = sc
+				}
+			}
+		}
+		return nil
+	}
+	return s
+}()
+
+// Layouts hold their definition as JSON text.
+var Layouts = func() *Spec {
+	s := direct("layouts", []string{"isArchived", "schema"}, nil, "layoutId")
+	s.JSONFields = []string{"schema"}
+	return s
+}()
+
+// Presets are written through this spec (batch import); reading them uses the
+// joined query in presets.go.
+var Presets = &Spec{
+	Table: "presets",
+	Fields: []string{"name", "businessId", "clientId", "currencyId", "bankId", "styleProfilesId", "customerNotes",
+		"thanksNotes", "termsConditionNotes", "language", "signatureData", "signatureSize", "signatureType",
+		"signatureName", "isArchived"},
+	Blobs: []string{"signatureData"},
+}

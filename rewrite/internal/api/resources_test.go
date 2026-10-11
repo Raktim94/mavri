@@ -310,3 +310,77 @@ func TestSettingsAndTaxRoutes(t *testing.T) {
 		t.Error(`unknown state must answer "data":null explicitly`)
 	}
 }
+
+func TestStyleProfileJSONColumnsKeepOrderAndLayoutSchema(t *testing.T) {
+	e, ck := sqlEnv(t)
+	full := `"isArchived":false,"labelUpperCase":false,"showQuantity":true,"showUnit":true,"showRowNo":true`
+	r := e.do("POST", "/api/styleProfiles", `{`+full+`,"name":"P","layoutId":1,"fieldSortOrders":{"b":2,"a":[1,{"x":null}]},"pdfTexts":{"title":"Facture"}}`, nil, ck)
+	if r.Body["success"] != true {
+		t.Fatalf("%v", r.Body)
+	}
+	var stored string
+	if err := e.sql.DB().QueryRow(`SELECT "fieldSortOrders" FROM style_profiles WHERE "id" = 1`).Scan(&stored); err != nil || stored != `{"b":2,"a":[1,{"x":null}]}` {
+		t.Errorf("stored text must keep the client's key order: %q %v", stored, err)
+	}
+	if _, has := r.data()["layoutSchema"]; has {
+		t.Error("layoutSchema only appears on lists")
+	}
+	if fo, _ := r.data()["fieldSortOrders"].(map[string]any); fo["b"] != float64(2) {
+		t.Errorf("response parses the JSON: %v", r.data()["fieldSortOrders"])
+	}
+	list := rows(t, e.do("GET", "/api/styleProfiles", "", nil, ck))
+	if sc, _ := list[0]["layoutSchema"].(map[string]any); sc["schemaVersion"] == nil {
+		t.Errorf("list should carry the layout schema: %v", list[0]["layoutSchema"])
+	}
+	// A batch row may carry the JSON already as text; that text is kept.
+	e.do("POST", "/api/styleProfiles/batch", `[{`+full+`,"name":"B","fieldSortOrders":"{\"q\":1}"}]`, nil, ck)
+	e.sql.DB().QueryRow(`SELECT "fieldSortOrders" FROM style_profiles WHERE "name" = 'B'`).Scan(&stored)
+	if stored != `{"q":1}` {
+		t.Errorf("batch text: %q", stored)
+	}
+}
+
+func TestLayoutsAndExport(t *testing.T) {
+	e, ck := sqlEnv(t)
+	made := e.do("POST", "/api/layouts", `{"isArchived":false,"schema":{"z":1,"a":[]}}`, nil, ck)
+	if s, _ := made.data()["schema"].(map[string]any); s["z"] != float64(1) || made.data()["invoiceCount"] != float64(0) {
+		t.Fatalf("%v", made.Body)
+	}
+	id := fmt.Sprint(made.data()["id"])
+	exp := e.do("GET", "/api/layouts/export/"+id, "", nil, ck)
+	if _, has := exp.data()["invoiceCount"]; has || exp.data()["id"] != made.data()["id"] {
+		t.Errorf("export is the plain row: %v", exp.data())
+	}
+	if r := e.do("GET", "/api/layouts/export/999", "", nil, ck); r.Body["success"] != true || r.Body["data"] != nil {
+		t.Errorf("missing layout: %v", r.Body)
+	}
+	if r := e.do("POST", "/api/layouts/batch", `[]`, nil, ck); r.Code != 404 && r.Code != 405 {
+		t.Errorf("layouts have no batch route: %d", r.Code)
+	}
+}
+
+func TestPresetsCarryBorrowedData(t *testing.T) {
+	e, ck := sqlEnv(t)
+	biz := e.do("POST", "/api/businesses", `{"name":"Me","shortName":"ME","logo":"iVBORw0KGgo="}`, nil, ck).data()
+	bare := e.do("POST", "/api/presets", `{"name":"Bare"}`, nil, ck)
+	if bare.Body["success"] != true || bare.data()["businessName"] != nil || bare.data()["isArchived"] != false {
+		t.Fatalf("bare: %v", bare.Body)
+	}
+	if _, has := bare.data()["layoutSchema"]; has {
+		t.Error("layoutSchema is absent (not null) when there is no layout")
+	}
+	std := e.do("POST", "/api/presets", fmt.Sprintf(`{"name":"Std","businessId":%v,"signatureData":"iVBORw0KGgo="}`, biz["id"]), nil, ck)
+	if std.data()["businessName"] != "Me" || std.data()["businessLogo"] != "iVBORw0KGgo=" || std.data()["signatureData"] != "iVBORw0KGgo=" {
+		t.Errorf("borrowed data: %v", std.data())
+	}
+	bad := e.do("POST", "/api/presets", `{"name":"Bad","businessId":999}`, nil, ck)
+	if bad.Body["success"] != false || bad.key() != "error.invalidConstraintForeign" || bad.Body["message"] != nil {
+		t.Errorf("fk failure carries only the key: %v", bad.Body)
+	}
+	if got := rows(t, e.do("GET", "/api/presets", "", nil, ck)); len(got) != 2 {
+		t.Errorf("failed save must leave nothing: %d", len(got))
+	}
+	if r := e.do("PUT", "/api/presets", `{"id":999,"name":"x"}`, nil, ck); r.Body["success"] != true || r.Body["data"] != nil {
+		t.Errorf("update unknown id: %v", r.Body)
+	}
+}

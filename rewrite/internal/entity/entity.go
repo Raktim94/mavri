@@ -4,6 +4,7 @@
 package entity
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"encoding/base64"
@@ -37,6 +38,69 @@ type Spec struct {
 	Defaults map[string]any
 	// Prepare may adjust a row inside the batch transaction (e.g. resolve names).
 	Prepare func(ctx context.Context, tx *sql.Tx, row Row) error
+	// JSONFields are columns holding JSON text: written as the JSON the client
+	// sent, returned as parsed JSON (key order kept).
+	JSONFields []string
+	// AfterList may add derived values to the rows of a list response.
+	AfterList func(ctx context.Context, db *sql.DB, rows []Row) error
+}
+
+// RawJSON is a request value that must be stored as its JSON text.
+type RawJSON json.RawMessage
+
+func (s *Spec) isJSON(name string) bool {
+	for _, f := range s.JSONFields {
+		if f == name {
+			return true
+		}
+	}
+	return false
+}
+
+// DecodeRow reads a request object. Values of jsonKeys stay as raw JSON.
+func DecodeRow(body []byte, jsonKeys []string) (Row, error) {
+	var m map[string]json.RawMessage
+	if err := json.Unmarshal(body, &m); err != nil || m == nil {
+		return nil, errors.New("not an object")
+	}
+	row := make(Row, len(m))
+	for k, raw := range m {
+		isJSON := false
+		for _, j := range jsonKeys {
+			if j == k {
+				isJSON = true
+			}
+		}
+		if isJSON {
+			row[k] = RawJSON(raw)
+			continue
+		}
+		dec := json.NewDecoder(bytes.NewReader(raw))
+		dec.UseNumber() // keep integers exact
+		var v any
+		if err := dec.Decode(&v); err != nil {
+			return nil, err
+		}
+		row[k] = v
+	}
+	return row, nil
+}
+
+// DecodeRows reads a request array of objects.
+func DecodeRows(body []byte, jsonKeys []string) ([]Row, error) {
+	var items []json.RawMessage
+	if err := json.Unmarshal(body, &items); err != nil {
+		return nil, err
+	}
+	out := make([]Row, 0, len(items))
+	for _, it := range items {
+		row, err := DecodeRow(it, jsonKeys)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, row)
+	}
+	return out, nil
 }
 
 type column struct {
@@ -189,6 +253,11 @@ func (s *Spec) scan(rows *sql.Rows) ([]Row, error) {
 }
 
 func (s *Spec) outValue(name string, v any) any {
+	if str, ok := v.(string); ok && str != "" && s.isJSON(name) {
+		if json.Valid([]byte(str)) {
+			return json.RawMessage(str)
+		}
+	}
 	switch x := v.(type) {
 	case []byte:
 		if s.isBlob(name) {
@@ -288,6 +357,9 @@ func (r Repo) List(ctx context.Context, s *Spec, filters []Filter) ([]Row, error
 	if out == nil {
 		out = []Row{}
 	}
+	if err == nil && s.AfterList != nil {
+		err = s.AfterList(ctx, r.DB, out)
+	}
 	return out, err
 }
 
@@ -310,10 +382,24 @@ func (s *Spec) one(ctx context.Context, q queryer, cols []column, id int64) (Row
 }
 
 // param converts a decoded JSON value into something the driver accepts.
-func (s *Spec) param(field string, v any) (any, error) {
+func (s *Spec) param(field string, v any, batch bool) (any, error) {
 	switch x := v.(type) {
 	case nil:
 		return nil, nil
+	case RawJSON:
+		raw := []byte(x)
+		if batch {
+			// A batch row may carry the JSON already as a string: keep that text.
+			var str string
+			if json.Unmarshal(raw, &str) == nil {
+				return str, nil
+			}
+		}
+		var buf bytes.Buffer
+		if err := json.Compact(&buf, raw); err != nil {
+			return nil, &Failure{Key: "error.unknownError", Message: "invalid JSON for " + field}
+		}
+		return buf.String(), nil
 	case bool:
 		if x {
 			return 1, nil
@@ -357,7 +443,7 @@ func decodeBase64(v string) []byte {
 	return b
 }
 
-func (s *Spec) save(ctx context.Context, q queryer, cols []column, row Row, update bool) (Row, error) {
+func (s *Spec) write(ctx context.Context, q queryer, cols []column, row Row, update, batch bool) (int64, error) {
 	for k, d := range s.Defaults {
 		if row[k] == nil {
 			row[k] = d
@@ -373,9 +459,9 @@ func (s *Spec) save(ctx context.Context, q queryer, cols []column, row Row, upda
 		if row[f] == nil && withDefault[f] {
 			continue
 		}
-		p, err := s.param(f, row[f])
+		p, err := s.param(f, row[f], batch)
 		if err != nil {
-			return nil, err
+			return 0, err
 		}
 		names = append(names, f)
 		params = append(params, p)
@@ -395,7 +481,7 @@ func (s *Spec) save(ctx context.Context, q queryer, cols []column, row Row, upda
 		set = append(set, `"updatedAt" = (datetime('now'))`)
 		if _, err := q.ExecContext(ctx, fmt.Sprintf(`UPDATE %s SET %s WHERE "id" = ?`,
 			s.Table, strings.Join(set, ", ")), append(params, id)...); err != nil {
-			return nil, err
+			return 0, err
 		}
 	} else {
 		var res sql.Result
@@ -412,11 +498,19 @@ func (s *Spec) save(ctx context.Context, q queryer, cols []column, row Row, upda
 				strings.Join(quoted, ","), strings.Join(marks, ",")), params...)
 		}
 		if err != nil {
-			return nil, err
+			return 0, err
 		}
 		if id, err = res.LastInsertId(); err != nil {
-			return nil, err
+			return 0, err
 		}
+	}
+	return id, nil
+}
+
+func (s *Spec) save(ctx context.Context, q queryer, cols []column, row Row, update, batch bool) (Row, error) {
+	id, err := s.write(ctx, q, cols, row, update, batch)
+	if err != nil {
+		return nil, err
 	}
 	return s.one(ctx, q, cols, id)
 }
@@ -428,7 +522,7 @@ func (r Repo) Save(ctx context.Context, s *Spec, row Row, update bool) (Row, err
 	if err != nil {
 		return nil, err
 	}
-	return s.save(ctx, r.DB, cols, row, update)
+	return s.save(ctx, r.DB, cols, row, update, false)
 }
 
 // Delete removes a row. Deleting a missing id is not an error.
@@ -455,7 +549,7 @@ func (r Repo) Batch(ctx context.Context, s *Spec, rows []Row) error {
 				return err
 			}
 		}
-		if _, err := s.save(ctx, tx, cols, row, false); err != nil {
+		if _, err := s.write(ctx, tx, cols, row, false, true); err != nil {
 			return err
 		}
 	}
@@ -489,17 +583,20 @@ func plainColumns(cols []column, alias string) string {
 // Select returns every column of table's rows matching tail (a WHERE/ORDER BY
 // clause with ? placeholders), converted like the resource rows.
 func (r Repo) Select(ctx context.Context, table, tail string, args ...any) ([]Row, error) {
-	cols, err := tableColumns(ctx, r.DB, table)
+	return (&Spec{}).selectRows(ctx, r.DB, table, tail, args...)
+}
+
+func (s *Spec) selectRows(ctx context.Context, db *sql.DB, table, tail string, args ...any) ([]Row, error) {
+	cols, err := tableColumns(ctx, db, table)
 	if err != nil {
 		return nil, err
 	}
-	rows, err := r.DB.QueryContext(ctx, fmt.Sprintf(`SELECT %s FROM %s t %s`, plainColumns(cols, "t"), table, tail), args...)
+	rows, err := db.QueryContext(ctx, fmt.Sprintf(`SELECT %s FROM %s t %s`, plainColumns(cols, "t"), table, tail), args...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	spec := &Spec{}
-	out, err := spec.scan(rows)
+	out, err := s.scan(rows)
 	if out == nil {
 		out = []Row{}
 	}
@@ -531,7 +628,7 @@ func (r Repo) UpdateColumns(ctx context.Context, table string, values Row, where
 		if !known[k] {
 			return false, &Failure{Key: "error.sqlSyntaxError"}
 		}
-		p, err := spec.param(k, v)
+		p, err := spec.param(k, v, false)
 		if err != nil {
 			return false, &Failure{Key: "error.unknownError", Message: "error.unsupportedValue"}
 		}

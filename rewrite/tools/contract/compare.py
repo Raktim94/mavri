@@ -16,7 +16,16 @@ def norm(v):
         if re.fullmatch(r"\d{4}-\d\d-\d\d[ T]\d\d:\d\d:\d\d(\.\d+)?Z?", v): return "<time>"
     return v
 
-a, b = json.load(open(sys.argv[1])), json.load(open(sys.argv[2]))
+def by_id(entry):
+    """Lists are ordered by creation second, which depends on when each server ran;
+    the order rule itself is covered by Go unit tests, so compare lists by id."""
+    data = entry["body"].get("data") if isinstance(entry["body"], dict) else None
+    if isinstance(data, list) and all(isinstance(r, dict) and "id" in r for r in data):
+        entry = {**entry, "body": {**entry["body"], "data": sorted(data, key=lambda r: r["id"])}}
+    return entry
+
+a = [by_id(e) for e in json.load(open(sys.argv[1]))]
+b = [by_id(e) for e in json.load(open(sys.argv[2]))]
 bad = 0
 for x, y in zip(a, b):
     if norm(x) != norm(y):

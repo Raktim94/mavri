@@ -59,6 +59,10 @@ func newHandler(cfg config.Config, log *slog.Logger, st store.Store, now func() 
 		a.mountResource(mux, path, spec)
 	}
 
+	a.mountResource(mux, "/api/styleProfiles", entity.StyleProfiles)
+	a.mountResourceWith(mux, "/api/layouts", entity.Layouts, false)
+	a.mountLayoutExport(mux)
+	a.mountPresets(mux)
 	a.mountSettings(mux)
 
 	limiter := httpx.NewLimiter(time.Minute, 300, cfg.TrustedProxies)

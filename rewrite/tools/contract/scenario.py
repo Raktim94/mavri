@@ -60,6 +60,41 @@ for p in ["banks", "businesses", "clients", "currencies", "categories", "units",
     for f in ['[{"type":"Active","value":""}]', '[{"type":"Archived","value":""}]', '[{"type":"NoInvoices","value":""}]',
               '[{"type":"AtleastOneInvoice","value":""}]', '[{"type":"NoInvoices30","value":""}]', 'junk']:
         call("GET", "/api/" + p + "?filter=" + urllib.parse.quote(f))
+# layouts / style profiles / presets
+call("GET", "/api/layouts")
+call("POST", "/api/layouts", {"isArchived": False, "schema": {"blocks": [{"z": 1, "a": 2}], "title": "T&C <b>"}})
+call("PUT", "/api/layouts", {"id": 7, "isArchived": False, "schema": {"blocks": [], "v": 2}})
+call("PUT", "/api/layouts", {"id": 999, "isArchived": False, "schema": {}})
+call("GET", "/api/layouts/export/7")
+call("GET", "/api/layouts/export/999")
+call("GET", "/api/layouts/export/abc")
+call("GET", "/api/layouts?filter=" + urllib.parse.quote('[{"type":"Active","value":""}]'))
+call("GET", "/api/styleProfiles")
+FULL = {"isArchived": False, "labelUpperCase": False, "showQuantity": True, "showUnit": True, "showRowNo": True}
+call("POST", "/api/styleProfiles", {**FULL, "name": "Plain", "color": "#112233", "layoutId": 1, "labelUpperCase": True,
+     "watermarkFileData": png, "watermarkFileName": "w.png", "fieldSortOrders": {"b": 2, "a": [1, 2, {"x": None}]}, "pdfTexts": {"title": "Facture"}})
+call("POST", "/api/styleProfiles", {**FULL, "name": "NullJson", "fieldSortOrders": None, "pdfTexts": None})
+call("PUT", "/api/styleProfiles", {**FULL, "id": 2, "name": "Plain 2", "layoutId": 2, "fieldSortOrders": {"x": 1}, "pdfTexts": {"title": "Rechnung"}})
+call("POST", "/api/styleProfiles/batch", [{**FULL, "name": "B1", "fieldSortOrders": "{\"q\":1}", "pdfTexts": {"t": 1}},
+                                          {**FULL, "name": "B2", "fieldSortOrders": {"r": 2}}])
+call("POST", "/api/styleProfiles/batch", [{**FULL, "name": "B3", "fieldSortOrders": {}}, {**FULL, "fieldSortOrders": {}}])
+call("DELETE", "/api/styleProfiles/4")
+call("GET", "/api/styleProfiles")
+call("GET", "/api/styleProfiles?filter=" + urllib.parse.quote('[{"type":"Archived","value":""}]'))
+call("GET", "/api/presets")
+call("POST", "/api/presets", {"name": "Std", "businessId": 1, "clientId": 1, "currencyId": 1, "bankId": 1, "styleProfilesId": 2,
+     "customerNotes": "n", "language": "en", "signatureData": png, "signatureName": "s.png", "isArchived": False})
+call("POST", "/api/presets", {"name": "Bare", "isArchived": False})
+call("POST", "/api/presets", {"name": "Bad fk", "businessId": 999, "isArchived": False})
+call("POST", "/api/presets", {"isArchived": False})
+call("PUT", "/api/presets", {"id": 2, "name": "Bare 2", "currencyId": 2, "isArchived": False})
+call("PUT", "/api/presets", {"id": 999, "name": "x", "isArchived": False})
+call("PUT", "/api/presets", {"name": "no id", "isArchived": False})
+call("POST", "/api/presets/batch", [{"name": "P1", "isArchived": False}, {"name": "P2", "isArchived": True}])
+call("POST", "/api/presets/batch", [{"name": "P3", "isArchived": False}, {"isArchived": False}])
+call("DELETE", "/api/presets/3")
+call("GET", "/api/presets")
+call("GET", "/api/presets?filter=" + urllib.parse.quote('[{"type":"Archived","value":""}]'))
 call("GET", "/api/settings")
 call("PUT", "/api/settings", {"id": 5, "language": "de", "isDarkMode": True, "createdAt": "x", "shouldIncludeYear": False})
 call("PUT", "/api/settings", {})
