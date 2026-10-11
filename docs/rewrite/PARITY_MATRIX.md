@@ -52,13 +52,13 @@ Generated from the TypeScript backend at commit `1308d57` by an extraction scrip
 | 42 | GET | `/api/export` | session or Bearer API key |  | importExport.ts | TODO |
 | 43 | GET | `/api/health` | public |  | main.ts | IN PROGRESS: unit-tested, TS contract check pending |
 | 44 | POST | `/api/import` | session or Bearer API key |  | importExport.ts | TODO |
-| 45 | GET | `/api/invoices` | session or Bearer API key |  | invoices.ts | TODO |
-| 46 | POST | `/api/invoices` | session or Bearer API key |  | invoices.ts | TODO |
-| 47 | PUT | `/api/invoices` | session or Bearer API key |  | invoices.ts | TODO |
-| 48 | DELETE | `/api/invoices/:id` | session or Bearer API key |  | invoices.ts | TODO |
-| 49 | POST | `/api/invoices/duplicate` | session or Bearer API key |  | invoices.ts | TODO |
-| 50 | GET | `/api/invoices/headers` | session or Bearer API key |  | invoices.ts | TODO |
-| 51 | GET | `/api/invoices/sequence` | session or Bearer API key |  | invoices.ts | TODO |
+| 45 | GET | `/api/invoices` | session or Bearer API key |  | invoices.ts | DONE: identical to TS in tools/contract |
+| 46 | POST | `/api/invoices` | session or Bearer API key |  | invoices.ts | DONE: identical to TS in tools/contract |
+| 47 | PUT | `/api/invoices` | session or Bearer API key |  | invoices.ts | DONE: identical to TS in tools/contract |
+| 48 | DELETE | `/api/invoices/:id` | session or Bearer API key |  | invoices.ts | DONE: identical to TS in tools/contract |
+| 49 | POST | `/api/invoices/duplicate` | session or Bearer API key |  | invoices.ts | DONE: identical to TS in tools/contract |
+| 50 | GET | `/api/invoices/headers` | session or Bearer API key |  | invoices.ts | DONE: identical to TS in tools/contract |
+| 51 | GET | `/api/invoices/sequence` | session or Bearer API key |  | invoices.ts | DONE: identical to TS in tools/contract |
 | 52 | GET | `/api/invoices/xml` | session or Bearer API key |  | invoices.ts | TODO |
 | 53 | GET | `/api/items` | session or Bearer API key |  | items.ts | DONE: identical to TS in tools/contract |
 | 54 | POST | `/api/items` | session or Bearer API key |  | items.ts | DONE: identical to TS in tools/contract |

@@ -110,6 +110,79 @@ call("POST", "/api/databases", {"fullPath": "../evil.db", "mode": "create"})
 call("POST", "/api/databases", {"fullPath": "missing.db", "mode": "open"})
 call("POST", "/api/databases", {"fullPath": "t.db", "mode": "open"})
 call("GET", "/api/auth/me")
+# ---- invoices -------------------------------------------------------------------
+def snaps(number, kind="invoice", **over):
+    inv = {
+        "invoiceType": kind, "businessId": 1, "clientId": 1, "currencyId": 1, "bankId": 1, "layoutId": 1, "styleProfilesId": 1,
+        "issuedAt": "2026-10-01", "dueDate": "2026-10-31", "invoiceNumber": number, "isArchived": False, "status": "unpaid",
+        "customerNotes": "Thanks", "thanksNotes": "Bye", "termsConditionNotes": "Net 30", "discountName": "Promo",
+        "discountType": "fixed", "discountAmountCents": "500", "discountPercent": 0, "shippingFeeCents": "250",
+        "surchargeName": None, "surchargeType": None, "surchargeAmountCents": "0", "surchargePercent": 0,
+        "taxName": "VAT", "taxRate": 10, "taxType": "exclusive", "language": "en", "signatureData": png, "signatureSize": 8,
+        "signatureType": "image/png", "signatureName": "sig.png",
+        "invoiceBusinessSnapshot": {"businessName": "Mavri Studio", "businessShortName": "MS", "businessLogo": png, "businessFileType": "image/png"},
+        "invoiceClientSnapshot": {"clientName": "Renamed", "clientEmail": "a@acme.test"},
+        "invoiceCurrencySnapshot": {"currencyCode": "USD", "currencySymbol": "$", "currencySubunit": 100},
+        "invoiceBankSnapshot": {"name": "Main", "bankName": "First", "accountNumber": "999", "qrCode": png},
+        "invoiceStyleProfileSnapshot": {"styleProfileName": "Plain"},
+        "invoiceLayoutSnapshot": {"layoutSchema": {"schemaVersion": 1, "sections": [{"type": "header", "z": 1, "a": 2}]}},
+        "invoiceCustomization": {"color": "#112233", "logoSize": "medium", "fontSize": "medium", "fontFamily": "Roboto",
+                                 "tableHeaderStyle": "light", "tableRowStyle": "classic", "pageFormat": "A4", "labelUpperCase": True,
+                                 "showQuantity": True, "showUnit": True, "showRowNo": False, "watermarkFileData": png,
+                                 "fieldSortOrders": {"no": 0, "item": 1, "unit": 2, "quantity": 3, "unitCost": 4, "total": 5},
+                                 "pdfTexts": {"title": "Invoice", "note": "z<&>"}},
+        "invoiceItems": [
+            {"itemId": 1, "quantity": "2", "taxRate": 10, "taxType": "exclusive",
+             "invoiceItemSnapshot": {"itemName": "Widget", "unitPriceCents": "1250", "unitName": "crate"}},
+            {"itemId": 2, "quantity": "1.5", "taxRate": 0, "customField": {"header": "Serial", "value": "A-1", "sortOrder": 7, "alignment": "left"},
+             "invoiceItemSnapshot": {"itemName": "NoUnit", "unitPriceCents": "700"}}],
+        "invoicePayments": [{"amountCents": "1000", "paidAt": "2026-10-02 10:00:00", "paymentMethod": "cash", "notes": "deposit"}],
+        "invoiceAttachments": [{"fileName": "a.png", "fileType": "image/png", "fileSize": 8, "data": png}],
+    }
+    inv.update(over)
+    return inv
+
+call("POST", "/api/invoices", snaps("0001"))
+call("POST", "/api/invoices", snaps("0002", status="paid", issuedAt="2026-10-03", invoicePayments=[], invoiceAttachments=[]))
+call("POST", "/api/invoices", snaps("Q-1", kind="quotation"))
+call("POST", "/api/invoices", snaps("0007", clientId=2, invoiceClientSnapshot={"clientName": "Beta LLC"}, invoiceItems=[]))
+call("POST", "/api/invoices", snaps("X", businessId=999))
+call("POST", "/api/invoices", {**snaps("Y"), "invoiceBusinessSnapshot": None})
+call("POST", "/api/invoices", snaps("0003", invoiceCustomization=None, discountType="bogus"))
+call("GET", "/api/invoices/sequence?businessId=1&clientId=1")
+call("GET", "/api/invoices/sequence?businessId=1&clientId=1&invoiceType=quotation")
+call("GET", "/api/invoices/sequence?businessId=9&clientId=9")
+call("GET", "/api/invoices/sequence")
+call("GET", "/api/invoices/headers?type=invoice")
+call("GET", "/api/invoices/headers?type=quotation")
+call("GET", "/api/invoices")
+for q in ["type=invoice", "type=quotation", "type=bogus"]:
+    call("GET", "/api/invoices?" + q)
+for f in ['[{"type":"Status","value":"paid"}]', '[{"type":"Client","value":"Beta LLC"}]', '[{"type":"Business","value":"Mavri Studio"}]',
+          '[{"type":"Date","value":"2026-10-02,2026-10-31"}]', '[{"type":"Active","value":""}]', '[{"type":"Archived","value":""}]',
+          '[{"type":"Status","value":"paid"},{"type":"Client","value":"Renamed"}]', "[{\"type\":\"Status\",\"value\":\"x' OR '1'='1\"}]"]:
+    call("GET", "/api/invoices?filter=" + urllib.parse.quote(f))
+call("PUT", "/api/invoices", {**snaps("0001", status="closed"), "id": 1, "invoiceBusinessSnapshot": {"id": 1, "businessName": "Mavri Studio 2", "businessShortName": "M2"},
+     "invoiceClientSnapshot": {"id": 1, "clientName": "Renamed"}, "invoiceCurrencySnapshot": {"id": 1, "currencyCode": "USD", "currencySymbol": "$", "currencySubunit": 100},
+     "invoiceCustomization": {"id": 1, "color": "#abcdef", "logoSize": "large", "fontSize": "medium", "fontFamily": "Roboto", "tableHeaderStyle": "light", "tableRowStyle": "classic",
+                              "pageFormat": "A4", "labelUpperCase": False, "showQuantity": True, "showUnit": False, "showRowNo": True,
+                              "fieldSortOrders": {"total": 0, "no": 1}, "pdfTexts": {"title": "Updated"}},
+     "invoicePayments": [{"id": 1, "amountCents": "1500", "paidAt": "2026-10-02 10:00:00", "paymentMethod": "card"}, {"amountCents": "250", "paidAt": "2026-10-05 09:00:00", "paymentMethod": "cash"}],
+     "invoiceAttachments": []})
+call("PUT", "/api/invoices", {**snaps("0002"), "id": 2, "bankId": None, "invoiceBankSnapshot": None, "invoiceNumber": "0010", "invoicePayments": [], "invoiceAttachments": []})
+call("PUT", "/api/invoices", {**snaps("0001"), "id": 999})
+call("PUT", "/api/invoices", {**snaps("0001"), "businessId": 999, "id": 1})
+call("GET", "/api/invoices/sequence?businessId=1&clientId=1")
+call("POST", "/api/invoices/duplicate", {"invoiceId": 1, "invoiceType": "invoice"})
+call("POST", "/api/invoices/duplicate", {"invoiceId": 3, "invoiceType": "invoice"})
+call("POST", "/api/invoices/duplicate", {"invoiceId": 3, "invoiceType": "quotation"})
+call("POST", "/api/invoices/duplicate", {"invoiceId": 999, "invoiceType": "invoice"})
+call("GET", "/api/invoices/sequence?businessId=1&clientId=1")
+call("GET", "/api/invoices/sequence?businessId=1&clientId=1&invoiceType=quotation")
+call("DELETE", "/api/invoices/2")
+call("DELETE", "/api/invoices/999")
+call("GET", "/api/invoices")
+call("GET", "/api/clients")
 # Auth edge cases that do not depend on session ids.
 call("POST", "/api/auth/login", {"email": "me@example.com", "password": "wrong-Password1"})
 call("POST", "/api/auth/login", {"email": "nobody@example.com", "password": "Correct-Horse-9"})

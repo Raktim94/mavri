@@ -51,7 +51,7 @@ var presetBorrowed = []string{
 	`sp."paidWatermarkFileData" AS "styleProfilePaidWatermarkFileData"`,
 }
 
-func (r Repo) presets(ctx context.Context, q queryer, where string, args ...any) ([]Row, error) {
+func (r Repo) presets(ctx context.Context, q Queryer, where string, args ...any) ([]Row, error) {
 	cols, err := tableColumns(ctx, r.DB, "presets")
 	if err != nil {
 		return nil, err

@@ -163,18 +163,23 @@ func tableColumns(ctx context.Context, db *sql.DB, table string) ([]column, erro
 	if v, ok := colCache.Load(table); ok {
 		return v.([]column), nil
 	}
-	rows, err := db.QueryContext(ctx, fmt.Sprintf(`PRAGMA table_info("%s")`, table))
+	rows, err := db.QueryContext(ctx, fmt.Sprintf(`PRAGMA table_xinfo("%s")`, table))
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	var cols []column
 	for rows.Next() {
-		var cid, notnull, pk int
+		var cid, notnull, pk, hidden int
 		var name, typ string
 		var dflt sql.NullString
-		if err := rows.Scan(&cid, &name, &typ, &notnull, &dflt, &pk); err != nil {
+		// table_xinfo, unlike table_info, also lists generated columns, which
+		// "SELECT *" returns; hidden == 1 marks columns it does not.
+		if err := rows.Scan(&cid, &name, &typ, &notnull, &dflt, &pk, &hidden); err != nil {
 			return nil, err
+		}
+		if hidden == 1 {
+			continue
 		}
 		u := strings.ToUpper(typ)
 		cols = append(cols, column{name: name, text: strings.Contains(u, "DATE") || strings.Contains(u, "TIME"),
@@ -363,12 +368,14 @@ func (r Repo) List(ctx context.Context, s *Spec, filters []Filter) ([]Row, error
 	return out, err
 }
 
-type queryer interface {
+// Queryer is what both *sql.DB and *sql.Tx offer.
+type Queryer interface {
 	QueryContext(context.Context, string, ...any) (*sql.Rows, error)
+	QueryRowContext(context.Context, string, ...any) *sql.Row
 	ExecContext(context.Context, string, ...any) (sql.Result, error)
 }
 
-func (s *Spec) one(ctx context.Context, q queryer, cols []column, id int64) (Row, error) {
+func (s *Spec) one(ctx context.Context, q Queryer, cols []column, id int64) (Row, error) {
 	rows, err := q.QueryContext(ctx, s.selectSQL(cols)+` WHERE t."id" = ? GROUP BY `+s.groupBy(), id)
 	if err != nil {
 		return nil, err
@@ -405,6 +412,8 @@ func (s *Spec) param(field string, v any, batch bool) (any, error) {
 			return 1, nil
 		}
 		return 0, nil
+	case int64, int, float64:
+		return x, nil
 	case json.Number:
 		if i, err := x.Int64(); err == nil {
 			return i, nil
@@ -443,7 +452,7 @@ func decodeBase64(v string) []byte {
 	return b
 }
 
-func (s *Spec) write(ctx context.Context, q queryer, cols []column, row Row, update, batch bool) (int64, error) {
+func (s *Spec) write(ctx context.Context, q Queryer, cols []column, row Row, update, batch bool) (int64, error) {
 	for k, d := range s.Defaults {
 		if row[k] == nil {
 			row[k] = d
@@ -468,12 +477,7 @@ func (s *Spec) write(ctx context.Context, q queryer, cols []column, row Row, upd
 	}
 	var id int64
 	if update {
-		id = -1
-		if n, ok := row["id"].(json.Number); ok {
-			if v, err := n.Int64(); err == nil {
-				id = v
-			}
-		}
+		id = RowID(row)
 		set := make([]string, len(names))
 		for i, f := range names {
 			set[i] = fmt.Sprintf(`"%s" = ?`, f)
@@ -507,7 +511,7 @@ func (s *Spec) write(ctx context.Context, q queryer, cols []column, row Row, upd
 	return id, nil
 }
 
-func (s *Spec) save(ctx context.Context, q queryer, cols []column, row Row, update, batch bool) (Row, error) {
+func (s *Spec) save(ctx context.Context, q Queryer, cols []column, row Row, update, batch bool) (Row, error) {
 	id, err := s.write(ctx, q, cols, row, update, batch)
 	if err != nil {
 		return nil, err
@@ -587,11 +591,15 @@ func (r Repo) Select(ctx context.Context, table, tail string, args ...any) ([]Ro
 }
 
 func (s *Spec) selectRows(ctx context.Context, db *sql.DB, table, tail string, args ...any) ([]Row, error) {
+	return s.selectRowsQ(ctx, db, db, table, tail, args...)
+}
+
+func (s *Spec) selectRowsQ(ctx context.Context, q Queryer, db *sql.DB, table, tail string, args ...any) ([]Row, error) {
 	cols, err := tableColumns(ctx, db, table)
 	if err != nil {
 		return nil, err
 	}
-	rows, err := db.QueryContext(ctx, fmt.Sprintf(`SELECT %s FROM %s t %s`, plainColumns(cols, "t"), table, tail), args...)
+	rows, err := q.QueryContext(ctx, fmt.Sprintf(`SELECT %s FROM %s t %s`, plainColumns(cols, "t"), table, tail), args...)
 	if err != nil {
 		return nil, err
 	}
@@ -640,4 +648,129 @@ func (r Repo) UpdateColumns(ctx context.Context, table string, values Row, where
 	set = append(set, `"updatedAt" = datetime('now')`)
 	_, err = r.DB.ExecContext(ctx, fmt.Sprintf(`UPDATE %s SET %s WHERE %s`, table, strings.Join(set, ", "), where), append(params, args...)...)
 	return err == nil, err
+}
+
+// SelectWith reads the rows of s's table matching tail (a WHERE/ORDER BY
+// clause), through q (a transaction or the pool), converted per s.
+func (r Repo) SelectWith(ctx context.Context, q Queryer, s *Spec, tail string, args ...any) ([]Row, error) {
+	return s.selectRowsQ(ctx, q, r.DB, s.Table, tail, args...)
+}
+
+// Write inserts or updates one row of s's table through q and returns its id.
+// batch selects the batch rule for JSON columns (a string is kept as is).
+func (r Repo) Write(ctx context.Context, q Queryer, s *Spec, row Row, update, batch bool) (int64, error) {
+	cols, err := s.columns(ctx, r.DB)
+	if err != nil {
+		return 0, err
+	}
+	return s.write(ctx, q, cols, row, update, batch)
+}
+
+// PlainColumns is the select list of every column of table under alias, dates
+// as stored text.
+func (r Repo) PlainColumns(ctx context.Context, table, alias string) (string, error) {
+	cols, err := tableColumns(ctx, r.DB, table)
+	if err != nil {
+		return "", err
+	}
+	return plainColumns(cols, alias), nil
+}
+
+// Convert reads rows from a query the caller wrote, converting values per s.
+func (s *Spec) Convert(rows *sql.Rows) ([]Row, error) { return s.scan(rows) }
+
+// Tree describes the shape of a nested request body: which keys of an object
+// hold raw JSON text, and which keys hold nested objects or lists of them.
+type Tree struct {
+	JSON     []string
+	Children map[string]Tree // nested object
+	Lists    map[string]Tree // array of nested objects
+}
+
+// DecodeTree reads a request body, keeping the JSON columns named by the tree
+// as raw text at every level.
+func DecodeTree(body []byte, t Tree) (Row, error) {
+	var m map[string]json.RawMessage
+	if err := json.Unmarshal(body, &m); err != nil || m == nil {
+		return nil, errors.New("not an object")
+	}
+	return decodeNode(m, t)
+}
+
+func decodeNode(m map[string]json.RawMessage, t Tree) (Row, error) {
+	row := make(Row, len(m))
+	for k, raw := range m {
+		if child, ok := t.Children[k]; ok {
+			var sub map[string]json.RawMessage
+			if json.Unmarshal(raw, &sub) == nil && sub != nil {
+				r, err := decodeNode(sub, child)
+				if err != nil {
+					return nil, err
+				}
+				row[k] = r
+				continue
+			}
+		}
+		if child, ok := t.Lists[k]; ok {
+			var items []map[string]json.RawMessage
+			if json.Unmarshal(raw, &items) == nil && items != nil {
+				list := make([]Row, 0, len(items))
+				for _, it := range items {
+					r, err := decodeNode(it, child)
+					if err != nil {
+						return nil, err
+					}
+					list = append(list, r)
+				}
+				row[k] = list
+				continue
+			}
+		}
+		isJSON := false
+		for _, j := range t.JSON {
+			if j == k {
+				isJSON = true
+			}
+		}
+		if isJSON {
+			row[k] = RawJSON(raw)
+			continue
+		}
+		dec := json.NewDecoder(bytes.NewReader(raw))
+		dec.UseNumber()
+		var v any
+		if err := dec.Decode(&v); err != nil {
+			return nil, err
+		}
+		row[k] = v
+	}
+	return row, nil
+}
+
+// RowID reads a row's "id" whatever numeric type it carries; -1 when absent.
+func RowID(row Row) int64 {
+	switch n := row["id"].(type) {
+	case json.Number:
+		if v, err := n.Int64(); err == nil {
+			return v
+		}
+	case int64:
+		return n
+	case int:
+		return int64(n)
+	case float64:
+		return int64(n)
+	}
+	return -1
+}
+
+// Warm loads the column lists of tables ahead of a transaction. Inside one the
+// single database connection is taken, so nothing may query the pool then.
+func (r Repo) Warm(ctx context.Context, tables ...string) error {
+	for _, t := range tables {
+		if _, err := tableColumns(ctx, r.DB, t); err != nil {
+			return err
+		}
+	}
+	return nil
 }
