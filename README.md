@@ -107,6 +107,7 @@ After launch, add a business, currency, client, item, bank, and layout; then cre
 - **Invoices and quotes:** line items, discounts, surcharges, shipping, tax, partial payments, and status tracking.
 - **Documents:** live PDF preview, A4 or Letter output, brand styles, layout presets, signatures, attachments, and payment QR codes.
 - **International billing:** per-document currencies and languages, plus UBL 2.1, Peppol BIS Billing 3.0, and XRechnung export.
+- **Dashboard:** a *Needs attention* queue of overdue invoices, quick *Create invoice* and *Create quote* actions, collection rate, and sales trend.
 - **Business records:** clients, items, categories, banks, reports, search, filters, and archive.
 - **Portability:** database backup and restore, JSON export/import, and XLSX import/export for most entities.
 - **Integrations:** versioned REST API, e-commerce webhooks, and an MCP server for supported AI clients.
@@ -125,6 +126,10 @@ curl -X POST http://localhost:3001/api/v1/orders \
 ```
 
 Mavri also accepts HMAC-signed Shopify, WooCommerce, and generic webhooks. Run `npm run mcp` for the bundled MCP server. See [API.md](docs/reference/API.md) and the [tutorial](docs/TUTORIAL.md) for setup and examples.
+
+## Go backend rewrite (in progress)
+
+A Go replacement for the TypeScript backend is being built in [`rewrite/`](rewrite/README.md). The TypeScript backend stays the active application until every row of the [parity matrix](docs/rewrite/PARITY_MATRIX.md) is proven. So far the Go side has exact invoice arithmetic, India GST rules (GSTIN, Rule 46 checks, effective-dated tax calculation), UPI payment links, billing rules (terms, late fees, credit notes, recurring schedules), roles and a tamper-evident audit log. It has no database layer or REST routes yet, and it is not used by the app.
 
 ## Documentation and development
 

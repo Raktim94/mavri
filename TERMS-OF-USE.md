@@ -16,7 +16,7 @@ The Application is a free, open-source desktop software tool that allows users t
 
 ## 2. License
 
-The Application’s source code is released under the **MIT**, which is included in this repository.
+The Application’s source code is released under the **GNU Affero General Public License v3.0**, which is included in this repository (see `LICENSE`).
 
 These Terms govern _use of the compiled application_, not the underlying source code license.
 

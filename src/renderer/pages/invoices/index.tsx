@@ -1,6 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import { useCallback, useMemo, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import { CRUDPage } from '../../shared/components/layout/crudPage/CRUDPage';
 import { FilterType } from '../../shared/enums/filterType';
 import { InvoiceFormMode } from '../../shared/enums/invoiceFormMode';
@@ -32,6 +33,8 @@ interface Props {
 }
 export const InvoicesPage: FC<Props> = ({ type }) => {
   const { t } = useTranslation();
+  const location = useLocation();
+  const openAddOnMount = Boolean((location.state as { create?: boolean } | null)?.create);
   const clientsOptions = useAppSelector(selectClientsSnapshotsOptions);
   const businessesOptions = useAppSelector(selectBusinessesSnapshotsOptions);
   const settings = useAppSelector(selectSettings);
@@ -263,6 +266,7 @@ export const InvoicesPage: FC<Props> = ({ type }) => {
         noItemText={type === InvoiceType.quotation ? t('invoices.noItemQuote') : t('invoices.noItemInvoice')}
         leftTitle={type === InvoiceType.quotation ? t('menuItems.quotes') : t('menuItems.invoices')}
         exportExcelHandler={exportInvoices}
+        openAddOnMount={openAddOnMount}
         onAddClick={defaultOnAdd => {
           if (!isPresetsEnabled) {
             defaultOnAdd();

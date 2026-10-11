@@ -19,7 +19,9 @@ export const AMOUNT_FORMAT_ITEMS = {
   [AmountFormat.ltLT]: { label: '1 234,10', value: AmountFormat.ltLT },
   [AmountFormat.ltLTnodecimal]: { label: '1 234', value: AmountFormat.ltLTnodecimal },
   [AmountFormat.deDE]: { label: '1.234,10', value: AmountFormat.deDE },
-  [AmountFormat.deDEnodecimal]: { label: '1.234', value: AmountFormat.deDEnodecimal }
+  [AmountFormat.deDEnodecimal]: { label: '1.234', value: AmountFormat.deDEnodecimal },
+  [AmountFormat.enIN]: { label: '12,34,567.10', value: AmountFormat.enIN },
+  [AmountFormat.enINnodecimal]: { label: '12,34,567', value: AmountFormat.enINnodecimal }
 } as const;
 
 export const AMOUNT_FORMAT_ITEMS_ARRAY = Object.values(AMOUNT_FORMAT_ITEMS);

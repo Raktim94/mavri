@@ -1,0 +1,22 @@
+{
+ "passwords": [
+  {
+   "password": "CorrectHorse9Battery",
+   "stored": "scrypt:16384:8:1:0123456789abcdef0123456789abcdef:5515e30d2c849ba851e5bbb0c776a31b0b913478d046e331417e71295965859f879c92d12c4c279ca6ba89d5b0bfc50a9f69e5bfbd6e5bbeba8856eefe8516d1"
+  },
+  {
+   "password": "Ünïcode-Pass-9x",
+   "stored": "scrypt:16384:8:1:fedcba9876543210fedcba9876543210:01790d80ee4616ac9d10d3afda6c8e78ea7366bc4aea3afce4bf1642e1c916e830210147d8d5d51609a0dc65f8af50e719778affe2a0f4407e208610a7bcf560"
+  }
+ ],
+ "apiKeys": [
+  {
+   "raw": "ndr_S6ClBCv3mb8ck2-NATJCAbzfOCbizyQSSmsVC_JETck",
+   "hash": "35426b738304c8e6ab3c84d76e0a73cde4fde43054cf93226382338270a7ace4"
+  },
+  {
+   "raw": "ndr_fixedExampleKeyValue",
+   "hash": "984286ef1aaa23e37fab45eafe2fca1f0cac81d4b7d82c6defb8b167a2d05c79"
+  }
+ ]
+}

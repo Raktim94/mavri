@@ -1,0 +1,65 @@
+[
+ {
+  "password": "",
+  "salt": "",
+  "N": 16,
+  "r": 1,
+  "p": 1,
+  "keyLen": 64,
+  "hex": "77d6576238657b203b19ca42c18a0497f16b4844e3074ae8dfdffa3fede21442fcd0069ded0948f8326a753a0fc81f17e8d3e0fb2e0d3628cf35e20c38d18906"
+ },
+ {
+  "password": "password",
+  "salt": "NaCl",
+  "N": 1024,
+  "r": 8,
+  "p": 16,
+  "keyLen": 64,
+  "hex": "fdbabe1c9d3472007856e7190d01e9fe7c6ad7cbc8237830e77376634b3731622eaf30d92e22a3886ff109279d9830dac727afb94a83ee6d8360cbdfa2cc0640"
+ },
+ {
+  "password": "pleaseletmein",
+  "salt": "SodiumChloride",
+  "N": 16384,
+  "r": 8,
+  "p": 1,
+  "keyLen": 64,
+  "hex": "7023bdcb3afd7348461c06cd81fd38ebfda8fbba904f8e3ea9b543f6545da1f2d5432955613f0fcf62d49705242a9af9e61e85dc0d651e40dfcf017b45575887"
+ },
+ {
+  "password": "Pässwörd-日本語-🔑",
+  "salt": "00112233445566778899aabbccddeeff",
+  "N": 16384,
+  "r": 8,
+  "p": 1,
+  "keyLen": 64,
+  "hex": "41d38b34b837d418b78ac2dc5f0c60e895198f6b3bb9cf4dfa0f3f0edaeefa49054a17cbaf19a40ab5b8007377d0aca0cbda2a70516b29e08b5638978a69a6a5"
+ },
+ {
+  "password": "x",
+  "salt": "nodedr-invoice-api-key",
+  "N": 16384,
+  "r": 8,
+  "p": 1,
+  "keyLen": 32,
+  "hex": "db3a6865e340217eaca67c3208cd7acf919e12ef090413111aa364009395e840"
+ },
+ {
+  "password": "a",
+  "salt": "b",
+  "N": 2,
+  "r": 1,
+  "p": 1,
+  "keyLen": 16,
+  "hex": "da11baad0b1ed2e7dd90874c4d4d1a0d"
+ },
+ {
+  "password": "abc",
+  "salt": "def",
+  "N": 4,
+  "r": 2,
+  "p": 3,
+  "keyLen": 100,
+  "hex": "0877f6df40198dabca17a3468643bb79948c35573e03697de98adf0b405483572c7a0206b5bdf72fd7e8f95e371eec951e3ec6904788a23025f94201af0476040371a56fe32eac4029bba7f0a015acee229ee80e0a3447edbb7a97b57b80ef40bb016854"
+ }
+]

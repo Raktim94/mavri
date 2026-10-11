@@ -1,0 +1,6 @@
+{
+ "secret": "whsec_testsecret",
+ "body": "{\"id\":1,\"total\":\"10.00\",\"note\":\"ü\"}",
+ "base64": "pKONeHk6w33nQU+EAY2FJ71CouvWL+2mB3CBwzxTLhE=",
+ "hex": "a4a38d78793ac37de7414f84018d8527bd42a2ebd62feda6077081c33c532e11"
+}

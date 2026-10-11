@@ -28,6 +28,10 @@ You land on an empty **Invoices** screen. That's normal:
 
 ![Empty app after first sign in](screenshots/first-run-empty.png)
 
+Next time, sign in with the same email and password. After ten failed attempts in 15 minutes, sign-in pauses for a while.
+
+![Sign in](screenshots/login.png)
+
 ## 3. Add your business, client and items
 
 Mavri ships with currencies, units and invoice layouts already installed. You only need three things before your first invoice. Open each from the menu (**Data → …**), press **+ Add**, fill the form and **Save**.
@@ -39,6 +43,10 @@ Mavri ships with currencies, units and invoice layouts already installed. You on
 | **Item** — a product or service with a price | Reuse it on any invoice | ![Item form](screenshots/form-item.png) |
 
 Optional but nice: a **Bank** (payment details printed on the invoice, with an optional UPI/QR code) and a **Style profile** (colour, font and table look).
+
+![Bank form](screenshots/form-bank.png)
+
+Short names are limited to two characters (they become the avatar initials). Once saved, each list shows how many invoices and quotes use a record.
 
 ![Businesses](screenshots/businesses.png)
 
@@ -69,15 +77,26 @@ Open an invoice, add a payment (amount, date, method) and the status moves to **
 
 ![Invoices list](screenshots/invoices.png)
 
-Prefer quotes first? **Quotes** works the same way, and a quote can be turned into an invoice.
+Prefer quotes first? **Quotes** works the same way, and a quote can be turned into an invoice. You can also start a quote from the dashboard with **Create quote**.
 
 ![Quotes](screenshots/quotes.png)
 
+![New quote](screenshots/quote-new.png)
+
 ## 7. The dashboard
 
-**Reports** is your dashboard: totals, collection rate, sales trend, top clients and items, and your latest invoices. Change the date range, currency, or whether it counts by issue date or paid date from the top bar. Light and dark mode are both supported.
+**Reports** is your dashboard. It answers one question: what needs my attention today?
+
+- **Create invoice** and **Create quote** sit at the top right and open a blank form.
+- Change the **date basis** (issued or paid date), **currency** and **date range** from the row below the title.
+- Four cards show **Invoiced this period**, **Collection rate**, **Collected** and **Outstanding**.
+- **Sales trending** charts cumulative revenue. **Collection rate** compares paid with outstanding.
+- **Needs attention** lists overdue invoices, most overdue first, with the total balance owed. It ignores the date range and stays in the selected currency. Invoices without a due date never appear. **View all** jumps to the invoice list.
+- **Recent invoices** shows your latest documents. **Show top clients and items** expands the rankings.
 
 ![Dashboard](screenshots/dashboard.png)
+
+Light and dark mode are both supported (**Settings → Dark Mode**).
 
 ![Dashboard in dark mode](screenshots/dashboard-dark.png)
 
@@ -117,6 +136,23 @@ Prefer quotes first? **Quotes** works the same way, and a quote can be turned in
 </table>
 
 ![Settings](screenshots/settings.png)
+
+### Dark mode
+
+Every screen follows the theme you choose in **Settings**.
+
+<table>
+<tr>
+<td><img src="screenshots/invoices-dark.png" alt="Invoices in dark mode"></td>
+<td><img src="screenshots/quotes-dark.png" alt="Quotes in dark mode"></td>
+</tr>
+<tr>
+<td><img src="screenshots/clients-dark.png" alt="Clients in dark mode"></td>
+<td><img src="screenshots/settings-dark.png" alt="Settings in dark mode"></td>
+</tr>
+</table>
+
+![Invoice PDF preview in dark mode](screenshots/invoice-preview-dark.png)
 
 ## 9. Connect other systems
 

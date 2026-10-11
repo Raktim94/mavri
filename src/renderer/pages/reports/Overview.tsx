@@ -1,13 +1,18 @@
-import { Box, Grid } from '@mui/material';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { Box, Button, Collapse, Grid } from '@mui/material';
 import { parseISO } from 'date-fns';
-import { memo, useMemo, type FC } from 'react';
+import { memo, useMemo, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { NoItem } from '../../shared/components/lists/noItem/NoItem';
 import { ReportDateType } from '../../shared/enums/reportDateType';
 import type { ClientRevenue } from '../../shared/types/clientRevenue';
 import type { Invoice, InvoicesByCurrency } from '../../shared/types/invoice';
 import type { ItemSales } from '../../shared/types/itemSales';
-import { getInvoiceItemTotal, getInvoiceTotal } from '../../shared/utils/invoiceFunctions';
+import { getInvoiceItemTotal, getInvoiceTotal, getPaidAmount } from '../../shared/utils/invoiceFunctions';
+import { AttentionQueue } from './AttentionQueue';
+import { buildAttentionQueue } from './attention';
 import { CollectionCard } from './CollectionCard';
 import { ClientsRevenueChart } from './ClientsRevenueChart';
 import { FinancialCards } from './FinancialCards';
@@ -23,6 +28,8 @@ interface Props {
 }
 const OverviewComponent: FC<Props> = ({ reportDateType, groupedMeta, dates, currencyCode }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [showRankings, setShowRankings] = useState(false);
   const { groups, invoices } = groupedMeta;
 
   const toCumulativeTrend = (data: { date: string; total: number }[]) => {
@@ -183,6 +190,40 @@ const OverviewComponent: FC<Props> = ({ reportDateType, groupedMeta, dates, curr
     return { trendChartData, clientRevenueData, itemSalesData, recentInvoices };
   }, [groups, reportDateType, currencyCode, dates, invoices]);
 
+  // Overdue is a current state, not a period: it ignores the date filters but
+  // respects the selected currency so balances are never mixed.
+  const attention = useMemo(() => {
+    const data = groups[currencyCode];
+    if (!data) return null;
+    return buildAttentionQueue(
+      invoices
+        .filter(inv => inv.currencyId === data.currencyId && inv.invoiceCurrencySnapshot)
+        .map(inv => ({
+          id: inv.id,
+          invoiceNumber: inv.invoiceNumber,
+          clientName: inv.invoiceClientSnapshot?.clientName ?? '',
+          status: inv.status,
+          dueDate: inv.dueDate,
+          totalCents: getInvoiceTotal({
+            taxRate: inv.taxRate,
+            taxType: inv.taxType,
+            invoiceItems: inv.invoiceItems,
+            discountType: inv.discountType,
+            discountAmount: Number(inv.discountAmountCents),
+            discountPercent: inv.discountPercent,
+            shippingFee: Number(inv.shippingFeeCents),
+            surchargeType: inv.surchargeType,
+            surchargeAmount: Number(inv.surchargeAmountCents),
+            surchargePercent: inv.surchargePercent,
+            includeTax: true
+          }),
+          paidCents: getPaidAmount(inv.invoicePayments ?? []),
+          currencySubunit: inv.invoiceCurrencySnapshot!.currencySubunit
+        })),
+      new Date()
+    );
+  }, [groups, currencyCode, invoices]);
+
   const meta = groups[currencyCode];
 
   return (
@@ -197,19 +238,45 @@ const OverviewComponent: FC<Props> = ({ reportDateType, groupedMeta, dates, curr
             <Grid size={{ xs: 12, lg: 4 }}>
               <CollectionCard data={meta} />
             </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <ClientsRevenueChart data={reportData.clientRevenueData} />
-            </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <ItemsSalesChart data={reportData.itemSalesData} />
-            </Grid>
-            <Grid size={12}>
+            {attention && (
+              <Grid size={{ xs: 12, lg: 5 }}>
+                <AttentionQueue queue={attention} onOpenInvoices={() => navigate('/invoices')} />
+              </Grid>
+            )}
+            <Grid size={{ xs: 12, lg: attention ? 7 : 12 }}>
               <RecentInvoices rows={reportData.recentInvoices} />
             </Grid>
           </Grid>
+          <Box>
+            <Button
+              onClick={() => setShowRankings(v => !v)}
+              aria-expanded={showRankings}
+              aria-controls="dashboard-rankings"
+              startIcon={showRankings ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            >
+              {showRankings ? t('reports.hideRankings') : t('reports.showRankings')}
+            </Button>
+            <Collapse in={showRankings} unmountOnExit id="dashboard-rankings">
+              <Grid container spacing={3} sx={{ mt: 0.5 }}>
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <ClientsRevenueChart data={reportData.clientRevenueData} />
+                </Grid>
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <ItemsSalesChart data={reportData.itemSalesData} />
+                </Grid>
+              </Grid>
+            </Collapse>
+          </Box>
         </>
       ) : (
-        <NoItem text={t('reports.noItems')} />
+        <NoItem
+          text={t('reports.noItems')}
+          node={
+            <Button variant="contained" onClick={() => navigate('/invoices', { state: { create: true } })}>
+              {t('reports.createInvoice')}
+            </Button>
+          }
+        />
       )}
     </Box>
   );

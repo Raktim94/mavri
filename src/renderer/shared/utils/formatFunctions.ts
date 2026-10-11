@@ -48,7 +48,8 @@ export const getFormattingMeta = (amountFormat: AmountFormat = AmountFormat.enUS
   const separatorMap: Record<string, { thousand: string; decimal: string }> = {
     'en-US': { thousand: ',', decimal: '.' },
     'lt-LT': { thousand: ' ', decimal: ',' },
-    'de-DE': { thousand: '.', decimal: ',' }
+    'de-DE': { thousand: '.', decimal: ',' },
+    'en-IN': { thousand: ',', decimal: '.' }
   };
   const baseLocale = amountFormat.replace('-no-decimal', '');
   const { thousand, decimal } = separatorMap[baseLocale] || { thousand: ',', decimal: '.' };
