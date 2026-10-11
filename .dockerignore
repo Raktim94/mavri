@@ -7,7 +7,6 @@ release
 *.md
 !docs/DOCKER.md
 .vscode
-tutorial
 *.log
 .env
 .env.*

@@ -131,6 +131,17 @@ Mavri also accepts HMAC-signed Shopify, WooCommerce, and generic webhooks. Run `
 
 A Go replacement for the TypeScript backend is being built in [`rewrite/`](rewrite/README.md). The TypeScript backend stays the active application until every row of the [parity matrix](docs/rewrite/PARITY_MATRIX.md) is proven. So far the Go side has exact invoice arithmetic, India GST rules (GSTIN, Rule 46 checks, effective-dated tax calculation), UPI payment links, billing rules (terms, late fees, credit notes, recurring schedules), roles and a tamper-evident audit log. It has no database layer or REST routes yet, and it is not used by the app.
 
+## Project layout
+
+| Path | What is in it |
+| --- | --- |
+| `src/renderer` | React and MUI user interface |
+| `src/backend` | Express web server, Electron main process, MCP server, shared services and migrations |
+| `rewrite` | Go backend rewrite (work in progress) |
+| `docs` | Tutorial, API and layout references, screenshots, rewrite notes |
+| `casaos`, `Dockerfile`, `docker-compose*.yml` | Container and CasaOS deployment |
+| `scripts` | Container start-up and packaging helpers |
+
 ## Documentation and development
 
 [Tutorial](docs/TUTORIAL.md) · [API](docs/reference/API.md) · [Layout JSON reference](docs/reference/LAYOUT.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [Privacy](PRIVACY-POLICY.md)
