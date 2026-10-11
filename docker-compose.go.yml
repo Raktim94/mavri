@@ -15,6 +15,9 @@ services:
       - '${HOST_PORT:-3001}:3001'
     environment:
       - COOKIE_SECURE=${COOKIE_SECURE:-false}
+      # 0: clients connect directly. Set 1 when a reverse proxy (nginx, Caddy,
+      # Cloudflare Tunnel) sits in front, so rate limits see the real client.
+      - TRUST_PROXY=${TRUST_PROXY:-0}
       # Pin the key that protects e-commerce webhook secrets (32+ characters,
       # or 64 hex characters). Without it one is generated in the data volume.
       - ENCRYPTION_KEY=${ENCRYPTION_KEY:-}

@@ -127,9 +127,15 @@ curl -X POST http://localhost:3001/api/v1/orders \
 
 Mavri also accepts HMAC-signed Shopify, WooCommerce, and generic webhooks. Run `npm run mcp` for the bundled MCP server. See [API.md](docs/reference/API.md) and the [tutorial](docs/TUTORIAL.md) for setup and examples.
 
-## Go backend rewrite (in progress)
+## Go backend
 
-A Go replacement for the TypeScript backend is being built in [`rewrite/`](rewrite/README.md). The TypeScript backend stays the active application until every row of the [parity matrix](docs/rewrite/PARITY_MATRIX.md) is proven. So far the Go side has exact invoice arithmetic, India GST rules (GSTIN, Rule 46 checks, effective-dated tax calculation), UPI payment links, billing rules (terms, late fees, credit notes, recurring schedules), roles and a tamper-evident audit log. It has no database layer or REST routes yet, and it is not used by the app.
+A Go replacement for the Express backend lives in [`rewrite/`](rewrite/README.md). It implements every route and MCP tool of the web backend on SQLite, and the web app runs on it unchanged. It was checked against the real TypeScript backend by driving both with the same requests (257 REST responses and 60 MCP replies, no differences) and by running the app in Chrome against it. To run it as one small container (about 66 MB) serving the app and the API:
+
+```bash
+docker compose -f docker-compose.go.yml up -d --build
+```
+
+It opens the same `/data/invoice.db` the Node version used. Not yet moved: the Electron desktop app (still on the TypeScript backend) and PostgreSQL (the Go server uses SQLite only). The Node setup above stays the supported default until you choose to switch; see [`rewrite/README.md`](rewrite/README.md) for what differs and why.
 
 ## Project layout
 
@@ -137,7 +143,7 @@ A Go replacement for the TypeScript backend is being built in [`rewrite/`](rewri
 | --- | --- |
 | `src/renderer` | React and MUI user interface |
 | `src/backend` | Express web server, Electron main process, MCP server, shared services and migrations |
-| `rewrite` | Go backend rewrite (work in progress) |
+| `rewrite` | Go backend: REST API, MCP server, tests and the comparison scripts against the TypeScript one |
 | `docs` | Tutorial, API and layout references, screenshots, rewrite notes |
 | `casaos`, `Dockerfile`, `docker-compose*.yml` | Container and CasaOS deployment |
 | `scripts` | Container start-up and packaging helpers |

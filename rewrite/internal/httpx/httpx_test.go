@@ -144,3 +144,15 @@ func TestMaxBody(t *testing.T) {
 		}
 	}
 }
+
+func TestForwardedForIsIgnoredWithoutAProxy(t *testing.T) {
+	r := httptest.NewRequest("GET", "/", nil)
+	r.RemoteAddr = "203.0.113.9:5555"
+	r.Header.Set("X-Forwarded-For", "1.2.3.4, 5.6.7.8")
+	if got := ClientIP(r, 0); got != "203.0.113.9" {
+		t.Errorf("a spoofed header must not change the client with no proxy trusted: %q", got)
+	}
+	if got := ClientIP(r, 1); got != "5.6.7.8" {
+		t.Errorf("one trusted proxy: %q", got)
+	}
+}

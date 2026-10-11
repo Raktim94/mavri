@@ -25,7 +25,7 @@ type Config struct {
 	DefaultDB      string // DEFAULT_DATABASE file name inside DataDir; "invoice.db" when NODE_ENV=docker, else none
 	FrontendOrigin string // FRONTEND_ORIGIN, else FE_SERVER_URL, else http://127.0.0.1:5173
 	CookieSecure   bool   // COOKIE_SECURE == "true"
-	TrustedProxies int    // proxy hops to trust for client IPs (TS: trust proxy = 1)
+	TrustedProxies int    // TRUST_PROXY: proxy hops whose X-Forwarded-For to trust for client IPs (default 1, as the TS server did)
 	Version        string
 }
 
@@ -71,7 +71,18 @@ func loadWith(lookup func(string) (string, bool)) Config {
 		DefaultDB:      defaultDB,
 		FrontendOrigin: first(getenv("FRONTEND_ORIGIN"), feServer),
 		CookieSecure:   getenv("COOKIE_SECURE") == "true",
-		TrustedProxies: 1,
+		TrustedProxies: trustedProxies(getenv("TRUST_PROXY")),
 		Version:        Version,
 	}
+}
+
+// trustedProxies reads TRUST_PROXY: how many reverse proxies sit in front of
+// the server. 1 (the default) suits nginx or Caddy; 0 means clients connect
+// directly, so X-Forwarded-For is ignored and cannot be used to dodge the
+// per-address rate limits.
+func trustedProxies(v string) int {
+	if n, err := strconv.Atoi(v); err == nil && n >= 0 && n <= 10 {
+		return n
+	}
+	return 1
 }

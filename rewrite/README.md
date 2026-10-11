@@ -62,6 +62,11 @@ One container with the app and the API, about 66 MB:
 docker compose -f docker-compose.go.yml up -d --build      # from the repository root
 ```
 
+Behind a reverse proxy (nginx, Caddy, a Cloudflare tunnel) set `TRUST_PROXY=1` so
+rate limits see the real client address; with clients connecting directly leave
+it at `0`, or anyone could dodge the limits with a made-up `X-Forwarded-For`.
+(The Docker setup defaults to `0`; the plain binary to `1`, like the Node server.)
+
 The MCP server (stdio, for AI assistants) needs an API key from Settings and an
 existing database:
 

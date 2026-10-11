@@ -29,6 +29,7 @@ USER mavri
 ENV NODE_ENV=docker \
     DB_DIRECTORY=/data \
     PORT=3001 \
+    TRUST_PROXY=0 \
     DEV_SERVER_URL=0.0.0.0 \
     FRONTEND_DIR=/app/dist-fe
 VOLUME ["/data"]

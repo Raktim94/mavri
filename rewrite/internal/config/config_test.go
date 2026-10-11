@@ -1,6 +1,10 @@
 package config
 
-import "testing"
+import (
+	"encoding/json"
+	"os"
+	"testing"
+)
 
 func env(m map[string]string) func(string) string { return func(k string) string { return m[k] } }
 
@@ -69,5 +73,28 @@ func TestDefaultDatabaseSetEmptyDisablesDocker(t *testing.T) {
 	}
 	if got := loadWith(look).DefaultDB; got != "" {
 		t.Errorf("explicitly empty DEFAULT_DATABASE should disable it, got %q", got)
+	}
+}
+
+func TestTrustProxy(t *testing.T) {
+	for in, want := range map[string]int{"": 1, "0": 0, "1": 1, "2": 2, "-1": 1, "99": 1, "abc": 1} {
+		if got := LoadFrom(env(map[string]string{"TRUST_PROXY": in})).TrustedProxies; got != want {
+			t.Errorf("TRUST_PROXY=%q -> %d, want %d", in, got, want)
+		}
+	}
+}
+
+// The version the API reports must be the one in package.json.
+func TestVersionMatchesPackageJSON(t *testing.T) {
+	data, err := os.ReadFile("../../../package.json")
+	if err != nil {
+		t.Skip("package.json not next to the Go module (a Docker build context)")
+	}
+	var pkg struct{ Version string }
+	if err := json.Unmarshal(data, &pkg); err != nil {
+		t.Fatal(err)
+	}
+	if Version != pkg.Version {
+		t.Errorf("config.Version = %q but package.json says %q", Version, pkg.Version)
 	}
 }
