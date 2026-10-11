@@ -227,14 +227,18 @@ func ParseFilter(q string) []Filter {
 	if q == "" {
 		return nil
 	}
-	var raw []map[string]any
+	var raw []any
 	if json.Unmarshal([]byte(q), &raw) != nil {
 		return nil
 	}
 	known := map[string]bool{"All": true, "Active": true, "Archived": true, "AtleastOneInvoice": true, "NoInvoices": true,
 		"NoInvoices30": true, "NoInvoices60": true, "NoInvoices90": true, "Client": true, "Business": true, "Date": true, "Status": true}
 	var out []Filter
-	for _, m := range raw {
+	for _, item := range raw {
+		m, ok := item.(map[string]any)
+		if !ok {
+			continue // not an object: skipped, like the old server did
+		}
 		t, _ := m["type"].(string)
 		v, ok := m["value"].(string)
 		if !known[t] || !ok {

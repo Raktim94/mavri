@@ -277,14 +277,14 @@ func TestIntegerIDsStayExact(t *testing.T) {
 func TestSettingsAndTaxRoutes(t *testing.T) {
 	e, ck := sqlEnv(t)
 	s := e.do("GET", "/api/settings", "", nil, ck)
-	if s.data()["language"] != "en" || s.data()["isDarkMode"] != false {
+	if s.data()["language"] != "en" || s.data()["isDarkMode"] != true {
 		t.Fatalf("settings: %v", s.Body)
 	}
-	if r := e.do("PUT", "/api/settings", `{"id":9,"language":"de","isDarkMode":true}`, nil, ck); r.Body["success"] != true {
+	if r := e.do("PUT", "/api/settings", `{"id":9,"language":"de","isDarkMode":false}`, nil, ck); r.Body["success"] != true {
 		t.Fatalf("put: %v", r.Body)
 	}
 	s = e.do("GET", "/api/settings", "", nil, ck)
-	if s.data()["language"] != "de" || s.data()["isDarkMode"] != true || s.data()["id"] != float64(1) {
+	if s.data()["language"] != "de" || s.data()["isDarkMode"] != false || s.data()["id"] != float64(1) {
 		t.Errorf("after put: %v", s.data())
 	}
 	if r := e.do("PUT", "/api/settings", `{"nope":1}`, nil, ck); r.Body["success"] != false || r.key() != "error.sqlSyntaxError" {

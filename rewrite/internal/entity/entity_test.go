@@ -7,11 +7,14 @@ import (
 )
 
 func TestDecodeBase64IsAsLenientAsNode(t *testing.T) {
-	want := []byte{0x89, 'P', 'N', 'G', 0xfb, 0xff}
-	for _, in := range []string{"iVBORvv/", "iVBORvv/\n", "iVBORvv_", "iVBO Rvv/", "iVBORvv/===", "iVBORvv-"} {
+	want := []byte{0x89, 'P', 'N', 'F', 0xfb, 0xff}
+	for _, in := range []string{"iVBORvv/", "iVBORvv/\n", "iVBORvv_", "iVBO Rvv/", "iVBORvv/==="} {
 		if got := decodeBase64(in); !bytes.Equal(got, want) {
 			t.Errorf("%q -> %x", in, got)
 		}
+	}
+	if got := decodeBase64("iVBORvv+"); got[5] != 0xfe {
+		t.Errorf("plus is not slash: %x", got)
 	}
 	if got := decodeBase64("QQ"); string(got) != "A" {
 		t.Errorf("unpadded: %q", got)
