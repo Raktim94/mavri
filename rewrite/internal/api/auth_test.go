@@ -282,3 +282,13 @@ func TestSetupRateLimit(t *testing.T) {
 		}
 	}
 }
+
+// setupCookie signs the test owner in again (sqlEnv already created the account).
+func (e *env) setupCookie() *http.Cookie {
+	e.t.Helper()
+	r := e.do("POST", "/api/auth/login", creds("owner@example.com", goodPassword), nil, nil)
+	if r.session() == nil {
+		e.t.Fatalf("login: %v", r.Body)
+	}
+	return r.session()
+}

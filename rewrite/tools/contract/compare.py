@@ -30,7 +30,7 @@ bad = 0
 fixed = 0
 for x, y in zip(a, b):
     ts_crashed = x["status"] == 500 and x["body"] == "<non-json>"
-    go_refused = y["status"] == 200 and isinstance(y["body"], dict) and y["body"].get("success") is False
+    go_refused = y["status"] in (200, 400) and isinstance(y["body"], dict) and y["body"].get("success") is False
     if norm(x) != norm(y) and ts_crashed and go_refused:
         # The TypeScript server answered an HTML 500 page (an unhandled error);
         # Go answers with a proper failure. Counted separately, not as a regression.

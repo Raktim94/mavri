@@ -64,6 +64,7 @@ func newHandler(cfg config.Config, log *slog.Logger, st store.Store, open Opener
 	a.mountLayoutExport(mux)
 	a.mountPresets(mux)
 	a.mountInvoices(mux)
+	a.mountTransfer(mux)
 	a.mountSettings(mux)
 
 	limiter := httpx.NewLimiter(time.Minute, 300, cfg.TrustedProxies)

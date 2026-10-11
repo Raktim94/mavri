@@ -24,6 +24,25 @@ def call(method, path, body=None):
     log.append({"call": f"{method} {path}", "status": code, "body": payload})
     return payload
 
+import gzip, uuid
+
+def call_raw(method, path, data, content_type):
+    req = urllib.request.Request(base + path, method=method, data=data, headers={"Content-Type": content_type})
+    try:
+        r = op.open(req); code, text = r.status, r.read()
+    except urllib.error.HTTPError as e:
+        code, text = e.code, e.read()
+    try: payload = json.loads(text or b"null")
+    except ValueError: payload = "<non-json>"
+    log.append({"call": f"{method} {path} [{content_type.split(';')[0]}]", "status": code, "body": payload})
+    return payload
+
+def upload(doc_bytes, gz=True, field="file"):
+    boundary = uuid.uuid4().hex
+    body = (f"--{boundary}\r\nContent-Disposition: form-data; name=\"{field}\"; filename=\"backup.json.gz\"\r\n"
+            f"Content-Type: application/gzip\r\n\r\n").encode() + (gzip.compress(doc_bytes) if gz else doc_bytes) + f"\r\n--{boundary}--\r\n".encode()
+    return call_raw("POST", "/api/import", body, f"multipart/form-data; boundary={boundary}")
+
 creds = {"email": "me@example.com", "password": "Correct-Horse-9"}
 if "--setup" in sys.argv:
     call("POST", "/api/auth/setup", creds)
@@ -110,6 +129,27 @@ call("POST", "/api/databases", {"fullPath": "../evil.db", "mode": "create"})
 call("POST", "/api/databases", {"fullPath": "missing.db", "mode": "open"})
 call("POST", "/api/databases", {"fullPath": "t.db", "mode": "open"})
 call("GET", "/api/auth/me")
+# ---- export / import ---------------------------------------------------------------
+exported = call("GET", "/api/export")
+doc = exported["data"]
+upload(json.dumps(doc).encode())                      # round trip
+call("GET", "/api/export")
+changed = json.loads(json.dumps(doc))
+changed["clients"][0]["name"] = "Imported Name"
+changed["currencies"].append({**changed["currencies"][0], "id": 500, "code": "IMP"})
+changed["settings"]["language"] = "fr"
+upload(json.dumps(changed).encode())
+call("GET", "/api/export")
+call("GET", "/api/invoices")
+upload(b"not gzip at all", gz=False)
+upload(gzip.compress(b"not json")[:-3], gz=False)
+upload(b"null")
+# (an uploaded "[]" wipes the database in the TypeScript server; Go refuses it, so it is tested in Go only)
+broken = json.loads(json.dumps(doc)); broken["clients"][0]["nope"] = 1
+upload(json.dumps(broken).encode())                   # unknown column: rolled back
+call("GET", "/api/clients")
+upload(json.dumps(doc).encode(), field="other")
+call_raw("POST", "/api/import", b"{}", "application/json")
 # ---- invoices -------------------------------------------------------------------
 def snaps(number, kind="invoice", **over):
     inv = {
@@ -147,8 +187,6 @@ call("POST", "/api/invoices", snaps("0002", status="paid", issuedAt="2026-10-03"
 call("POST", "/api/invoices", snaps("Q-1", kind="quotation"))
 call("POST", "/api/invoices", snaps("0007", clientId=2, invoiceClientSnapshot={"clientName": "Beta LLC"}, invoiceItems=[]))
 call("POST", "/api/invoices", snaps("X", businessId=999))
-call("POST", "/api/invoices", {**snaps("Y"), "invoiceBusinessSnapshot": None})
-call("POST", "/api/invoices", snaps("0003", invoiceCustomization=None, discountType="bogus"))
 call("GET", "/api/invoices/sequence?businessId=1&clientId=1")
 call("GET", "/api/invoices/sequence?businessId=1&clientId=1&invoiceType=quotation")
 call("GET", "/api/invoices/sequence?businessId=9&clientId=9")
@@ -196,4 +234,8 @@ call("GET", "/api/auth/api-keys")
 call("POST", "/api/auth/logout")
 call("GET", "/api/auth/me")
 call("GET", "/api/clients")
+# The TypeScript server crashes on these two and is left inside an open
+# transaction, so they run last.
+call("POST", "/api/invoices", {**snaps("Y"), "invoiceBusinessSnapshot": None})
+call("POST", "/api/invoices", snaps("0003", invoiceCustomization=None, discountType="bogus"))
 json.dump(log, open(out, "w"), indent=1)

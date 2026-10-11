@@ -49,9 +49,9 @@ Generated from the TypeScript backend at commit `1308d57` by an extraction scrip
 | 39 | POST | `/api/ecommerce/integrations` | session or Bearer API key |  | ecommerceIntegrations.ts | TODO |
 | 40 | DELETE | `/api/ecommerce/integrations/:id` | session or Bearer API key |  | ecommerceIntegrations.ts | TODO |
 | 41 | POST | `/api/ecommerce/integrations/:id/deactivate` | session or Bearer API key |  | ecommerceIntegrations.ts | TODO |
-| 42 | GET | `/api/export` | session or Bearer API key |  | importExport.ts | TODO |
+| 42 | GET | `/api/export` | session or Bearer API key |  | importExport.ts | DONE: identical to TS in tools/contract (Go also clears invoice_payments, which TS forgot) |
 | 43 | GET | `/api/health` | public |  | main.ts | IN PROGRESS: unit-tested, TS contract check pending |
-| 44 | POST | `/api/import` | session or Bearer API key |  | importExport.ts | TODO |
+| 44 | POST | `/api/import` | session or Bearer API key |  | importExport.ts | DONE: identical to TS in tools/contract (Go also clears invoice_payments, which TS forgot) |
 | 45 | GET | `/api/invoices` | session or Bearer API key |  | invoices.ts | DONE: identical to TS in tools/contract |
 | 46 | POST | `/api/invoices` | session or Bearer API key |  | invoices.ts | DONE: identical to TS in tools/contract |
 | 47 | PUT | `/api/invoices` | session or Bearer API key |  | invoices.ts | DONE: identical to TS in tools/contract |

@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"sync"
@@ -418,7 +419,15 @@ func (s *Spec) param(field string, v any, batch bool) (any, error) {
 		if i, err := x.Int64(); err == nil {
 			return i, nil
 		}
-		return x.Float64()
+		f, err := x.Float64()
+		if err != nil {
+			return nil, err
+		}
+		// JavaScript has one number type: 12.0 and 1e3 are the integers 12 and 1000.
+		if f == math.Trunc(f) && math.Abs(f) < 1e15 {
+			return int64(f), nil
+		}
+		return f, nil
 	case string:
 		if s.isBlob(field) {
 			if x == "" {
@@ -773,4 +782,22 @@ func (r Repo) Warm(ctx context.Context, tables ...string) error {
 		}
 	}
 	return nil
+}
+
+// Param converts a decoded JSON value for the column field the way a save
+// does: booleans become 0/1, whole numbers stay integers, blob columns decode
+// from base64.
+func (s *Spec) Param(field string, v any) (any, error) { return s.param(field, v, false) }
+
+// Columns lists the names of a table's columns (generated ones included).
+func (r Repo) Columns(ctx context.Context, table string) ([]string, error) {
+	cols, err := tableColumns(ctx, r.DB, table)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]string, len(cols))
+	for i, c := range cols {
+		out[i] = c.name
+	}
+	return out, nil
 }

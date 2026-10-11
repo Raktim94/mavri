@@ -7,7 +7,7 @@ set -eu
 HERE=$(cd "$(dirname "$0")" && pwd)
 ROOT=$(cd "$HERE/../../.." && pwd)
 W=$(mktemp -d)
-trap 'fuser -k 3915/tcp 3916/tcp >/dev/null 2>&1 || true; [ -n "${KEEP:-}" ] && cp "$W"/*.json /tmp/ 2>/dev/null; rm -rf "$W"' EXIT
+trap 'fuser -k 3915/tcp 3916/tcp >/dev/null 2>&1 || true; [ -n "${KEEP:-}" ] && { cp "$W"/*.json /tmp/ 2>/dev/null; rm -rf /tmp/contract-ts; cp -r "$W/ts" /tmp/contract-ts 2>/dev/null; }; rm -rf "$W"' EXIT
 mkdir "$W/ts" "$W/go"
 
 # 1. Let the TypeScript server create the database and the owner account.

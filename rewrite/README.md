@@ -28,9 +28,10 @@ Builder project, so the repository `LICENSE` and attribution in the root
 | `internal/billing` | Terms, aging, late fees, allocation, lifecycle, credit notes, numbering, recurring, reminders, quotes, statements, FX records |
 | `internal/rbac` | Roles, permissions, approval thresholds |
 | `internal/audit` | Tamper-evident hash-chained audit log |
+| `internal/transfer` | Whole-database JSON export and import (all or nothing) |
 | `internal/invoices` | Invoice service: read with everything attached, save/update with snapshots, items, payments and attachments in one transaction, duplicate and quotation conversion, numbering |
 | `internal/entity` | Generic list/create/update/delete/batch engine for the simple resources (banks, businesses, clients, currencies, categories, units, items) |
-| `tools/contract` | `run.sh`: starts the TS server and the Go server on copies of one database, runs the same 169-call conversation against both and diffs every response (timestamps and random key secrets masked) |
+| `tools/contract` | `run.sh`: starts the TS server and the Go server on copies of one database, runs the same 182-call conversation against both and diffs every response (timestamps and random key secrets masked) |
 | `tools/difftest` | Script that generates the TS reference cases (run outside the repo) |
 | `internal/ecommerce` | Webhook signature schemes and verification |
 
@@ -66,11 +67,11 @@ GST (India) logic with tests: see the matrix for what is unverified. Rates are
 never built in; they come from rules the business loads.
 The auth routes and the simple resource routes (banks, businesses,
 clients, currencies, categories, units, items) run on SQLite and answer
-identically to the TypeScript server, as do settings, the US tax lookups, style profiles, layouts, presets and invoices (create, update, duplicate, convert, delete, numbering): `tools/contract/run.sh` compares 169
+identically to the TypeScript server, as do settings, the US tax lookups, style profiles, layouts, presets and invoices (create, update, duplicate, convert, delete, numbering), and export/import: `tools/contract/run.sh` compares 182
 responses (status and body) and reports 0 differences. It does not cover rate
 limits, response headers, or PostgreSQL.
 
-Known, deliberate differences: a saved invoice and its numbering change are one transaction (the old server advanced the counter after committing, so a failure there left an invoice that never took its number); the old server answered an HTML 500 page when an invoice was rejected for a missing snapshot or a bad enum value, Go answers `success:false` with the key (the contract run lists these two); opening a database with mode `create` refuses to overwrite an existing file (the old server deleted it); an empty database name is refused; PostgreSQL answers "not supported"; a field left out of a create request takes the
+Known, deliberate differences: import also clears `invoice_payments` (the old server forgot, so importing over any data that had payments failed with a duplicate id), and a file holding `[]` is refused instead of wiping the database; a saved invoice and its numbering change are one transaction (the old server advanced the counter after committing, so a failure there left an invoice that never took its number); the old server answered an HTML 500 page when an invoice was rejected for a missing snapshot or a bad enum value, Go answers `success:false` with the key (the contract run lists these two); opening a database with mode `create` refuses to overwrite an existing file (the old server deleted it); an empty database name is refused; PostgreSQL answers "not supported"; a field left out of a create request takes the
 column default instead of failing on NULL; batch imports decode base64 logos
 and QR codes instead of storing the base64 text.
 
