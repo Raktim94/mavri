@@ -181,26 +181,26 @@ Preload exposes 79 `window.electronAPI` members (including `onUpdate*` event sub
 
 | # | Tool | Go status |
 |---|---|---|
-| 1 | `list_clients` | TODO |
-| 2 | `get_client` | TODO |
-| 3 | `create_client` | TODO |
-| 4 | `update_client` | TODO |
-| 5 | `delete_client` | TODO |
-| 6 | `list_items` | TODO |
-| 7 | `create_item` | TODO |
-| 8 | `update_item` | TODO |
-| 9 | `delete_item` | TODO |
-| 10 | `list_us_sales_tax_rates` | TODO |
-| 11 | `list_invoices` | TODO |
-| 12 | `get_invoice` | TODO |
-| 13 | `create_invoice` | TODO |
-| 14 | `update_invoice_status` | TODO |
-| 15 | `record_payment` | TODO |
-| 16 | `delete_invoice` | TODO |
-| 17 | `list_ecommerce_integrations` | TODO |
-| 18 | `create_ecommerce_integration` | TODO |
-| 19 | `deactivate_ecommerce_integration` | TODO |
-| 20 | `create_invoice_from_order` | TODO |
+| 1 | `list_clients` | DONE: identical to TS in tools/contract/run_mcp.sh |
+| 2 | `get_client` | DONE: identical to TS in tools/contract/run_mcp.sh |
+| 3 | `create_client` | DONE: identical to TS in tools/contract/run_mcp.sh |
+| 4 | `update_client` | DONE: identical to TS in tools/contract/run_mcp.sh |
+| 5 | `delete_client` | DONE: identical to TS in tools/contract/run_mcp.sh |
+| 6 | `list_items` | DONE: identical to TS in tools/contract/run_mcp.sh |
+| 7 | `create_item` | DONE: identical to TS in tools/contract/run_mcp.sh |
+| 8 | `update_item` | DONE: identical to TS in tools/contract/run_mcp.sh |
+| 9 | `delete_item` | DONE: identical to TS in tools/contract/run_mcp.sh |
+| 10 | `list_us_sales_tax_rates` | DONE: identical to TS in tools/contract/run_mcp.sh |
+| 11 | `list_invoices` | DONE: identical to TS in tools/contract/run_mcp.sh |
+| 12 | `get_invoice` | DONE: identical to TS in tools/contract/run_mcp.sh |
+| 13 | `create_invoice` | DONE: identical to TS in tools/contract/run_mcp.sh |
+| 14 | `update_invoice_status` | DONE: identical to TS in tools/contract/run_mcp.sh |
+| 15 | `record_payment` | DONE: identical to TS in tools/contract/run_mcp.sh |
+| 16 | `delete_invoice` | DONE: identical to TS in tools/contract/run_mcp.sh |
+| 17 | `list_ecommerce_integrations` | DONE: identical to TS in tools/contract/run_mcp.sh |
+| 18 | `create_ecommerce_integration` | DONE: identical to TS in tools/contract/run_mcp.sh |
+| 19 | `deactivate_ecommerce_integration` | DONE: identical to TS in tools/contract/run_mcp.sh |
+| 20 | `create_invoice_from_order` | DONE: identical to TS in tools/contract/run_mcp.sh |
 
 ## 4. Migrations (applied in filename-sort order)
 
@@ -208,39 +208,39 @@ Runner: `shared/db/migrationRunner.ts` matches `^\d{8}-\d{2}-.*`, sorts by filen
 
 | # | File | Go status |
 |---|---|---|
-| 1 | `20260105-01-invoice_items-quantity-to-text.ts` | TODO |
-| 2 | `20260108-02-invoices-prefix-suffix-language.ts` | TODO |
-| 3 | `20260108-03-invoices-ghost-data-cleanup.ts` | TODO |
-| 4 | `20260122-04-invoices-signature.ts` | TODO |
-| 5 | `20260129-05-style_profiles.ts` | TODO |
-| 6 | `20260202-06-style_profile-column-renames.ts` | TODO |
-| 7 | `20260202-07-snapshot-tables.ts` | TODO |
-| 8 | `20260203-08-customize-items-table.ts` | TODO |
-| 9 | `20260205-09-invoice_item_snapshots_fix-name.ts` | TODO |
-| 10 | `20260206-10-converting-amount-fields.ts` | TODO |
-| 11 | `20260209-11-custom-fields-order.ts` | TODO |
-| 12 | `20260209-12-banks-table.ts` | TODO |
-| 13 | `20260212-13-vat-code-fields.ts` | TODO |
-| 14 | `20260218-14-invoice_sequences.ts` | TODO |
-| 15 | `20260218-15-customize-font.ts` | TODO |
-| 16 | `20260218-16-custom-labels.ts` | TODO |
-| 17 | `20260220-17-banks-fields.ts` | TODO |
-| 18 | `20260220-18-templates.ts` | TODO |
-| 19 | `20260228-19-style_profile-default-font.ts` | TODO |
-| 20 | `20260228-20-peppol-fields.ts` | TODO |
-| 21 | `20260304-21-xrechnung-fields.ts` | TODO |
-| 22 | `20260612-21-paidAt-closedAt.ts` | TODO |
-| 23 | `20260810-22-invoice-unique.ts` | TODO |
-| 24 | `20260826-23-invoice-surcharge.ts` | TODO |
-| 25 | `20260826-24-invoice-unique.ts` | TODO |
-| 26 | `20260826-25-invoice-sequence.ts` | TODO |
-| 27 | `20260831-26-settings-receipt.ts` | TODO |
-| 28 | `20260902-27-invoice_layouts.ts` | TODO |
-| 29 | `20260902-28-layout-schema-seeds.ts` | TODO |
-| 30 | `20260903-29-style-profiles-layout-id.ts` | TODO |
-| 31 | `20260924-30-us-sales-tax.ts` | TODO |
-| 32 | `20260924-31-auth.ts` | TODO |
-| 33 | `20260927-32-ecommerce-integrations.ts` | TODO |
+| 1 | `20260105-01-invoice_items-quantity-to-text.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
+| 2 | `20260108-02-invoices-prefix-suffix-language.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
+| 3 | `20260108-03-invoices-ghost-data-cleanup.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
+| 4 | `20260122-04-invoices-signature.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
+| 5 | `20260129-05-style_profiles.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
+| 6 | `20260202-06-style_profile-column-renames.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
+| 7 | `20260202-07-snapshot-tables.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
+| 8 | `20260203-08-customize-items-table.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
+| 9 | `20260205-09-invoice_item_snapshots_fix-name.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
+| 10 | `20260206-10-converting-amount-fields.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
+| 11 | `20260209-11-custom-fields-order.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
+| 12 | `20260209-12-banks-table.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
+| 13 | `20260212-13-vat-code-fields.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
+| 14 | `20260218-14-invoice_sequences.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
+| 15 | `20260218-15-customize-font.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
+| 16 | `20260218-16-custom-labels.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
+| 17 | `20260220-17-banks-fields.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
+| 18 | `20260220-18-templates.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
+| 19 | `20260228-19-style_profile-default-font.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
+| 20 | `20260228-20-peppol-fields.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
+| 21 | `20260304-21-xrechnung-fields.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
+| 22 | `20260612-21-paidAt-closedAt.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
+| 23 | `20260810-22-invoice-unique.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
+| 24 | `20260826-23-invoice-surcharge.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
+| 25 | `20260826-24-invoice-unique.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
+| 26 | `20260826-25-invoice-sequence.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
+| 27 | `20260831-26-settings-receipt.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
+| 28 | `20260902-27-invoice_layouts.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
+| 29 | `20260902-28-layout-schema-seeds.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
+| 30 | `20260903-29-style-profiles-layout-id.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
+| 31 | `20260924-30-us-sales-tax.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
+| 32 | `20260924-31-auth.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
+| 33 | `20260927-32-ecommerce-integrations.ts` | DONE: contained in the Go baseline (internal/schema/baseline.sql), checked both ways |
 
 ## 5. Tables seen in schema/migration code
 

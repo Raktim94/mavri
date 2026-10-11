@@ -69,6 +69,10 @@ func newHandler(cfg config.Config, log *slog.Logger, st store.Store, open Opener
 	a.mountTransfer(mux)
 	a.mountSettings(mux)
 
+	if cfg.FrontendDir != "" {
+		mux.Handle("/", spa(cfg.FrontendDir))
+	}
+
 	limiter := httpx.NewLimiter(time.Minute, 300, cfg.TrustedProxies)
 	apiLimited := func(next http.Handler) http.Handler {
 		limited := limiter.Middleware(next)

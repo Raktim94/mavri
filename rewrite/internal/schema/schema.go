@@ -137,6 +137,11 @@ func applyBaseline(db *sql.DB) error {
 		}
 		return nil
 	}
+	return checkBaseline(db)
+}
+
+// checkBaseline fails unless every migration the baseline contains is recorded.
+func checkBaseline(db *sql.DB) error {
 	rows, err := db.Query(`SELECT "name" FROM migrations`)
 	if err != nil {
 		return err
@@ -159,4 +164,50 @@ func applyBaseline(db *sql.DB) error {
 		}
 	}
 	return nil
+}
+
+// Verify checks, without changing anything, that db was prepared by this or the
+// TypeScript version: the baseline and every newer migration are recorded.
+func Verify(db *sql.DB) error {
+	var n int
+	if err := db.QueryRow(`SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='migrations'`).Scan(&n); err != nil {
+		return err
+	}
+	if n == 0 {
+		return fmt.Errorf("schema: this database has not been set up; open it in Mavri once first")
+	}
+	if err := checkBaseline(db); err != nil {
+		return err
+	}
+	sub, err := fs.Sub(migrationFiles, "migrations")
+	if err != nil {
+		return err
+	}
+	return checkPending(db, sub)
+}
+
+func checkPending(db *sql.DB, fsys fs.FS) error {
+	entries, err := fs.ReadDir(fsys, ".")
+	if err != nil {
+		return err
+	}
+	have := map[string]bool{}
+	rows, err := db.Query(`SELECT "name" FROM migrations`)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var name string
+		if err := rows.Scan(&name); err != nil {
+			return err
+		}
+		have[stem(name)] = true
+	}
+	for _, e := range entries {
+		if !e.IsDir() && migrationName.MatchString(e.Name()) && !have[stem(e.Name())] {
+			return fmt.Errorf("schema: this database has not been upgraded (%s is pending); open it in Mavri once first", e.Name())
+		}
+	}
+	return rows.Err()
 }

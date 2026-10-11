@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 
@@ -25,7 +26,19 @@ var _ store.Store = (*Store)(nil)
 
 // Open opens (creating if needed) the database file at path and makes sure
 // the schema exists (see package schema). Use ":memory:" for a throwaway database.
-func Open(path string) (*Store, error) {
+func Open(path string) (*Store, error) { return open(path, false) }
+
+// OpenExisting opens a database that must already exist and be fully set up.
+// It never creates, upgrades or changes anything, which is what a tool that
+// only visits a database (the MCP server) needs.
+func OpenExisting(path string) (*Store, error) { return open(path, true) }
+
+func open(path string, existing bool) (*Store, error) {
+	if existing {
+		if st, err := os.Stat(path); err != nil || st.IsDir() {
+			return nil, fmt.Errorf("sqlitestore: database file %q does not exist", path)
+		}
+	}
 	q := url.Values{}
 	for _, p := range []string{"foreign_keys(1)", "busy_timeout(5000)", "journal_mode(WAL)"} {
 		q.Add("_pragma", p)
@@ -37,7 +50,11 @@ func Open(path string) (*Store, error) {
 	// One connection: SQLite allows a single writer anyway, and it keeps
 	// ":memory:" databases from splitting into one per connection.
 	db.SetMaxOpenConns(1)
-	if err := schema.Apply(db); err != nil {
+	check := schema.Apply
+	if existing {
+		check = schema.Verify
+	}
+	if err := check(db); err != nil {
 		db.Close()
 		return nil, err
 	}

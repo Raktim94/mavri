@@ -20,6 +20,7 @@ type Config struct {
 	Port           int    // PORT (default 3000)
 	Host           string // DEV_SERVER_URL, the bind address (default 127.0.0.1)
 	DataDir        string // DB_DIRECTORY (default "data")
+	FrontendDir    string // FRONTEND_DIR: built web app to serve next to the API (empty: API only)
 	EncryptionKey  string // ENCRYPTION_KEY: pins the key that protects webhook secrets
 	DefaultDB      string // DEFAULT_DATABASE file name inside DataDir; "invoice.db" when NODE_ENV=docker, else none
 	FrontendOrigin string // FRONTEND_ORIGIN, else FE_SERVER_URL, else http://127.0.0.1:5173
@@ -65,6 +66,7 @@ func loadWith(lookup func(string) (string, bool)) Config {
 		Port:           port,
 		Host:           first(getenv("DEV_SERVER_URL"), "127.0.0.1"),
 		DataDir:        first(getenv("DB_DIRECTORY"), "data"),
+		FrontendDir:    getenv("FRONTEND_DIR"),
 		EncryptionKey:  getenv("ENCRYPTION_KEY"),
 		DefaultDB:      defaultDB,
 		FrontendOrigin: first(getenv("FRONTEND_ORIGIN"), feServer),

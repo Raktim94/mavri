@@ -5,6 +5,8 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -69,5 +71,44 @@ func TestPostToReadOnlyRouteRejected(t *testing.T) {
 	handler().ServeHTTP(rec, httptest.NewRequest("POST", "/api/health", nil))
 	if rec.Code != http.StatusMethodNotAllowed {
 		t.Fatalf("got %d", rec.Code)
+	}
+}
+
+func TestServesTheWebAppNextToTheAPI(t *testing.T) {
+	dir := t.TempDir()
+	os.WriteFile(filepath.Join(dir, "index.html"), []byte("<html>app</html>"), 0o644)
+	os.MkdirAll(filepath.Join(dir, "assets"), 0o755)
+	os.WriteFile(filepath.Join(dir, "assets", "app.js"), []byte("console.log(1)"), 0o644)
+	os.WriteFile(filepath.Join(filepath.Dir(dir), "secret.txt"), []byte("outside"), 0o644)
+	h := NewHandler(config.LoadFrom(func(k string) string {
+		if k == "FRONTEND_DIR" {
+			return dir
+		}
+		return ""
+	}), slog.New(slog.NewJSONHandler(io.Discard, nil)), nil, nil)
+	get := func(p string) *httptest.ResponseRecorder {
+		rec := httptest.NewRecorder()
+		h.ServeHTTP(rec, httptest.NewRequest("GET", p, nil))
+		return rec
+	}
+	if r := get("/"); r.Code != 200 || !strings.Contains(r.Body.String(), "app") || r.Header().Get("Cache-Control") != "no-cache" {
+		t.Errorf("/: %d %q %q", r.Code, r.Body.String(), r.Header().Get("Cache-Control"))
+	}
+	if r := get("/assets/app.js"); r.Code != 200 || r.Body.String() != "console.log(1)" {
+		t.Errorf("asset: %d %q", r.Code, r.Body.String())
+	}
+	if r := get("/invoices/42"); r.Code != 200 || !strings.Contains(r.Body.String(), "app") {
+		t.Errorf("client route should fall back to the page: %d %q", r.Code, r.Body.String())
+	}
+	for _, p := range []string{"/../secret.txt", "/assets/../../secret.txt", "/%2e%2e/secret.txt"} {
+		if r := get(p); strings.Contains(r.Body.String(), "outside") {
+			t.Errorf("%s escaped the directory", p)
+		}
+	}
+	if r := get("/api/nope"); r.Code != 404 || !strings.Contains(r.Body.String(), "error.notFound") {
+		t.Errorf("unknown api path: %d %q", r.Code, r.Body.String())
+	}
+	if r := get("/api/health"); r.Code != 200 || r.Body.String() != "{\"ok\":true}\n" {
+		t.Errorf("the API still answers: %d %q", r.Code, r.Body.String())
 	}
 }

@@ -30,6 +30,7 @@ Builder project, so the repository `LICENSE` and attribution in the root
 | `internal/audit` | Tamper-evident hash-chained audit log |
 | `internal/einvoice` | UBL 2.1 / XRechnung XML, same float arithmetic and rounding as before; checked byte for byte against 12 documents the TS server wrote (`internal/api/testdata/einvoice`) |
 | `internal/jsnum` | JavaScript's `Number()`, number printing, `Math.round` and `toFixed`, which the XML and order handling depend on |
+| `internal/mcp`, `cmd/mcp` | MCP server over stdio with the same 20 tools; `tools/contract/run_mcp.sh` drives it and the TS one with one conversation: 60 replies, 0 differences (schemas, results, validation messages) |
 | `internal/secrets` | AES-256-GCM for webhook secrets, readable by values the TS server wrote |
 | `internal/orders` | Store integrations, order normalisation (Shopify, WooCommerce, generic), order ledger, order to invoice |
 | `internal/transfer` | Whole-database JSON export and import (all or nothing) |
@@ -39,55 +40,118 @@ Builder project, so the repository `LICENSE` and attribution in the root
 | `tools/difftest` | Script that generates the TS reference cases (run outside the repo) |
 | `internal/ecommerce` | Webhook signature schemes and verification |
 
-## Run and test
+## Run
 
-Requires Go 1.24 or newer. No Go on your machine? Use a container:
-
-```sh
-docker run --rm -v "$PWD":/w -w /w golang:1.24 sh -c 'gofmt -l . && go vet ./... && go test ./...'
-```
-
-With Go installed:
+Requires Go 1.24 or newer (or Docker, which needs no Go install).
 
 ```sh
 cd rewrite
-go vet ./... && go test -race ./...
-DEFAULT_DATABASE=invoice.db PORT=3000 go run ./cmd/server   # without DEFAULT_DATABASE the server starts with no database
+DEFAULT_DATABASE=invoice.db DB_DIRECTORY=data PORT=3000 go run ./cmd/server
 ```
 
-Last verified on 2026-10-11 with `golang:1.24`: `gofmt -l` lists nothing, `go vet ./...` is clean, and `go test ./...` passes in every package that has tests. The `-race` run was not repeated.
+Without `DEFAULT_DATABASE` the server starts with no database and the app's
+database chooser opens one (`/api/databases`). Set `FRONTEND_DIR=../dist-fe`
+(after `npm run build:react` in the repository root) to serve the web app from
+the same port. A database written by the Node version opens as is, as long as
+that version had applied all its migrations.
+
+One container with the app and the API, about 66 MB:
+
+```sh
+docker compose -f docker-compose.go.yml up -d --build      # from the repository root
+```
+
+The MCP server (stdio, for AI assistants) needs an API key from Settings and an
+existing database:
+
+```sh
+NODEDR_API_KEY=ndr_... DB_DIRECTORY=data DB_FILE=invoice.db go run ./cmd/mcp
+```
+
+## Test
+
+```sh
+docker run --rm -v "$PWD":/w -w /w golang:1.24 sh -c 'gofmt -l . && go vet ./... && go test -race ./...'
+```
+
+That runs the unit and HTTP tests, including golden files the Node server wrote.
+Two scripts compare Go with the real TypeScript backend by driving both with the
+same conversation from copies of one database (they need `npm install` in the
+repository root, Python 3 and Docker):
+
+```sh
+sh tools/contract/run.sh        # REST API: 257 responses
+sh tools/contract/run_mcp.sh    # MCP: 60 replies
+```
+
+Both report 0 differences. They mask timestamps and random secrets, ignore list
+order (it depends on the second a row was created) and list, rather than fail on,
+the places where the TypeScript server crashes and Go answers cleanly.
 
 ## Status
 
-Done and unit-tested: configuration, middleware stack, `/api/health`,
-`/api/version`, `/api/databases/ready`; password and API-key hashing (existing
-hashes verify), password policy, lockout rules and webhook signatures, all
-cross-checked against values produced by Node's crypto and the TS code.
-Invoice totals, line discounts and tax in exact arithmetic, compared with the
-real renderer functions on 1,500 synthetic invoices: identical except where a
-line's discount share is exactly n.5 cents (the old float code rounds down,
-the exact version rounds up). Which behaviour to keep is an open decision.
-GST (India) logic with tests: see the matrix for what is unverified. Rates are
-never built in; they come from rules the business loads.
-The auth routes and the simple resource routes (banks, businesses,
-clients, currencies, categories, units, items) run on SQLite and answer
-identically to the TypeScript server, as do settings, the US tax lookups, style profiles, layouts, presets and invoices (create, update, duplicate, convert, delete, numbering), export/import, e-commerce integrations, signed webhooks, the public v1 API and the e-invoice XML (UBL 2.1 and XRechnung): `tools/contract/run.sh` compares 257
-responses (status and body) and reports 0 differences. It does not cover rate
-limits, response headers, or PostgreSQL.
+**Everything the TypeScript web backend does is implemented**, on SQLite: all 86
+REST routes, the 20 MCP tools, the schema and its 33 migrations (as one
+baseline, plus a runner for later changes), sessions, API keys, encrypted
+webhook secrets, import/export, e-commerce webhooks and the e-invoice XML.
+`docs/rewrite/PARITY_MATRIX.md` lists every route and how it was verified.
 
-Known, deliberate differences: `GET /api/invoices/xml` answers errors as JSON with the translation key as `message` and serves `application/xml` (the old server crashed to an HTML error page, or sent the content type `xml`), a customer's new client gets a two-letter short name derived from their name (the old server tried to store the whole name, which the column refuses, so most first orders failed), `GET /api/v1/invoices?clientId=` filters by client id (the old server compared it with client names and always came back empty), `GET /api/v1/invoices/:id` returns binary fields as base64 like every other route (the old server leaked Node Buffer JSON), import also clears `invoice_payments` (the old server forgot, so importing over any data that had payments failed with a duplicate id), and a file holding `[]` is refused instead of wiping the database; a saved invoice and its numbering change are one transaction (the old server advanced the counter after committing, so a failure there left an invoice that never took its number); the old server answered an HTML 500 page when an invoice was rejected for a missing snapshot or a bad enum value, Go answers `success:false` with the key (the contract run lists these two); opening a database with mode `create` refuses to overwrite an existing file (the old server deleted it); an empty database name is refused; PostgreSQL answers "not supported"; a field left out of a create request takes the
-column default instead of failing on NULL; batch imports decode base64 logos
-and QR codes instead of storing the base64 text.
+Also written but **not yet reachable from any route**, because the old backend
+had no equivalent: exact-arithmetic invoice totals (`money`), India GST
+(`gst`), UPI payment links (`upi`), billing rules such as terms, late fees,
+credit notes and recurring invoices (`billing`), roles and approvals (`rbac`)
+and a tamper-evident audit log (`audit`). They are tested as libraries.
 
-Not started: PostgreSQL, the migrations runner (a fresh database gets the
-baseline; later schema changes still need a Go migration mechanism), import/export, MCP, e-commerce
-webhooks, desktop bridge.
+**Not done**
 
-Not yet verified: that response headers match the TypeScript server byte for
-byte. That needs a contract test against a running TS server.
+- **PostgreSQL.** The server and MCP run on SQLite only; asking for PostgreSQL
+  answers "not supported". Supporting it means a second SQL dialect (`pgx`,
+  placeholders, `datetime('now')`, grouping rules) and a PostgreSQL store.
+- **The Electron desktop app** still runs its own TypeScript backend over IPC.
+  Moving it to Go needs a decision: the Go server demands a sign-in, which the
+  single-user desktop app never had (see the parity matrix, section 2).
+- **Response headers** are not compared with the TypeScript server's (bodies and
+  status codes are), nor rate limits.
+- **Exact versus float rounding** in `money` is still the open decision from the
+  start: the old float code and exact arithmetic differ when a line's discount
+  share is exactly n.5 cents (16 of 5,176 compared invoices).
+
+**Where Go deliberately differs.** Each of these was a bug or hazard in the
+TypeScript backend, found while comparing:
+
+- A saved invoice and its numbering change are one transaction. The old server
+  advanced the counter after committing, so a failure left an invoice that
+  never took its number.
+- Duplicating an invoice id that does not exist left the old server's database
+  connection inside an open transaction; every later write was then silently
+  rolled back. Go answers `{"success":false}` and changes nothing.
+- An invoice rejected for a missing snapshot or a bad enum value made the old
+  server answer an HTML 500 page; Go answers `success:false` with the key.
+- Import also clears `invoice_payments` (the old server forgot, so importing
+  over data that had payments failed with a duplicate id), and a file holding
+  `[]` is refused instead of wiping the database.
+- Opening a database with mode `create` refuses to overwrite an existing file
+  (the old server deleted it); an empty database name is refused.
+- A new customer's client gets a two-letter short name derived from their name
+  (the old server stored the whole name, which the column refuses, so most first
+  orders failed).
+- `GET /api/v1/invoices?clientId=` filters by client id (the old server compared
+  it with client names and always came back empty); `GET /api/v1/invoices/:id`
+  returns binary fields as base64 like every other route (it leaked Node Buffer
+  JSON).
+- `GET /api/invoices/xml` answers errors as JSON with the translation key as
+  `message` and serves `application/xml` (the old server crashed to an HTML error
+  page, or sent the content type `xml`).
+- A field left out of a create request takes the column's default instead of
+  failing on NULL; batch imports decode base64 logos and QR codes instead of
+  storing the base64 text.
+- Filter and type values reach SQL as parameters, never as text. The old server
+  pasted them into the query.
+- The MCP server prints only protocol on stdout (the old one printed
+  "Database opened successfully.", which breaks clients that parse it).
 
 ## Dependencies
 
 Only `modernc.org/sqlite` (a pure-Go SQLite driver, no cgo) is pulled in; v1.44.0
-is the newest release that builds with Go 1.24. `pgx` is still to be added for
-PostgreSQL. Run `go mod tidy` and commit `go.sum` after changing dependencies.
+is the newest release that builds with Go 1.24. Run `go mod tidy` and commit
+`go.sum` after changing dependencies.

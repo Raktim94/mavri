@@ -2,6 +2,7 @@ package invoices
 
 import (
 	"context"
+	"encoding/json"
 	"math"
 	"strconv"
 	"strings"
@@ -175,4 +176,31 @@ func (s *Service) XML(ctx context.Context, id int64, profile string) (string, er
 		return "", &einvoice.Error{Message: "error.invoiceNotFound"}
 	}
 	return einvoice.Generate(profile, inv)
+}
+
+// ToRequest turns an invoice read from the database back into the shape a
+// save accepts: parsed JSON columns become raw JSON again. Used when an
+// existing invoice is changed in place (status, payments).
+func ToRequest(row Row) Row {
+	out := make(Row, len(row))
+	for k, v := range row {
+		out[k] = requestValue(v)
+	}
+	return out
+}
+
+func requestValue(v any) any {
+	switch x := v.(type) {
+	case json.RawMessage:
+		return entity.RawJSON(x)
+	case Row:
+		return ToRequest(x)
+	case []Row:
+		out := make([]Row, len(x))
+		for i, r := range x {
+			out[i] = ToRequest(r)
+		}
+		return out
+	}
+	return v
 }
