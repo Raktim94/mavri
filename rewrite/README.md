@@ -20,6 +20,8 @@ Builder project, so the repository `LICENSE` and attribution in the root
 | `internal/api` | Route wiring |
 | `internal/scrypt` | scrypt (RFC 7914), standard library only, checked against Node |
 | `internal/auth` | Password hashing, API-key secrets, password policy, lockout rules |
+| `internal/money` | Exact (rational) invoice arithmetic, differential-tested against the real TS functions |
+| `tools/difftest` | Script that generates the TS reference cases (run outside the repo) |
 | `internal/ecommerce` | Webhook signature schemes and verification |
 
 ## Run and test
@@ -36,6 +38,10 @@ Done and unit-tested: configuration, middleware stack, `/api/health`,
 `/api/version`, `/api/databases/ready`; password and API-key hashing (existing
 hashes verify), password policy, lockout rules and webhook signatures, all
 cross-checked against values produced by Node's crypto and the TS code.
+Invoice totals, line discounts and tax in exact arithmetic, compared with the
+real renderer functions on 1,500 synthetic invoices: identical except where a
+line's discount share is exactly n.5 cents (the old float code rounds down,
+the exact version rounds up). Which behaviour to keep is an open decision.
 These are pure functions: they are not yet wired to a database or routes.
 
 Not started: database layer, migrations, authentication, every resource route,

@@ -263,3 +263,5 @@ Tables ending in `_new` are temporary rebuild tables inside migrations, not fina
 | DB file names | resolved inside the data dir, `..` escapes rejected, only .db/.sqlite/.sqlite3 listed | TODO |
 | Webhooks | HMAC-SHA256 over raw bytes, Shopify uses `x-shopify-hmac-sha256` base64, constant-time compare, payload hash for idempotency, secrets `whsec_...` | IN PROGRESS: pure logic verified against Node vectors; DB and HTTP wiring pending |
 | Response envelope | `{success, message, data, key}`; error keys like `error.unknownError` must be preserved | TODO |
+| Invoice totals | Computed in the renderer (`renderer/shared/utils/invoiceFunctions.ts`) with JS floats on cent values, not in the backend. Go (`internal/money`) is exact. Differs only when a line's discount share is exactly n.5 cents: JS rounds down through float error, Go rounds up (about 0.3% of lines in synthetic data). DECISION NEEDED: keep exact, or emulate the float result | IN PROGRESS |
+| E-invoice XML maths | `shared/utils/einvoice/ubl21.ts` and `invoiceFunctions.ts` use their own rounding (`Math.round(n*100)/100`), separate from the renderer. Not yet compared with Go | TODO |
