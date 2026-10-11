@@ -41,7 +41,7 @@ func (s *Service) snapshots(ctx context.Context, tx *sql.Tx, data Row, id int64,
 		gate  bool
 		batch bool
 	}
-	cust := withDecoded(data, "invoiceCustomization")
+	cust := child(data, "invoiceCustomization")
 	client := child(data, "invoiceClientSnapshot")
 	if client != nil {
 		client = clone(client)
@@ -49,11 +49,11 @@ func (s *Service) snapshots(ctx context.Context, tx *sql.Tx, data Row, id int64,
 			client["clientTaxExempt"] = false
 		}
 	}
-	business := withDecoded(data, "invoiceBusinessSnapshot")
-	bank := withDecoded(data, "invoiceBankSnapshot")
+	business := child(data, "invoiceBusinessSnapshot")
+	bank := child(data, "invoiceBankSnapshot")
 	steps := []step{
 		{styleSnap, child(data, "invoiceStyleProfileSnapshot"), isSet(data, "styleProfilesId"), false},
-		{customization, cust, true, false},
+		{customization, cust, cust != nil, false},
 		{currencySnap, child(data, "invoiceCurrencySnapshot"), isSet(data, "currencyId"), false},
 		{bankSnap, bank, isSet(data, "bankId"), false},
 		{businessSnap, business, isSet(data, "businessId"), false},

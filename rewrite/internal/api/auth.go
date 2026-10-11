@@ -15,6 +15,7 @@ import (
 
 	"github.com/Raktim94/nodedr-invoice/rewrite/internal/auth"
 	"github.com/Raktim94/nodedr-invoice/rewrite/internal/httpx"
+	"github.com/Raktim94/nodedr-invoice/rewrite/internal/secrets"
 	"github.com/Raktim94/nodedr-invoice/rewrite/internal/store"
 )
 
@@ -85,6 +86,7 @@ type authAPI struct {
 	secure    bool
 	dummyOnce sync.Once
 	dummyHash string
+	box       *secrets.Box
 }
 
 // cur is the database in use right now. It changes when /api/databases opens

@@ -87,14 +87,16 @@ func clone(r Row) Row {
 	return out
 }
 
-// withDecoded mirrors the controller, which turned an absent customization,
-// business snapshot or bank snapshot into an object of nulls instead of
-// leaving it out.
-func withDecoded(row Row, key string) Row {
-	if c := child(row, key); c != nil {
-		return c
+// PrepareRequest applies what the HTTP layer always did to a request body: an
+// absent customization, business snapshot or bank snapshot becomes an object
+// of nulls rather than staying absent. Orders built inside the server skip it.
+func PrepareRequest(row Row) Row {
+	for _, key := range []string{"invoiceCustomization", "invoiceBusinessSnapshot", "invoiceBankSnapshot"} {
+		if child(row, key) == nil {
+			row[key] = Row{}
+		}
 	}
-	return Row{}
+	return row
 }
 
 // ---- reading -----------------------------------------------------------------
@@ -105,6 +107,7 @@ type readOptions struct {
 	Filters []entity.Filter
 	// HasFilter is false when the filter query was missing or unparsable.
 	HasFilter bool
+	ClientID  *int64
 }
 
 func (s *Service) invoicesWhere(o readOptions) (string, []any) {
@@ -115,6 +118,9 @@ func (s *Service) invoicesWhere(o readOptions) (string, []any) {
 	}
 	if o.Type != "" {
 		conds, args = append(conds, `i."invoiceType" = ?`), append(args, o.Type)
+	}
+	if o.ClientID != nil {
+		conds, args = append(conds, `i."clientId" = ?`), append(args, *o.ClientID)
 	}
 	for _, f := range o.Filters {
 		switch f.Type {

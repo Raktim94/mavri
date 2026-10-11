@@ -14,6 +14,8 @@ type Limiter struct {
 	Max    int
 	Hops   int
 	Now    func() time.Time // injectable for tests
+	// Key picks what a request is counted against; the client address by default.
+	Key func(*http.Request) string
 
 	mu      sync.Mutex
 	clients map[string]*window
@@ -34,7 +36,12 @@ func NewLimiter(win time.Duration, max, hops int) *Limiter {
 func (l *Limiter) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		now := l.Now()
-		ip := ClientIP(r, l.Hops)
+		ip := ""
+		if l.Key != nil {
+			ip = l.Key(r)
+		} else {
+			ip = ClientIP(r, l.Hops)
+		}
 
 		l.mu.Lock()
 		l.sweep(now)

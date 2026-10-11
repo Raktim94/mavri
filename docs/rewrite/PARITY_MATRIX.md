@@ -45,10 +45,10 @@ Generated from the TypeScript backend at commit `1308d57` by an extraction scrip
 | 35 | POST | `/api/databases` | public until first user exists | listDbLimiter | database.ts | DONE for SQLite: identical to TS in tools/contract; PostgreSQL not supported |
 | 36 | GET | `/api/databases/ready` | public |  | main.ts | IN PROGRESS: unit-tested, TS contract check pending |
 | 37 | POST | `/api/databases/test` | public until first user exists | listDbLimiter | database.ts | DONE for SQLite: identical to TS in tools/contract; PostgreSQL not supported |
-| 38 | GET | `/api/ecommerce/integrations` | session or Bearer API key |  | ecommerceIntegrations.ts | TODO |
-| 39 | POST | `/api/ecommerce/integrations` | session or Bearer API key |  | ecommerceIntegrations.ts | TODO |
-| 40 | DELETE | `/api/ecommerce/integrations/:id` | session or Bearer API key |  | ecommerceIntegrations.ts | TODO |
-| 41 | POST | `/api/ecommerce/integrations/:id/deactivate` | session or Bearer API key |  | ecommerceIntegrations.ts | TODO |
+| 38 | GET | `/api/ecommerce/integrations` | session or Bearer API key |  | ecommerceIntegrations.ts | DONE: identical to TS in tools/contract |
+| 39 | POST | `/api/ecommerce/integrations` | session or Bearer API key |  | ecommerceIntegrations.ts | DONE: identical to TS in tools/contract |
+| 40 | DELETE | `/api/ecommerce/integrations/:id` | session or Bearer API key |  | ecommerceIntegrations.ts | DONE: identical to TS in tools/contract |
+| 41 | POST | `/api/ecommerce/integrations/:id/deactivate` | session or Bearer API key |  | ecommerceIntegrations.ts | DONE: identical to TS in tools/contract |
 | 42 | GET | `/api/export` | session or Bearer API key |  | importExport.ts | DONE: identical to TS in tools/contract (Go also clears invoice_payments, which TS forgot) |
 | 43 | GET | `/api/health` | public |  | main.ts | IN PROGRESS: unit-tested, TS contract check pending |
 | 44 | POST | `/api/import` | session or Bearer API key |  | importExport.ts | DONE: identical to TS in tools/contract (Go also clears invoice_payments, which TS forgot) |
@@ -89,11 +89,11 @@ Generated from the TypeScript backend at commit `1308d57` by an extraction scrip
 | 79 | PUT | `/api/units` | session or Bearer API key |  | units.ts | DONE: identical to TS in tools/contract |
 | 80 | DELETE | `/api/units/:id` | session or Bearer API key |  | units.ts | DONE: identical to TS in tools/contract |
 | 81 | POST | `/api/units/batch` | session or Bearer API key |  | units.ts | DONE: identical to TS in tools/contract |
-| 82 | GET | `/api/v1/invoices` | session or Bearer API key |  | publicApi.ts | TODO |
-| 83 | GET | `/api/v1/invoices/:id` | session or Bearer API key |  | publicApi.ts | TODO |
-| 84 | POST | `/api/v1/orders` | session or Bearer API key |  | publicApi.ts | TODO |
+| 82 | GET | `/api/v1/invoices` | session or Bearer API key |  | publicApi.ts | DONE: identical to TS in tools/contract |
+| 83 | GET | `/api/v1/invoices/:id` | session or Bearer API key |  | publicApi.ts | DONE: identical to TS in tools/contract |
+| 84 | POST | `/api/v1/orders` | session or Bearer API key |  | publicApi.ts | DONE: identical to TS in tools/contract |
 | 85 | GET | `/api/version` | public |  | main.ts | IN PROGRESS: unit-tested, TS contract check pending |
-| 86 | POST | `/api/webhooks/ecommerce/:platform/:integrationId` | public + HMAC signature | 60 / min | ecommerceWebhooks.ts | TODO |
+| 86 | POST | `/api/webhooks/ecommerce/:platform/:integrationId` | public + HMAC signature | 60 / min | ecommerceWebhooks.ts | DONE: identical to TS in tools/contract |
 
 ## 2. Electron IPC channels
 

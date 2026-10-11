@@ -68,6 +68,7 @@ func (a *authAPI) mountInvoices(mux *http.ServeMux) {
 				httpx.Fail(w, http.StatusBadRequest, "error.missingFields")
 				return
 			}
+			invoices.PrepareRequest(data)
 			var res any
 			if update {
 				res, err = svc.Update(ctx, data)

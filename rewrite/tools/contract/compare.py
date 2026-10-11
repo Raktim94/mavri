@@ -7,13 +7,14 @@ def norm(v):
     if isinstance(v, dict):
         out = {}
         for k, x in v.items():
-            if k in ("secret", "keyPrefix"): out[k] = "<random>"
+            if k in ("secret", "keyPrefix", "webhookSecret"): out[k] = "<random>"
             elif k == "name" and isinstance(x, str) and re.fullmatch(r"key-[0-9a-f]{8}", x): out[k] = "<random>"
             else: out[k] = norm(x)
         return out
     if isinstance(v, list): return [norm(x) for x in v]
     if isinstance(v, str):
         if re.fullmatch(r"\d{4}-\d\d-\d\d[ T]\d\d:\d\d:\d\d(\.\d+)?Z?", v): return "<time>"
+        v = re.sub(r"http://127\.0\.0\.1:\d+", "<server>", v)
     return v
 
 def by_id(entry):

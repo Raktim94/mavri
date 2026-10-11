@@ -11,6 +11,7 @@ import (
 	"github.com/Raktim94/nodedr-invoice/rewrite/internal/config"
 	"github.com/Raktim94/nodedr-invoice/rewrite/internal/entity"
 	"github.com/Raktim94/nodedr-invoice/rewrite/internal/httpx"
+	"github.com/Raktim94/nodedr-invoice/rewrite/internal/secrets"
 	"github.com/Raktim94/nodedr-invoice/rewrite/internal/store"
 )
 
@@ -64,6 +65,7 @@ func newHandler(cfg config.Config, log *slog.Logger, st store.Store, open Opener
 	a.mountLayoutExport(mux)
 	a.mountPresets(mux)
 	a.mountInvoices(mux)
+	a.mountOrders(mux, cfg.TrustedProxies, &secrets.Box{Dir: cfg.DataDir, EnvKey: cfg.EncryptionKey})
 	a.mountTransfer(mux)
 	a.mountSettings(mux)
 

@@ -26,8 +26,8 @@ def call(method, path, body=None):
 
 import gzip, uuid
 
-def call_raw(method, path, data, content_type):
-    req = urllib.request.Request(base + path, method=method, data=data, headers={"Content-Type": content_type})
+def call_raw(method, path, data, content_type, headers=None):
+    req = urllib.request.Request(base + path, method=method, data=data, headers={"Content-Type": content_type, **(headers or {})})
     try:
         r = op.open(req); code, text = r.status, r.read()
     except urllib.error.HTTPError as e:
@@ -214,13 +214,94 @@ call("GET", "/api/invoices/sequence?businessId=1&clientId=1")
 call("POST", "/api/invoices/duplicate", {"invoiceId": 1, "invoiceType": "invoice"})
 call("POST", "/api/invoices/duplicate", {"invoiceId": 3, "invoiceType": "invoice"})
 call("POST", "/api/invoices/duplicate", {"invoiceId": 3, "invoiceType": "quotation"})
-call("POST", "/api/invoices/duplicate", {"invoiceId": 999, "invoiceType": "invoice"})
 call("GET", "/api/invoices/sequence?businessId=1&clientId=1")
 call("GET", "/api/invoices/sequence?businessId=1&clientId=1&invoiceType=quotation")
 call("DELETE", "/api/invoices/2")
 call("DELETE", "/api/invoices/999")
 call("GET", "/api/invoices")
 call("GET", "/api/clients")
+# ---- e-commerce integrations, signed webhooks, public API v1 -----------------------
+import hmac, hashlib, base64
+
+def sign(secret, body, scheme):
+    mac = hmac.new(secret.encode(), body, hashlib.sha256)
+    return mac.hexdigest() if scheme == "hex" else base64.b64encode(mac.digest()).decode()
+
+def hook(integ, platform, doc, secret, scheme, header, content_type="application/json", tamper=False):
+    body = json.dumps(doc, separators=(",", ":")).encode() if not isinstance(doc, bytes) else doc
+    sig = sign(secret, body, scheme)
+    if tamper: sig = sign(secret + "x", body, scheme)
+    hdrs = {header: sig} if header else {}
+    return call_raw("POST", f"/api/webhooks/ecommerce/{platform}/{integ}", body, content_type, hdrs)
+
+call("POST", "/api/ecommerce/integrations", {"name": "x", "platform": "bogus", "businessId": 1, "currencyId": 1})
+call("POST", "/api/ecommerce/integrations", {"name": 5, "platform": "generic", "businessId": 1, "currencyId": 1})
+call("POST", "/api/ecommerce/integrations", {"name": "No business", "platform": "generic", "currencyId": 1})
+call("POST", "/api/ecommerce/integrations", {"name": "   ", "platform": "generic", "businessId": 1, "currencyId": 1})
+call("POST", "/api/ecommerce/integrations", {"name": "Bad fk", "platform": "generic", "businessId": 999, "currencyId": 1})
+gen = call("POST", "/api/ecommerce/integrations", {"name": " Generic shop ", "platform": "generic", "businessId": 1, "currencyId": 1, "bankId": 1, "defaultTaxRate": 8, "autoIssue": True})["data"]
+shop = call("POST", "/api/ecommerce/integrations", {"name": "Shopify shop", "platform": "shopify", "businessId": 1, "currencyId": 1, "autoIssue": False})["data"]
+woo = call("POST", "/api/ecommerce/integrations", {"name": "Woo shop", "platform": "woocommerce", "businessId": 1, "currencyId": 1})["data"]
+call("GET", "/api/ecommerce/integrations")
+G, S, W = gen["integration"]["id"], shop["integration"]["id"], woo["integration"]["id"]
+order = {"externalOrderId": "G-1", "customer": {"name": "Zo", "email": "zo@x.test", "phone": "555", "address": "1 Main St", "countryCode": "US"},
+         "lineItems": [{"name": "Widget", "quantity": 2, "unitPriceMajor": 12.5}, {"name": "Gizmo", "quantity": "3", "unitPriceMajor": "4.10"}],
+         "shippingMajor": 5, "notes": "leave at door"}
+hook(G, "generic", order, gen["webhookSecret"], "hex", "X-Webhook-Signature")
+hook(G, "generic", order, gen["webhookSecret"], "hex", "X-Webhook-Signature")            # redelivery
+hook(G, "generic", {**order, "externalOrderId": "G-2"}, gen["webhookSecret"], "hex", "X-Webhook-Signature")   # same email: client reused
+hook(G, "generic", {**order, "externalOrderId": "G-3"}, gen["webhookSecret"], "hex", "X-Webhook-Signature", tamper=True)
+hook(G, "generic", {**order, "externalOrderId": "G-4"}, gen["webhookSecret"], "hex", None)
+hook(G, "generic", {**order, "externalOrderId": "G-5", "lineItems": []}, gen["webhookSecret"], "hex", "X-Webhook-Signature")
+hook(G, "generic", {**order, "externalOrderId": ""}, gen["webhookSecret"], "hex", "X-Webhook-Signature")
+hook(G, "generic", {**order, "externalOrderId": "G-6"}, gen["webhookSecret"], "hex", "X-Webhook-Signature", content_type="text/plain")
+hook(G, "generic", b"", gen["webhookSecret"], "hex", "X-Webhook-Signature")
+hook(G, "shopify", order, gen["webhookSecret"], "hex", "X-Webhook-Signature")             # platform does not match the integration
+hook(G, "nope", order, gen["webhookSecret"], "hex", "X-Webhook-Signature")
+hook(9999, "generic", order, gen["webhookSecret"], "hex", "X-Webhook-Signature")
+hook("abc", "generic", order, gen["webhookSecret"], "hex", "X-Webhook-Signature")
+hook(S, "shopify", {"id": 450789469, "name": "#1001", "email": "bob@shop.test", "currency": "USD",
+     "customer": {"first_name": "Bo", "last_name": "", "phone": "555"},
+     "shipping_address": {"address1": "1 Main", "city": "X", "country": "US", "country_code": "US"},
+     "line_items": [{"title": "Shirt", "quantity": 1, "price": "19.99", "sku": "S"}, {"name": "Cap", "quantity": 2, "price": "7.5"}],
+     "total_shipping_price_set": {"shop_money": {"amount": "3.50"}}, "note": "gift"}, shop["webhookSecret"], "base64", "X-Shopify-Hmac-Sha256")
+hook(S, "shopify", {"id": 450789469}, shop["webhookSecret"], "base64", "X-Shopify-Hmac-Sha256")
+hook(S, "shopify", {"id": 1, "line_items": [{"title": "T", "quantity": 1, "price": "1"}]}, shop["webhookSecret"], "base64", "X-Shopify-Hmac-Sha256", tamper=True)
+hook(W, "woocommerce", {"id": 727, "number": "727", "currency": "USD", "billing": {"first_name": "Wu", "last_name": "", "email": "wu@shop.test", "phone": "1", "city": "Y", "country": "GB"},
+     "line_items": [{"name": "Mug", "quantity": 3, "price": "4.25", "sku": "M"}], "shipping_total": "2.00", "customer_note": "fragile"},
+     woo["webhookSecret"], "base64", "X-WC-Webhook-Signature")
+call("GET", "/api/invoices?type=invoice")
+call("GET", "/api/v1/invoices")
+call("GET", "/api/v1/invoices?type=invoice&search=zo&limit=2&offset=0")
+call("GET", "/api/v1/invoices?status=open")
+call("GET", "/api/v1/invoices?search=nobody")
+call("GET", "/api/v1/invoices?limit=0&offset=-5")
+call("GET", "/api/v1/invoices?limit=1000")
+call("GET", "/api/v1/invoices?from=2030-01-01")
+call("GET", "/api/v1/invoices?from=2026-10-01&to=2026-10-02")
+call("GET", "/api/v1/invoices?from=garbage")
+last = call("GET", "/api/v1/invoices?search=zo&limit=1")["data"]["items"]
+if last: call("GET", f"/api/v1/invoices/{last[0]['id']}")
+call("GET", "/api/v1/invoices/999999")
+call("GET", "/api/v1/invoices/abc")
+v1 = {"integrationId": G, "externalOrderId": "API-1", "customer": {"name": "Yi", "email": "yi@x.test"},
+      "lineItems": [{"name": "Widget", "quantity": 1, "unitPriceMajor": 12.5}], "shippingMajor": 0, "taxRatePercent": 20}
+call("POST", "/api/v1/orders", v1)
+call("POST", "/api/v1/orders", v1)
+call("POST", "/api/v1/orders", {**v1, "externalOrderId": "API-2", "lineItems": []})
+call("POST", "/api/v1/orders", {**v1, "externalOrderId": "API-3", "lineItems": [{"name": "X", "quantity": 0, "unitPriceMajor": 1}]})
+call("POST", "/api/v1/orders", {**v1, "externalOrderId": "API-4", "customer": {}})
+call("POST", "/api/v1/orders", {**v1, "externalOrderId": ""})
+call("POST", "/api/v1/orders", {**v1, "integrationId": 9999})
+call("POST", "/api/v1/orders", {k: v for k, v in v1.items() if k != "integrationId"})
+call("POST", "/api/ecommerce/integrations/%d/deactivate" % G)
+hook(G, "generic", {**order, "externalOrderId": "G-7"}, gen["webhookSecret"], "hex", "X-Webhook-Signature")
+call("POST", "/api/v1/orders", {**v1, "externalOrderId": "API-5"})
+call("GET", "/api/ecommerce/integrations")
+call("DELETE", "/api/ecommerce/integrations/%d" % S)
+call("DELETE", "/api/ecommerce/integrations/999")
+call("GET", "/api/ecommerce/integrations")
+call("GET", "/api/invoices?type=invoice")
 # Auth edge cases that do not depend on session ids.
 call("POST", "/api/auth/login", {"email": "me@example.com", "password": "wrong-Password1"})
 call("POST", "/api/auth/login", {"email": "nobody@example.com", "password": "Correct-Horse-9"})
@@ -234,8 +315,10 @@ call("GET", "/api/auth/api-keys")
 call("POST", "/api/auth/logout")
 call("GET", "/api/auth/me")
 call("GET", "/api/clients")
-# The TypeScript server crashes on these two and is left inside an open
-# transaction, so they run last.
+# The TypeScript server crashes on the next two and is left inside an open
+# transaction, and duplicating an unknown invoice leaves it in one too (every
+# later write is then silently rolled back), so these run last.
+call("POST", "/api/invoices/duplicate", {"invoiceId": 999, "invoiceType": "invoice"})
 call("POST", "/api/invoices", {**snaps("Y"), "invoiceBusinessSnapshot": None})
 call("POST", "/api/invoices", snaps("0003", invoiceCustomization=None, discountType="bogus"))
 json.dump(log, open(out, "w"), indent=1)
