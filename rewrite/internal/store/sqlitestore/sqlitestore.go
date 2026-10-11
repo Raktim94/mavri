@@ -14,6 +14,7 @@ import (
 
 	_ "modernc.org/sqlite" // pure-Go driver, registers "sqlite"
 
+	"github.com/Raktim94/nodedr-invoice/rewrite/internal/schema"
 	"github.com/Raktim94/nodedr-invoice/rewrite/internal/store"
 )
 
@@ -22,40 +23,8 @@ type Store struct{ db *sql.DB }
 
 var _ store.Store = (*Store)(nil)
 
-const schema = `
-CREATE TABLE IF NOT EXISTS users (
-  "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-  "email" TEXT NOT NULL UNIQUE,
-  "passwordHash" TEXT NOT NULL,
-  "role" TEXT NOT NULL DEFAULT 'owner',
-  "failedLoginCount" INTEGER NOT NULL DEFAULT 0,
-  "lockedUntil" DATETIME,
-  "lastLoginAt" DATETIME,
-  "createdAt" DATETIME NOT NULL DEFAULT (datetime('now')),
-  "updatedAt" DATETIME NOT NULL DEFAULT (datetime('now'))
-);
-CREATE TABLE IF NOT EXISTS api_keys (
-  "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-  "name" TEXT NOT NULL,
-  "keyPrefix" TEXT NOT NULL,
-  "keyHash" TEXT NOT NULL UNIQUE,
-  "createdByUserId" INTEGER,
-  "lastUsedAt" DATETIME,
-  "revokedAt" DATETIME,
-  "createdAt" DATETIME NOT NULL DEFAULT (datetime('now')),
-  FOREIGN KEY("createdByUserId") REFERENCES users("id") ON DELETE SET NULL
-);
-CREATE INDEX IF NOT EXISTS idx_api_keys_revokedAt ON api_keys("revokedAt");
-CREATE TABLE IF NOT EXISTS sessions (
-  "sid" TEXT PRIMARY KEY,
-  "data" TEXT NOT NULL,
-  "expiresAt" DATETIME NOT NULL
-);
-CREATE INDEX IF NOT EXISTS idx_sessions_expiresAt ON sessions("expiresAt");
-`
-
 // Open opens (creating if needed) the database file at path and makes sure
-// the authentication tables exist. Use ":memory:" for a throwaway database.
+// the schema exists (see package schema). Use ":memory:" for a throwaway database.
 func Open(path string) (*Store, error) {
 	q := url.Values{}
 	for _, p := range []string{"foreign_keys(1)", "busy_timeout(5000)", "journal_mode(WAL)"} {
@@ -68,9 +37,9 @@ func Open(path string) (*Store, error) {
 	// One connection: SQLite allows a single writer anyway, and it keeps
 	// ":memory:" databases from splitting into one per connection.
 	db.SetMaxOpenConns(1)
-	if _, err := db.Exec(schema); err != nil {
+	if err := schema.Apply(db); err != nil {
 		db.Close()
-		return nil, fmt.Errorf("sqlitestore: create schema: %w", err)
+		return nil, err
 	}
 	return &Store{db: db}, nil
 }

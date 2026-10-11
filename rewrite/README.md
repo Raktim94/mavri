@@ -18,6 +18,7 @@ Builder project, so the repository `LICENSE` and attribution in the root
 | `internal/config` | Environment settings (same variable names as the TS server) |
 | `internal/httpx` | Response envelope, security headers, CORS, body limit, rate limiter |
 | `internal/api` | Route wiring and the `/api/auth/*` handlers (setup, login, logout, me, API keys) |
+| `internal/schema` | `baseline.sql`: full schema and seed rows after TS migration 32, applied to an empty database; existing databases are only checked. Verified both ways: the TS server opens a Go-created database and logs in the Go-created account (in dev mode it records its own `.ts` migration names, which is harmless) |
 | `internal/store` | Persistence interface for users, API keys and sessions, plus an in-memory version for tests. `sqlitestore` is the SQLite version (same tables as the TS backend); PostgreSQL is still to do. Both pass one shared contract test (`storetest`) |
 | `internal/scrypt` | scrypt (RFC 7914), standard library only, checked against Node |
 | `internal/auth` | Password hashing, API-key secrets, password policy, lockout rules |
@@ -64,8 +65,8 @@ The auth routes (setup, login, logout, me, API keys) run on SQLite and were
 checked by hand against a running server, including a session surviving a
 restart. They are not yet compared against the TypeScript backend.
 
-Not started: PostgreSQL, the migrations runner (only the auth tables are
-created), every resource route, invoices, import/export, MCP, e-commerce
+Not started: PostgreSQL, the migrations runner (a fresh database gets the
+baseline; later schema changes still need a Go migration mechanism), every resource route, invoices, import/export, MCP, e-commerce
 webhooks, desktop bridge.
 
 Not yet verified: that response headers match the TypeScript server byte for
