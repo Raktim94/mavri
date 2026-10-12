@@ -26,6 +26,8 @@ export const resources: Resource[] = [
       f('address', 'Address', { kind: 'textarea' }),
       f('vatCode', 'VAT / tax ID'),
       f('countryCode', 'Country code'),
+      f('peppolEndpointSchemeId', 'E-invoice address scheme (e.g. 0088)'),
+      f('peppolEndpointId', 'E-invoice address ID'),
       f('buyerReference', 'Buyer reference'),
       f('taxExempt', 'Tax exempt', { kind: 'checkbox' }),
       f('additional', 'Additional info', { kind: 'textarea' })
@@ -43,6 +45,8 @@ export const resources: Resource[] = [
       f('website', 'Website'),
       f('vatCode', 'VAT / tax ID'),
       f('countryCode', 'Country code'),
+      f('peppolEndpointSchemeId', 'E-invoice address scheme (e.g. 0088)'),
+      f('peppolEndpointId', 'E-invoice address ID'),
       f('additional', 'Additional info', { kind: 'textarea' })
     ]
   },

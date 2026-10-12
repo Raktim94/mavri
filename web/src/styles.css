@@ -353,3 +353,26 @@ input:not([type]),
     --muted: #444;
   }
 }
+.settings {
+  display: grid;
+  gap: 16px;
+  max-width: 760px;
+}
+.settings h2 {
+  margin: 0;
+}
+code {
+  background: var(--line);
+  padding: 1px 5px;
+  border-radius: 4px;
+  word-break: break-all;
+}
+.file {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.file input {
+  max-width: 200px;
+}

@@ -14,6 +14,7 @@ import {
   totalsOf,
   type Kind
 } from '../invoiceTypes';
+import { featureOn, useSettings } from '../settings';
 import { formatMoney } from '../money';
 
 const addressLines = (v: unknown) => text(v).split('\n').filter(Boolean);
@@ -24,6 +25,7 @@ export function InvoiceView({ kind }: { kind: Kind }) {
   const nav = useNavigate();
   const [inv, setInv] = useState<Row | null>(null);
   const [error, setError] = useState('');
+  const settings = useSettings();
 
   useEffect(() => {
     api
@@ -45,6 +47,39 @@ export function InvoiceView({ kind }: { kind: Kind }) {
   const lines = linesOf(inv);
   const paid = paidCents(inv);
   const money = (c: number) => formatMoney(c, cur);
+
+  const problems: Record<string, string> = {
+    NotSupported: 'This document type is not supported by that e-invoice format.',
+    BusinessSchema: 'Add the e-invoice address (scheme and ID) to the business.',
+    ClientSchema: 'Add the e-invoice address (scheme and ID) to the client.',
+    ClientReference: 'Add a buyer reference to the client.',
+    ClientCC: 'Add a country code to the client.',
+    BusinessCC: 'Add a country code to the business.',
+    DueDate: 'Set a due date.',
+    BusinessVATCode: 'Add a tax ID to the business.',
+    BusinessEmail: 'Add an email address to the business.',
+    BusinessPhone: 'Add a phone number to the business.',
+    ClientAddress: 'Add an address to the client.'
+  };
+  const explain = (key: string) => {
+    const m = /^error\.(?:peppol|xrechnung)(\w+)$/.exec(key);
+    return (m && problems[m[1]]) || `The e-invoice could not be made (${key}).`;
+  };
+
+  async function downloadXml(profile: string) {
+    setError('');
+    const res = await fetch(`/api/invoices/xml?invoiceId=${id}&einvoice=${profile}`, { credentials: 'same-origin' });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      setError(explain(String(body.message ?? res.status)));
+      return;
+    }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(await res.blob());
+    a.download = `${profile}-${text(inv!.invoiceFullNumber)}.xml`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
 
   async function convert() {
     try {
@@ -74,7 +109,8 @@ export function InvoiceView({ kind }: { kind: Kind }) {
         <h1>{text(inv.invoiceFullNumber)}</h1>
         <Link to={`${base}`}>Back</Link>
         <Link to={`${base}/${id}/edit`}>Edit</Link>
-        <a href={`/api/invoices/xml?invoiceId=${id}&einvoice=ubl`}>UBL XML</a>
+        {featureOn(settings, 'ublON') && <button onClick={() => downloadXml('ubl21')}>UBL XML</button>}
+        {featureOn(settings, 'xrechnungON') && <button onClick={() => downloadXml('xrechnung')}>XRechnung XML</button>}
         {kind === 'quotation' && <button onClick={convert}>Convert to invoice</button>}
         <button className="primary" onClick={() => window.print()}>
           Print / save as PDF

@@ -4,7 +4,15 @@ import { api, type Row } from '../api';
 import { asNumber, currencyOf, day, statusLabel, statuses, text, totalsOf, type Kind } from '../invoiceTypes';
 import { formatMoney, fromCents, toCents } from '../money';
 
-type Catalog = { businesses: Row[]; clients: Row[]; currencies: Row[]; banks: Row[]; items: Row[] };
+type Catalog = {
+  businesses: Row[];
+  clients: Row[];
+  currencies: Row[];
+  banks: Row[];
+  items: Row[];
+  presets: Row[];
+  styles: Row[];
+};
 
 const pick = (src: Row, map: Record<string, string>) =>
   Object.fromEntries(Object.entries(map).map(([to, from]) => [to, src[from] ?? null]));
@@ -84,15 +92,19 @@ export function InvoiceEditor({ kind }: { kind: Kind }) {
 
   useEffect(() => {
     (async () => {
-      const [businesses, clients, currencies, banks, items] = await Promise.all(
-        ['businesses', 'clients', 'currencies', 'banks', 'items'].map(p => api.get<Row[]>(`/api/${p}`))
+      const [businesses, clients, currencies, banks, items, presets, styles] = await Promise.all(
+        ['businesses', 'clients', 'currencies', 'banks', 'items', 'presets', 'styleProfiles'].map(p =>
+          api.get<Row[]>(`/api/${p}`).catch(() => [] as Row[])
+        )
       );
       setCat({
         businesses: businesses.filter(r => !r.isArchived),
         clients: clients.filter(r => !r.isArchived),
         currencies: currencies.filter(r => !r.isArchived),
         banks: banks.filter(r => !r.isArchived),
-        items: items.filter(r => !r.isArchived)
+        items: items.filter(r => !r.isArchived),
+        presets: presets.filter(r => !r.isArchived),
+        styles: styles.filter(r => !r.isArchived)
       });
       if (id) {
         const all = await api.get<Row[]>(`/api/invoices?type=${kind}`);
@@ -158,6 +170,60 @@ export function InvoiceEditor({ kind }: { kind: Kind }) {
     const b = cat!.banks.find(x => String(x.id) === v);
     if (!b) return set({ bankId: null, invoiceBankSnapshot: {} });
     set({ bankId: b.id, invoiceBankSnapshot: withSnap(inv!.invoiceBankSnapshot, bankSnapshot(b)) });
+  }
+  function chooseStyle(v: string) {
+    const st = cat!.styles.find(x => String(x.id) === v);
+    if (!st) return set({ styleProfilesId: null });
+    const keys = [
+      'color',
+      'logoSize',
+      'fontSize',
+      'fontFamily',
+      'tableHeaderStyle',
+      'tableRowStyle',
+      'pageFormat',
+      'labelUpperCase',
+      'showQuantity',
+      'showUnit',
+      'showRowNo'
+    ];
+    set({
+      styleProfilesId: st.id,
+      layoutId: st.layoutId ?? null,
+      invoiceStyleProfileSnapshot: withSnap(inv!.invoiceStyleProfileSnapshot, { styleProfileName: st.name }),
+      invoiceCustomization: withSnap(inv!.invoiceCustomization, Object.fromEntries(keys.map(k => [k, st[k]])))
+    });
+  }
+  function applyPreset(v: string) {
+    const pr = cat!.presets.find(x => String(x.id) === v);
+    if (!pr) return;
+    const b = cat!.businesses.find(x => x.id === pr.businessId);
+    const c = cat!.clients.find(x => x.id === pr.clientId);
+    const cu = cat!.currencies.find(x => x.id === pr.currencyId);
+    const ba = cat!.banks.find(x => x.id === pr.bankId);
+    const st = cat!.styles.find(x => x.id === pr.styleProfilesId);
+    const next: Row = { ...inv!, language: pr.language ?? inv!.language };
+    for (const k of ['customerNotes', 'thanksNotes', 'termsConditionNotes']) if (pr[k]) next[k] = pr[k];
+    if (b)
+      Object.assign(next, {
+        businessId: b.id,
+        invoiceBusinessSnapshot: withSnap(next.invoiceBusinessSnapshot, businessSnapshot(b))
+      });
+    if (c)
+      Object.assign(next, {
+        clientId: c.id,
+        invoiceClientSnapshot: withSnap(next.invoiceClientSnapshot, clientSnapshot(c))
+      });
+    if (cu)
+      Object.assign(next, {
+        currencyId: cu.id,
+        currencyFormat: cu.format,
+        invoiceCurrencySnapshot: withSnap(next.invoiceCurrencySnapshot, currencySnapshot(cu))
+      });
+    if (ba) Object.assign(next, { bankId: ba.id, invoiceBankSnapshot: bankSnapshot(ba) });
+    setInv(next);
+    if (st) setTimeout(() => chooseStyle(String(st.id)), 0);
+    refreshNumber(b?.id, c?.id);
   }
   async function refreshNumber(businessId: unknown, clientId: unknown) {
     if (id || !businessId || !clientId) return;
@@ -313,11 +379,21 @@ export function InvoiceEditor({ kind }: { kind: Kind }) {
           {error}
         </p>
       )}
+      {!id && cat.presets.length > 0 && (
+        <label>
+          Start from a preset
+          {sel(undefined, cat.presets, r => text(r.name), applyPreset, 'None')}
+        </label>
+      )}
       <div className="grid2">
         <label>Business{sel(inv.businessId, cat.businesses, r => text(r.name), chooseBusiness)}</label>
         <label>Client{sel(inv.clientId, cat.clients, r => text(r.name), chooseClient)}</label>
         <label>Currency{sel(inv.currencyId, cat.currencies, r => `${r.code} ${r.symbol}`, chooseCurrency)}</label>
         <label>Bank account{sel(inv.bankId, cat.banks, r => text(r.name), chooseBank, 'None')}</label>
+        <label>
+          Style
+          {sel(inv.styleProfilesId, cat.styles, r => text(r.name), chooseStyle, 'Default')}
+        </label>
         <label>
           Number
           <input value={text(inv.invoiceNumber)} onChange={e => set({ invoiceNumber: e.target.value })} required />
