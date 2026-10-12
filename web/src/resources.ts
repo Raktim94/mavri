@@ -72,7 +72,7 @@ export const resources: Resource[] = [
       f('code', 'Code', { required: true, list: true }),
       f('symbol', 'Symbol', { required: true, list: true }),
       f('text', 'Name', { required: true, list: true }),
-      f('format', 'Format (e.g. 1,234.56)', { required: true }),
+      f('format', 'Format (e.g. {symbol}{amount})', { required: true }),
       f('subunit', 'Subunit', { kind: 'number' })
     ]
   },

@@ -221,3 +221,135 @@ td.actions button {
     margin: 0;
   }
 }
+.num {
+  text-align: right;
+}
+.filters {
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+input[type='search'],
+input[type='date'],
+select,
+input:not([type]),
+.lines input {
+  font: inherit;
+  padding: 7px 9px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+}
+.grid2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+  margin: 12px 0;
+}
+.editor {
+  display: grid;
+  gap: 8px;
+  max-width: 1000px;
+}
+.editor h2 {
+  margin-top: 16px;
+}
+.lines input.short {
+  width: 76px;
+}
+.lines td {
+  padding: 6px;
+}
+.totals {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 24px;
+  margin-left: auto;
+  width: min(320px, 100%);
+}
+.totals dt,
+.totals dd {
+  margin: 0;
+}
+.totals dd {
+  text-align: right;
+}
+.big {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+.badge {
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-size: 0.78rem;
+  background: var(--line);
+}
+.badge.paid {
+  background: #2b8a3e;
+  color: #fff;
+}
+.badge.unpaid,
+.badge.open {
+  background: #e8590c;
+  color: #fff;
+}
+.badge.partially {
+  background: #f08c00;
+  color: #fff;
+}
+.paper {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 28px;
+  display: grid;
+  gap: 14px;
+  max-width: 860px;
+}
+.paper p {
+  margin: 0;
+}
+.paper h3 {
+  margin: 0 0 4px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.paper-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+.logo {
+  max-height: 64px;
+  max-width: 160px;
+}
+.bar a {
+  color: var(--accent);
+  text-decoration: none;
+}
+@media print {
+  .noprint,
+  nav {
+    display: none !important;
+  }
+  .shell {
+    display: block;
+  }
+  body {
+    background: #fff;
+    color: #000;
+  }
+  .paper {
+    border: 0;
+    padding: 0;
+    max-width: none;
+  }
+  :root {
+    --panel: #fff;
+    --text: #000;
+    --line: #ccc;
+    --muted: #444;
+  }
+}
