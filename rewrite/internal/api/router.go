@@ -1,5 +1,4 @@
-// Package api wires the REST routes. Only the public service endpoints exist
-// so far; every other route is tracked in docs/rewrite/PARITY_MATRIX.md.
+// Package api wires the REST routes.
 package api
 
 import (

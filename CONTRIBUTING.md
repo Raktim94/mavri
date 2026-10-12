@@ -33,8 +33,7 @@ licensed under the same [AGPL-3.0](./LICENSE) as the project; you keep copyright
 
 ## Before you start
 
-Read the [`README.md`](./README.md) and skim [`API.md`](./docs/reference/API.md), [`LAYOUT.md`](./docs/reference/LAYOUT.md) and
-[`DESIGN.md`](./docs/reference/DESIGN.md). Keep contributions aligned with "self-hosted, data-you-own invoicing"
+Read the [`README.md`](./README.md) and skim [`API.md`](./docs/API.md). Keep contributions aligned with "self-hosted, data-you-own invoicing"
 rather than expanding into multi-tenant SaaS territory. For anything big, open an issue first.
 
 ## Development setup
@@ -93,23 +92,23 @@ docs/            Tutorial, API and layout references, screenshots
 ## Working on the API and MCP server
 
 - Public endpoints live under `/api/v1` (`controllers/publicApi.ts`) and use Bearer API keys.
-  Keep them versioned, idempotent where they create data, and documented in `docs/reference/API.md`.
+  Keep them versioned, idempotent where they create data, and documented in `docs/API.md`.
 - Add a matching MCP tool when you add a capability that agents would want, sharing the same
   service function (see `services/invoiceFetcher.ts`).
 - Paginate list endpoints and cap `limit`.
 
 ## Working on the UI and design
 
-The visual language is in [`DESIGN.md`](./docs/reference/DESIGN.md) and implemented centrally in
-`renderer/shared/components/layout/theme/theme.ts`. Change tokens there, not per component, and
-check both light and dark mode. PDF output must keep working with user-chosen colors.
+The interface is plain React and CSS in `web/src`. Colours are CSS variables at the top of
+`web/src/styles.css`; change tokens there, not per component, and check both light and dark mode.
+The printed invoice must stay readable in black on white.
 
 ## Making a change
 
 1. Fork and create a branch: `git checkout -b feature/short-description`
-2. Make a focused change with tests where practical (`*.spec.ts` next to the code).
+2. Make a focused change with tests where practical (`*.test.ts` next to the code).
 3. Run the checks above.
-4. Update docs (`README.md`, `docs/reference/API.md`, `docs/reference/LAYOUT.md`) if behavior changed.
+4. Update docs (`README.md`, `docs/API.md`, `docs/GUIDE.md`) if behavior changed.
 
 ## Commit messages
 

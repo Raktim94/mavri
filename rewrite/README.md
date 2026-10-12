@@ -6,9 +6,7 @@ replaced an Express/Electron backend, which has been removed from the
 repository (see git history before the commit "remove the Node backend and the
 desktop app" if you need it).
 
-It was written against the behaviour recorded in
-[`docs/rewrite/PARITY_MATRIX.md`](../docs/rewrite/PARITY_MATRIX.md), not
-translated line by line.
+It was written to match the behaviour of that backend, not translated line by line.
 
 ## Layout
 
@@ -103,7 +101,7 @@ server crashed and Go answers cleanly). They are in git history.
 REST routes, the 20 MCP tools, the schema and its 33 migrations (as one
 baseline, plus a runner for later changes), sessions, API keys, encrypted
 webhook secrets, import/export, e-commerce webhooks and the e-invoice XML.
-`docs/rewrite/PARITY_MATRIX.md` lists every route and how it was verified.
+Each route is covered by Go tests.
 
 Also written but **not yet reachable from any route**, because the old backend
 had no equivalent: exact-arithmetic invoice totals (`money`), India GST
