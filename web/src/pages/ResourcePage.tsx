@@ -15,6 +15,7 @@ export function ResourcePage({ res }: { res: Resource }) {
   const [editing, setEditing] = useState<Row | null>(null);
   const [showArchived, setShowArchived] = useState(false);
   const [error, setError] = useState('');
+  const [choices, setChoices] = useState<Record<string, Row[]>>({});
 
   const load = useCallback(async () => {
     try {
@@ -23,6 +24,17 @@ export function ResourcePage({ res }: { res: Resource }) {
       setError('Could not load the list.');
     }
   }, [res.path]);
+
+  useEffect(() => {
+    const sources = [
+      ...new Set(res.fields.flatMap(f => (f.options && !Array.isArray(f.options) ? [f.options.from] : [])))
+    ];
+    Promise.all(
+      sources.map(src => api.get<Row[]>(`/api/${src}`).then(r => [src, r.filter(x => !x.isArchived)] as const))
+    )
+      .then(pairs => setChoices(Object.fromEntries(pairs)))
+      .catch(() => setError('Could not load the choices.'));
+  }, [res]);
 
   useEffect(() => {
     setRows(null);
@@ -128,7 +140,42 @@ export function ResourcePage({ res }: { res: Resource }) {
             {res.fields.map(fl => (
               <label key={fl.name} className={fl.kind === 'checkbox' ? 'inline' : undefined}>
                 {fl.label}
-                {fl.kind === 'textarea' ? (
+                {fl.kind === 'select' ? (
+                  <select
+                    required={fl.required}
+                    value={String(editing[fl.name] ?? '')}
+                    onChange={e =>
+                      setEditing({
+                        ...editing,
+                        [fl.name]:
+                          e.target.value === ''
+                            ? null
+                            : Array.isArray(fl.options)
+                              ? e.target.value
+                              : Number(e.target.value)
+                      })
+                    }
+                  >
+                    <option value="">{fl.required ? 'Choose…' : 'None'}</option>
+                    {Array.isArray(fl.options)
+                      ? fl.options.map(o => (
+                          <option key={o} value={o}>
+                            {o}
+                          </option>
+                        ))
+                      : (choices[fl.options?.from ?? ''] ?? []).map(r => (
+                          <option key={String(r.id)} value={String(r.id)}>
+                            {String(r[fl.options && !Array.isArray(fl.options) ? fl.options.label : 'name'] ?? r.id)}
+                          </option>
+                        ))}
+                  </select>
+                ) : fl.kind === 'color' ? (
+                  <input
+                    type="color"
+                    value={String(editing[fl.name] ?? '#006400')}
+                    onChange={e => setEditing({ ...editing, [fl.name]: e.target.value })}
+                  />
+                ) : fl.kind === 'textarea' ? (
                   <textarea
                     rows={3}
                     value={String(editing[fl.name] ?? '')}
