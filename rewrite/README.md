@@ -8,8 +8,7 @@ desktop app" if you need it).
 
 It was written against the behaviour recorded in
 [`docs/rewrite/PARITY_MATRIX.md`](../docs/rewrite/PARITY_MATRIX.md), not
-translated line by line, and contains no code from the project Mavri began as
-(see `THIRD-PARTY-NOTICES.md` in the repository root).
+translated line by line.
 
 ## Layout
 
@@ -51,7 +50,7 @@ DEFAULT_DATABASE=invoice.db DB_DIRECTORY=data PORT=3000 go run ./cmd/server
 
 Without `DEFAULT_DATABASE` the server starts with no database and the app's
 database chooser opens one (`/api/databases`). Set `FRONTEND_DIR=../dist-fe`
-(after `npm run build:react` in the repository root) to serve the web app from
+(after `npm run build` in the repository root) to serve the web app from
 the same port. A database written by the Node version opens as is, as long as
 that version had applied all its migrations.
 

@@ -1,9 +1,8 @@
 // Package money does invoice arithmetic exactly, using rational numbers.
 //
 // All amounts here are in minor units (cents) unless stated otherwise. The
-// functions follow the same steps as the renderer's invoice maths
-// (src/renderer/shared/utils/invoiceFunctions.ts) but never lose precision
-// to binary floating point. Results are exact rationals; rounding to whole
+// functions follow the usual invoice steps (line totals, tax, discount,
+// surcharge) but never lose precision to binary floating point. Results are exact rationals; rounding to whole
 // minor units is explicit (Round) and uses round-half-up, matching
 // JavaScript's Math.round for the values that matter.
 //

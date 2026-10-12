@@ -71,10 +71,9 @@ npx tsc -p tsconfig.app.json --noEmit
 ## Project structure
 
 ```
-src/renderer/    React app (pages, state, shared UI, i18n)
+web/             React app (Vite, plain CSS)
 rewrite/         Go backend: cmd/server, cmd/mcp, internal/* (API, SQLite, schema, MCP, e-invoice)
 casaos/          CasaOS/ZimaOS app manifest
-scripts/         Developer helpers (translation sorting)
 docs/            Tutorial, API and layout references, screenshots
 ```
 
@@ -89,7 +88,6 @@ docs/            Tutorial, API and layout references, screenshots
   invoice read live data for those.
 - **Security bar:** anything touching auth, API keys, webhooks, secrets or input validation is
   reviewed strictly. Webhooks verify HMAC over raw bytes; secrets are never logged or returned.
-- **i18n:** add every new UI string to all files in `src/renderer/i18n` (`npm run sort:i18n`).
 - **No secrets, personal data or generated build output** in commits.
 
 ## Working on the API and MCP server

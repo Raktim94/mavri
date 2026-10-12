@@ -7,11 +7,8 @@ FROM node:20-alpine AS web
 WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm install
-COPY . .
-# Optional: only for deployments where the API lives on another origin.
-ARG VITE_API_URL
-ENV VITE_API_URL=$VITE_API_URL
-RUN npm run build:react
+COPY web ./web
+RUN npm run build
 
 FROM golang:1.24-alpine AS server
 WORKDIR /src

@@ -88,7 +88,7 @@ func (c tsCase) invoice(t *testing.T) Invoice {
 }
 
 // TestAgainstTypeScript compares the exact Go arithmetic with the real
-// renderer functions on synthetic invoices (see tools/difftest/gen.mjs).
+// reference calculations on synthetic invoices.
 //
 // Known, accepted divergence: the TypeScript code spreads the invoice
 // discount over lines with Math.round((line/subtotal)*discount) in binary

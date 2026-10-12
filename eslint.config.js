@@ -7,17 +7,7 @@ import tseslint from 'typescript-eslint';
 
 export default [
   {
-    ignores: [
-      'rewrite/**',
-      'dist-fe/**',
-      'release/**',
-      'coverage/**',
-      'index.html',
-      '.eslintrc.js',
-      'public/**',
-      'public/mockServiceWorker.js',
-      '.github/**'
-    ]
+    ignores: ['rewrite/**', 'dist-fe/**', 'coverage/**', 'node_modules/**', '.github/**']
   },
 
   js.configs.recommended,
