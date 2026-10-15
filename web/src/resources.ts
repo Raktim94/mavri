@@ -53,6 +53,7 @@ export const resources: Resource[] = [
       ...partyFields,
       f('buyerReference', 'Buyer reference'),
       f('taxExempt', 'Tax exempt', { kind: 'checkbox' }),
+      f('noReminders', 'Never send this customer automatic payment reminders', { kind: 'checkbox' }),
       f('note', 'Private note', { kind: 'textarea' })
     ]
   },

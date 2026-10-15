@@ -286,3 +286,33 @@ func TestConfigValidationAndNames(t *testing.T) {
 		t.Fatal("validation must not create files")
 	}
 }
+
+// A backup made before sharing, history and schedules existed still restores.
+func TestRestoreOfAnOlderBackupFormat(t *testing.T) {
+	src := seed(t)
+	ctx := context.Background()
+	f, _ := Export(ctx, src.DB)
+	for _, newer := range []string{"recurring", "share_links", "audit_log"} {
+		delete(f.Tables, newer)
+	}
+	for _, row := range f.Tables["parties"] {
+		delete(row, "no_reminders") // the column did not exist yet
+	}
+	raw, _ := json.Marshal(f)
+	parsed, err := Parse(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dst, _ := db.Open(":memory:")
+	defer dst.Close()
+	dst.ExecContext(ctx, `INSERT INTO audit_log (at, source, action, entity) VALUES ('2026-01-01T00:00:00Z', 'ui', 'created', 'x')`)
+	if err := Restore(ctx, dst, parsed); err != nil {
+		t.Fatalf("restore of an older file: %v", err)
+	}
+	var docs, noRem int
+	dst.QueryRow(`SELECT COUNT(*) FROM documents`).Scan(&docs)
+	dst.QueryRow(`SELECT COUNT(*) FROM parties WHERE no_reminders <> 0`).Scan(&noRem)
+	if docs != 2 || noRem != 0 {
+		t.Fatalf("documents %d, parties opted out of reminders %d", docs, noRem)
+	}
+}

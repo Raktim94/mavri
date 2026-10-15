@@ -36,15 +36,16 @@ Mavri helps freelancers and small businesses create invoices and quotes without 
 
 ## Why Mavri
 
-| | |
-| --- | --- |
-| **Polished documents** | Your logo, colours and fonts on every invoice and quote. Print to PDF from the browser, or export UBL 2.1 and XRechnung XML. |
-| **Yours alone** | One container, one data folder, no accounts with anyone else, no analytics, no tracking. One-file backup and restore. |
-| **Set up in a minute** | A guided first run takes you from account to business, logo, currency, bank details and first customer, with every step skippable. |
-| **Stays current** | An **Update now** button in Settings moves your install to the newest release in seconds and keeps your data. |
-| **Plays well with others** | Versioned REST API, signed Shopify and WooCommerce webhooks, and an MCP server for AI tools. |
-| **A real dashboard** | Outstanding, overdue and billed totals, a setup checklist and your latest invoices the moment you sign in. Status tabs with counts, overdue flags, and friendly empty states everywhere. |
-| **Looks the part** | Light and dark themes, subtle motion that respects your system settings, and an invoice view built to be shown to clients. See the [design notes](docs/DESIGN.md). |
+|                            |                                                                                                                                                                                          |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Polished documents**     | Your logo, colours and fonts on every invoice and quote. Print to PDF from the browser, or export UBL 2.1 and XRechnung XML.                                                             |
+| **Yours alone**            | One container, one data folder, no accounts with anyone else, no analytics, no tracking. One-file backup and restore.                                                                    |
+| **Set up in a minute**     | A guided first run takes you from account to business, logo, currency, bank details and first customer, with every step skippable.                                                       |
+| **Gets you paid**          | Send invoices by email or a secure link, let clients pay online with Stripe, chase late payments with automatic reminders, and repeat invoices on a schedule.                            |
+| **Stays current**          | An **Update now** button in Settings moves your install to the newest release in seconds and keeps your data.                                                                            |
+| **Plays well with others** | Documented REST API (OpenAPI), signed webhooks in and out, CSV import and export, and an MCP server for AI tools that asks before it acts.                                               |
+| **A real dashboard**       | Outstanding, overdue and billed totals, a setup checklist and your latest invoices the moment you sign in. Status tabs with counts, overdue flags, and friendly empty states everywhere. |
+| **Looks the part**         | Light and dark themes, subtle motion that respects your system settings, and an invoice view built to be shown to clients. See the [design notes](docs/DESIGN.md).                       |
 
 <p align="center">
   <img src="docs/screenshots/invoice-view.png" alt="A printable invoice with logo, amount due and a Made with Mavri footer" width="49%">
@@ -55,7 +56,7 @@ Mavri helps freelancers and small businesses create invoices and quotes without 
   <img src="docs/screenshots/invoices-dark.png" alt="Mavri in dark mode" width="49%">
 </p>
 
-*Screenshots use fictional demo data. The standalone [Mavri logo](mavri-logo.png) is available for project artwork.*
+_Screenshots use fictional demo data. The standalone [Mavri logo](mavri-logo.png) is available for project artwork._
 
 ## Get started
 
@@ -105,16 +106,21 @@ On CasaOS (with the bundled updater container) open **Settings → Updates** and
 - **Documents:** a printable page you can save as PDF from the browser, bank details, notes and terms, UBL 2.1 and XRechnung XML downloads.
 - **Records:** clients, businesses, items, bank accounts, currencies, categories and units, with archive and restore. Presets and styles speed up new documents.
 - **Reports:** billed, paid and outstanding by month and by client.
-- **Portability:** one-file backup and restore.
-- **Integrations:** versioned REST API with API keys, signed webhooks from Shopify, WooCommerce or any sender, and an MCP server for AI clients.
+- **Sharing and email:** a secure link per document that clients open without an account to read, print or save as PDF (and to accept or decline a quote); a Share button with the system share sheet, WhatsApp and copy link; email through your own SMTP server with editable templates and a delivery log.
+- **Getting paid:** clients pay the balance on Stripe's own page and Mavri records the payment when Stripe confirms; automatic reminders before and after the due date, per-customer opt-out, and a Remind button.
+- **Automation:** recurring invoices with a preview, "when a quote is accepted, draft an invoice", and bulk email, remind, mark paid and void.
+- **History:** who changed what, when and from where (app, API, AI assistant, client link, automatic), exportable as CSV.
+- **Data:** CSV import (with a check before anything is written) and export for customers, products, invoices and payments; scheduled, encrypted backups to this server and to S3-compatible storage with a guided restore.
+- **Operations:** a health page (database check, storage, backup age, webhook and email failures, recent errors).
+- **Integrations:** versioned REST API described in OpenAPI, API keys, signed webhooks in from Shopify, WooCommerce or any sender and out for events such as `invoice.paid`, and an MCP server for AI clients that needs your approval before it sends, pays, voids or deletes.
 
 Each invoice and quote stores a snapshot of its business, client, items, bank, currency and style. Later edits to those records do not change existing documents.
 
-The interface is in English. The database is SQLite only.
+The interface is in English. The database is SQLite only. Not included yet: multiple user accounts and roles, a payment provider other than Stripe, translations, custom fields, PDF attachments in email (the email carries a link; the client saves the PDF from the page), and importing invoices from CSV.
 
 ## API and integrations
 
-Create an API key in **Settings**, then use the [`/api/v1` API](docs/API.md) to create orders and fetch invoices. The order endpoint is idempotent for a given store connection and external order ID.
+Create an API key in **Settings**, then use the [`/api/v1` API](docs/API.md) to create orders and fetch invoices. The whole API is described in [OpenAPI](server/internal/web/openapi.yaml) (also served at `/api/openapi.yaml`). The order endpoint is idempotent for a given store connection and external order ID.
 
 ```bash
 curl -X POST http://localhost:3001/api/v1/orders \
@@ -127,14 +133,14 @@ The MCP server is the `mavri-mcp` program in the image. Everything is documented
 
 ## Project layout
 
-| Path | What is in it |
-| --- | --- |
-| `web` | React user interface |
-| `server` | Go backend: REST API, MCP server, SQLite schema, tests |
-| `updater` | Small sidecar behind the Update now button |
-| `e2e` | Browser end-to-end check and the screenshot generator |
-| `docs` | Guide, API reference, design notes, screenshots |
-| `casaos`, `Dockerfile`, `docker-compose*.yml` | Container and CasaOS deployment |
+| Path                                          | What is in it                                          |
+| --------------------------------------------- | ------------------------------------------------------ |
+| `web`                                         | React user interface                                   |
+| `server`                                      | Go backend: REST API, MCP server, SQLite schema, tests |
+| `updater`                                     | Small sidecar behind the Update now button             |
+| `e2e`                                         | Browser end-to-end check and the screenshot generator  |
+| `docs`                                        | Guide, API reference, design notes, screenshots        |
+| `casaos`, `Dockerfile`, `docker-compose*.yml` | Container and CasaOS deployment                        |
 
 ## Documentation and development
 

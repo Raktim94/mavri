@@ -22,7 +22,19 @@ const paths: Record<string, string> = {
   plus: 'M12 4.5v15 M4.5 12h15',
   check: 'M5 12.5l4.5 4.5L19 7',
   menu: 'M4 7h16 M4 12h16 M4 17h16',
-  close: 'M6 6l12 12 M18 6L6 18'
+  close: 'M6 6l12 12 M18 6L6 18',
+  share: 'M12 3v12 M7.5 7.5L12 3l4.5 4.5 M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7',
+  mail: 'M3 6h18v12H3z M3 7l9 6 9-6',
+  repeat: 'M17 3l3 3-3 3 M4 11V9a3 3 0 0 1 3-3h13 M7 21l-3-3 3-3 M20 13v2a3 3 0 0 1-3 3H4',
+  bolt: 'M13 3L5 14h6l-1 7 8-11h-6z',
+  activity: 'M3 12h4l3-8 4 16 3-8h4',
+  data: 'M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3z M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6 M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3',
+  health: 'M12 20.5s-8-4.7-8-10.2A4.6 4.6 0 0 1 12 7.6a4.6 4.6 0 0 1 8 2.7c0 5.5-8 10.2-8 10.2z',
+  copy: 'M8 8h11v12H8z M5 16V4h11',
+  bell: 'M6 16V11a6 6 0 0 1 12 0v5l2 2H4z M10 21h4',
+  automate: 'M12 3v4 M12 17v4 M3 12h4 M17 12h4 M6 6l2.5 2.5 M15.5 15.5L18 18 M18 6l-2.5 2.5 M8.5 15.5L6 18',
+  link: 'M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1 M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1',
+  download: 'M12 4v12 M6.5 11.5L12 17l5.5-5.5 M5 20h14'
 };
 
 export function Icon({ name, size = 18 }: { name: string; size?: number }) {

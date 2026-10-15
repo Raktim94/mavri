@@ -45,7 +45,7 @@ components:
         quantity: { type: number }
         unitCents: { type: integer }
         taxRate: { type: number, description: percent }
-        taxMode: { type: string, enum: ["", add, included] }
+        taxMode: { type: string, enum: ['', add, included] }
     Payment:
       type: object
       required: [amountCents, paidOn]
@@ -70,16 +70,16 @@ components:
         id: { type: integer, readOnly: true }
         kind: { type: string, enum: [invoice, quote] }
         fullNumber: { type: string, readOnly: true }
-        number: { type: string, description: "leave empty for the next number" }
+        number: { type: string, description: 'leave empty for the next number' }
         issuerId: { type: integer }
         customerId: { type: integer }
         currencyId: { type: integer }
         issuedOn: { type: string, format: date }
         dueOn: { type: string, format: date }
         status: { type: string, enum: [unpaid, partial, paid, void, open, accepted, declined] }
-        lines: { type: array, items: { $ref: "#/components/schemas/Line" } }
-        payments: { type: array, items: { $ref: "#/components/schemas/Payment" } }
-        totals: { $ref: "#/components/schemas/Totals" }
+        lines: { type: array, items: { $ref: '#/components/schemas/Line' } }
+        payments: { type: array, items: { $ref: '#/components/schemas/Payment' } }
+        totals: { $ref: '#/components/schemas/Totals' }
         paidCents: { type: integer, readOnly: true }
     Summary:
       type: object
@@ -151,7 +151,7 @@ components:
       description: Error
       content:
         application/json:
-          schema: { $ref: "#/components/schemas/Error" }
+          schema: { $ref: '#/components/schemas/Error' }
 paths:
   /api/v1/documents:
     get:
@@ -164,17 +164,17 @@ paths:
         - { name: customerId, in: query, schema: { type: integer } }
         - { name: from, in: query, schema: { type: string, format: date } }
         - { name: to, in: query, schema: { type: string, format: date } }
-        - { $ref: "#/components/parameters/limit" }
-        - { $ref: "#/components/parameters/offset" }
+        - { $ref: '#/components/parameters/limit' }
+        - { $ref: '#/components/parameters/offset' }
       responses:
-        "200":
+        '200':
           description: A page of documents
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  items: { type: array, items: { $ref: "#/components/schemas/Summary" } }
+                  items: { type: array, items: { $ref: '#/components/schemas/Summary' } }
                   total: { type: integer }
                   limit: { type: integer }
                   offset: { type: integer }
@@ -182,10 +182,14 @@ paths:
     get:
       summary: Get one document
       tags: [Documents]
-      parameters: [{ $ref: "#/components/parameters/id" }]
+      parameters: [{ $ref: '#/components/parameters/id' }]
       responses:
-        "200": { description: The document, content: { application/json: { schema: { $ref: "#/components/schemas/Document" } } } }
-        "404": { $ref: "#/components/responses/Error" }
+        '200':
+          {
+            description: The document,
+            content: { application/json: { schema: { $ref: '#/components/schemas/Document' } } }
+          }
+        '404': { $ref: '#/components/responses/Error' }
   /api/v1/orders:
     post:
       summary: Create an invoice from an order
@@ -200,84 +204,85 @@ paths:
               properties:
                 shopId: { type: integer }
       responses:
-        "201": { description: Created }
-        "200": { description: Already received (duplicate order id) }
+        '201': { description: Created }
+        '200': { description: Already received (duplicate order id) }
   /api/documents:
     post:
       summary: Create an invoice or quote
       tags: [Documents]
       requestBody:
         required: true
-        content: { application/json: { schema: { $ref: "#/components/schemas/Document" } } }
+        content: { application/json: { schema: { $ref: '#/components/schemas/Document' } } }
       responses:
-        "201": { description: Created, content: { application/json: { schema: { $ref: "#/components/schemas/Document" } } } }
-        "400": { $ref: "#/components/responses/Error" }
+        '201':
+          { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Document' } } } }
+        '400': { $ref: '#/components/responses/Error' }
   /api/documents/{id}:
     put:
       summary: Replace a document
       description: Payments in the body replace the stored payments; the status of an invoice follows them.
       tags: [Documents]
-      parameters: [{ $ref: "#/components/parameters/id" }]
+      parameters: [{ $ref: '#/components/parameters/id' }]
       requestBody:
         required: true
-        content: { application/json: { schema: { $ref: "#/components/schemas/Document" } } }
+        content: { application/json: { schema: { $ref: '#/components/schemas/Document' } } }
       responses:
-        "200": { description: Updated }
+        '200': { description: Updated }
     delete:
       summary: Delete a document
       tags: [Documents]
-      parameters: [{ $ref: "#/components/parameters/id" }]
+      parameters: [{ $ref: '#/components/parameters/id' }]
       responses:
-        "204": { description: Deleted }
+        '204': { description: Deleted }
   /api/documents/{id}/duplicate:
     post:
       summary: Copy a document with the next number and today's date
       tags: [Documents]
-      parameters: [{ $ref: "#/components/parameters/id" }]
+      parameters: [{ $ref: '#/components/parameters/id' }]
       responses:
-        "201": { description: Created }
+        '201': { description: Created }
   /api/documents/{id}/convert:
     post:
       summary: Turn a quote into an invoice
       tags: [Documents]
-      parameters: [{ $ref: "#/components/parameters/id" }]
+      parameters: [{ $ref: '#/components/parameters/id' }]
       responses:
-        "201": { description: The new invoice }
+        '201': { description: The new invoice }
   /api/documents/{id}/einvoice:
     get:
       summary: UBL or XRechnung XML
       tags: [Documents]
       parameters:
-        - { $ref: "#/components/parameters/id" }
+        - { $ref: '#/components/parameters/id' }
         - { name: format, in: query, schema: { type: string, enum: [ubl, xrechnung] } }
       responses:
-        "200": { description: XML, content: { application/xml: {} } }
-        "422": { description: Details the format needs are missing (see problems) }
+        '200': { description: XML, content: { application/xml: {} } }
+        '422': { description: Details the format needs are missing (see problems) }
   /api/documents/{id}/share:
     get:
       summary: The secure client link, if there is one
       tags: [Sharing and email]
-      parameters: [{ $ref: "#/components/parameters/id" }]
+      parameters: [{ $ref: '#/components/parameters/id' }]
       responses:
-        "200": { description: "`{link: {url, token, views, …} | null}`" }
+        '200': { description: '`{link: {url, token, views, …} | null}`' }
     post:
       summary: Create (or return) the secure client link
       description: The link opens a read-only page; clients can print it as PDF and accept or decline quotes.
       tags: [Sharing and email]
-      parameters: [{ $ref: "#/components/parameters/id" }]
+      parameters: [{ $ref: '#/components/parameters/id' }]
       responses:
-        "200": { description: The link }
+        '200': { description: The link }
     delete:
       summary: Revoke the link
       tags: [Sharing and email]
-      parameters: [{ $ref: "#/components/parameters/id" }]
+      parameters: [{ $ref: '#/components/parameters/id' }]
       responses:
-        "204": { description: Revoked }
+        '204': { description: Revoked }
   /api/documents/{id}/email/preview:
     post:
       summary: Render the email without sending it
       tags: [Sharing and email]
-      parameters: [{ $ref: "#/components/parameters/id" }]
+      parameters: [{ $ref: '#/components/parameters/id' }]
       requestBody:
         content:
           application/json:
@@ -289,12 +294,12 @@ paths:
                 subject: { type: string }
                 body: { type: string }
       responses:
-        "200": { description: "`{to, subject, body, link, configured}`" }
+        '200': { description: '`{to, subject, body, link, configured}`' }
   /api/documents/{id}/email:
     post:
       summary: Email the document as a secure link (person only)
       tags: [Sharing and email]
-      parameters: [{ $ref: "#/components/parameters/id" }]
+      parameters: [{ $ref: '#/components/parameters/id' }]
       requestBody:
         content:
           application/json:
@@ -304,18 +309,22 @@ paths:
                 kind: { type: string, enum: [send, reminder] }
                 to: { type: string }
                 subject: { type: string }
-                body: { type: string, description: "placeholders: {{customer}} {{number}} {{total}} {{balance}} {{due}} {{when}} {{link}} {{business}}" }
+                body:
+                  {
+                    type: string,
+                    description: 'placeholders: {{customer}} {{number}} {{total}} {{balance}} {{due}} {{when}} {{link}} {{business}}'
+                  }
       responses:
-        "200": { description: Sent }
-        "409": { description: Email is not set up }
-        "502": { description: The mail server refused it }
+        '200': { description: Sent }
+        '409': { description: Email is not set up }
+        '502': { description: The mail server refused it }
   /api/documents/{id}/mail:
     get:
       summary: Email log of one document
       tags: [Sharing and email]
-      parameters: [{ $ref: "#/components/parameters/id" }]
+      parameters: [{ $ref: '#/components/parameters/id' }]
       responses:
-        "200": { description: Log rows }
+        '200': { description: Log rows }
   /api/public/documents/{token}:
     get:
       summary: What a client sees through a secure link (no sign-in)
@@ -323,8 +332,8 @@ paths:
       tags: [Client link]
       parameters: [{ name: token, in: path, required: true, schema: { type: string } }]
       responses:
-        "200": { description: The document without internal notes or attachments }
-        "404": { description: The link is wrong or revoked }
+        '200': { description: The document without internal notes or attachments }
+        '404': { description: The link is wrong or revoked }
   /api/public/documents/{token}/respond:
     post:
       summary: Accept or decline a quote (no sign-in)
@@ -342,14 +351,87 @@ paths:
                 action: { type: string, enum: [accept, decline] }
                 message: { type: string, maxLength: 500 }
       responses:
-        "200": { description: The updated quote }
-        "409": { description: Already answered }
+        '200': { description: The updated quote }
+        '409': { description: Already answered }
+  /api/documents/bulk:
+    post:
+      summary: Email, remind, mark paid or void many documents (person only)
+      tags: [Documents]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ids, action]
+              properties:
+                ids: { type: array, items: { type: integer }, maxItems: 200 }
+                action: { type: string, enum: [email, remind, paid, void] }
+      responses:
+        '200': { description: '`{results: [{id, number, ok, message}], ok, failed}`' }
+  /api/public/documents/{token}/options:
+    get:
+      summary: What the client can do with the document
+      security: []
+      tags: [Client link]
+      parameters: [{ name: token, in: path, required: true, schema: { type: string } }]
+      responses:
+        '200': { description: '`{pay, payAmount, einvoice: [ubl, xrechnung]}`' }
+  /api/public/documents/{token}/pay:
+    post:
+      summary: Start a Stripe Checkout for the balance
+      security: []
+      tags: [Client link]
+      parameters: [{ name: token, in: path, required: true, schema: { type: string } }]
+      responses:
+        '200': { description: '`{url}` — send the client there' }
+        '409': { description: Nothing to pay or online payment is off }
+        '502': { description: Stripe refused (the message says why) }
+  /api/public/documents/{token}/einvoice:
+    get:
+      summary: Download the e-invoice XML
+      security: []
+      tags: [Client link]
+      parameters:
+        - { name: token, in: path, required: true, schema: { type: string } }
+        - { name: format, in: query, schema: { type: string, enum: [ubl, xrechnung] } }
+      responses:
+        '200': { description: XML, content: { application/xml: {} } }
+  /api/payments/config:
+    get:
+      summary: Online payment (Stripe) settings and the webhook address to give Stripe (person only)
+      tags: [Payments]
+      responses:
+        '200': { description: Settings without secrets }
+    put:
+      summary: Save the Stripe keys and switch online payment on or off (person only)
+      tags: [Payments]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                enabled: { type: boolean }
+                secretKey: { type: string, description: 'sk_… or rk_…; empty keeps the saved one' }
+                webhookSecret: { type: string, description: 'whsec_…; empty keeps the saved one' }
+      responses:
+        '200': { description: Saved }
+  /api/hooks/stripe:
+    post:
+      summary: Stripe's webhook
+      description: Signed with `Stripe-Signature`; each event is applied once, the currency is checked, and a payment is added to the invoice.
+      security: []
+      tags: [Payments]
+      responses:
+        '200': { description: Received }
+        '400': { description: Bad signature }
   /api/recurring:
     get:
       summary: Recurring invoice schedules
       tags: [Automation]
       responses:
-        "200": { description: Schedules }
+        '200': { description: Schedules }
     post:
       summary: Repeat an invoice on a schedule
       tags: [Automation]
@@ -368,46 +450,52 @@ paths:
                 endOn: { type: string, format: date }
                 autoSend: { type: boolean }
       responses:
-        "201": { description: Created }
+        '201': { description: Created }
+  /api/recurring/preview:
+    post:
+      summary: Preview a schedule before creating it
+      tags: [Automation]
+      responses:
+        '200': { description: Upcoming dates and the invoice that would be copied }
   /api/recurring/{id}:
     put:
       summary: Pause, resume or change the end date
       tags: [Automation]
-      parameters: [{ $ref: "#/components/parameters/id" }]
+      parameters: [{ $ref: '#/components/parameters/id' }]
       responses:
-        "204": { description: Saved }
+        '204': { description: Saved }
     delete:
       summary: Stop a schedule (invoices already issued stay)
       tags: [Automation]
-      parameters: [{ $ref: "#/components/parameters/id" }]
+      parameters: [{ $ref: '#/components/parameters/id' }]
       responses:
-        "204": { description: Deleted }
+        '204': { description: Deleted }
   /api/recurring/{id}/preview:
     get:
       summary: The next invoices a schedule will issue
       tags: [Automation]
       parameters:
-        - { $ref: "#/components/parameters/id" }
+        - { $ref: '#/components/parameters/id' }
         - { name: n, in: query, schema: { type: integer, default: 6 } }
       responses:
-        "200": { description: Upcoming dates and the invoice being copied }
+        '200': { description: Upcoming dates and the invoice being copied }
   /api/overdue:
     get:
       summary: Unpaid invoices past their due date
       tags: [Automation]
       responses:
-        "200": { description: Oldest first }
+        '200': { description: Oldest first }
   /api/automation:
     get:
       summary: Reminder schedule and rules
       tags: [Automation]
       responses:
-        "200": { description: Settings }
+        '200': { description: Settings }
     put:
       summary: Change reminders and rules (person only)
       tags: [Automation]
       responses:
-        "200": { description: Saved }
+        '200': { description: Saved }
   /api/activity:
     get:
       summary: Activity history
@@ -420,22 +508,22 @@ paths:
         - { name: q, in: query, schema: { type: string } }
         - { name: from, in: query, schema: { type: string, format: date } }
         - { name: to, in: query, schema: { type: string, format: date } }
-        - { $ref: "#/components/parameters/limit" }
-        - { $ref: "#/components/parameters/offset" }
+        - { $ref: '#/components/parameters/limit' }
+        - { $ref: '#/components/parameters/offset' }
       responses:
-        "200": { description: A page of entries }
+        '200': { description: A page of entries }
   /api/activity.csv:
     get:
       summary: Export the history as CSV (person only)
       tags: [Activity]
       responses:
-        "200": { description: CSV, content: { text/csv: {} } }
+        '200': { description: CSV, content: { text/csv: {} } }
   /api/webhooks:
     get:
       summary: Webhook endpoints and the event names (person only)
       tags: [Webhooks]
       responses:
-        "200": { description: Endpoints }
+        '200': { description: Endpoints }
     post:
       summary: Add an endpoint (person only)
       description: |
@@ -455,29 +543,34 @@ paths:
               properties:
                 url: { type: string }
                 description: { type: string }
-                events: { type: array, items: { type: string }, description: 'empty means all, e.g. ["invoice.paid", "quote.accepted"]' }
+                events:
+                  {
+                    type: array,
+                    items: { type: string },
+                    description: 'empty means all, e.g. ["invoice.paid", "quote.accepted"]'
+                  }
       responses:
-        "201": { description: "`{endpoint, secret}`" }
+        '201': { description: '`{endpoint, secret}`' }
   /api/webhooks/{id}:
     put:
       summary: Change an endpoint (person only)
       tags: [Webhooks]
-      parameters: [{ $ref: "#/components/parameters/id" }]
+      parameters: [{ $ref: '#/components/parameters/id' }]
       responses:
-        "204": { description: Saved }
+        '204': { description: Saved }
     delete:
       summary: Remove an endpoint and its log (person only)
       tags: [Webhooks]
-      parameters: [{ $ref: "#/components/parameters/id" }]
+      parameters: [{ $ref: '#/components/parameters/id' }]
       responses:
-        "204": { description: Deleted }
+        '204': { description: Deleted }
   /api/webhooks/{id}/test:
     post:
       summary: Send a `ping` event (person only)
       tags: [Webhooks]
-      parameters: [{ $ref: "#/components/parameters/id" }]
+      parameters: [{ $ref: '#/components/parameters/id' }]
       responses:
-        "202": { description: Queued }
+        '202': { description: Queued }
   /api/webhooks/deliveries:
     get:
       summary: Delivery log (person only)
@@ -486,21 +579,29 @@ paths:
         - { name: endpointId, in: query, schema: { type: integer } }
         - { name: status, in: query, schema: { type: string, enum: [pending, delivered, failed] } }
       responses:
-        "200": { description: Deliveries, newest first }
+        '200': { description: Deliveries, newest first }
   /api/webhooks/deliveries/{id}/replay:
     post:
       summary: Send a past delivery again (person only)
       tags: [Webhooks]
-      parameters: [{ $ref: "#/components/parameters/id" }]
+      parameters: [{ $ref: '#/components/parameters/id' }]
       responses:
-        "202": { description: Queued as a new delivery with the same event id }
+        '202': { description: Queued as a new delivery with the same event id }
   /api/export/{file}:
     get:
       summary: Export CSV (customers.csv, products.csv, invoices.csv, payments.csv)
       tags: [CSV]
-      parameters: [{ name: file, in: path, required: true, schema: { type: string, enum: [customers.csv, products.csv, invoices.csv, payments.csv] } }]
+      parameters:
+        [
+          {
+            name: file,
+            in: path,
+            required: true,
+            schema: { type: string, enum: [customers.csv, products.csv, invoices.csv, payments.csv] }
+          }
+        ]
       responses:
-        "200": { description: CSV (UTF-8 with BOM), content: { text/csv: {} } }
+        '200': { description: CSV (UTF-8 with BOM), content: { text/csv: {} } }
   /api/import/{kind}:
     post:
       summary: Import customers or products from CSV (person only)
@@ -508,33 +609,37 @@ paths:
       tags: [CSV]
       parameters:
         - { name: kind, in: path, required: true, schema: { type: string, enum: [customers, products] } }
-        - { name: dryRun, in: query, schema: { type: string, enum: ["1"] } }
+        - { name: dryRun, in: query, schema: { type: string, enum: ['1'] } }
       responses:
-        "200": { description: Report, content: { application/json: { schema: { $ref: "#/components/schemas/ImportReport" } } } }
+        '200':
+          {
+            description: Report,
+            content: { application/json: { schema: { $ref: '#/components/schemas/ImportReport' } } }
+          }
   /api/backups:
     get:
       summary: Backup status, history and what a backup contains (person only)
       tags: [Backups]
       responses:
-        "200": { description: Status }
+        '200': { description: Status }
   /api/backups/config:
     put:
       summary: Schedule, retention, encryption and S3 destination (person only)
       tags: [Backups]
       responses:
-        "200": { description: Saved }
+        '200': { description: Saved }
   /api/backups/run:
     post:
       summary: Take a backup now (person only)
       tags: [Backups]
       responses:
-        "200": { description: "`{name}`" }
+        '200': { description: '`{name}`' }
   /api/backups/verify:
     post:
       summary: Open a backup and count what it holds, without restoring (person only)
       tags: [Backups]
       responses:
-        "200": { description: Row counts per table }
+        '200': { description: Row counts per table }
   /api/backups/restore:
     post:
       summary: Replace the business data with a backup (person only)
@@ -542,24 +647,24 @@ paths:
       tags: [Backups]
       parameters: [{ name: confirm, in: query, required: true, schema: { type: string, enum: [replace] } }]
       responses:
-        "204": { description: Restored }
+        '204': { description: Restored }
   /api/admin/health:
     get:
       summary: Database, storage, backup age, webhook and email failures, recent errors (person only)
       tags: [Operations]
       responses:
-        "200": { description: Health report }
+        '200': { description: Health report }
   /api/health:
     get:
       summary: Liveness
       security: []
       tags: [Operations]
       responses:
-        "200": { description: "`{status: ok}`" }
+        '200': { description: '`{status: ok}`' }
   /api/openapi.yaml:
     get:
       summary: This document
       security: []
       tags: [Operations]
       responses:
-        "200": { description: OpenAPI 3 }
+        '200': { description: OpenAPI 3 }

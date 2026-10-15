@@ -264,14 +264,14 @@ func (s *Service) RunNow(ctx context.Context) (name string, err error) {
 	if len(problems) > 0 {
 		return name, errors.New(strings.Join(problems, "; "))
 	}
-	s.Hub.Record(ctx, activity.Event{Action: "backup", Entity: "backup", Label: name, Detail: fmt.Sprintf("%d bytes", len(data)), Name: "backup.completed",
+	s.Hub.Record(ctx, activity.Event{Action: "completed", Entity: "backup", Label: name, Detail: fmt.Sprintf("%d bytes", len(data)), Name: "backup.completed",
 		Data: map[string]any{"name": name, "bytes": len(data), "encrypted": cfg.Encrypt, "s3": cfg.S3.Enabled}})
 	return name, nil
 }
 
 func (s *Service) fail(ctx context.Context, target, name string, err error) {
 	s.record(ctx, target, false, name, 0, err.Error())
-	s.Hub.Record(ctx, activity.Event{Action: "backup failed", Entity: "backup", Label: name, Detail: target + ": " + err.Error(), Name: "backup.failed",
+	s.Hub.Record(ctx, activity.Event{Action: "failed", Entity: "backup", Label: name, Detail: target + ": " + err.Error(), Name: "backup.failed",
 		Data: map[string]any{"target": target, "error": err.Error()}})
 }
 

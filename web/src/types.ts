@@ -17,6 +17,7 @@ export interface Party {
   buyerReference: string;
   taxExempt: boolean;
   note: string;
+  noReminders: boolean;
   logo?: string;
   logoType: string;
   archived: boolean;
@@ -254,4 +255,219 @@ export interface UpdateStatus {
   checkError: string;
   checkDisabled?: boolean;
   releaseUrl: string;
+}
+
+// ---- sharing, email, automation, history, webhooks, data -------------------
+
+export interface ShareLink {
+  url: string;
+  token: string;
+  createdAt: string;
+  firstViewedAt: string;
+  lastViewedAt: string;
+  views: number;
+}
+
+export interface MailPreview {
+  to: string;
+  subject: string;
+  body: string;
+  link: string;
+  configured: boolean;
+}
+
+export interface MailLogRow {
+  id: number;
+  documentId: number;
+  kind: string;
+  to: string;
+  subject: string;
+  status: 'sent' | 'failed';
+  error: string;
+  at: string;
+}
+
+export interface MailConfig {
+  enabled: boolean;
+  host: string;
+  port: number;
+  security: 'starttls' | 'tls' | 'none';
+  username: string;
+  password?: string;
+  passwordSet: boolean;
+  from: string;
+  fromName: string;
+  replyTo: string;
+  subjectInvoice: string;
+  bodyInvoice: string;
+  subjectQuote: string;
+  bodyQuote: string;
+  subjectReminder: string;
+  bodyReminder: string;
+}
+
+export interface AutomationConfig {
+  remindersEnabled: boolean;
+  remindBefore: number[];
+  remindOnDue: boolean;
+  remindAfter: number[];
+  quoteAcceptedMakesInvoice: boolean;
+  publicUrl: string;
+}
+
+export interface Schedule {
+  id: number;
+  documentId: number;
+  every: 'week' | 'month' | 'quarter' | 'year';
+  interval: number;
+  startOn: string;
+  nextOn: string;
+  endOn: string;
+  active: boolean;
+  autoSend: boolean;
+  lastIssuedOn: string;
+  issuedCount: number;
+  number?: string;
+  customer?: string;
+  totalCents?: number;
+  currency?: string;
+}
+
+export interface SchedulePreview {
+  schedule: Schedule;
+  upcoming: { issuedOn: string; dueOn: string }[];
+  template: { number: string; customer: string; totalCents: number; currency: string; lines: number };
+}
+
+export interface ActivityEntry {
+  id: number;
+  at: string;
+  actor: string;
+  source: string;
+  action: string;
+  entity: string;
+  entityId: number;
+  label: string;
+  detail: string;
+}
+
+export interface WebhookEndpoint {
+  id: number;
+  url: string;
+  description: string;
+  events: string[];
+  active: boolean;
+  createdAt: string;
+  failing: number;
+  lastStatus: string;
+}
+
+export interface WebhookDelivery {
+  id: number;
+  endpointId: number;
+  event: string;
+  eventId: string;
+  status: 'pending' | 'delivered' | 'failed';
+  attempts: number;
+  responseCode: number;
+  responseBody: string;
+  error: string;
+  nextAttemptAt: string;
+  createdAt: string;
+  deliveredAt: string;
+}
+
+export interface ImportReport {
+  kind: string;
+  dryRun: boolean;
+  header: string[];
+  total: number;
+  valid: number;
+  created: number;
+  skipped: number;
+  errors: { line: number; message: string; raw: string[] }[];
+  preview: Record<string, string>[];
+}
+
+export interface BackupRun {
+  id: number;
+  at: string;
+  target: 'local' | 's3';
+  ok: boolean;
+  name: string;
+  bytes: number;
+  error: string;
+}
+
+export interface BackupFile {
+  name: string;
+  bytes: number;
+  at: string;
+  encrypted: boolean;
+}
+
+export interface BackupConfig {
+  enabled: boolean;
+  everyHours: number;
+  keep: number;
+  encrypt: boolean;
+  passphrase?: string;
+  passphraseSet: boolean;
+  s3: {
+    enabled: boolean;
+    endpoint: string;
+    region: string;
+    bucket: string;
+    prefix: string;
+    accessKey: string;
+    secretKey?: string;
+    secretKeySet: boolean;
+    pathStyle: boolean;
+  };
+}
+
+export interface BackupStatus {
+  config: BackupConfig;
+  lastSuccess: BackupRun | null;
+  lastFailure: BackupRun | null;
+  ageHours: number;
+  runs: BackupRun[];
+  files: BackupFile[];
+  included: string[];
+  excluded: string[];
+  encryptionNote: string;
+}
+
+export interface Health {
+  version: string;
+  uptimeSeconds: number;
+  schema: string;
+  databaseBytes: number;
+  databaseCheck: string;
+  dataFolderBytes: number;
+  counts: Record<string, number>;
+  backup?: {
+    enabled: boolean;
+    ageHours: number;
+    lastSuccess: BackupRun | null;
+    lastFailure: BackupRun | null;
+    copies: number;
+  };
+  webhooks: { pending: number; failed24h: number; delivered24h: number };
+  email: { configured: boolean; failed24h: number; sent24h: number };
+  automation?: { reminders: boolean; recurringActive: number; publicUrlSet: boolean };
+  overdueInvoices?: number;
+  recentErrors: { at: string; level: string; message: string; detail: string }[];
+}
+
+export interface PaymentsConfig {
+  config: { enabled: boolean; secretKeySet: boolean; webhookSecretSet: boolean };
+  webhookUrl: string;
+  events: string[];
+}
+
+export interface BulkResult {
+  results: { id: number; number: string; ok: boolean; message: string }[];
+  ok: number;
+  failed: number;
 }

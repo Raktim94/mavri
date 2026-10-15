@@ -237,6 +237,37 @@ func (s *Service) Preview(ctx context.Context, id int64, n int) (Preview, error)
 	return p, nil
 }
 
+// PreviewDraft shows what a schedule would do before it is created.
+func (s *Service) PreviewDraft(ctx context.Context, sc Schedule, n int) (Preview, error) {
+	var p Preview
+	if sc.Interval == 0 {
+		sc.Interval = 1
+	}
+	if err := s.check(ctx, &sc); err != nil {
+		return p, err
+	}
+	sc.NextOn, sc.Active = sc.StartOn, true
+	p.Schedule = sc
+	doc, err := s.Store.GetDocument(ctx, s.DB, sc.DocumentID)
+	if err != nil {
+		return p, err
+	}
+	p.Template.Number, p.Template.Customer, p.Template.TotalCents, p.Template.Currency, p.Template.Lines =
+		doc.FullNumber, doc.Customer.Name, doc.Totals.TotalCents, doc.Currency.Code, len(doc.Lines)
+	p.Upcoming = []Upcoming{}
+	if n <= 0 || n > 24 {
+		n = 6
+	}
+	for k := 0; len(p.Upcoming) < n && k < 500; k++ {
+		t, err := occurrence(sc.StartOn, sc.Every, sc.Interval, k)
+		if err != nil || (sc.EndOn != "" && t.Format(dayFmt) > sc.EndOn) {
+			break
+		}
+		p.Upcoming = append(p.Upcoming, Upcoming{t.Format(dayFmt), s.dueFor(doc, t)})
+	}
+	return p, nil
+}
+
 // dueFor keeps the payment term of the template: the same number of days after the issue date.
 func (s *Service) dueFor(tpl model.Document, issued time.Time) string {
 	a, e1 := time.Parse(dayFmt, tpl.IssuedOn)

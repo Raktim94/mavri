@@ -45,7 +45,7 @@ func (s *Server) putSettings(w http.ResponseWriter, r *http.Request) {
 		s.problem(w, r, err)
 		return
 	}
-	s.Hub.Record(r.Context(), activity.Event{Action: "updated", Entity: "settings", Label: "app settings"})
+	s.Hub.Record(r.Context(), activity.Event{Action: "changed", Entity: "settings", Detail: "app settings"})
 	writeJSON(w, http.StatusOK, set)
 }
 

@@ -6,10 +6,15 @@ import { Icon } from './components/Icon';
 import { Onboarding, ONBOARDING_KEY } from './components/Onboarding';
 import { UpdateButton } from './components/Updates';
 import { SignIn } from './components/SignIn';
+import { ActivityPage } from './pages/ActivityPage';
+import { AutomationPage } from './pages/AutomationPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { DataPage } from './pages/DataPage';
 import { DocumentEditor } from './pages/DocumentEditor';
 import { DocumentsPage } from './pages/DocumentsPage';
 import { DocumentView } from './pages/DocumentView';
+import { HealthPage } from './pages/HealthPage';
+import { IntegrationsPage } from './pages/IntegrationsPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { ResourcePage } from './pages/ResourcePage';
 import { SettingsPage } from './pages/SettingsPage';
@@ -86,7 +91,23 @@ function Shell() {
               <Icon name={r.id} /> {r.title}
             </NavLink>
           ))}
+          <p className="nav-label">Automate</p>
+          <NavLink to="/automation">
+            <Icon name="automate" /> Automation
+          </NavLink>
+          <NavLink to="/integrations">
+            <Icon name="bolt" /> Integrations
+          </NavLink>
           <p className="nav-label">System</p>
+          <NavLink to="/activity">
+            <Icon name="activity" /> Activity
+          </NavLink>
+          <NavLink to="/data">
+            <Icon name="data" /> Data & backups
+          </NavLink>
+          <NavLink to="/health">
+            <Icon name="health" /> Health
+          </NavLink>
           <NavLink to="/settings">
             <Icon name="settings" /> Settings
           </NavLink>
@@ -115,6 +136,11 @@ function Shell() {
               ))}
               <Route path="/reports" element={<ReportsPage />} />
               <Route path="/stores" element={<ShopsPage />} />
+              <Route path="/automation" element={<AutomationPage />} />
+              <Route path="/integrations" element={<IntegrationsPage />} />
+              <Route path="/activity" element={<ActivityPage />} />
+              <Route path="/data" element={<DataPage />} />
+              <Route path="/health" element={<HealthPage />} />
               <Route path="/settings" element={<SettingsPage onSaved={setSettings} />} />
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>

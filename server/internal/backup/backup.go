@@ -5,7 +5,7 @@
 // (not the email and backup setup), recurring-invoice schedules, client share
 // links and the activity history. It does not hold what belongs to this
 // installation: accounts, sessions, API keys, store connections, webhook
-// endpoints, email (SMTP) and backup settings, and the encryption key.
+// endpoints, email (SMTP), backup and online-payment settings, and the encryption key.
 // Restoring replaces the business data and removes store connections (create
 // them again afterwards); the installation's own setup is left alone.
 package backup
@@ -37,7 +37,7 @@ var Included = []string{"Invoices and quotes with their lines, payments and atta
 
 // Excluded is what a backup never contains, and why.
 var Excluded = []string{"Sign-in accounts, sessions and API keys (they belong to this installation)", "Store connections and their secrets",
-	"Webhook endpoints and their signing secrets", "Email (SMTP) and backup settings, including saved passwords", "The encryption key file (secret.key)"}
+	"Webhook endpoints and their signing secrets", "Email (SMTP), backup and online-payment settings, including saved passwords and keys", "The encryption key file (secret.key)"}
 
 // File is the backup document.
 type File struct {

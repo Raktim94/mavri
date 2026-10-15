@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 import { useUi } from '../components/ui';
 import { api, download, errorText } from '../api';
 import { UpdatePanel } from '../components/Updates';
@@ -122,7 +123,8 @@ export function SettingsPage({ onSaved }: { onSaved: (s: Settings) => void }) {
       <div className="card">
         <h2>Backup</h2>
         <p className="muted">
-          Download all invoices, quotes and records as one file, or restore from a file made here.
+          Download all invoices, quotes and records as one file, or restore from a file made here. For scheduled,
+          encrypted and off-site backups and a guided restore, open <Link to="/data">Data & backups</Link>.
         </p>
         <div className="row">
           <button onClick={() => download('/api/backup', 'mavri-backup.json.gz').catch(e => setMsg(errorText(e)))}>

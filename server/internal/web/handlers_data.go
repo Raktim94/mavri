@@ -8,13 +8,16 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/Raktim94/mavri/server/internal/activity"
 	"github.com/Raktim94/mavri/server/internal/backup"
 	"github.com/Raktim94/mavri/server/internal/csvio"
+	"github.com/Raktim94/mavri/server/internal/einvoice"
 	"github.com/Raktim94/mavri/server/internal/model"
+	"github.com/Raktim94/mavri/server/internal/payments"
 )
 
 //go:embed openapi.yaml
@@ -37,8 +40,14 @@ func (s *Server) exportCSV(w http.ResponseWriter, r *http.Request) {
 		fail(w, http.StatusNotFound, "not_found", "export one of: customers, products, invoices, payments")
 		return
 	}
+	var only []int64
+	for _, f := range strings.Split(r.URL.Query().Get("ids"), ",") {
+		if n, err := strconv.ParseInt(strings.TrimSpace(f), 10, 64); err == nil && n > 0 {
+			only = append(only, n)
+		}
+	}
 	var buf bytes.Buffer
-	if err := csvio.Export(r.Context(), s.DB, s.Store, kind, &buf); err != nil {
+	if err := csvio.Export(r.Context(), s.DB, s.Store, kind, &buf, only...); err != nil {
 		s.problem(w, r, err)
 		return
 	}
@@ -101,7 +110,7 @@ func (s *Server) putBackupConfig(w http.ResponseWriter, r *http.Request) {
 		s.problem(w, r, err)
 		return
 	}
-	s.Hub.Record(r.Context(), activity.Event{Action: "updated", Entity: "settings", Label: "backup settings"})
+	s.Hub.Record(r.Context(), activity.Event{Action: "changed", Entity: "settings", Detail: "backup settings"})
 	s.backupStatus(w, r)
 }
 
@@ -408,4 +417,138 @@ func (s *Server) publicRespond(w http.ResponseWriter, r *http.Request) {
 		out, _ = s.Store.GetDocument(ctx, s.DB, id)
 	}
 	writeJSON(w, http.StatusOK, publicDoc(out))
+}
+
+// ---- online payments ---------------------------------------------------------
+
+func (s *Server) getPayConfig(w http.ResponseWriter, r *http.Request) {
+	cfg, err := s.Pay.Load(r.Context())
+	if err != nil {
+		s.problem(w, r, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"config": cfg, "webhookUrl": s.publicBase(r) + "/api/hooks/stripe",
+		"events": []string{"checkout.session.completed", "checkout.session.async_payment_succeeded", "checkout.session.async_payment_failed", "payment_intent.payment_failed"}})
+}
+
+func (s *Server) putPayConfig(w http.ResponseWriter, r *http.Request) {
+	var in payments.Config
+	if !readJSON(w, r, &in) {
+		return
+	}
+	if err := s.Pay.Save(r.Context(), in); err != nil {
+		if errors.Is(err, payments.ErrInvalid) {
+			fail(w, http.StatusBadRequest, "validation", strings.TrimPrefix(err.Error(), "invalid: "))
+			return
+		}
+		s.problem(w, r, err)
+		return
+	}
+	s.Hub.Record(r.Context(), activity.Event{Action: "changed", Entity: "settings", Detail: "online payments"})
+	s.getPayConfig(w, r)
+}
+
+// publicOptions says what a client can do with the document: pay online, download the e-invoice.
+func (s *Server) publicOptions(w http.ResponseWriter, r *http.Request) {
+	id, err := s.Links.Lookup(r.Context(), r.PathValue("token"))
+	if err != nil {
+		fail(w, http.StatusNotFound, "not_found", "this link is not valid any more")
+		return
+	}
+	d, err := s.Store.GetDocument(r.Context(), s.DB, id)
+	if err != nil {
+		fail(w, http.StatusNotFound, "not_found", "this link is not valid any more")
+		return
+	}
+	set, _ := s.Store.GetSettings(r.Context(), s.DB)
+	formats := []string{}
+	if d.Kind == model.KindInvoice && d.Status != model.StatusVoid {
+		if set.Features.UBL {
+			formats = append(formats, "ubl")
+		}
+		if set.Features.XRechnung {
+			formats = append(formats, "xrechnung")
+		}
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"pay": s.Pay.Enabled(r.Context()) && payments.Payable(d) > 0, "payAmount": payments.Payable(d), "einvoice": formats})
+}
+
+// publicPay starts a Stripe Checkout for the balance and answers with its address.
+func (s *Server) publicPay(w http.ResponseWriter, r *http.Request) {
+	token := r.PathValue("token")
+	id, err := s.Links.Lookup(r.Context(), token)
+	if err != nil {
+		fail(w, http.StatusNotFound, "not_found", "this link is not valid any more")
+		return
+	}
+	d, err := s.Store.GetDocument(r.Context(), s.DB, id)
+	if err != nil {
+		s.problem(w, r, err)
+		return
+	}
+	base := s.publicBase(r)
+	link := base + "/d/" + token
+	url, err := s.Pay.CreateCheckout(r.Context(), d, link+"?paid=1", link)
+	switch {
+	case errors.Is(err, payments.ErrNotAvailable):
+		fail(w, http.StatusConflict, "conflict", "online payment is not available for this invoice")
+		return
+	case err != nil:
+		s.Log.Warn("could not start an online payment", "invoice", d.FullNumber, "error", err)
+		fail(w, http.StatusBadGateway, "payment_failed", err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]string{"url": url})
+}
+
+func (s *Server) stripeHook(w http.ResponseWriter, r *http.Request) {
+	body, err := io.ReadAll(http.MaxBytesReader(w, r.Body, 1<<20))
+	if err != nil {
+		fail(w, http.StatusRequestEntityTooLarge, "validation", "the request is too large")
+		return
+	}
+	err = s.Pay.HandleWebhook(r.Context(), body, r.Header.Get("Stripe-Signature"))
+	switch {
+	case errors.Is(err, payments.ErrSignature):
+		fail(w, http.StatusBadRequest, "unauthorized", "signature does not match")
+	case errors.Is(err, payments.ErrNotAvailable):
+		fail(w, http.StatusNotFound, "not_found", "online payments are not set up")
+	case errors.Is(err, payments.ErrInvalid):
+		fail(w, http.StatusBadRequest, "validation", err.Error())
+	case err != nil:
+		s.problem(w, r, err) // a 5xx makes Stripe retry later
+	default:
+		writeJSON(w, http.StatusOK, map[string]bool{"received": true})
+	}
+}
+
+// publicEInvoice lets a client download the e-invoice XML of their invoice.
+func (s *Server) publicEInvoice(w http.ResponseWriter, r *http.Request) {
+	id, err := s.Links.Lookup(r.Context(), r.PathValue("token"))
+	if err != nil {
+		fail(w, http.StatusNotFound, "not_found", "this link is not valid any more")
+		return
+	}
+	format := r.URL.Query().Get("format")
+	if format == "" {
+		format = einvoice.UBL
+	}
+	set, _ := s.Store.GetSettings(r.Context(), s.DB)
+	if (format == einvoice.UBL && !set.Features.UBL) || (format == einvoice.XRechnung && !set.Features.XRechnung) || (format != einvoice.UBL && format != einvoice.XRechnung) {
+		fail(w, http.StatusForbidden, "forbidden", "this download is not offered")
+		return
+	}
+	d, err := s.Store.GetDocument(r.Context(), s.DB, id)
+	if err != nil || d.Kind != model.KindInvoice || d.Status == model.StatusVoid {
+		fail(w, http.StatusNotFound, "not_found", "this link is not valid any more")
+		return
+	}
+	x, err := einvoice.Generate(d, format)
+	if err != nil {
+		fail(w, http.StatusUnprocessableEntity, "einvoice_incomplete", "the sender has not filled in the details this format needs")
+		return
+	}
+	w.Header().Set("Content-Type", "application/xml; charset=utf-8")
+	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s-%s.xml"`, format, safeName(d.FullNumber)))
+	_, _ = w.Write(x)
 }

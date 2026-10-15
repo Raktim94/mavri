@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api';
 import { Icon, Skeleton } from '../components/Icon';
 import { EmptyState } from '../components/ui';
+import { CountUp } from '../components/CountUp';
 import { isOverdue, statusLabel, today } from '../docs';
 import { formatMoney } from '../money';
 import { useAuth } from '../auth';
@@ -120,26 +121,34 @@ export function DashboardPage() {
           <div className="kpis">
             <div className="kpi">
               <span className="kpi-label">Outstanding</span>
-              <strong>{m(sum(open, owed))}</strong>
+              <strong>
+                <CountUp cents={sum(open, owed)} format={m} />
+              </strong>
               <span className="muted">
                 {open.length} open invoice{open.length === 1 ? '' : 's'}
               </span>
             </div>
             <div className={`kpi ${late.length ? 'warn' : ''}`}>
               <span className="kpi-label">Overdue</span>
-              <strong>{m(sum(late, owed))}</strong>
+              <strong>
+                <CountUp cents={sum(late, owed)} format={m} />
+              </strong>
               <span className="muted">{late.length ? `${late.length} past due` : 'Nothing overdue'}</span>
             </div>
             <div className="kpi">
               <span className="kpi-label">Billed this month</span>
-              <strong>{m(sum(billed, d => d.totalCents))}</strong>
+              <strong>
+                <CountUp cents={sum(billed, d => d.totalCents)} format={m} />
+              </strong>
               <span className="muted">
                 {billed.length} invoice{billed.length === 1 ? '' : 's'}
               </span>
             </div>
             <div className="kpi">
               <span className="kpi-label">Collected</span>
-              <strong>{m(sum(inMain, d => d.paidCents))}</strong>
+              <strong>
+                <CountUp cents={sum(inMain, d => d.paidCents)} format={m} />
+              </strong>
               <span className="muted">
                 across {inMain.length} invoice{inMain.length === 1 ? '' : 's'}
               </span>

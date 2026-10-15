@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/Raktim94/mavri/server/internal/mailer"
 	"github.com/Raktim94/mavri/server/internal/model"
 	"github.com/Raktim94/mavri/server/internal/share"
+	"github.com/Raktim94/mavri/server/internal/store"
 )
 
 // recordChange writes the history and queues the webhooks for a document that was created (old == nil) or changed.
@@ -218,7 +220,7 @@ func (s *Server) putMailConfig(w http.ResponseWriter, r *http.Request) {
 		s.flowProblem(w, r, err)
 		return
 	}
-	s.Hub.Record(r.Context(), activity.Event{Action: "updated", Entity: "settings", Label: "email settings"})
+	s.Hub.Record(r.Context(), activity.Event{Action: "changed", Entity: "settings", Detail: "email settings"})
 	s.getMailConfig(w, r)
 }
 
@@ -257,7 +259,7 @@ func (s *Server) putAutomation(w http.ResponseWriter, r *http.Request) {
 		s.flowProblem(w, r, err)
 		return
 	}
-	s.Hub.Record(r.Context(), activity.Event{Action: "updated", Entity: "settings", Label: "automation rules"})
+	s.Hub.Record(r.Context(), activity.Event{Action: "changed", Entity: "settings", Detail: "automation rules"})
 	writeJSON(w, http.StatusOK, out)
 }
 
@@ -329,6 +331,19 @@ func (s *Server) deleteRecurring(w http.ResponseWriter, r *http.Request) {
 	}
 	s.Hub.Record(r.Context(), activity.Event{Action: "deleted", Entity: "recurring invoice", EntityID: id})
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func (s *Server) previewDraftRecurring(w http.ResponseWriter, r *http.Request) {
+	var in automation.Schedule
+	if !readJSON(w, r, &in) {
+		return
+	}
+	p, err := s.Auto.PreviewDraft(r.Context(), in, qint(r, "n", 6))
+	if err != nil {
+		s.flowProblem(w, r, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, p)
 }
 
 func (s *Server) previewRecurring(w http.ResponseWriter, r *http.Request) {
@@ -474,3 +489,121 @@ func (s *Server) replayDelivery(w http.ResponseWriter, r *http.Request) {
 }
 
 var errNoRows = sql.ErrNoRows
+
+// ---- bulk actions ------------------------------------------------------------
+
+type bulkResult struct {
+	ID      int64  `json:"id"`
+	Number  string `json:"number"`
+	OK      bool   `json:"ok"`
+	Message string `json:"message"`
+}
+
+const maxBulk = 200
+
+// bulkDocuments applies one action to many documents and reports each outcome, so one bad row never hides the rest.
+func (s *Server) bulkDocuments(w http.ResponseWriter, r *http.Request) {
+	var in struct {
+		IDs    []int64 `json:"ids"`
+		Action string  `json:"action"` // email, remind, paid, void
+	}
+	if !readJSON(w, r, &in) {
+		return
+	}
+	if len(in.IDs) == 0 || len(in.IDs) > maxBulk {
+		fail(w, http.StatusBadRequest, "validation", "choose between 1 and 200 documents")
+		return
+	}
+	switch in.Action {
+	case "email", "remind", "paid", "void":
+	default:
+		fail(w, http.StatusBadRequest, "validation", "action must be email, remind, paid or void")
+		return
+	}
+	ctx := r.Context()
+	if in.Action == "email" || in.Action == "remind" {
+		if cfg, err := s.Mail.Load(ctx); err != nil || !cfg.Enabled || cfg.Host == "" {
+			fail(w, http.StatusConflict, "email_not_configured", mailer.ErrNotConfigured.Error())
+			return
+		}
+	}
+	base := s.publicBase(r)
+	results := make([]bulkResult, 0, len(in.IDs))
+	seen := map[int64]bool{}
+	okCount := 0
+	for _, id := range in.IDs {
+		if seen[id] {
+			continue
+		}
+		seen[id] = true
+		res := bulkResult{ID: id}
+		d, err := s.Store.GetDocument(ctx, s.DB, id)
+		if err != nil {
+			res.Message = "not found"
+			results = append(results, res)
+			continue
+		}
+		res.Number = d.FullNumber
+		res.OK, res.Message = s.bulkOne(r, in.Action, d, base)
+		if res.OK {
+			okCount++
+		}
+		results = append(results, res)
+	}
+	s.Hub.Record(ctx, activity.Event{Action: "bulk " + in.Action, Entity: "documents", Detail: fmt.Sprintf("%d of %d succeeded", okCount, len(results))})
+	writeJSON(w, http.StatusOK, map[string]any{"results": results, "ok": okCount, "failed": len(results) - okCount})
+}
+
+func (s *Server) bulkOne(r *http.Request, action string, d model.Document, base string) (bool, string) {
+	ctx := r.Context()
+	owed := d.Kind == model.KindInvoice && (d.Status == model.StatusUnpaid || d.Status == model.StatusPartial)
+	switch action {
+	case "email":
+		if d.Status == model.StatusVoid {
+			return false, "void documents are not sent"
+		}
+		if strings.TrimSpace(d.Customer.Email) == "" {
+			return false, "the customer has no email address"
+		}
+		if _, err := s.Mail.SendDocument(ctx, mailer.Request{DocumentID: d.ID, BaseURL: base}); err != nil {
+			return false, err.Error()
+		}
+		return true, "sent to " + d.Customer.Email
+	case "remind":
+		if !owed {
+			return false, "nothing is owed on this document"
+		}
+		if strings.TrimSpace(d.Customer.Email) == "" {
+			return false, "the customer has no email address"
+		}
+		if _, err := s.Mail.SendDocument(ctx, mailer.Request{DocumentID: d.ID, Kind: "reminder", BaseURL: base, When: s.Auto.WhenText(d)}); err != nil {
+			return false, err.Error()
+		}
+		return true, "reminder sent to " + d.Customer.Email
+	case "paid":
+		if !owed {
+			return false, "nothing is owed on this document"
+		}
+		old := d
+		d.Payments = append(append([]model.Payment{}, d.Payments...), model.Payment{AmountCents: d.Totals.TotalCents - d.PaidCents, PaidOn: s.Store.Today(), Method: "marked paid"})
+		out, err := s.Store.UpdateDocument(ctx, d.ID, d, store.SaveOptions{})
+		if err != nil {
+			return false, err.Error()
+		}
+		s.recordChange(ctx, &old, out)
+		return true, "marked paid"
+	case "void":
+		if d.Kind != model.KindInvoice || d.Status == model.StatusVoid {
+			return false, "only an invoice that is not void can be voided"
+		}
+		old := d
+		d.Status = model.StatusVoid
+		out, err := s.Store.UpdateDocument(ctx, d.ID, d, store.SaveOptions{})
+		if err != nil {
+			return false, err.Error()
+		}
+		s.recordChange(ctx, &old, out)
+		return true, "voided"
+	}
+	return false, "unknown action"
+}

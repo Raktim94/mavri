@@ -27,14 +27,14 @@ sh e2e/run.sh        # optional: full browser run against the Docker image (need
 
 ## How the code is organised
 
-| Path | Contents |
-| --- | --- |
-| `web/src` | React interface: `pages`, `components`, one `styles.css` with design tokens at the top |
-| `server/internal` | `web` (HTTP), `store` (records and rules), `auth`, `shop` (webhooks), `einvoice`, `mcp`, `db` |
-| `server/cmd` | `mavri` (the server), `mavri-mcp` |
-| `updater` | Tiny sidecar behind the in-app **Update now** button |
-| `casaos`, `Dockerfile`, `docker-compose.yml` | Deployment |
-| `docs` | Guide, API reference, design notes and screenshots |
+| Path                                         | Contents                                                                                      |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `web/src`                                    | React interface: `pages`, `components`, one `styles.css` with design tokens at the top        |
+| `server/internal`                            | `web` (HTTP), `store` (records and rules), `auth`, `shop` (webhooks), `einvoice`, `mcp`, `db` |
+| `server/cmd`                                 | `mavri` (the server), `mavri-mcp`                                                             |
+| `updater`                                    | Tiny sidecar behind the in-app **Update now** button                                          |
+| `casaos`, `Dockerfile`, `docker-compose.yml` | Deployment                                                                                    |
+| `docs`                                       | Guide, API reference, design notes and screenshots                                            |
 
 ## Rules that matter
 

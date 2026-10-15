@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"github.com/Raktim94/mavri/server/internal/model"
+	"github.com/Raktim94/mavri/server/internal/money"
 	"github.com/Raktim94/mavri/server/internal/shop"
 )
 
@@ -53,7 +54,7 @@ func From(ctx context.Context) (source, actor string) {
 var Events = []string{
 	"invoice.created", "invoice.updated", "invoice.paid", "invoice.voided", "invoice.deleted",
 	"quote.created", "quote.updated", "quote.accepted", "quote.declined", "quote.deleted",
-	"payment.recorded", "document.shared", "document.viewed", "document.emailed",
+	"payment.recorded", "payment.failed", "document.shared", "document.viewed", "document.emailed",
 	"reminder.sent", "email.failed", "backup.completed", "backup.failed",
 }
 
@@ -252,9 +253,11 @@ func DocEvents(old *model.Document, cur model.Document) []Event {
 	}
 	if n := len(cur.Payments) - len(old.Payments); n > 0 {
 		p := cur.Payments[len(cur.Payments)-1]
-		out = append(out, Event{Action: "payment", Entity: kind, EntityID: cur.ID, Label: cur.FullNumber,
-			Detail: strconv.Itoa(n) + " payment(s) added, last " + strconv.FormatInt(p.AmountCents, 10) + " minor units on " + p.PaidOn,
-			Name:   "payment.recorded", Data: data})
+		detail := money.Format(p.AmountCents, cur.Currency) + " received on " + p.PaidOn
+		if n > 1 {
+			detail = strconv.Itoa(n) + " payments added, the last " + detail
+		}
+		out = append(out, Event{Action: "payment recorded", Entity: kind, EntityID: cur.ID, Label: cur.FullNumber, Detail: detail, Name: "payment.recorded", Data: data})
 	}
 	if len(out) == 0 || changedContent(*old, cur) {
 		out = append(out, ev("updated", kind+".updated", ""))

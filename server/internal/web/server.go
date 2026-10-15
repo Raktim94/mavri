@@ -16,6 +16,7 @@ import (
 	"github.com/Raktim94/mavri/server/internal/automation"
 	"github.com/Raktim94/mavri/server/internal/backup"
 	"github.com/Raktim94/mavri/server/internal/mailer"
+	"github.com/Raktim94/mavri/server/internal/payments"
 	"github.com/Raktim94/mavri/server/internal/share"
 	"github.com/Raktim94/mavri/server/internal/shop"
 	"github.com/Raktim94/mavri/server/internal/store"
@@ -66,6 +67,7 @@ type Server struct {
 	Mail    *mailer.Service
 	Auto    *automation.Service
 	Backups *backup.Service
+	Pay     *payments.Service
 	Errors  *ErrorLog // recent warnings and errors, for the health page
 	Started time.Time
 
@@ -92,6 +94,7 @@ func Build(cfg Config, log *slog.Logger, d *sql.DB, box *shop.Box) (http.Handler
 		c, _ := s.Auto.Load(ctx)
 		return strings.TrimRight(c.PublicURL, "/")
 	}
+	s.Pay = &payments.Service{DB: d, Box: box, Store: st, Hub: hub}
 	s.Backups = &backup.Service{DB: d, Box: box, Dir: filepath.Join(cfg.DataDir, "backups"), Hub: hub}
 	mux := http.NewServeMux()
 	s.routes(mux)
@@ -162,6 +165,7 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/documents", user(s.listDocuments))
 	mux.HandleFunc("GET /api/documents/next-number", user(s.nextNumber))
 	mux.HandleFunc("POST /api/documents", user(s.createDocument))
+	mux.HandleFunc("POST /api/documents/bulk", human(s.bulkDocuments))
 	mux.HandleFunc("GET /api/documents/{id}", user(s.getDocument))
 	mux.HandleFunc("PUT /api/documents/{id}", user(s.updateDocument))
 	mux.HandleFunc("DELETE /api/documents/{id}", user(s.deleteDocument))
@@ -192,6 +196,7 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/overdue", user(s.overdue))
 	mux.HandleFunc("GET /api/recurring", user(s.listRecurring))
 	mux.HandleFunc("POST /api/recurring", user(s.createRecurring))
+	mux.HandleFunc("POST /api/recurring/preview", user(s.previewDraftRecurring))
 	mux.HandleFunc("PUT /api/recurring/{id}", user(s.updateRecurring))
 	mux.HandleFunc("DELETE /api/recurring/{id}", user(s.deleteRecurring))
 	mux.HandleFunc("GET /api/recurring/{id}/preview", user(s.previewRecurring))
@@ -230,6 +235,14 @@ func (s *Server) routes(mux *http.ServeMux) {
 	// what a client sees through a secure link (no sign-in)
 	mux.HandleFunc("GET /api/public/documents/{token}", s.limited(s.publicLimit, s.clientIP, s.publicGet))
 	mux.HandleFunc("POST /api/public/documents/{token}/respond", s.limited(s.publicLimit, s.clientIP, s.publicRespond))
+
+	// online payments
+	mux.HandleFunc("GET /api/payments/config", human(s.getPayConfig))
+	mux.HandleFunc("PUT /api/payments/config", human(s.putPayConfig))
+	mux.HandleFunc("GET /api/public/documents/{token}/options", s.limited(s.publicLimit, s.clientIP, s.publicOptions))
+	mux.HandleFunc("GET /api/public/documents/{token}/einvoice", s.limited(s.publicLimit, s.clientIP, s.publicEInvoice))
+	mux.HandleFunc("POST /api/public/documents/{token}/pay", s.limited(s.publicLimit, s.clientIP, s.publicPay))
+	mux.HandleFunc("POST /api/hooks/stripe", s.limited(s.hookLimit, s.clientIP, s.stripeHook))
 
 	// stores
 	mux.HandleFunc("GET /api/shops", user(s.listShops))

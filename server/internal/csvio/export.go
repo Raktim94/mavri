@@ -27,7 +27,12 @@ func SafeCell(s string) string {
 func row(w *csv.Writer, cells ...string) { _ = w.Write(cells) }
 
 // Export writes one kind as CSV. Amounts are in major units (12.50), so a spreadsheet can read them.
-func Export(ctx context.Context, d *sql.DB, st *store.Store, kind string, w io.Writer) error {
+func Export(ctx context.Context, d *sql.DB, st *store.Store, kind string, w io.Writer, only ...int64) error {
+	want := map[int64]bool{}
+	for _, id := range only {
+		want[id] = true
+	}
+	pick := func(id int64) bool { return len(want) == 0 || want[id] }
 	cw := csv.NewWriter(w)
 	defer cw.Flush()
 	switch kind {
@@ -71,6 +76,9 @@ func Export(ctx context.Context, d *sql.DB, st *store.Store, kind string, w io.W
 			return err
 		}
 		for _, it := range items {
+			if !pick(it.ID) {
+				continue
+			}
 			doc, err := st.GetDocument(ctx, d, it.ID)
 			if err != nil {
 				return err
@@ -86,6 +94,9 @@ func Export(ctx context.Context, d *sql.DB, st *store.Store, kind string, w io.W
 			return err
 		}
 		for _, it := range items {
+			if !pick(it.ID) {
+				continue
+			}
 			doc, err := st.GetDocument(ctx, d, it.ID)
 			if err != nil {
 				return err

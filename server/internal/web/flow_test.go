@@ -2,6 +2,9 @@ package web
 
 import (
 	"bytes"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"io"
 	"log/slog"
@@ -9,8 +12,11 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httptest"
+	"net/url"
+	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/Raktim94/mavri/server/internal/auth"
 	"github.com/Raktim94/mavri/server/internal/db"
@@ -278,6 +284,13 @@ func TestRecurringAndRemindersEndpoints(t *testing.T) {
 		t.Fatalf("preview: %v", pv)
 	}
 	c.json("POST", "/api/recurring", map[string]any{"documentId": id(doc), "every": "fortnight", "startOn": "2026-01-15"}, 400)
+	dp := c.json("POST", "/api/recurring/preview?n=2", map[string]any{"documentId": id(doc), "every": "week", "startOn": "2026-11-01"}, 200)
+	if up := dp["upcoming"].([]any); len(up) != 2 || up[1].(map[string]any)["issuedOn"] != "2026-11-08" {
+		t.Fatalf("draft preview: %v", dp)
+	}
+	if n := len(c.list("/api/recurring")); n != 1 {
+		t.Fatalf("a preview must not create a schedule: %d", n)
+	}
 	n, err := s.Auto.RunRecurring(t.Context())
 	if err != nil || n == 0 {
 		t.Fatalf("run: %d %v", n, err)
@@ -393,5 +406,256 @@ func TestHealthAndOpenAPI(t *testing.T) {
 	api := &client{t: t, srv: c.srv, c: &http.Client{}, key: key}
 	if code, _ := api.do("GET", "/api/admin/health", nil); code != 403 {
 		t.Fatalf("health for an API key: %d", code)
+	}
+}
+
+// stripeEvent builds a signed Stripe webhook request body and header.
+func stripeEvent(secret, id, typ string, obj map[string]any, at time.Time) (string, string) {
+	body, _ := json.Marshal(map[string]any{"id": id, "type": typ, "data": map[string]any{"object": obj}})
+	m := hmac.New(sha256.New, []byte(secret))
+	ts := strconv.FormatInt(at.Unix(), 10)
+	m.Write([]byte(ts + "."))
+	m.Write(body)
+	return string(body), "t=" + ts + ",v1=" + hex.EncodeToString(m.Sum(nil))
+}
+
+func TestClientPaysOnlineAndStripeConfirms(t *testing.T) {
+	c, s := newFlow(t)
+	var got url.Values
+	var auth string
+	stripe := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/v1/checkout/sessions" {
+			http.NotFound(w, r)
+			return
+		}
+		r.ParseForm()
+		got, auth = r.PostForm, r.Header.Get("Authorization")
+		w.Write([]byte(`{"id":"cs_test_1","url":"https://checkout.stripe.test/pay/cs_test_1"}`))
+	}))
+	defer stripe.Close()
+	s.Pay.APIBase = stripe.URL
+
+	issuer, customer := setupParties(c)
+	inv := c.invoice(issuer, customer, nil) // 100.00 EUR
+	docID := id(inv)
+	token := c.json("POST", "/api/documents/"+jsonNum(docID)+"/share", nil, 200)["link"].(map[string]any)["token"].(string)
+	anon := c.anonymous()
+
+	// Off until set up; the keys must look right; secrets are never returned.
+	if o := anon.json("GET", "/api/public/documents/"+token+"/options", nil, 200); o["pay"] != false {
+		t.Fatalf("pay should be off: %v", o)
+	}
+	c.json("PUT", "/api/payments/config", map[string]any{"enabled": true}, 400)
+	c.json("PUT", "/api/payments/config", map[string]any{"secretKey": "pk_live_nope", "webhookSecret": "whsec_x"}, 400)
+	cfg := c.json("PUT", "/api/payments/config", map[string]any{"enabled": true, "secretKey": "sk_test_abc", "webhookSecret": "whsec_test"}, 200)
+	if cfg["config"].(map[string]any)["secretKey"] != nil && cfg["config"].(map[string]any)["secretKey"] != "" {
+		t.Fatalf("the key leaked: %v", cfg)
+	}
+	if !strings.HasSuffix(cfg["webhookUrl"].(string), "/api/hooks/stripe") {
+		t.Fatalf("webhook url: %v", cfg["webhookUrl"])
+	}
+	o := anon.json("GET", "/api/public/documents/"+token+"/options", nil, 200)
+	if o["pay"] != true || o["payAmount"] != float64(10000) {
+		t.Fatalf("options: %v", o)
+	}
+
+	// The client starts a payment: Stripe is asked for exactly the balance.
+	pay := anon.json("POST", "/api/public/documents/"+token+"/pay", nil, 200)
+	if pay["url"] != "https://checkout.stripe.test/pay/cs_test_1" {
+		t.Fatalf("pay: %v", pay)
+	}
+	if auth != "Bearer sk_test_abc" || got.Get("line_items[0][price_data][unit_amount]") != "10000" || got.Get("line_items[0][price_data][currency]") != "eur" ||
+		got.Get("metadata[mavri_document]") != jsonNum(docID) || !strings.HasSuffix(got.Get("success_url"), "/d/"+token+"?paid=1") {
+		t.Fatalf("what Stripe was asked: %v (auth %q)", got, auth)
+	}
+
+	hook := func(secret, evID, typ string, obj map[string]any, at time.Time) int {
+		body, sig := stripeEvent(secret, evID, typ, obj, at)
+		req, _ := http.NewRequest("POST", c.srv.URL+"/api/hooks/stripe", strings.NewReader(body))
+		req.Header.Set("Stripe-Signature", sig)
+		res, err := http.DefaultClient.Do(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		res.Body.Close()
+		return res.StatusCode
+	}
+	paidObj := func(amount int, cur string) map[string]any {
+		return map[string]any{"id": "cs_test_1", "payment_status": "paid", "amount_total": amount, "currency": cur, "client_reference_id": jsonNum(docID),
+			"metadata": map[string]any{"mavri_document": jsonNum(docID)}}
+	}
+	now := time.Now()
+	state := func() map[string]any { return c.json("GET", "/api/documents/"+jsonNum(docID), nil, 200) }
+
+	// Forged or stale events are refused and change nothing.
+	if code := hook("whsec_wrong", "evt_1", "checkout.session.completed", paidObj(10000, "eur"), now); code != 400 {
+		t.Fatalf("forged signature: %d", code)
+	}
+	if code := hook("whsec_test", "evt_1", "checkout.session.completed", paidObj(10000, "eur"), now.Add(-time.Hour)); code != 400 {
+		t.Fatalf("stale timestamp: %d", code)
+	}
+	if state()["status"] != "unpaid" {
+		t.Fatal("a refused event changed the invoice")
+	}
+	// A different currency is never applied.
+	if code := hook("whsec_test", "evt_cur", "checkout.session.completed", paidObj(10000, "usd"), now); code != 200 {
+		t.Fatalf("currency mismatch answers: %d", code)
+	}
+	if state()["status"] != "unpaid" {
+		t.Fatal("a payment in the wrong currency was applied")
+	}
+	// A partial payment, then the rest; each event only once.
+	if code := hook("whsec_test", "evt_part", "checkout.session.completed", paidObj(4000, "eur"), now); code != 200 {
+		t.Fatalf("partial: %d", code)
+	}
+	if st := state(); st["status"] != "partial" || st["paidCents"] != float64(4000) {
+		t.Fatalf("after the partial payment: %v", st)
+	}
+	hook("whsec_test", "evt_part", "checkout.session.completed", paidObj(4000, "eur"), now) // Stripe retries
+	if st := state(); st["paidCents"] != float64(4000) {
+		t.Fatalf("a retried event paid twice: %v", st["paidCents"])
+	}
+	if code := hook("whsec_test", "evt_rest", "checkout.session.completed", paidObj(6000, "eur"), now); code != 200 {
+		t.Fatalf("rest: %d", code)
+	}
+	st := state()
+	pays := st["payments"].([]any)
+	if st["status"] != "paid" || len(pays) != 2 || pays[1].(map[string]any)["method"] != "card (Stripe)" {
+		t.Fatalf("after paying in full: %v", st)
+	}
+	// Nothing is left to pay.
+	if o := anon.json("GET", "/api/public/documents/"+token+"/options", nil, 200); o["pay"] != false {
+		t.Fatalf("a paid invoice offers payment: %v", o)
+	}
+	anon.json("POST", "/api/public/documents/"+token+"/pay", nil, 409)
+
+	// A failed payment is recorded and can be sent to webhooks as payment.failed.
+	other := c.invoice(issuer, customer, nil)
+	failObj := map[string]any{"id": "pi_1", "metadata": map[string]any{"mavri_document": jsonNum(id(other))}, "last_payment_error": map[string]any{"message": "Your card was declined."}}
+	if code := hook("whsec_test", "evt_fail", "payment_intent.payment_failed", failObj, now); code != 200 {
+		t.Fatalf("failure: %d", code)
+	}
+	act := c.json("GET", "/api/activity?entity=invoice&entityId="+jsonNum(id(other)), nil, 200)
+	seen := false
+	for _, it := range act["items"].([]any) {
+		e := it.(map[string]any)
+		if e["action"] == "payment failed" && strings.Contains(e["detail"].(string), "declined") && e["source"] == "webhook" {
+			seen = true
+		}
+	}
+	if !seen {
+		t.Fatalf("the failure is missing from the history: %v", act["items"])
+	}
+	// The sign-in required parts stay private.
+	if code, _ := anon.do("GET", "/api/payments/config", nil); code != 401 {
+		t.Fatalf("payments config without sign-in: %d", code)
+	}
+}
+
+func TestStripeErrorsAreReportedAndNoOneElseCanPay(t *testing.T) {
+	c, s := newFlow(t)
+	stripe := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(401)
+		w.Write([]byte(`{"error":{"message":"Invalid API Key provided: sk_test_***"}}`))
+	}))
+	defer stripe.Close()
+	s.Pay.APIBase = stripe.URL
+	issuer, customer := setupParties(c)
+	inv := c.invoice(issuer, customer, nil)
+	token := c.json("POST", "/api/documents/"+jsonNum(id(inv))+"/share", nil, 200)["link"].(map[string]any)["token"].(string)
+	c.json("PUT", "/api/payments/config", map[string]any{"enabled": true, "secretKey": "sk_test_abc", "webhookSecret": "whsec_test"}, 200)
+	anon := c.anonymous()
+	code, raw := anon.do("POST", "/api/public/documents/"+token+"/pay", nil)
+	if code != 502 || !strings.Contains(string(raw), "Invalid API Key") {
+		t.Fatalf("a Stripe failure should be explained: %d %s", code, raw)
+	}
+	// A quote cannot be paid.
+	q := c.json("POST", "/api/documents", map[string]any{"kind": "quote", "issuerId": issuer, "customerId": customer, "currencyId": 2, "issuedOn": "2026-10-02",
+		"lines": []any{map[string]any{"name": "Plan", "quantity": 1, "unitCents": 5000}}}, 201)
+	qt := c.json("POST", "/api/documents/"+jsonNum(id(q))+"/share", nil, 200)["link"].(map[string]any)["token"].(string)
+	anon.json("POST", "/api/public/documents/"+qt+"/pay", nil, 409)
+	// The webhook endpoint refuses everything when payments were never set up.
+	c2, _ := newFlow(t)
+	if code, _ := c2.do("POST", "/api/hooks/stripe", "{}", "Stripe-Signature", "t=1,v1=00"); code != 404 {
+		t.Fatalf("webhook without setup: %d", code)
+	}
+}
+
+func TestClientDownloadsTheEInvoice(t *testing.T) {
+	c, _ := newFlow(t)
+	issuer, customer := setupParties(c)
+	inv := c.invoice(issuer, customer, nil)
+	token := c.json("POST", "/api/documents/"+jsonNum(id(inv))+"/share", nil, 200)["link"].(map[string]any)["token"].(string)
+	anon := c.anonymous()
+	o := anon.json("GET", "/api/public/documents/"+token+"/options", nil, 200)
+	if len(o["einvoice"].([]any)) != 2 {
+		t.Fatalf("options: %v", o)
+	}
+	code, raw := anon.do("GET", "/api/public/documents/"+token+"/einvoice?format=ubl", nil)
+	if code != 200 || !strings.Contains(string(raw), "<cbc:ID>") {
+		t.Fatalf("ubl: %d %s", code, raw)
+	}
+	if code, _ := anon.do("GET", "/api/public/documents/"+token+"/einvoice?format=nonsense", nil); code != 403 {
+		t.Fatalf("unknown format: %d", code)
+	}
+	if code, _ := anon.do("GET", "/api/public/documents/aaaaaaaaaaaaaaaaaaaaaaaaaaaa/einvoice", nil); code != 404 {
+		t.Fatalf("bad token: %d", code)
+	}
+}
+
+func TestBulkActionsReportEachDocument(t *testing.T) {
+	c, s := newFlow(t)
+	var mailed []string
+	s.Mail.Send = func(_ mailer.Config, _ string, to []string, _ []byte) error {
+		mailed = append(mailed, to[0])
+		return nil
+	}
+	issuer, customer := setupParties(c)
+	c.json("PUT", "/api/parties/"+jsonNum(customer), map[string]any{"kind": "customer", "name": "Acme", "email": "ap@acme.example"}, 200)
+	noMail := c.json("POST", "/api/parties", map[string]any{"kind": "customer", "name": "No Email Ltd"}, 201)
+	a := c.invoice(issuer, customer, nil)
+	b := c.invoice(issuer, customer, nil)
+	n := c.invoice(issuer, id(noMail), nil)
+	ids := []float64{id(a), id(b), id(n), 9999}
+
+	// Email needs mail set up: one clear answer instead of many failures.
+	c.json("POST", "/api/documents/bulk", map[string]any{"ids": ids, "action": "email"}, 409)
+	c.json("PUT", "/api/mail/config", map[string]any{"enabled": true, "host": "smtp.test", "port": 587, "security": "starttls", "from": "bill@n.example"}, 200)
+	c.json("PUT", "/api/automation", map[string]any{"publicUrl": "https://inv.example", "remindBefore": []int{3}, "remindAfter": []int{3}}, 200)
+
+	res := c.json("POST", "/api/documents/bulk", map[string]any{"ids": ids, "action": "email"}, 200)
+	if res["ok"] != float64(2) || res["failed"] != float64(2) || len(mailed) != 2 {
+		t.Fatalf("email: %v (mailed %v)", res, mailed)
+	}
+	byID := map[float64]map[string]any{}
+	for _, r := range res["results"].([]any) {
+		m := r.(map[string]any)
+		byID[m["id"].(float64)] = m
+	}
+	if byID[id(n)]["ok"] != false || !strings.Contains(byID[id(n)]["message"].(string), "no email") || byID[9999]["message"] != "not found" {
+		t.Fatalf("per-document outcomes: %v", byID)
+	}
+	if r := c.json("POST", "/api/documents/bulk", map[string]any{"ids": []float64{id(a)}, "action": "remind"}, 200); r["ok"] != float64(1) {
+		t.Fatalf("remind: %v", r)
+	}
+	// Mark paid, then the second pass finds nothing owed.
+	if r := c.json("POST", "/api/documents/bulk", map[string]any{"ids": []float64{id(a), id(b)}, "action": "paid"}, 200); r["ok"] != float64(2) {
+		t.Fatalf("paid: %v", r)
+	}
+	if st := c.json("GET", "/api/documents/"+jsonNum(id(a)), nil, 200); st["status"] != "paid" || st["paidCents"] != float64(10000) {
+		t.Fatalf("after marking paid: %v", st)
+	}
+	if r := c.json("POST", "/api/documents/bulk", map[string]any{"ids": []float64{id(a)}, "action": "paid"}, 200); r["ok"] != float64(0) {
+		t.Fatalf("paying twice: %v", r)
+	}
+	if r := c.json("POST", "/api/documents/bulk", map[string]any{"ids": []float64{id(n)}, "action": "void"}, 200); r["ok"] != float64(1) {
+		t.Fatalf("void: %v", r)
+	}
+	c.json("POST", "/api/documents/bulk", map[string]any{"ids": []float64{}, "action": "void"}, 400)
+	c.json("POST", "/api/documents/bulk", map[string]any{"ids": []float64{1}, "action": "delete"}, 400)
+	// A selection can be exported on its own.
+	code, raw := c.do("GET", "/api/export/invoices.csv?ids="+jsonNum(id(a)), nil)
+	if code != 200 || strings.Count(string(raw), "\n") != 2 {
+		t.Fatalf("export of one invoice: %d\n%s", code, raw)
 	}
 }
