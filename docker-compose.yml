@@ -1,0 +1,29 @@
+# Mavri — a single container serving the app and the API.
+# Start:  docker compose up -d --build
+# Stop:   docker compose down
+#
+# It opens /data/mavri.db, creating it on the first start.
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mavri
+    ports:
+      - '${HOST_PORT:-3001}:3001'
+    environment:
+      - COOKIE_SECURE=${COOKIE_SECURE:-false}
+      # 0: clients connect directly. Set 1 when a reverse proxy (nginx, Caddy,
+      # Cloudflare Tunnel) sits in front, so rate limits see the real client.
+      - TRUST_PROXY=${TRUST_PROXY:-0}
+      # Pin the key that protects store webhook secrets: 32 random bytes in
+      # base64 (openssl rand -base64 32). Without it one is generated in the
+      # data volume.
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-}
+    volumes:
+      - mavri-data:/data
+    restart: unless-stopped
+
+volumes:
+  mavri-data:

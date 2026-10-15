@@ -1,0 +1,12 @@
+node_modules
+dist-fe
+release
+.git
+.github
+*.md
+!docs/DOCKER.md
+.vscode
+*.log
+.env
+.env.*
+.coverage

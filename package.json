@@ -1,0 +1,69 @@
+{
+  "name": "mavri",
+  "private": true,
+  "version": "2.1.0",
+  "type": "module",
+  "description": "Invoicing and quoting application for freelancers and small businesses, run with Docker. Create, manage and export invoices and quotes with full data ownership.",
+  "author": "Raktim Ranjit <mail@raktimranjit.com>",
+  "keywords": [
+    "invoice",
+    "quotation",
+    "quote",
+    "billing",
+    "pdf-export",
+    "pdf-generation",
+    "business-management",
+    "finance",
+    "accounting",
+    "local-database",
+    "billing-software",
+    "business-software",
+    "document-generation",
+    "e-invoices",
+    "peppol",
+    "ubl",
+    "xrechnung"
+  ],
+  "bugs": {
+    "url": "https://github.com/Raktim94/mavri/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Raktim94/mavri.git"
+  },
+  "license": "AGPL-3.0-only",
+  "scripts": {
+    "dev": "vite -c web/vite.config.ts",
+    "build": "vite build -c web/vite.config.ts",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "lint:fix": "eslint --fix .",
+    "typecheck": "tsc -p web",
+    "test": "vitest run --root web",
+    "docker:up": "docker compose up -d --build",
+    "docker:down": "docker compose down"
+  },
+  "dependencies": {
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "react-router-dom": "^7.18.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@types/node": "^26.4.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.5",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.5.3",
+    "globals": "^17.7.0",
+    "prettier": "^3.9.6",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.69.0",
+    "vite": "^8.1.4",
+    "vitest": "^4.1.8"
+  }
+}
