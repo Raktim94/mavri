@@ -2,8 +2,10 @@ package web
 
 import (
 	"net/http"
+	"reflect"
 	"strconv"
 
+	"github.com/Raktim94/mavri/server/internal/activity"
 	"github.com/Raktim94/mavri/server/internal/db"
 )
 
@@ -40,6 +42,7 @@ func crud[T any](s *Server, mux *http.ServeMux, path string, t *db.Table[T], che
 			s.problem(w, r, err)
 			return
 		}
+		s.Hub.Record(r.Context(), activity.Event{Action: "created", Entity: entityOf(path), EntityID: t.ID(&v), Label: labelOf(v)})
 		writeJSON(w, http.StatusCreated, v)
 	}))
 	mux.HandleFunc("GET "+path+"/{id}", user(func(w http.ResponseWriter, r *http.Request) {
@@ -74,6 +77,7 @@ func crud[T any](s *Server, mux *http.ServeMux, path string, t *db.Table[T], che
 			s.problem(w, r, err)
 			return
 		}
+		s.Hub.Record(r.Context(), activity.Event{Action: "updated", Entity: entityOf(path), EntityID: id, Label: labelOf(v)})
 		writeJSON(w, http.StatusOK, v)
 	}))
 	mux.HandleFunc("DELETE "+path+"/{id}", user(func(w http.ResponseWriter, r *http.Request) {
@@ -86,6 +90,45 @@ func crud[T any](s *Server, mux *http.ServeMux, path string, t *db.Table[T], che
 			s.problem(w, r, err)
 			return
 		}
+		s.Hub.Record(r.Context(), activity.Event{Action: "deleted", Entity: entityOf(path), EntityID: id})
 		w.WriteHeader(http.StatusNoContent)
 	}))
+}
+
+// entityOf names the record type for the history, from "/api/parties" and so on.
+func entityOf(path string) string {
+	switch path {
+	case "/api/parties":
+		return "party"
+	case "/api/currencies":
+		return "currency"
+	case "/api/banks":
+		return "bank account"
+	case "/api/groups":
+		return "category or unit"
+	case "/api/products":
+		return "product"
+	case "/api/styles":
+		return "style"
+	case "/api/presets":
+		return "preset"
+	}
+	return path
+}
+
+// labelOf picks a readable name from a record (its Name, Label or Code), for the history.
+func labelOf(v any) string {
+	rv := reflect.ValueOf(v)
+	for rv.Kind() == reflect.Pointer {
+		rv = rv.Elem()
+	}
+	if rv.Kind() != reflect.Struct {
+		return ""
+	}
+	for _, k := range []string{"Name", "Label", "Code"} {
+		if f := rv.FieldByName(k); f.IsValid() && f.Kind() == reflect.String && f.String() != "" {
+			return f.String()
+		}
+	}
+	return ""
 }

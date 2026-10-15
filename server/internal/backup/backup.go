@@ -1,8 +1,13 @@
 // Package backup exports the business data as one JSON document and restores it.
 //
-// Accounts, sessions, API keys and store connections are not part of a backup:
-// they belong to this installation. Restoring replaces all invoices, quotes and
-// records, and removes store connections (create them again afterwards).
+// A backup holds the business data: invoices, quotes, payments, customers,
+// businesses, products, banks, styles, presets, currencies, the app preferences
+// (not the email and backup setup), recurring-invoice schedules, client share
+// links and the activity history. It does not hold what belongs to this
+// installation: accounts, sessions, API keys, store connections, webhook
+// endpoints, email (SMTP) and backup settings, and the encryption key.
+// Restoring replaces the business data and removes store connections (create
+// them again afterwards); the installation's own setup is left alone.
 package backup
 
 import (
@@ -23,7 +28,16 @@ const Version = 1
 
 // tables in the order they can be inserted (parents first).
 var tables = []string{"currencies", "parties", "bank_accounts", "catalog_groups", "products", "styles", "presets",
-	"documents", "document_lines", "payments", "attachments", "settings"}
+	"documents", "document_lines", "payments", "attachments", "recurring", "share_links", "audit_log", "settings"}
+
+// Included describes, for people, what a backup contains and what it leaves out.
+var Included = []string{"Invoices and quotes with their lines, payments and attachments", "Customers and businesses, with logos",
+	"Products, categories, units, bank accounts, currencies, styles and presets", "App preferences (prefixes, date and number format, switches)",
+	"Recurring-invoice schedules", "Client share links", "Activity history"}
+
+// Excluded is what a backup never contains, and why.
+var Excluded = []string{"Sign-in accounts, sessions and API keys (they belong to this installation)", "Store connections and their secrets",
+	"Webhook endpoints and their signing secrets", "Email (SMTP) and backup settings, including saved passwords", "The encryption key file (secret.key)"}
 
 // File is the backup document.
 type File struct {
@@ -66,7 +80,11 @@ func Export(ctx context.Context, d *sql.DB) (File, error) {
 		if err != nil {
 			return f, err
 		}
-		rows, err := d.QueryContext(ctx, "SELECT * FROM "+t+" ORDER BY 1")
+		query := "SELECT * FROM " + t + " ORDER BY 1"
+		if t == "settings" {
+			query = "SELECT * FROM settings WHERE key = 'app' ORDER BY 1" // email and backup setup stay with the installation
+		}
+		rows, err := d.QueryContext(ctx, query)
 		if err != nil {
 			return f, err
 		}
@@ -139,7 +157,11 @@ func Restore(ctx context.Context, d *sql.DB, f File) error {
 			}
 		}
 		for i := len(tables) - 1; i >= 0; i-- {
-			if _, err := tx.ExecContext(ctx, "DELETE FROM "+tables[i]); err != nil {
+			del := "DELETE FROM " + tables[i]
+			if tables[i] == "settings" {
+				del += " WHERE key = 'app'"
+			}
+			if _, err := tx.ExecContext(ctx, del); err != nil {
 				return err
 			}
 		}

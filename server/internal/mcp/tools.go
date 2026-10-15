@@ -7,10 +7,14 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/Raktim94/mavri/server/internal/activity"
+	"github.com/Raktim94/mavri/server/internal/automation"
 	"github.com/Raktim94/mavri/server/internal/db"
 	"github.com/Raktim94/mavri/server/internal/einvoice"
+	"github.com/Raktim94/mavri/server/internal/mailer"
 	"github.com/Raktim94/mavri/server/internal/model"
 	"github.com/Raktim94/mavri/server/internal/money"
+	"github.com/Raktim94/mavri/server/internal/share"
 	"github.com/Raktim94/mavri/server/internal/shop"
 	"github.com/Raktim94/mavri/server/internal/store"
 )
@@ -19,7 +23,32 @@ import (
 type Env struct {
 	Store *store.Store
 	Shops *shop.Service
+	// The rest is optional; without it the history, email and sharing tools say they are unavailable.
+	Hub   *activity.Hub
+	Auto  *automation.Service
+	Mail  *mailer.Service
+	Links *share.Links
 }
+
+// record writes what a tool changed to the history and queues webhooks (source: mcp).
+func (e *Env) record(ctx context.Context, old *model.Document, cur model.Document) {
+	if e.Hub == nil {
+		return
+	}
+	for _, ev := range activity.DocEvents(old, cur) {
+		e.Hub.Record(ctx, ev)
+	}
+}
+
+// approval is the answer to an action that needs the user's explicit go-ahead and did not get it.
+func approval(action string, preview any) (any, error) {
+	return m{"status": "approval_required", "changed": false, "action": action, "preview": preview,
+		"message": "Nothing was changed. Show this to the user. Only after they explicitly approve, call this tool again with confirm set to true."}, nil
+}
+
+func confirmed(a map[string]any) bool { b, _ := a["confirm"].(bool); return b }
+
+var confirmField = boolean("must be true, and only after the user has explicitly approved this exact action")
 
 // ---- schema helpers --------------------------------------------------------
 
@@ -113,43 +142,80 @@ func Tools(env *Env) []Tool {
 		func(ctx context.Context, a map[string]any) (any, error) { return createDocument(ctx, env, a) })
 	add("record_payment", "Record a payment against an invoice; the status updates by itself.",
 		obj(m{"documentId": intg("invoice id"), "amount": num("amount in major units"), "paidOn": str("YYYY-MM-DD, default today"),
-			"method": str("e.g. bank, cash, card"), "note": str("note")}, "documentId", "amount"),
+			"method": str("e.g. bank, cash, card"), "note": str("note"), "confirm": confirmField}, "documentId", "amount"),
 		func(ctx context.Context, a map[string]any) (any, error) {
 			d, err := s.GetDocument(ctx, s.DB, idArg(a, "documentId"))
 			if err != nil {
 				return nil, notFound("document", err)
 			}
 			amount, _ := a["amount"].(float64)
+			if !confirmed(a) {
+				return approval("record a payment", m{"invoice": d.FullNumber, "customer": d.Customer.Name, "amount": amount, "currency": d.Currency.Code,
+					"balanceBefore": money.Major(d.Totals.TotalCents-d.PaidCents, d.Currency.Decimals)})
+			}
+			old := d
 			paidOn := strArg(a, "paidOn")
 			if paidOn == "" {
 				paidOn = s.Today()
 			}
 			d.Payments = append(d.Payments, model.Payment{AmountCents: money.ToMinor(amount, d.Currency.Decimals), PaidOn: paidOn, Method: strArg(a, "method"), Note: strArg(a, "note")})
-			return s.UpdateDocument(ctx, d.ID, d, store.SaveOptions{})
+			out, err := s.UpdateDocument(ctx, d.ID, d, store.SaveOptions{})
+			if err == nil {
+				env.record(ctx, &old, out)
+			}
+			return out, err
 		})
 	add("set_document_status", "Set a quote to open, accepted or declined, or void an invoice. Invoice paid and unpaid statuses follow payments.",
-		obj(m{"id": intg("document id"), "status": oneOf("new status", "open", "accepted", "declined", "void", "unpaid")}, "id", "status"),
+		obj(m{"id": intg("document id"), "status": oneOf("new status", "open", "accepted", "declined", "void", "unpaid"), "confirm": confirmField}, "id", "status"),
 		func(ctx context.Context, a map[string]any) (any, error) {
 			d, err := s.GetDocument(ctx, s.DB, idArg(a, "id"))
 			if err != nil {
 				return nil, notFound("document", err)
 			}
+			if strArg(a, "status") == model.StatusVoid && !confirmed(a) {
+				return approval("void a document", m{"document": d.FullNumber, "customer": d.Customer.Name, "total": money.Format(d.Totals.TotalCents, d.Currency)})
+			}
+			old := d
 			d.Status = strArg(a, "status")
-			return s.UpdateDocument(ctx, d.ID, d, store.SaveOptions{})
+			out, err := s.UpdateDocument(ctx, d.ID, d, store.SaveOptions{})
+			if err == nil {
+				env.record(ctx, &old, out)
+			}
+			return out, err
 		})
 	add("duplicate_document", "Copy a document as a new one with the next number and today's date.", obj(m{"id": intg("document id")}, "id"),
 		func(ctx context.Context, a map[string]any) (any, error) {
 			d, err := s.Duplicate(ctx, idArg(a, "id"))
+			if err == nil {
+				env.record(ctx, nil, d)
+			}
 			return d, notFound("document", err)
 		})
 	add("convert_quote", "Turn a quote into an invoice and mark the quote accepted.", obj(m{"id": intg("quote id")}, "id"),
 		func(ctx context.Context, a map[string]any) (any, error) {
 			d, err := s.Convert(ctx, idArg(a, "id"))
+			if err == nil {
+				env.record(ctx, nil, d)
+			}
 			return d, notFound("quote", err)
 		})
-	add("delete_document", "Delete a document and its payments.", obj(m{"id": intg("document id")}, "id"),
+	add("delete_document", "Delete a document and its payments. This cannot be undone, so it needs the user's explicit approval.",
+		obj(m{"id": intg("document id"), "confirm": confirmField}, "id"),
 		func(ctx context.Context, a map[string]any) (any, error) {
-			return m{"deleted": true}, notFound("document", s.DeleteDocument(ctx, idArg(a, "id")))
+			d, err := s.GetDocument(ctx, s.DB, idArg(a, "id"))
+			if err != nil {
+				return nil, notFound("document", err)
+			}
+			if !confirmed(a) {
+				return approval("delete a document", m{"document": d.FullNumber, "customer": d.Customer.Name, "payments": len(d.Payments)})
+			}
+			if err := s.DeleteDocument(ctx, d.ID); err != nil {
+				return nil, notFound("document", err)
+			}
+			if env.Hub != nil {
+				env.Hub.Record(ctx, activity.Event{Action: "deleted", Entity: d.Kind, EntityID: d.ID, Label: d.FullNumber, Name: d.Kind + ".deleted", Data: activity.DocData(d)})
+			}
+			return m{"deleted": true}, nil
 		})
 	add("export_einvoice", "Make the UBL 2.1 or XRechnung XML of an invoice. Returns the XML text, or lists what is missing.",
 		obj(m{"id": intg("invoice id"), "format": oneOf("e-invoice format, default ubl", "ubl", "xrechnung")}, "id"),
@@ -176,6 +242,117 @@ func Tools(env *Env) []Tool {
 				y = s.Today()[:4]
 			}
 			return s.YearReport(ctx, y)
+		})
+
+	// overdue accounts, email and sharing
+	add("overdue_summary", "Summarise unpaid invoices that are past their due date, grouped by customer, oldest first. Amounts are in major units.", obj(m{}),
+		func(ctx context.Context, _ map[string]any) (any, error) {
+			if env.Auto == nil {
+				return nil, errors.New("this tool is not available here")
+			}
+			items, err := env.Auto.Overdue(ctx)
+			if err != nil {
+				return nil, err
+			}
+			type row struct {
+				Customer string             `json:"customer"`
+				Invoices int                `json:"invoices"`
+				Oldest   int                `json:"oldestDaysOverdue"`
+				Numbers  []string           `json:"numbers"`
+				Owed     map[string]float64 `json:"owedByCurrency"`
+			}
+			by := map[string]*row{}
+			var order []string
+			for _, it := range items {
+				r := by[it.Customer]
+				if r == nil {
+					r = &row{Customer: it.Customer, Owed: map[string]float64{}}
+					by[it.Customer] = r
+					order = append(order, it.Customer)
+				}
+				r.Invoices++
+				r.Numbers = append(r.Numbers, it.Number)
+				if it.DaysOverdue > r.Oldest {
+					r.Oldest = it.DaysOverdue
+				}
+				r.Owed[it.Currency] += float64(it.BalanceCents) / 100
+			}
+			out := []*row{}
+			for _, k := range order {
+				out = append(out, by[k])
+			}
+			return m{"overdueInvoices": len(items), "customers": out}, nil
+		})
+	add("send_document", "Email an invoice or quote to the customer as a secure link, or send a payment reminder. Sending is outward-facing: without confirm=true this only returns a preview of the email.",
+		obj(m{"id": intg("document id"), "kind": oneOf("send for the first email, reminder to chase payment", "send", "reminder"), "to": str("recipient; default is the customer's email"),
+			"subject": str("replace the subject"), "body": str("replace the body; {{link}} is replaced by the secure link"), "confirm": confirmField}, "id"),
+		func(ctx context.Context, a map[string]any) (any, error) {
+			if env.Mail == nil || env.Auto == nil {
+				return nil, errors.New("email is not available here")
+			}
+			base := env.Auto.BaseURL(ctx)
+			if base == "" {
+				return nil, errors.New("set the public address in Mavri (Automation) first; the email needs a link that clients can open")
+			}
+			d, err := s.GetDocument(ctx, s.DB, idArg(a, "id"))
+			if err != nil {
+				return nil, notFound("document", err)
+			}
+			req := mailer.Request{DocumentID: d.ID, Kind: strArg(a, "kind"), To: strArg(a, "to"), Subject: strArg(a, "subject"), Body: strArg(a, "body"), BaseURL: base}
+			if req.Kind == "reminder" {
+				req.When = env.Auto.WhenText(d)
+			}
+			if !confirmed(a) {
+				res, body, err := env.Mail.Preview(ctx, req)
+				if err != nil {
+					return nil, err
+				}
+				return approval("send an email", m{"to": res.To, "subject": res.Subject, "body": body})
+			}
+			res, err := env.Mail.SendDocument(ctx, req)
+			if err != nil {
+				return nil, err
+			}
+			return m{"sent": true, "to": res.To, "subject": res.Subject, "link": res.Link}, nil
+		})
+	add("share_document", "Create (or return) the secure client link for a document. Anyone with the link can read the document, so it needs the user's approval.",
+		obj(m{"id": intg("document id"), "confirm": confirmField}, "id"),
+		func(ctx context.Context, a map[string]any) (any, error) {
+			if env.Links == nil || env.Auto == nil {
+				return nil, errors.New("sharing is not available here")
+			}
+			d, err := s.GetDocument(ctx, s.DB, idArg(a, "id"))
+			if err != nil {
+				return nil, notFound("document", err)
+			}
+			base := env.Auto.BaseURL(ctx)
+			if base == "" {
+				return nil, errors.New("set the public address in Mavri (Automation) first")
+			}
+			if !confirmed(a) {
+				return approval("create a secure link", m{"document": d.FullNumber, "customer": d.Customer.Name, "note": "anyone with the link can read this document"})
+			}
+			k, created, err := env.Links.Ensure(ctx, d.ID)
+			if err != nil {
+				return nil, err
+			}
+			if created && env.Hub != nil {
+				env.Hub.Record(ctx, activity.Event{Action: "shared", Entity: d.Kind, EntityID: d.ID, Label: d.FullNumber, Detail: "secure client link created", Name: "document.shared", Data: activity.DocData(d)})
+			}
+			return m{"url": base + "/d/" + k.Token}, nil
+		})
+	add("list_activity", "Read the activity history: who changed what, when, and from where (ui, api, mcp, public, system).",
+		obj(m{"entity": str("invoice, quote, party, ..."), "source": oneOf("where it came from", "ui", "api", "mcp", "public", "webhook", "system"), "query": str("text to find"), "limit": intg("default 50")}),
+		func(ctx context.Context, a map[string]any) (any, error) {
+			if env.Hub == nil {
+				return nil, errors.New("the history is not available here")
+			}
+			limit := int(idArg(a, "limit"))
+			if limit == 0 {
+				limit = 50
+			}
+			items, total, err := env.Hub.List(ctx, activity.Filter{Entity: strArg(a, "entity"), Source: strArg(a, "source"), Query: strArg(a, "query"), Limit: limit})
+			return m{"total": total, "items": items}, err
 		})
 
 	// customers and issuers
@@ -376,5 +553,9 @@ func createDocument(ctx context.Context, env *Env, a map[string]any) (any, error
 		}
 		d.Lines = append(d.Lines, ln)
 	}
-	return s.CreateDocument(ctx, d, store.SaveOptions{})
+	out, err := s.CreateDocument(ctx, d, store.SaveOptions{})
+	if err == nil {
+		env.record(ctx, nil, out)
+	}
+	return out, err
 }

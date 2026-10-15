@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Raktim94/mavri/server/internal/activity"
 	"github.com/Raktim94/mavri/server/internal/backup"
 	"github.com/Raktim94/mavri/server/internal/db"
 	"github.com/Raktim94/mavri/server/internal/model"
@@ -44,6 +45,7 @@ func (s *Server) putSettings(w http.ResponseWriter, r *http.Request) {
 		s.problem(w, r, err)
 		return
 	}
+	s.Hub.Record(r.Context(), activity.Event{Action: "updated", Entity: "settings", Label: "app settings"})
 	writeJSON(w, http.StatusOK, set)
 }
 
@@ -53,6 +55,7 @@ func (s *Server) exportBackup(w http.ResponseWriter, r *http.Request) {
 		s.problem(w, r, err)
 		return
 	}
+	s.Hub.Record(r.Context(), activity.Event{Action: "downloaded", Entity: "backup", Label: "backup download"})
 	w.Header().Set("Content-Type", "application/gzip")
 	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="mavri-backup-%s.json.gz"`, time.Now().UTC().Format("2006-01-02")))
 	zw := gzip.NewWriter(w)
@@ -72,19 +75,21 @@ func (s *Server) importBackup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer file.Close()
-	zr, err := gzip.NewReader(file)
-	if err != nil {
-		fail(w, http.StatusBadRequest, "validation", "this is not a Mavri backup (expected a .json.gz file)")
-		return
-	}
-	raw, err := io.ReadAll(io.LimitReader(zr, 256<<20))
+	data, err := io.ReadAll(io.LimitReader(file, 256<<20))
 	if err != nil {
 		fail(w, http.StatusBadRequest, "validation", "this is not a Mavri backup")
 		return
 	}
-	f, err := backup.Parse(raw)
+	f, err := backup.Unpack(data, r.FormValue("passphrase"))
+	if errors.Is(err, backup.ErrPassphrase) {
+		fail(w, http.StatusBadRequest, "passphrase", "this backup is encrypted: enter its passphrase (it is missing or wrong)")
+		return
+	}
 	if err == nil {
 		err = backup.Restore(r.Context(), s.DB, f)
+	}
+	if err == nil {
+		s.Hub.Record(r.Context(), activity.Event{Action: "restored", Entity: "backup", Label: "from backup of " + f.ExportedAt})
 	}
 	if errors.Is(err, backup.ErrInvalid) {
 		fail(w, http.StatusBadRequest, "validation", err.Error())

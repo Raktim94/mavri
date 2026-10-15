@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/Raktim94/mavri/server/internal/activity"
 	"github.com/Raktim94/mavri/server/internal/einvoice"
 	"github.com/Raktim94/mavri/server/internal/model"
 	"github.com/Raktim94/mavri/server/internal/store"
@@ -75,6 +76,7 @@ func (s *Server) createDocument(w http.ResponseWriter, r *http.Request) {
 		s.problem(w, r, err)
 		return
 	}
+	s.recordChange(r.Context(), nil, out)
 	writeJSON(w, http.StatusCreated, out)
 }
 
@@ -102,10 +104,17 @@ func (s *Server) updateDocument(w http.ResponseWriter, r *http.Request) {
 	if !readJSON(w, r, &d) {
 		return
 	}
+	old, _ := s.Store.GetDocument(r.Context(), s.DB, id)
 	out, err := s.Store.UpdateDocument(r.Context(), id, d, saveOptions(r))
 	if err != nil {
 		s.problem(w, r, err)
 		return
+	}
+	s.recordChange(r.Context(), &old, out)
+	if out.Kind == model.KindQuote && old.Status != model.StatusAccepted && out.Status == model.StatusAccepted {
+		if _, err := s.Auto.OnQuoteAccepted(r.Context(), out.ID); err != nil {
+			s.Log.Warn("could not draft the invoice for an accepted quote", "error", err)
+		}
 	}
 	writeJSON(w, http.StatusOK, out)
 }
@@ -116,10 +125,12 @@ func (s *Server) deleteDocument(w http.ResponseWriter, r *http.Request) {
 		fail(w, http.StatusBadRequest, "validation", "bad id")
 		return
 	}
+	old, _ := s.Store.GetDocument(r.Context(), s.DB, id)
 	if err := s.Store.DeleteDocument(r.Context(), id); err != nil {
 		s.problem(w, r, err)
 		return
 	}
+	s.Hub.Record(r.Context(), activity.Event{Action: "deleted", Entity: old.Kind, EntityID: id, Label: old.FullNumber, Name: old.Kind + ".deleted", Data: activity.DocData(old)})
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -134,6 +145,7 @@ func (s *Server) duplicateDocument(w http.ResponseWriter, r *http.Request) {
 		s.problem(w, r, err)
 		return
 	}
+	s.recordChange(r.Context(), nil, d)
 	writeJSON(w, http.StatusCreated, d)
 }
 
@@ -148,6 +160,9 @@ func (s *Server) convertDocument(w http.ResponseWriter, r *http.Request) {
 		s.problem(w, r, err)
 		return
 	}
+	s.recordChange(r.Context(), nil, d)
+	s.Hub.Record(r.Context(), activity.Event{Action: "accepted", Entity: "quote", EntityID: *d.ConvertedFrom, Detail: "converted to invoice " + d.FullNumber, Name: "quote.accepted",
+		Data: map[string]any{"quoteId": *d.ConvertedFrom, "invoice": activity.DocData(d)["document"]}})
 	writeJSON(w, http.StatusCreated, d)
 }
 
@@ -175,6 +190,7 @@ func (s *Server) einvoice(w http.ResponseWriter, r *http.Request) {
 		s.problem(w, r, err)
 		return
 	}
+	s.Hub.Record(r.Context(), activity.Event{Action: "exported", Entity: d.Kind, EntityID: d.ID, Label: d.FullNumber, Detail: format + " e-invoice"})
 	xml, err := einvoice.Generate(d, format)
 	var problems einvoice.Problems
 	if errors.As(err, &problems) {

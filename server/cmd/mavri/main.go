@@ -21,7 +21,7 @@ import (
 )
 
 func main() {
-	log := slog.New(slog.NewJSONHandler(os.Stderr, nil))
+	log, _ := web.WithErrorLog(slog.New(slog.NewJSONHandler(os.Stderr, nil)))
 	cfg := web.ConfigFromEnv()
 	if err := os.MkdirAll(cfg.DataDir, 0o700); err != nil {
 		fatal("cannot create the data directory", err)
@@ -35,9 +35,10 @@ func main() {
 	if err != nil {
 		fatal("cannot set up encryption", err)
 	}
+	handler, app := web.Build(cfg, log, d, box)
 	srv := &http.Server{
 		Addr:              net.JoinHostPort(cfg.Host, strconv.Itoa(cfg.Port)),
-		Handler:           web.New(cfg, log, d, box),
+		Handler:           handler,
 		ReadHeaderTimeout: 10 * time.Second,
 		ReadTimeout:       2 * time.Minute,
 		WriteTimeout:      2 * time.Minute,
@@ -45,6 +46,7 @@ func main() {
 	}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
+	app.Start(ctx)
 	errc := make(chan error, 1)
 	go func() {
 		log.Info("listening", "addr", srv.Addr, "version", web.Version, "database", cfg.Database)

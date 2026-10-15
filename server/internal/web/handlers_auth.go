@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Raktim94/mavri/server/internal/activity"
 	"github.com/Raktim94/mavri/server/internal/auth"
 )
 
@@ -74,6 +75,7 @@ func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.setCookie(w, token, 14*24*3600)
+	s.Hub.Record(activity.WithSource(r.Context(), activity.SourceUI, u.Email), activity.Event{Action: "signed in", Entity: "session", Label: u.Email})
 	writeJSON(w, http.StatusOK, u)
 }
 
@@ -119,6 +121,7 @@ func (s *Server) createKey(w http.ResponseWriter, r *http.Request) {
 		s.problem(w, r, err)
 		return
 	}
+	s.Hub.Record(r.Context(), activity.Event{Action: "created", Entity: "API key", EntityID: k.ID, Label: k.Label})
 	writeJSON(w, http.StatusCreated, map[string]any{"key": k, "secret": secret})
 }
 
@@ -132,5 +135,6 @@ func (s *Server) revokeKey(w http.ResponseWriter, r *http.Request) {
 		fail(w, http.StatusNotFound, "not_found", "no such active key")
 		return
 	}
+	s.Hub.Record(r.Context(), activity.Event{Action: "revoked", Entity: "API key", EntityID: id})
 	w.WriteHeader(http.StatusNoContent)
 }

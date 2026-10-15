@@ -1,0 +1,565 @@
+openapi: 3.0.3
+info:
+  title: Mavri API
+  version: 1.0.0
+  description: |
+    REST API of a self-hosted Mavri. Amounts are integers in minor units (cents). Dates are `YYYY-MM-DD`.
+
+    **Authentication.** Send an API key made in Settings as `Authorization: Bearer mvr_…`. Endpoints marked
+    *person only* need a signed-in user (the web app) and refuse API keys: they send mail, change
+    credentials or restore data.
+
+    **Errors** always look like `{"error": {"code": "validation", "message": "…", "problems": []}}` with codes
+    `validation`, `unauthorized`, `forbidden`, `not_found`, `conflict`, `rate_limited`, `internal`.
+
+    **Lists** are paged with `limit` (max 1000) and `offset` and answer `{items, total, limit, offset}`.
+
+    **Versioning.** `/api/v1/*` paths are stable: fields are only added, never removed or renamed. Other paths
+    serve the web app and may change between releases (the changelog says when).
+servers:
+  - url: http://localhost:3001
+security:
+  - apiKey: []
+components:
+  securitySchemes:
+    apiKey:
+      type: http
+      scheme: bearer
+      description: An API key from Settings → API keys.
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code: { type: string }
+            message: { type: string }
+            problems: { type: array, items: { type: string } }
+    Line:
+      type: object
+      required: [name, quantity, unitCents]
+      properties:
+        name: { type: string }
+        unit: { type: string }
+        quantity: { type: number }
+        unitCents: { type: integer }
+        taxRate: { type: number, description: percent }
+        taxMode: { type: string, enum: ["", add, included] }
+    Payment:
+      type: object
+      required: [amountCents, paidOn]
+      properties:
+        amountCents: { type: integer }
+        paidOn: { type: string, format: date }
+        method: { type: string }
+        note: { type: string }
+    Totals:
+      type: object
+      properties:
+        subtotalCents: { type: integer }
+        discountCents: { type: integer }
+        surchargeCents: { type: integer }
+        shippingCents: { type: integer }
+        taxCents: { type: integer }
+        totalCents: { type: integer }
+    Document:
+      type: object
+      required: [kind, issuerId, customerId, currencyId, issuedOn, lines]
+      properties:
+        id: { type: integer, readOnly: true }
+        kind: { type: string, enum: [invoice, quote] }
+        fullNumber: { type: string, readOnly: true }
+        number: { type: string, description: "leave empty for the next number" }
+        issuerId: { type: integer }
+        customerId: { type: integer }
+        currencyId: { type: integer }
+        issuedOn: { type: string, format: date }
+        dueOn: { type: string, format: date }
+        status: { type: string, enum: [unpaid, partial, paid, void, open, accepted, declined] }
+        lines: { type: array, items: { $ref: "#/components/schemas/Line" } }
+        payments: { type: array, items: { $ref: "#/components/schemas/Payment" } }
+        totals: { $ref: "#/components/schemas/Totals" }
+        paidCents: { type: integer, readOnly: true }
+    Summary:
+      type: object
+      properties:
+        id: { type: integer }
+        kind: { type: string }
+        fullNumber: { type: string }
+        customerName: { type: string }
+        issuedOn: { type: string }
+        dueOn: { type: string }
+        status: { type: string }
+        currencyCode: { type: string }
+        totalCents: { type: integer }
+        paidCents: { type: integer }
+    Party:
+      type: object
+      required: [kind, name]
+      properties:
+        id: { type: integer, readOnly: true }
+        kind: { type: string, enum: [issuer, customer] }
+        name: { type: string }
+        email: { type: string }
+        phone: { type: string }
+        address: { type: string }
+        taxId: { type: string }
+        country: { type: string, description: two-letter code }
+        noReminders: { type: boolean, description: never send this customer automatic payment reminders }
+    WebhookEvent:
+      type: object
+      description: Body of every webhook delivery.
+      properties:
+        id: { type: string, example: evt_9f2c… }
+        type: { type: string, example: invoice.paid }
+        createdAt: { type: string, format: date-time }
+        data: { type: object }
+    ImportReport:
+      type: object
+      properties:
+        kind: { type: string }
+        dryRun: { type: boolean }
+        total: { type: integer }
+        valid: { type: integer }
+        created: { type: integer }
+        skipped: { type: integer }
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              line: { type: integer }
+              message: { type: string }
+              raw: { type: array, items: { type: string } }
+  parameters:
+    id:
+      name: id
+      in: path
+      required: true
+      schema: { type: integer }
+    limit:
+      name: limit
+      in: query
+      schema: { type: integer, maximum: 1000, default: 200 }
+    offset:
+      name: offset
+      in: query
+      schema: { type: integer, default: 0 }
+  responses:
+    Error:
+      description: Error
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+paths:
+  /api/v1/documents:
+    get:
+      summary: List invoices and quotes
+      tags: [Documents]
+      parameters:
+        - { name: kind, in: query, schema: { type: string, enum: [invoice, quote] } }
+        - { name: status, in: query, schema: { type: string } }
+        - { name: q, in: query, schema: { type: string }, description: number or customer name }
+        - { name: customerId, in: query, schema: { type: integer } }
+        - { name: from, in: query, schema: { type: string, format: date } }
+        - { name: to, in: query, schema: { type: string, format: date } }
+        - { $ref: "#/components/parameters/limit" }
+        - { $ref: "#/components/parameters/offset" }
+      responses:
+        "200":
+          description: A page of documents
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items: { type: array, items: { $ref: "#/components/schemas/Summary" } }
+                  total: { type: integer }
+                  limit: { type: integer }
+                  offset: { type: integer }
+  /api/v1/documents/{id}:
+    get:
+      summary: Get one document
+      tags: [Documents]
+      parameters: [{ $ref: "#/components/parameters/id" }]
+      responses:
+        "200": { description: The document, content: { application/json: { schema: { $ref: "#/components/schemas/Document" } } } }
+        "404": { $ref: "#/components/responses/Error" }
+  /api/v1/orders:
+    post:
+      summary: Create an invoice from an order
+      tags: [Documents]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [shopId]
+              properties:
+                shopId: { type: integer }
+      responses:
+        "201": { description: Created }
+        "200": { description: Already received (duplicate order id) }
+  /api/documents:
+    post:
+      summary: Create an invoice or quote
+      tags: [Documents]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: "#/components/schemas/Document" } } }
+      responses:
+        "201": { description: Created, content: { application/json: { schema: { $ref: "#/components/schemas/Document" } } } }
+        "400": { $ref: "#/components/responses/Error" }
+  /api/documents/{id}:
+    put:
+      summary: Replace a document
+      description: Payments in the body replace the stored payments; the status of an invoice follows them.
+      tags: [Documents]
+      parameters: [{ $ref: "#/components/parameters/id" }]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: "#/components/schemas/Document" } } }
+      responses:
+        "200": { description: Updated }
+    delete:
+      summary: Delete a document
+      tags: [Documents]
+      parameters: [{ $ref: "#/components/parameters/id" }]
+      responses:
+        "204": { description: Deleted }
+  /api/documents/{id}/duplicate:
+    post:
+      summary: Copy a document with the next number and today's date
+      tags: [Documents]
+      parameters: [{ $ref: "#/components/parameters/id" }]
+      responses:
+        "201": { description: Created }
+  /api/documents/{id}/convert:
+    post:
+      summary: Turn a quote into an invoice
+      tags: [Documents]
+      parameters: [{ $ref: "#/components/parameters/id" }]
+      responses:
+        "201": { description: The new invoice }
+  /api/documents/{id}/einvoice:
+    get:
+      summary: UBL or XRechnung XML
+      tags: [Documents]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+        - { name: format, in: query, schema: { type: string, enum: [ubl, xrechnung] } }
+      responses:
+        "200": { description: XML, content: { application/xml: {} } }
+        "422": { description: Details the format needs are missing (see problems) }
+  /api/documents/{id}/share:
+    get:
+      summary: The secure client link, if there is one
+      tags: [Sharing and email]
+      parameters: [{ $ref: "#/components/parameters/id" }]
+      responses:
+        "200": { description: "`{link: {url, token, views, …} | null}`" }
+    post:
+      summary: Create (or return) the secure client link
+      description: The link opens a read-only page; clients can print it as PDF and accept or decline quotes.
+      tags: [Sharing and email]
+      parameters: [{ $ref: "#/components/parameters/id" }]
+      responses:
+        "200": { description: The link }
+    delete:
+      summary: Revoke the link
+      tags: [Sharing and email]
+      parameters: [{ $ref: "#/components/parameters/id" }]
+      responses:
+        "204": { description: Revoked }
+  /api/documents/{id}/email/preview:
+    post:
+      summary: Render the email without sending it
+      tags: [Sharing and email]
+      parameters: [{ $ref: "#/components/parameters/id" }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                kind: { type: string, enum: [send, reminder] }
+                to: { type: string }
+                subject: { type: string }
+                body: { type: string }
+      responses:
+        "200": { description: "`{to, subject, body, link, configured}`" }
+  /api/documents/{id}/email:
+    post:
+      summary: Email the document as a secure link (person only)
+      tags: [Sharing and email]
+      parameters: [{ $ref: "#/components/parameters/id" }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                kind: { type: string, enum: [send, reminder] }
+                to: { type: string }
+                subject: { type: string }
+                body: { type: string, description: "placeholders: {{customer}} {{number}} {{total}} {{balance}} {{due}} {{when}} {{link}} {{business}}" }
+      responses:
+        "200": { description: Sent }
+        "409": { description: Email is not set up }
+        "502": { description: The mail server refused it }
+  /api/documents/{id}/mail:
+    get:
+      summary: Email log of one document
+      tags: [Sharing and email]
+      parameters: [{ $ref: "#/components/parameters/id" }]
+      responses:
+        "200": { description: Log rows }
+  /api/public/documents/{token}:
+    get:
+      summary: What a client sees through a secure link (no sign-in)
+      security: []
+      tags: [Client link]
+      parameters: [{ name: token, in: path, required: true, schema: { type: string } }]
+      responses:
+        "200": { description: The document without internal notes or attachments }
+        "404": { description: The link is wrong or revoked }
+  /api/public/documents/{token}/respond:
+    post:
+      summary: Accept or decline a quote (no sign-in)
+      security: []
+      tags: [Client link]
+      parameters: [{ name: token, in: path, required: true, schema: { type: string } }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [action]
+              properties:
+                action: { type: string, enum: [accept, decline] }
+                message: { type: string, maxLength: 500 }
+      responses:
+        "200": { description: The updated quote }
+        "409": { description: Already answered }
+  /api/recurring:
+    get:
+      summary: Recurring invoice schedules
+      tags: [Automation]
+      responses:
+        "200": { description: Schedules }
+    post:
+      summary: Repeat an invoice on a schedule
+      tags: [Automation]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [documentId, every, startOn]
+              properties:
+                documentId: { type: integer, description: the invoice to copy }
+                every: { type: string, enum: [week, month, quarter, year] }
+                interval: { type: integer, default: 1 }
+                startOn: { type: string, format: date, description: date of the first invoice }
+                endOn: { type: string, format: date }
+                autoSend: { type: boolean }
+      responses:
+        "201": { description: Created }
+  /api/recurring/{id}:
+    put:
+      summary: Pause, resume or change the end date
+      tags: [Automation]
+      parameters: [{ $ref: "#/components/parameters/id" }]
+      responses:
+        "204": { description: Saved }
+    delete:
+      summary: Stop a schedule (invoices already issued stay)
+      tags: [Automation]
+      parameters: [{ $ref: "#/components/parameters/id" }]
+      responses:
+        "204": { description: Deleted }
+  /api/recurring/{id}/preview:
+    get:
+      summary: The next invoices a schedule will issue
+      tags: [Automation]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+        - { name: n, in: query, schema: { type: integer, default: 6 } }
+      responses:
+        "200": { description: Upcoming dates and the invoice being copied }
+  /api/overdue:
+    get:
+      summary: Unpaid invoices past their due date
+      tags: [Automation]
+      responses:
+        "200": { description: Oldest first }
+  /api/automation:
+    get:
+      summary: Reminder schedule and rules
+      tags: [Automation]
+      responses:
+        "200": { description: Settings }
+    put:
+      summary: Change reminders and rules (person only)
+      tags: [Automation]
+      responses:
+        "200": { description: Saved }
+  /api/activity:
+    get:
+      summary: Activity history
+      description: Who changed what, when, and from where (`ui`, `api`, `mcp`, `public`, `webhook`, `system`).
+      tags: [Activity]
+      parameters:
+        - { name: source, in: query, schema: { type: string } }
+        - { name: entity, in: query, schema: { type: string } }
+        - { name: entityId, in: query, schema: { type: integer } }
+        - { name: q, in: query, schema: { type: string } }
+        - { name: from, in: query, schema: { type: string, format: date } }
+        - { name: to, in: query, schema: { type: string, format: date } }
+        - { $ref: "#/components/parameters/limit" }
+        - { $ref: "#/components/parameters/offset" }
+      responses:
+        "200": { description: A page of entries }
+  /api/activity.csv:
+    get:
+      summary: Export the history as CSV (person only)
+      tags: [Activity]
+      responses:
+        "200": { description: CSV, content: { text/csv: {} } }
+  /api/webhooks:
+    get:
+      summary: Webhook endpoints and the event names (person only)
+      tags: [Webhooks]
+      responses:
+        "200": { description: Endpoints }
+    post:
+      summary: Add an endpoint (person only)
+      description: |
+        The response contains the signing secret **once**. Each delivery is a POST with the headers
+        `Mavri-Event`, `Mavri-Event-Id`, `Mavri-Delivery` and `Mavri-Signature: t=<unix>,v1=<hex>` where `v1`
+        is the HMAC-SHA256 of `"<t>.<raw body>"` with the secret. Reject deliveries whose `t` is older than a few
+        minutes. A non-2xx answer is retried after 1 min, 5 min, 30 min, 2 h and 6 h, then marked failed; use
+        replay to send it again.
+      tags: [Webhooks]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [url]
+              properties:
+                url: { type: string }
+                description: { type: string }
+                events: { type: array, items: { type: string }, description: 'empty means all, e.g. ["invoice.paid", "quote.accepted"]' }
+      responses:
+        "201": { description: "`{endpoint, secret}`" }
+  /api/webhooks/{id}:
+    put:
+      summary: Change an endpoint (person only)
+      tags: [Webhooks]
+      parameters: [{ $ref: "#/components/parameters/id" }]
+      responses:
+        "204": { description: Saved }
+    delete:
+      summary: Remove an endpoint and its log (person only)
+      tags: [Webhooks]
+      parameters: [{ $ref: "#/components/parameters/id" }]
+      responses:
+        "204": { description: Deleted }
+  /api/webhooks/{id}/test:
+    post:
+      summary: Send a `ping` event (person only)
+      tags: [Webhooks]
+      parameters: [{ $ref: "#/components/parameters/id" }]
+      responses:
+        "202": { description: Queued }
+  /api/webhooks/deliveries:
+    get:
+      summary: Delivery log (person only)
+      tags: [Webhooks]
+      parameters:
+        - { name: endpointId, in: query, schema: { type: integer } }
+        - { name: status, in: query, schema: { type: string, enum: [pending, delivered, failed] } }
+      responses:
+        "200": { description: Deliveries, newest first }
+  /api/webhooks/deliveries/{id}/replay:
+    post:
+      summary: Send a past delivery again (person only)
+      tags: [Webhooks]
+      parameters: [{ $ref: "#/components/parameters/id" }]
+      responses:
+        "202": { description: Queued as a new delivery with the same event id }
+  /api/export/{file}:
+    get:
+      summary: Export CSV (customers.csv, products.csv, invoices.csv, payments.csv)
+      tags: [CSV]
+      parameters: [{ name: file, in: path, required: true, schema: { type: string, enum: [customers.csv, products.csv, invoices.csv, payments.csv] } }]
+      responses:
+        "200": { description: CSV (UTF-8 with BOM), content: { text/csv: {} } }
+  /api/import/{kind}:
+    post:
+      summary: Import customers or products from CSV (person only)
+      description: Send `multipart/form-data` with a `file`. Add `?dryRun=1` to validate without writing; the report lists every row with a problem, with its line number.
+      tags: [CSV]
+      parameters:
+        - { name: kind, in: path, required: true, schema: { type: string, enum: [customers, products] } }
+        - { name: dryRun, in: query, schema: { type: string, enum: ["1"] } }
+      responses:
+        "200": { description: Report, content: { application/json: { schema: { $ref: "#/components/schemas/ImportReport" } } } }
+  /api/backups:
+    get:
+      summary: Backup status, history and what a backup contains (person only)
+      tags: [Backups]
+      responses:
+        "200": { description: Status }
+  /api/backups/config:
+    put:
+      summary: Schedule, retention, encryption and S3 destination (person only)
+      tags: [Backups]
+      responses:
+        "200": { description: Saved }
+  /api/backups/run:
+    post:
+      summary: Take a backup now (person only)
+      tags: [Backups]
+      responses:
+        "200": { description: "`{name}`" }
+  /api/backups/verify:
+    post:
+      summary: Open a backup and count what it holds, without restoring (person only)
+      tags: [Backups]
+      responses:
+        "200": { description: Row counts per table }
+  /api/backups/restore:
+    post:
+      summary: Replace the business data with a backup (person only)
+      description: Needs `?confirm=replace`. A safety backup of the current data is taken first.
+      tags: [Backups]
+      parameters: [{ name: confirm, in: query, required: true, schema: { type: string, enum: [replace] } }]
+      responses:
+        "204": { description: Restored }
+  /api/admin/health:
+    get:
+      summary: Database, storage, backup age, webhook and email failures, recent errors (person only)
+      tags: [Operations]
+      responses:
+        "200": { description: Health report }
+  /api/health:
+    get:
+      summary: Liveness
+      security: []
+      tags: [Operations]
+      responses:
+        "200": { description: "`{status: ok}`" }
+  /api/openapi.yaml:
+    get:
+      summary: This document
+      security: []
+      tags: [Operations]
+      responses:
+        "200": { description: OpenAPI 3 }

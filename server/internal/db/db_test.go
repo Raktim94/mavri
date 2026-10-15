@@ -72,7 +72,20 @@ func TestMigrateIsIdempotent(t *testing.T) {
 	}
 	var n int
 	d.QueryRow(`SELECT COUNT(*) FROM schema_migrations`).Scan(&n)
-	if n != 1 {
-		t.Fatalf("migrations recorded: %d", n)
+	if want := len(migrationNames(t)); n != want {
+		t.Fatalf("migrations recorded: %d, want %d", n, want)
 	}
+}
+
+func migrationNames(t *testing.T) []string {
+	t.Helper()
+	ents, err := migrationFiles.ReadDir("migrations")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var out []string
+	for _, e := range ents {
+		out = append(out, e.Name())
+	}
+	return out
 }

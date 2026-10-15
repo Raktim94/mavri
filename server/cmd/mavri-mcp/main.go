@@ -10,9 +10,13 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/Raktim94/mavri/server/internal/activity"
 	"github.com/Raktim94/mavri/server/internal/auth"
+	"github.com/Raktim94/mavri/server/internal/automation"
 	"github.com/Raktim94/mavri/server/internal/db"
+	"github.com/Raktim94/mavri/server/internal/mailer"
 	"github.com/Raktim94/mavri/server/internal/mcp"
+	"github.com/Raktim94/mavri/server/internal/share"
 	"github.com/Raktim94/mavri/server/internal/shop"
 	"github.com/Raktim94/mavri/server/internal/store"
 	"github.com/Raktim94/mavri/server/internal/web"
@@ -33,9 +37,19 @@ func main() {
 		fail("cannot set up encryption", err)
 	}
 	st := &store.Store{DB: d}
-	env := &mcp.Env{Store: st, Shops: &shop.Service{Store: st, Box: box}}
+	hub := &activity.Hub{DB: d, Box: box}
+	links := &share.Links{DB: d}
+	ml := &mailer.Service{DB: d, Box: box, Store: st, Links: links, Hub: hub}
+	auto := &automation.Service{DB: d, Store: st, Mail: ml, Hub: hub}
+	auto.BaseURL = func(ctx context.Context) string {
+		c, _ := auto.Load(ctx)
+		return c.PublicURL
+	}
+	env := &mcp.Env{Store: st, Shops: &shop.Service{Store: st, Box: box}, Hub: hub, Auto: auto, Mail: ml, Links: links}
 	srv := mcp.NewServer("mavri", web.Version, mcp.Tools(env))
-	if err := srv.Serve(context.Background(), os.Stdin, os.Stdout); err != nil {
+	// Everything this process changes is recorded as coming from an AI assistant over MCP.
+	ctx := activity.WithSource(context.Background(), activity.SourceMCP, "MCP client")
+	if err := srv.Serve(ctx, os.Stdin, os.Stdout); err != nil {
 		fail("mcp server stopped", err)
 	}
 }

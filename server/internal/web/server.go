@@ -1,14 +1,22 @@
 package web
 
 import (
+	"context"
 	"database/sql"
 	"log/slog"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
+	"github.com/Raktim94/mavri/server/internal/activity"
 	"github.com/Raktim94/mavri/server/internal/auth"
+	"github.com/Raktim94/mavri/server/internal/automation"
+	"github.com/Raktim94/mavri/server/internal/backup"
+	"github.com/Raktim94/mavri/server/internal/mailer"
+	"github.com/Raktim94/mavri/server/internal/share"
 	"github.com/Raktim94/mavri/server/internal/shop"
 	"github.com/Raktim94/mavri/server/internal/store"
 )
@@ -53,17 +61,49 @@ type Server struct {
 	Auth  *auth.Service
 	Shops *shop.Service
 
-	loginLimit, setupLimit, hookLimit *limiter
+	Hub     *activity.Hub
+	Links   *share.Links
+	Mail    *mailer.Service
+	Auto    *automation.Service
+	Backups *backup.Service
+	Errors  *ErrorLog // recent warnings and errors, for the health page
+	Started time.Time
+
+	loginLimit, setupLimit, hookLimit, publicLimit *limiter
 }
 
 // New builds the HTTP handler.
 func New(cfg Config, log *slog.Logger, d *sql.DB, box *shop.Box) http.Handler {
+	h, _ := Build(cfg, log, d, box)
+	return h
+}
+
+// Build builds the HTTP handler and the server behind it. Call Start on the server to run the background jobs.
+func Build(cfg Config, log *slog.Logger, d *sql.DB, box *shop.Box) (http.Handler, *Server) {
 	st := &store.Store{DB: d}
+	hub := &activity.Hub{DB: d, Box: box, Log: log}
+	links := &share.Links{DB: d}
+	ml := &mailer.Service{DB: d, Box: box, Store: st, Links: links, Hub: hub}
 	s := &Server{Cfg: cfg, Log: log, DB: d, Store: st, Auth: &auth.Service{DB: d}, Shops: &shop.Service{Store: st, Box: box},
-		loginLimit: newLimiter(time.Minute, 10), setupLimit: newLimiter(time.Minute, 5), hookLimit: newLimiter(time.Minute, 120)}
+		Hub: hub, Links: links, Mail: ml, Started: time.Now(), Errors: errorLogFrom(log),
+		loginLimit: newLimiter(time.Minute, 10), setupLimit: newLimiter(time.Minute, 5), hookLimit: newLimiter(time.Minute, 120), publicLimit: newLimiter(time.Minute, 60)}
+	s.Auto = &automation.Service{DB: d, Store: st, Mail: ml, Hub: hub}
+	s.Auto.BaseURL = func(ctx context.Context) string {
+		c, _ := s.Auto.Load(ctx)
+		return strings.TrimRight(c.PublicURL, "/")
+	}
+	s.Backups = &backup.Service{DB: d, Box: box, Dir: filepath.Join(cfg.DataDir, "backups"), Hub: hub}
 	mux := http.NewServeMux()
 	s.routes(mux)
-	return s.wrap(mux)
+	return s.wrap(mux), s
+}
+
+// Start runs the background jobs (webhook deliveries, reminders, recurring invoices, scheduled backups) until ctx ends.
+func (s *Server) Start(ctx context.Context) {
+	logf := func(msg string, args ...any) { s.Log.Warn(msg, args...) }
+	go s.Hub.Run(ctx)
+	go s.Auto.Run(ctx, logf)
+	go s.Backups.Run(ctx, logf)
 }
 
 func (s *Server) routes(mux *http.ServeMux) {
@@ -135,6 +175,61 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("PUT /api/settings", user(s.putSettings))
 	mux.HandleFunc("GET /api/backup", user(s.exportBackup))
 	mux.HandleFunc("POST /api/backup", human(s.importBackup))
+
+	// share links, email, reminders
+	mux.HandleFunc("GET /api/documents/{id}/share", user(s.getShare))
+	mux.HandleFunc("POST /api/documents/{id}/share", user(s.createShare))
+	mux.HandleFunc("DELETE /api/documents/{id}/share", user(s.revokeShare))
+	mux.HandleFunc("POST /api/documents/{id}/email/preview", user(s.emailPreview))
+	mux.HandleFunc("POST /api/documents/{id}/email", human(s.emailSend))
+	mux.HandleFunc("GET /api/documents/{id}/mail", user(s.documentMail))
+	mux.HandleFunc("GET /api/mail/log", user(s.mailLog))
+	mux.HandleFunc("GET /api/mail/config", human(s.getMailConfig))
+	mux.HandleFunc("PUT /api/mail/config", human(s.putMailConfig))
+	mux.HandleFunc("POST /api/mail/test", human(s.mailTest))
+	mux.HandleFunc("GET /api/automation", user(s.getAutomation))
+	mux.HandleFunc("PUT /api/automation", human(s.putAutomation))
+	mux.HandleFunc("GET /api/overdue", user(s.overdue))
+	mux.HandleFunc("GET /api/recurring", user(s.listRecurring))
+	mux.HandleFunc("POST /api/recurring", user(s.createRecurring))
+	mux.HandleFunc("PUT /api/recurring/{id}", user(s.updateRecurring))
+	mux.HandleFunc("DELETE /api/recurring/{id}", user(s.deleteRecurring))
+	mux.HandleFunc("GET /api/recurring/{id}/preview", user(s.previewRecurring))
+
+	// activity history
+	mux.HandleFunc("GET /api/activity", user(s.listActivity))
+	mux.HandleFunc("GET /api/activity.csv", human(s.activityCSV))
+
+	// webhooks
+	mux.HandleFunc("GET /api/webhooks", human(s.listWebhooks))
+	mux.HandleFunc("POST /api/webhooks", human(s.createWebhook))
+	mux.HandleFunc("GET /api/webhooks/deliveries", human(s.listDeliveries))
+	mux.HandleFunc("POST /api/webhooks/deliveries/{id}/replay", human(s.replayDelivery))
+	mux.HandleFunc("PUT /api/webhooks/{id}", human(s.updateWebhook))
+	mux.HandleFunc("DELETE /api/webhooks/{id}", human(s.deleteWebhook))
+	mux.HandleFunc("POST /api/webhooks/{id}/test", human(s.testWebhook))
+
+	// CSV
+	mux.HandleFunc("GET /api/export/{file}", user(s.exportCSV))
+	mux.HandleFunc("POST /api/import/{kind}", human(s.importCSV))
+
+	// backups
+	mux.HandleFunc("GET /api/backups", human(s.backupStatus))
+	mux.HandleFunc("PUT /api/backups/config", human(s.putBackupConfig))
+	mux.HandleFunc("POST /api/backups/run", human(s.runBackup))
+	mux.HandleFunc("POST /api/backups/test-s3", human(s.testS3))
+	mux.HandleFunc("GET /api/backups/s3", human(s.listS3Backups))
+	mux.HandleFunc("GET /api/backups/files/{name}", human(s.downloadBackupFile))
+	mux.HandleFunc("POST /api/backups/verify", human(s.verifyBackup))
+	mux.HandleFunc("POST /api/backups/restore", human(s.restoreBackup))
+
+	// health and the API description
+	mux.HandleFunc("GET /api/admin/health", human(s.health))
+	mux.HandleFunc("GET /api/openapi.yaml", s.openapi)
+
+	// what a client sees through a secure link (no sign-in)
+	mux.HandleFunc("GET /api/public/documents/{token}", s.limited(s.publicLimit, s.clientIP, s.publicGet))
+	mux.HandleFunc("POST /api/public/documents/{token}/respond", s.limited(s.publicLimit, s.clientIP, s.publicRespond))
 
 	// stores
 	mux.HandleFunc("GET /api/shops", user(s.listShops))

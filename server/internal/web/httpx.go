@@ -10,10 +10,12 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/Raktim94/mavri/server/internal/activity"
 	"github.com/Raktim94/mavri/server/internal/db"
 	"github.com/Raktim94/mavri/server/internal/store"
 )
@@ -150,6 +152,11 @@ func (s *Server) wrap(next http.Handler) http.Handler {
 		h.Set("X-Content-Type-Options", "nosniff")
 		h.Set("X-Frame-Options", "DENY")
 		h.Set("Referrer-Policy", "same-origin")
+		if strings.HasPrefix(r.URL.Path, "/d/") || strings.HasPrefix(r.URL.Path, "/api/public/") {
+			h.Set("Referrer-Policy", "no-referrer") // a client link must not leak in the Referer header
+			h.Set("X-Robots-Tag", "noindex, nofollow")
+			h.Set("Cache-Control", "no-store")
+		}
 		h.Set("Content-Security-Policy", "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'")
 		defer func() {
 			if rec := recover(); rec != nil {
@@ -203,6 +210,7 @@ func (s *Server) auth(humanOnly bool, h http.HandlerFunc) http.HandlerFunc {
 				return
 			}
 			if id, ok := s.Auth.VerifyKey(ctx, strings.TrimPrefix(hdr, "Bearer ")); ok {
+				ctx = activity.WithSource(ctx, activity.SourceAPI, "API key #"+strconv.FormatInt(id, 10))
 				h(w, r.WithContext(context.WithValue(ctx, principalKey, principal{KeyID: id})))
 				return
 			}
@@ -223,6 +231,7 @@ func (s *Server) auth(humanOnly bool, h http.HandlerFunc) http.HandlerFunc {
 			fail(w, http.StatusForbidden, "forbidden", "cross-site request refused")
 			return
 		}
+		ctx = activity.WithSource(ctx, activity.SourceUI, u.Email)
 		h(w, r.WithContext(context.WithValue(ctx, principalKey, principal{UserID: u.ID})))
 	}
 }
