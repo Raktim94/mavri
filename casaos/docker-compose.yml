@@ -2,7 +2,7 @@ name: nodedr-invoice
 
 services:
   nodedr-invoice:
-    image: ghcr.io/raktim94/mavri:2.1.0
+    image: ghcr.io/raktim94/mavri:2.2.0
     container_name: nodedr-invoice
     hostname: nodedr-invoice
     restart: unless-stopped
@@ -45,7 +45,7 @@ services:
       volumes:
         - container: /data
           description:
-            en_US: SQLite database, session secret and encryption key. Back this up.
+            en_US: SQLite database, session secret and encryption key, and scheduled backups (in backups/). Back this up.
 
   # Powers the in-app "Update now" button. Does nothing on its own (no
   # polling): when you press the button, Mavri tells it which published
@@ -53,7 +53,7 @@ services:
   # recreates the Mavri container (nothing else). Needs the Docker socket to do
   # that; your data in /DATA/AppData is untouched.
   updater:
-    image: ghcr.io/raktim94/mavri-updater:2.1.0
+    image: ghcr.io/raktim94/mavri-updater:2.2.0
     container_name: nodedr-invoice-updater
     hostname: nodedr-invoice-updater
     restart: unless-stopped
