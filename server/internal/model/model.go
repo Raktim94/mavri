@@ -36,6 +36,7 @@ type Party struct {
 	Logo           []byte `db:"logo" json:"logo,omitempty"`
 	LogoType       string `db:"logo_type" json:"logoType"`
 	NoReminders    bool   `db:"no_reminders" json:"noReminders"`
+	Language       string `db:"language" json:"language"`
 	Archived       bool   `db:"archived" json:"archived"`
 	CreatedAt      string `db:"created_at" json:"createdAt"`
 	UpdatedAt      string `db:"updated_at" json:"updatedAt"`

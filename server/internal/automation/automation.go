@@ -148,7 +148,10 @@ func (s *Service) RunReminders(ctx context.Context) (sent int, err error) {
 		return 0, nil // no public address: a reminder would carry a link that goes nowhere
 	}
 	today, _ := parseDay(s.Store.Today())
-	rows, err := s.DB.QueryContext(ctx, `SELECT id, due_on FROM documents WHERE kind = 'invoice' AND status IN ('unpaid', 'partial') AND due_on <> ''`)
+	// A dispute, a pause or a promise that has not come due yet means a person is handling it: no automatic reminder.
+	rows, err := s.DB.QueryContext(ctx, `SELECT id, due_on FROM documents WHERE kind = 'invoice' AND status IN ('unpaid', 'partial') AND due_on <> ''
+		AND NOT EXISTS (SELECT 1 FROM follow_ups f WHERE f.document_id = documents.id AND f.status = 'open'
+			AND (f.kind = 'dispute' OR (f.kind IN ('snooze', 'promise') AND f.due_on >= ?)))`, s.Store.Today())
 	if err != nil {
 		return 0, err
 	}

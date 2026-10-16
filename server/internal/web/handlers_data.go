@@ -362,8 +362,9 @@ func (s *Server) publicRespond(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var in struct {
-		Action  string `json:"action"` // accept or decline
+		Action  string `json:"action"` // quotes: accept or decline. Invoices: dispute or promise
 		Message string `json:"message"`
+		Date    string `json:"date"` // invoices, for a promise
 	}
 	if !readJSON(w, r, &in) {
 		return
@@ -371,6 +372,10 @@ func (s *Server) publicRespond(w http.ResponseWriter, r *http.Request) {
 	old, err := s.Store.GetDocument(r.Context(), s.DB, id)
 	if err != nil {
 		s.problem(w, r, err)
+		return
+	}
+	if old.Kind == model.KindInvoice {
+		s.publicInvoiceResponse(w, r, id, in.Action, strings.TrimSpace(in.Message), in.Date)
 		return
 	}
 	if old.Kind != model.KindQuote {

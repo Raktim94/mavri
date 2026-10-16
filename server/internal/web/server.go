@@ -15,6 +15,7 @@ import (
 	"github.com/Raktim94/mavri/server/internal/auth"
 	"github.com/Raktim94/mavri/server/internal/automation"
 	"github.com/Raktim94/mavri/server/internal/backup"
+	"github.com/Raktim94/mavri/server/internal/collections"
 	"github.com/Raktim94/mavri/server/internal/mailer"
 	"github.com/Raktim94/mavri/server/internal/payments"
 	"github.com/Raktim94/mavri/server/internal/share"
@@ -68,6 +69,7 @@ type Server struct {
 	Auto    *automation.Service
 	Backups *backup.Service
 	Pay     *payments.Service
+	Coll    *collections.Service
 	Errors  *ErrorLog // recent warnings and errors, for the health page
 	Started time.Time
 
@@ -94,6 +96,7 @@ func Build(cfg Config, log *slog.Logger, d *sql.DB, box *shop.Box) (http.Handler
 		c, _ := s.Auto.Load(ctx)
 		return strings.TrimRight(c.PublicURL, "/")
 	}
+	s.Coll = &collections.Service{DB: d, Store: st, Hub: hub}
 	s.Pay = &payments.Service{DB: d, Box: box, Store: st, Hub: hub}
 	s.Backups = &backup.Service{DB: d, Box: box, Dir: filepath.Join(cfg.DataDir, "backups"), Hub: hub}
 	mux := http.NewServeMux()
@@ -200,6 +203,14 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("PUT /api/recurring/{id}", user(s.updateRecurring))
 	mux.HandleFunc("DELETE /api/recurring/{id}", user(s.deleteRecurring))
 	mux.HandleFunc("GET /api/recurring/{id}/preview", user(s.previewRecurring))
+
+	// collections: promises, disputes, pauses and the daily list
+	mux.HandleFunc("GET /api/attention", user(s.attention))
+	mux.HandleFunc("GET /api/documents/{id}/follow-ups", user(s.listFollowUps))
+	mux.HandleFunc("POST /api/documents/{id}/follow-ups", user(s.addFollowUp))
+	mux.HandleFunc("POST /api/follow-ups/{id}/resolve", user(s.resolveFollowUp))
+	mux.HandleFunc("GET /api/documents/{id}/payment-options", user(s.paymentOptions))
+	mux.HandleFunc("GET /api/public/documents/{token}/payment-options", s.limited(s.publicLimit, s.clientIP, s.publicPaymentOptions))
 
 	// activity history
 	mux.HandleFunc("GET /api/activity", user(s.listActivity))

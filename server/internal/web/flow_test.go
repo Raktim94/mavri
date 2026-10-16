@@ -659,3 +659,60 @@ func TestBulkActionsReportEachDocument(t *testing.T) {
 		t.Fatalf("export of one invoice: %d\n%s", code, raw)
 	}
 }
+
+func TestCollectionsOverHTTP(t *testing.T) {
+	c, _ := newFlow(t)
+	issuer, customer := setupParties(c)
+	doc := c.invoice(issuer, customer, map[string]any{"dueOn": "2020-01-31"}) // long overdue
+	did := jsonNum(id(doc))
+
+	list := c.json("GET", "/api/attention", nil, 200)
+	items := list["items"].([]any)
+	if len(items) != 1 || items[0].(map[string]any)["reason"] != "overdue" {
+		t.Fatalf("an overdue invoice is on the list: %v", list)
+	}
+	c.anonymous().json("GET", "/api/attention", nil, 401)
+
+	// A person records a promise: the invoice stays listed, as promised, and the history shows it.
+	c.json("POST", "/api/documents/"+did+"/follow-ups", map[string]any{"kind": "promise"}, 400)
+	c.json("POST", "/api/documents/"+did+"/follow-ups", map[string]any{"kind": "promise", "dueOn": "2999-01-01", "note": "By phone"}, 201)
+	if r := c.json("GET", "/api/attention", nil, 200)["items"].([]any)[0].(map[string]any)["reason"]; r != "promised" {
+		t.Fatalf("reason after a promise: %v", r)
+	}
+	if rows := c.list("/api/documents/" + did + "/follow-ups"); len(rows) != 1 {
+		t.Fatalf("follow-ups: %v", rows)
+	}
+
+	// The client disputes it from the secure link; reminders stop and the invoice jumps to the top.
+	token := c.json("POST", "/api/documents/"+did+"/share", nil, 200)["link"].(map[string]any)["token"].(string)
+	anon := c.anonymous()
+	anon.json("POST", "/api/public/documents/"+token+"/respond", map[string]any{"action": "dispute"}, 400) // needs a message
+	anon.json("POST", "/api/public/documents/"+token+"/respond", map[string]any{"action": "dispute", "message": "We never ordered this"}, 200)
+	first := c.json("GET", "/api/attention", nil, 200)["items"].([]any)[0].(map[string]any)
+	if first["reason"] != "disputed" || first["detail"] != "We never ordered this" {
+		t.Fatalf("dispute: %v", first)
+	}
+	c.json("POST", "/api/follow-ups/"+jsonNum(first["followUpId"].(float64))+"/resolve", nil, 200)
+	c.json("POST", "/api/follow-ups/9999/resolve", nil, 404)
+}
+
+func TestPaymentOptionsOverHTTP(t *testing.T) {
+	c, _ := newFlow(t)
+	issuer, customer := setupParties(c)
+	bank := c.json("POST", "/api/banks", map[string]any{"label": "Main", "bankName": "Example Bank", "holder": "Northwind", "accountNumber": "DE89 3704 0044 0532 0130 00", "swift": "COBADEFF"}, 201)
+	doc := c.invoice(issuer, customer, map[string]any{"bankId": id(bank)}) // currency 2 is EUR in the seed data
+	did := jsonNum(id(doc))
+	opts := c.list("/api/documents/" + did + "/payment-options")
+	var kinds []string
+	for _, o := range opts {
+		kinds = append(kinds, o.(map[string]any)["kind"].(string))
+	}
+	if len(kinds) == 0 || kinds[len(kinds)-1] != "bank" {
+		t.Fatalf("a bank transfer is always offered: %v", kinds)
+	}
+	token := c.json("POST", "/api/documents/"+did+"/share", nil, 200)["link"].(map[string]any)["token"].(string)
+	if got := c.anonymous().list("/api/public/documents/" + token + "/payment-options"); len(got) != len(opts) {
+		t.Fatalf("the client sees the same options: %v vs %v", got, opts)
+	}
+	c.anonymous().json("GET", "/api/public/documents/nope-nope-nope-nope/payment-options", nil, 404)
+}

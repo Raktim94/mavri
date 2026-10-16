@@ -8,6 +8,7 @@ import { UpdateButton } from './components/Updates';
 import { SignIn } from './components/SignIn';
 import { ActivityPage } from './pages/ActivityPage';
 import { AutomationPage } from './pages/AutomationPage';
+import { CollectionsPage } from './pages/CollectionsPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { DataPage } from './pages/DataPage';
 import { DocumentEditor } from './pages/DocumentEditor';
@@ -78,6 +79,9 @@ function Shell() {
               <Icon name="quotes" /> Quotes
             </NavLink>
           )}
+          <NavLink to="/collections">
+            <Icon name="bell" /> Needs attention
+          </NavLink>
           {features.reports && (
             <NavLink to="/reports">
               <Icon name="reports" /> Reports
@@ -138,6 +142,7 @@ function Shell() {
               {pages.map(r => (
                 <Route key={r.id} path={`/${r.id}`} element={<ResourcePage res={r} />} />
               ))}
+              <Route path="/collections" element={<CollectionsPage />} />
               <Route path="/templates" element={<TemplatesPage />} />
               <Route path="/reports" element={<ReportsPage />} />
               <Route path="/stores" element={<ShopsPage />} />

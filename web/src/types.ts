@@ -20,6 +20,7 @@ export interface Party {
   noReminders: boolean;
   logo?: string;
   logoType: string;
+  language: string;
   archived: boolean;
 }
 
@@ -471,4 +472,48 @@ export interface BulkResult {
   results: { id: number; number: string; ok: boolean; message: string }[];
   ok: number;
   failed: number;
+}
+
+export interface PaymentOption {
+  kind: 'upi' | 'sepa' | 'bank';
+  label: string;
+  payload?: string;
+  lines: Array<{ label: string; value: string }>;
+  reference: string;
+  amountCents: number;
+  note: string;
+}
+
+export interface FollowUp {
+  id: number;
+  documentId: number;
+  kind: 'promise' | 'dispute' | 'snooze' | 'note';
+  dueOn: string;
+  amountCents: number;
+  note: string;
+  source: string;
+  status: 'open' | 'resolved';
+  createdAt: string;
+  resolvedAt: string;
+}
+
+export interface AttentionItem {
+  id: number;
+  number: string;
+  customer: string;
+  dueOn: string;
+  daysOverdue: number;
+  balanceCents: number;
+  currency: string;
+  reason: 'disputed' | 'broken_promise' | 'delivery_failed' | 'overdue' | 'due_soon' | 'partial' | 'promised';
+  detail: string;
+  action: string;
+  promisedOn?: string;
+  followUpId?: number;
+}
+
+export interface Attention {
+  items: AttentionItem[];
+  counts: Record<string, number>;
+  snoozed: number;
 }

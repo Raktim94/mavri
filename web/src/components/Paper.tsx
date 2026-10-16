@@ -2,7 +2,8 @@ import type { CSSProperties } from 'react';
 import { statusLabel } from '../docs';
 import { formatMoney, gross, lineTax } from '../money';
 import { templateOf } from '../templates';
-import type { Doc } from '../types';
+import type { Doc, PaymentOption } from '../types';
+import { PayBlock } from './PayBlock';
 
 const fonts: Record<string, string> = {
   sans: 'system-ui, sans-serif',
@@ -29,7 +30,7 @@ function summarise(doc: Doc) {
 const lines = (v: string) => v.split('\n').filter(Boolean);
 
 /** The document as printed: used by the editor view and by the client link. */
-export function Paper({ doc }: { doc: Doc }) {
+export function Paper({ doc, pay }: { doc: Doc; pay?: PaymentOption[] }) {
   const kind = doc.kind;
   const money = (c: number) => formatMoney(c, doc.currency);
   const { issuer, customer, bank, style, totals } = doc;
@@ -238,12 +239,13 @@ export function Paper({ doc }: { doc: Doc }) {
           </ul>
         </div>
       )}
-      {bank?.label && (
+      {bank?.label && !(pay && pay.length > 0) && (
         <div className="paper-card">
           <h3>Payment details</h3>
           <p>{[bank.bankName, bank.holder, bank.accountNumber, bank.swift].filter(Boolean).join(' · ')}</p>
         </div>
       )}
+      {pay && pay.length > 0 && <PayBlock options={pay} currency={doc.currency} />}
       {doc.noteCustomer && <p>{doc.noteCustomer}</p>}
       {doc.noteTerms && <p className="muted">{doc.noteTerms}</p>}
       {doc.noteThanks && <p className="paper-thanks">{doc.noteThanks}</p>}

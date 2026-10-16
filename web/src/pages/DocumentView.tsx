@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { EmailDialog } from '../components/EmailDialog';
+import { FollowUps } from '../components/FollowUps';
+import { RecordPayment } from '../components/RecordPayment';
 import { Icon } from '../components/Icon';
 import { fmtTime } from '../components/Modal';
 import { Paper } from '../components/Paper';
@@ -10,9 +12,10 @@ import { useUi } from '../components/ui';
 import { api, ApiError, download, errorText } from '../api';
 import { isOverdue, routeOf, statusLabel } from '../docs';
 import { useSettings } from '../settings';
-import type { ActivityEntry, Doc, Kind, MailLogRow } from '../types';
+import { formatMoney } from '../money';
+import type { ActivityEntry, Doc, Kind, MailLogRow, PaymentOption } from '../types';
 
-type Dialog = '' | 'share' | 'email' | 'remind' | 'repeat';
+type Dialog = '' | 'share' | 'email' | 'remind' | 'repeat' | 'payment';
 
 export function DocumentView({ kind }: { kind: Kind }) {
   const { id } = useParams();
@@ -26,6 +29,10 @@ export function DocumentView({ kind }: { kind: Kind }) {
   const [dialog, setDialog] = useState<Dialog>('');
   const [history, setHistory] = useState<ActivityEntry[]>([]);
   const [mail, setMail] = useState<MailLogRow[]>([]);
+  const [pay, setPay] = useState<PaymentOption[]>([]);
+  const [params, setParams] = useSearchParams();
+  const location = useLocation();
+  const [justSaved, setJustSaved] = useState(Boolean((location.state as { justSaved?: boolean } | null)?.justSaved));
 
   const loadHistory = useCallback(() => {
     api
@@ -38,13 +45,29 @@ export function DocumentView({ kind }: { kind: Kind }) {
       .catch(() => undefined);
   }, [id, kind]);
 
-  useEffect(() => {
+  const loadDoc = useCallback(() => {
     api
       .get<Doc>(`/api/documents/${id}`)
       .then(setDoc)
       .catch(e => setError(errorText(e, 'Could not load.')));
+    if (kind === 'invoice')
+      api
+        .get<PaymentOption[]>(`/api/documents/${id}/payment-options`)
+        .then(setPay)
+        .catch(() => setPay([]));
     loadHistory();
-  }, [id, loadHistory]);
+  }, [id, kind, loadHistory]);
+  useEffect(loadDoc, [loadDoc]);
+
+  // "Save and share" arrives here with ?share=1: open the share dialog once, then tidy the address.
+  useEffect(() => {
+    if ((params.get('share') || params.get('remind')) && doc) {
+      setDialog(params.get('share') ? 'share' : 'remind');
+      params.delete('share');
+      params.delete('remind');
+      setParams(params, { replace: true });
+    }
+  }, [params, setParams, doc]);
 
   if (!doc) return error ? <p className="error">{error}</p> : <p className="muted">Loading…</p>;
 
@@ -84,6 +107,17 @@ export function DocumentView({ kind }: { kind: Kind }) {
 
   const owed = kind === 'invoice' && (doc.status === 'unpaid' || doc.status === 'partial');
   const late = isOverdue({ kind, status: doc.status, dueOn: doc.dueOn });
+  const balance = Math.max(doc.totals.totalCents - doc.paidCents, 0);
+
+  async function duplicate() {
+    try {
+      const copy = await api.post<Doc>(`/api/documents/${id}/duplicate`);
+      toast('Copied. Adjust it and save.');
+      nav(`${base}/${copy.id}/edit`);
+    } catch (e) {
+      setError(errorText(e, 'Could not copy this document.'));
+    }
+  }
 
   return (
     <section>
@@ -145,7 +179,62 @@ export function DocumentView({ kind }: { kind: Kind }) {
           )}
         </div>
       )}
-      <Paper doc={doc} />
+      {justSaved && (
+        <div className="card receipt noprint" role="status">
+          <div>
+            <h2>
+              {kind === 'invoice' ? 'Invoice' : 'Quote'} {doc.fullNumber} saved
+            </h2>
+            <p className="muted">
+              {doc.customer.name} · {formatMoney(doc.totals.totalCents, doc.currency)}
+              {doc.dueOn && ` · ${kind === 'invoice' ? 'due' : 'valid until'} ${doc.dueOn}`} ·{' '}
+              {statusLabel[doc.status] ?? doc.status}
+            </p>
+          </div>
+          <div className="row">
+            <button className="primary" onClick={() => setDialog('share')}>
+              Share link
+            </button>
+            <button onClick={() => setDialog('email')}>Send by email</button>
+            <button onClick={() => window.print()}>Download PDF</button>
+            {kind === 'invoice' && <button onClick={() => setDialog('payment')}>Record payment</button>}
+            <button onClick={duplicate}>Create similar</button>
+            <button className="link" onClick={() => setJustSaved(false)}>
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
+      <div className="docsummary noprint">
+        <div>
+          <span className={`badge ${doc.status}`}>{statusLabel[doc.status] ?? doc.status}</span>
+          {late && <span className="badge overdue">Overdue</span>}
+        </div>
+        <div>
+          <small className="muted">Customer</small>
+          <strong>{doc.customer.name}</strong>
+        </div>
+        <div>
+          <small className="muted">{kind === 'invoice' ? 'Amount due' : 'Total'}</small>
+          <strong>{formatMoney(kind === 'invoice' ? balance : doc.totals.totalCents, doc.currency)}</strong>
+        </div>
+        {doc.dueOn && (
+          <div>
+            <small className="muted">{kind === 'invoice' ? 'Due' : 'Valid until'}</small>
+            <strong>{doc.dueOn}</strong>
+          </div>
+        )}
+        <div className="next">
+          {owed && (
+            <button className="primary" onClick={() => setDialog('payment')}>
+              Record payment
+            </button>
+          )}
+          <button onClick={duplicate}>Create similar</button>
+        </div>
+      </div>
+      <Paper doc={doc} pay={pay} />
+      {kind === 'invoice' && doc.status !== 'void' && <FollowUps docId={doc.id!} onChange={loadHistory} />}
 
       {(history.length > 0 || mail.length > 0) && (
         <div className="doc-history noprint">
@@ -205,6 +294,18 @@ export function DocumentView({ kind }: { kind: Kind }) {
           kind={dialog === 'remind' ? 'reminder' : 'send'}
           onClose={() => setDialog('')}
           onSent={loadHistory}
+        />
+      )}
+      {dialog === 'payment' && (
+        <RecordPayment
+          doc={doc}
+          onClose={() => setDialog('')}
+          onSaved={d => {
+            setDoc(d);
+            setDialog('');
+            toast('Payment recorded');
+            loadDoc();
+          }}
         />
       )}
       {dialog === 'repeat' && <RecurringDialog doc={doc} onClose={() => setDialog('')} />}

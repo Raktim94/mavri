@@ -3120,3 +3120,143 @@ tr.picked {
     grid-column: 1 / -1;
   }
 }
+
+/* Payment options with QR codes */
+.payblock h4 {
+  margin: 0 0 6px;
+  font-size: 0.95rem;
+}
+.pay-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+.pay-body {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.pay-body dl {
+  margin: 0;
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  flex: 1 1 140px;
+}
+.pay-body dt {
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.pay-body dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+.qr {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  flex: none;
+  max-width: 100%;
+  height: auto;
+}
+.pay-note {
+  font-size: 0.78rem;
+  margin: 8px 0 0;
+}
+.upi-link {
+  display: inline-block;
+  margin-top: 6px;
+}
+
+/* Invoice detail: summary strip, receipt, collections */
+.docsummary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+  align-items: center;
+  padding: 12px 16px;
+  margin: 8px 0 14px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.docsummary > div {
+  display: grid;
+  gap: 2px;
+}
+.docsummary .next {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+.badge.overdue {
+  background: var(--danger);
+  color: #fff;
+  margin-left: 6px;
+}
+.receipt {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin: 8px 0 12px;
+  border-color: #2b8a3e;
+}
+.receipt h2 {
+  margin: 0;
+}
+.receipt p {
+  margin: 4px 0 0;
+}
+.followups {
+  margin-top: 16px;
+  display: grid;
+  gap: 10px;
+}
+.followup-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: end;
+}
+.followup-form .grow {
+  flex: 1 1 220px;
+}
+.timeline li.resolved {
+  opacity: 0.65;
+}
+.dialog-form {
+  display: grid;
+  gap: 10px;
+}
+
+.collections td {
+  vertical-align: top;
+}
+.collections .num {
+  text-align: right;
+  white-space: nowrap;
+}
+.badge.reason-disputed,
+.badge.reason-broken_promise {
+  background: var(--danger);
+  color: #fff;
+}
+.badge.reason-delivery_failed,
+.badge.reason-overdue {
+  background: #e8590c;
+  color: #fff;
+}
+.badge.reason-due_soon,
+.badge.reason-partial {
+  background: #f08c00;
+  color: #fff;
+}
+.badge.reason-promised {
+  background: var(--accent);
+  color: var(--accent-text);
+}

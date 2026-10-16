@@ -55,7 +55,7 @@ var Events = []string{
 	"invoice.created", "invoice.updated", "invoice.paid", "invoice.voided", "invoice.deleted",
 	"quote.created", "quote.updated", "quote.accepted", "quote.declined", "quote.deleted",
 	"payment.recorded", "payment.failed", "document.shared", "document.viewed", "document.emailed",
-	"reminder.sent", "email.failed", "backup.completed", "backup.failed",
+	"reminder.sent", "email.failed", "payment.promised", "dispute.opened", "dispute.resolved", "backup.completed", "backup.failed",
 }
 
 // Hub records history and queues webhook deliveries.

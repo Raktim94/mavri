@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { api, ApiError, errorText } from '../api';
 import { Paper } from '../components/Paper';
 import { formatMoney } from '../money';
-import type { Doc } from '../types';
+import type { Doc, PaymentOption } from '../types';
 
 /** What a client sees at /d/<token>: the document, to read, print or save as PDF, and for quotes to accept or decline. */
 export function PublicDocument({ token }: { token: string }) {
@@ -18,6 +18,9 @@ export function PublicDocument({ token }: { token: string }) {
     einvoice: []
   });
   const [paying, setPaying] = useState(false);
+  const [payOpts, setPayOpts] = useState<PaymentOption[]>([]);
+  const [help, setHelp] = useState<'' | 'dispute' | 'promise'>('');
+  const [promiseOn, setPromiseOn] = useState('');
 
   useEffect(() => {
     api
@@ -36,6 +39,35 @@ export function PublicDocument({ token }: { token: string }) {
       .catch(() => undefined);
   }, [token]);
   useEffect(loadOptions, [loadOptions]);
+  useEffect(() => {
+    api
+      .get<PaymentOption[]>(`/api/public/documents/${encodeURIComponent(token)}/payment-options`)
+      .then(setPayOpts)
+      .catch(() => setPayOpts([]));
+  }, [token, doc?.status, doc?.paidCents]);
+
+  async function tell(action: 'dispute' | 'promise') {
+    setBusy(true);
+    setError('');
+    try {
+      await api.post(`/api/public/documents/${encodeURIComponent(token)}/respond`, {
+        action,
+        message,
+        date: promiseOn
+      });
+      setThanks(
+        action === 'dispute'
+          ? 'Thank you. We have your message and will get back to you.'
+          : `Thank you. We have noted that you plan to pay by ${promiseOn}.`
+      );
+      setHelp('');
+      setMessage('');
+    } catch (e) {
+      setError(errorText(e, 'That did not work. Please try again.'));
+    } finally {
+      setBusy(false);
+    }
+  }
 
   // Coming back from the payment page: Stripe tells Mavri a moment later, so check a few times.
   useEffect(() => {
@@ -150,7 +182,7 @@ export function PublicDocument({ token }: { token: string }) {
           {error}
         </p>
       )}
-      <Paper doc={doc} />
+      <Paper doc={doc} pay={payOpts} />
       {options.einvoice.length > 0 && (
         <p className="downloads noprint">
           {options.einvoice.map(f => (
@@ -177,6 +209,55 @@ export function PublicDocument({ token }: { token: string }) {
               Accept quote
             </button>
           </div>
+        </section>
+      )}
+      {doc.kind === 'invoice' && owed > 0 && doc.status !== 'void' && (
+        <section className="card respond noprint">
+          <h2>Questions about this invoice?</h2>
+          {help === '' ? (
+            <div className="row">
+              <button onClick={() => setHelp('promise')}>I will pay by a date</button>
+              <button onClick={() => setHelp('dispute')}>I need help or want to dispute this</button>
+            </div>
+          ) : (
+            <>
+              {help === 'promise' && (
+                <label>
+                  I will pay by
+                  <input
+                    type="date"
+                    value={promiseOn}
+                    min={new Date().toISOString().slice(0, 10)}
+                    onChange={e => setPromiseOn(e.target.value)}
+                    required
+                  />
+                </label>
+              )}
+              <label>
+                {help === 'dispute' ? 'What is wrong?' : 'Note (optional)'}
+                <textarea
+                  rows={3}
+                  maxLength={500}
+                  value={message}
+                  onChange={e => setMessage(e.target.value)}
+                  required={help === 'dispute'}
+                />
+              </label>
+              <p className="muted">
+                This tells {doc.issuer.name}; it does not change the amount or mark anything paid.
+              </p>
+              <div className="row end">
+                <button onClick={() => setHelp('')}>Cancel</button>
+                <button
+                  className="primary"
+                  disabled={busy || (help === 'promise' && !promiseOn) || (help === 'dispute' && !message.trim())}
+                  onClick={() => tell(help)}
+                >
+                  Send
+                </button>
+              </div>
+            </>
+          )}
         </section>
       )}
       {doc.kind === 'quote' && !pending && !thanks && <p className="notice noprint">This quote was {doc.status}.</p>}

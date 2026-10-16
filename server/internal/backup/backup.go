@@ -28,12 +28,12 @@ const Version = 1
 
 // tables in the order they can be inserted (parents first).
 var tables = []string{"currencies", "parties", "bank_accounts", "catalog_groups", "products", "styles", "presets",
-	"documents", "document_lines", "payments", "attachments", "recurring", "share_links", "audit_log", "settings"}
+	"documents", "document_lines", "payments", "attachments", "recurring", "follow_ups", "share_links", "audit_log", "settings"}
 
 // Included describes, for people, what a backup contains and what it leaves out.
 var Included = []string{"Invoices and quotes with their lines, payments and attachments", "Customers and businesses, with logos",
 	"Products, categories, units, bank accounts, currencies, styles and presets", "App preferences (prefixes, date and number format, switches)",
-	"Recurring-invoice schedules", "Client share links", "Activity history"}
+	"Recurring-invoice schedules", "Promises to pay, disputes and snoozes", "Client share links", "Activity history"}
 
 // Excluded is what a backup never contains, and why.
 var Excluded = []string{"Sign-in accounts, sessions and API keys (they belong to this installation)", "Store connections and their secrets",
