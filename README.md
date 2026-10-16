@@ -88,7 +88,7 @@ docker compose up -d --build
 
 Open **http://localhost:3001** and create the owner account. There is no database setup: Mavri creates its SQLite database in the data volume on first start. Back that volume up, or use **Settings → Backup**. Behind an HTTPS reverse proxy (nginx, Caddy, Cloudflare Tunnel), set `COOKIE_SECURE=true` and `TRUST_PROXY=1`.
 
-Or pull the published image: `docker pull ghcr.io/raktim94/mavri:2.3.0`. The `nodedr-invoice:1.0.0` image is an earlier, different version.
+Or pull the published image: `docker pull ghcr.io/raktim94/mavri:2.4.0`. The `nodedr-invoice:1.0.0` image is an earlier, different version.
 
 ### CasaOS / ZimaOS
 
