@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Icon } from '../components/Icon';
 import { bytes, fmtTime, Modal } from '../components/Modal';
 import { useAuth } from '../auth';
+import { ReconcileCard } from '../components/ReconcileCard';
 import { useUi } from '../components/ui';
 import { api, ApiError, download, errorText } from '../api';
 import type { BackupConfig, BackupFile, BackupStatus, ImportReport } from '../types';
@@ -17,6 +18,7 @@ export function DataPage() {
         </div>
       </header>
       <CsvCard />
+      <ReconcileCard />
       {user?.role === 'owner' && <BackupCard />}
     </section>
   );

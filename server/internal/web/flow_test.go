@@ -935,3 +935,72 @@ func TestAPIKeysSeeTheirRateLimit(t *testing.T) {
 		t.Fatalf("headers: %v", res.Header)
 	}
 }
+
+func TestReconcilingAStatementOverHTTP(t *testing.T) {
+	c, _ := newFlow(t)
+	issuer, customer := setupParties(c)
+	inv := c.invoice(issuer, customer, map[string]any{"number": "INV-777"}) // 100.00
+	statement := "Date,Narration,Credit\n2026-10-05,Payment INV-777,100.00\n2026-10-06,Mystery,12.00\n"
+	code, raw := upload(t, c, "/api/reconcile", "file", "statement.csv", statement, nil)
+	if code != 200 {
+		t.Fatalf("check: %d %s", code, raw)
+	}
+	var rep struct {
+		Rows []struct {
+			Status, Key string
+			InvoiceID   float64
+			AmountCents float64
+			Date        string
+		}
+		Matched int
+	}
+	if err := json.Unmarshal(raw, &rep); err != nil || rep.Matched != 1 || rep.Rows[0].Status != "matched" || rep.Rows[1].Status != "unmatched" {
+		t.Fatalf("report: %v %s", err, raw)
+	}
+	if got := c.json("GET", "/api/documents/"+jsonNum(id(inv)), nil, 200); got["status"] != "unpaid" {
+		t.Fatalf("checking recorded something: %v", got["status"])
+	}
+	m := rep.Rows[0]
+	body := map[string]any{"matches": []any{map[string]any{"key": m.Key, "invoiceId": m.InvoiceID, "date": m.Date, "amountCents": m.AmountCents, "note": "Payment INV-777"}}}
+	out := c.json("POST", "/api/reconcile/apply", body, 200)
+	if out["recorded"] != float64(1) {
+		t.Fatalf("apply: %v", out)
+	}
+	if got := c.json("GET", "/api/documents/"+jsonNum(id(inv)), nil, 200); got["status"] != "paid" {
+		t.Fatalf("status after apply: %v", got["status"])
+	}
+	if again := c.json("POST", "/api/reconcile/apply", body, 200); again["recorded"] != float64(0) {
+		t.Fatalf("applied twice: %v", again)
+	}
+	c.json("POST", "/api/reconcile/apply", map[string]any{"matches": []any{}}, 400)
+	c.anonymous().json("POST", "/api/reconcile/apply", body, 401)
+}
+
+func TestVerifyingATaxNumberKeepsWhoAnsweredAndWhen(t *testing.T) {
+	c, srv := newFlow(t)
+	vies := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.Path, "/vat/123456789") {
+			w.Write([]byte(`{"isValid":true,"name":"ACME GMBH","address":"Str 1\n10115 Berlin"}`))
+			return
+		}
+		w.Write([]byte(`{"isValid":false}`))
+	}))
+	defer vies.Close()
+	srv.Vies.BaseURL = vies.URL
+	de := c.json("POST", "/api/parties", map[string]any{"kind": "customer", "name": "Acme GmbH", "country": "DE", "taxId": "DE123456789"}, 201)
+	in := c.json("POST", "/api/parties", map[string]any{"kind": "customer", "name": "Indian Co", "country": "IN", "taxId": "27AAPFU0939F1ZV"}, 201)
+	none := c.json("POST", "/api/parties", map[string]any{"kind": "customer", "name": "No number", "country": "DE"}, 201)
+	out := c.json("POST", "/api/parties/"+jsonNum(id(de))+"/verify-tax", nil, 200)
+	if out["result"] != "valid" || out["provider"] != "EU VIES" || out["name"] != "ACME GMBH" || out["checkedAt"] == "" {
+		t.Fatalf("check: %v", out)
+	}
+	if rows := c.list("/api/parties/" + jsonNum(id(de)) + "/tax-checks"); len(rows) != 1 {
+		t.Fatalf("history: %v", rows)
+	}
+	c.json("POST", "/api/parties/"+jsonNum(id(in))+"/verify-tax", nil, 400)   // no service Mavri can ask
+	c.json("POST", "/api/parties/"+jsonNum(id(none))+"/verify-tax", nil, 400) // nothing to check
+	// A malformed number never reaches the service.
+	bad := c.json("POST", "/api/parties", map[string]any{"kind": "customer", "name": "Typo", "country": "DE", "taxId": "DE12"}, 201)
+	c.json("POST", "/api/parties/"+jsonNum(id(bad))+"/verify-tax", nil, 400)
+	c.anonymous().json("POST", "/api/parties/"+jsonNum(id(de))+"/verify-tax", nil, 401)
+}

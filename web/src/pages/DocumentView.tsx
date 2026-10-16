@@ -78,11 +78,14 @@ export function DocumentView({ kind }: { kind: Kind }) {
 
   if (!doc) return error ? <p className="error">{error}</p> : <p className="muted">Loading…</p>;
 
-  async function exportXml(format: 'ubl' | 'xrechnung') {
+  async function exportXml(format: 'ubl' | 'xrechnung' | 'irp-json') {
     setError('');
     setProblems([]);
     try {
-      await download(`/api/documents/${id}/einvoice?format=${format}`, `${format}-${doc!.fullNumber}.xml`);
+      await download(
+        `/api/documents/${id}/einvoice?format=${format}`,
+        format === 'irp-json' ? `irp-${doc!.fullNumber}.json` : `${format}-${doc!.fullNumber}.xml`
+      );
     } catch (e) {
       if (e instanceof ApiError && e.problems.length > 0) {
         setError('This invoice is missing details the e-invoice format needs:');
@@ -176,6 +179,14 @@ export function DocumentView({ kind }: { kind: Kind }) {
         )}
         {kind === 'invoice' && !isNote && !draft && features.ubl && (
           <button onClick={() => exportXml('ubl')}>UBL XML</button>
+        )}
+        {kind === 'invoice' && !draft && doc.issuer.country === 'IN' && doc.currency.code === 'INR' && (
+          <button
+            title="A file to upload to the Indian e-invoice portal; Mavri does not register it"
+            onClick={() => exportXml('irp-json')}
+          >
+            India e-invoice JSON
+          </button>
         )}
         {kind === 'invoice' && !isNote && !draft && features.xrechnung && (
           <button onClick={() => exportXml('xrechnung')}>XRechnung XML</button>
@@ -312,7 +323,8 @@ export function DocumentView({ kind }: { kind: Kind }) {
                   <li key={m.id} className={m.status}>
                     <span className="when">{fmtTime(m.at)}</span>
                     <span>
-                      {m.kind === 'reminder' ? 'Reminder' : 'Sent'} to <strong>{m.to}</strong>
+                      {m.kind === 'reminder' ? 'Reminder' : m.kind === 'escalation' ? 'Owner notified' : 'Sent'} to{' '}
+                      <strong>{m.to}</strong>
                       {m.status === 'failed' && <em className="error"> — failed: {m.error}</em>}
                     </span>
                   </li>

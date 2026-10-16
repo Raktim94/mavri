@@ -14,6 +14,7 @@ import (
 	"github.com/Raktim94/mavri/server/internal/activity"
 	"github.com/Raktim94/mavri/server/internal/mailer"
 	"github.com/Raktim94/mavri/server/internal/model"
+	"github.com/Raktim94/mavri/server/internal/money"
 	"github.com/Raktim94/mavri/server/internal/store"
 )
 
@@ -31,6 +32,10 @@ type Config struct {
 	// PublicURL is the address clients use to reach this Mavri, e.g. https://invoices.example.com.
 	// Automatic emails link to it; without it they cannot be sent.
 	PublicURL string `json:"publicUrl"`
+	// OwnerEmail gets a short note when an invoice is overdue by EscalateAfterDays (0 turns it off), once per invoice,
+	// unless a person is already handling it (a dispute, a pause, or a promise not yet due).
+	OwnerEmail        string `json:"ownerEmail"`
+	EscalateAfterDays int    `json:"escalateAfterDays"`
 }
 
 // DefaultConfig is off until the owner opts in, with a sensible schedule ready.
@@ -79,6 +84,16 @@ func (s *Service) Save(ctx context.Context, c Config) (Config, error) {
 			}
 		}
 	}
+	c.OwnerEmail = strings.TrimSpace(c.OwnerEmail)
+	if c.OwnerEmail != "" && (!strings.Contains(c.OwnerEmail, "@") || strings.ContainsAny(c.OwnerEmail, " \r\n,;")) {
+		return c, fmt.Errorf("%w: the owner email is not an email address", ErrInvalid)
+	}
+	if c.EscalateAfterDays < 0 || c.EscalateAfterDays > 365 {
+		return c, fmt.Errorf("%w: escalate after between 0 and 365 days", ErrInvalid)
+	}
+	if c.EscalateAfterDays > 0 && c.OwnerEmail == "" {
+		return c, fmt.Errorf("%w: give the owner email that should be told", ErrInvalid)
+	}
 	c.RemindBefore, c.RemindAfter = uniqSorted(c.RemindBefore), uniqSorted(c.RemindAfter)
 	raw, _ := json.Marshal(c)
 	_, err := s.DB.ExecContext(ctx, `INSERT INTO settings (key, value) VALUES ('automation', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value`, string(raw))
@@ -122,6 +137,94 @@ func whenText(daysUntilDue int) string {
 		return "is 1 day overdue"
 	}
 	return fmt.Sprintf("is %d days overdue", -daysUntilDue)
+}
+
+func (s *Service) clock() time.Time {
+	if s.Store != nil && s.Store.Now != nil {
+		return s.Store.Now()
+	}
+	return time.Now()
+}
+
+// InQuietHours reports whether it is inside the customer's quiet hours at the moment now, in their time zone.
+// The hours are "HH:MM" and may wrap past midnight (22:00 to 07:00). Without hours or with an unknown time
+// zone, it is never quiet: a reminder is not held back by a setting nobody can read.
+func InQuietHours(p model.Party, now time.Time) bool {
+	from, ok1 := clockMinutes(p.QuietFrom)
+	to, ok2 := clockMinutes(p.QuietTo)
+	if !ok1 || !ok2 || from == to {
+		return false
+	}
+	loc := time.UTC
+	if p.Timezone != "" {
+		l, err := time.LoadLocation(p.Timezone)
+		if err != nil {
+			return false
+		}
+		loc = l
+	}
+	t := now.In(loc)
+	m := t.Hour()*60 + t.Minute()
+	if from < to {
+		return m >= from && m < to
+	}
+	return m >= from || m < to
+}
+
+func clockMinutes(s string) (int, bool) {
+	t, err := time.Parse("15:04", strings.TrimSpace(s))
+	if err != nil {
+		return 0, false
+	}
+	return t.Hour()*60 + t.Minute(), true
+}
+
+// RunEscalations tells the owner about invoices that are well overdue and that nobody is handling. It sends one note
+// per invoice, and only to the owner's own address.
+func (s *Service) RunEscalations(ctx context.Context) (sent int, err error) {
+	cfg, err := s.Load(ctx)
+	if err != nil || cfg.EscalateAfterDays <= 0 || cfg.OwnerEmail == "" {
+		return 0, err
+	}
+	if mc, err := s.Mail.Load(ctx); err != nil || !mc.Enabled {
+		return 0, err
+	}
+	items, err := s.Overdue(ctx)
+	if err != nil {
+		return 0, err
+	}
+	today := s.Store.Today()
+	for _, it := range items {
+		if it.DaysOverdue < cfg.EscalateAfterDays {
+			continue
+		}
+		var handled int
+		_ = s.DB.QueryRowContext(ctx, `SELECT COUNT(*) FROM follow_ups WHERE document_id = ? AND status = 'open'
+			AND (kind = 'dispute' OR (kind IN ('snooze', 'promise') AND due_on >= ?))`, it.ID, today).Scan(&handled)
+		if handled > 0 {
+			continue
+		}
+		key := fmt.Sprintf("esc:%d", it.ID)
+		var n int
+		_ = s.DB.QueryRowContext(ctx, `SELECT COUNT(*) FROM mail_log WHERE reminder_key = ?`, key).Scan(&n)
+		if n > 0 {
+			continue
+		}
+		subject := fmt.Sprintf("Overdue: %s from %s (%d days)", it.Number, it.Customer, it.DaysOverdue)
+		body := fmt.Sprintf("Invoice %s for %s was due on %s and is %d days overdue, with %s still owed.\n\nNobody has recorded a dispute, a pause or a promise to pay for it. Open Mavri to decide what to do; nothing has been sent to the customer.",
+			it.Number, it.Customer, it.DueOn, it.DaysOverdue, money.Major(it.BalanceCents, 2)+" "+it.Currency)
+		err := s.Mail.SendNotice(ctx, cfg.OwnerEmail, subject, body)
+		status, msg := "sent", ""
+		if err != nil {
+			status, msg = "failed", err.Error()
+		}
+		_, _ = s.DB.ExecContext(ctx, `INSERT INTO mail_log (document_id, kind, to_addr, subject, status, error, reminder_key, created_at) VALUES (?, 'escalation', ?, ?, ?, ?, ?, ?)`,
+			it.ID, cfg.OwnerEmail, subject, status, msg, key, time.Now().UTC().Format(time.RFC3339))
+		if err == nil {
+			sent++
+		}
+	}
+	return sent, nil
 }
 
 // WhenText is the {{when}} phrase for a document's due date, for reminders sent by hand.
@@ -185,6 +288,9 @@ func (s *Service) RunReminders(ctx context.Context) (sent int, err error) {
 		party, err := store.Parties.Get(ctx, s.DB, doc.CustomerID)
 		if err != nil || party.NoReminders || strings.TrimSpace(party.Email) == "" {
 			continue
+		}
+		if InQuietHours(party, s.clock()) {
+			continue // the customer asked not to be written to now; the next check, after the quiet hours, sends it
 		}
 		key := fmt.Sprintf("rem:%d:%d", c.id, c.days)
 		var n int
@@ -285,6 +391,11 @@ func (s *Service) Run(ctx context.Context, log func(msg string, args ...any)) {
 			log("reminders failed", "error", err)
 		} else if n > 0 {
 			log("reminders sent", "count", n)
+		}
+		if n, err := s.RunEscalations(ctx); err != nil {
+			log("escalations failed", "error", err)
+		} else if n > 0 {
+			log("owner notified of overdue invoices", "count", n)
 		}
 		if n, err := s.RunRecurring(ctx); err != nil {
 			log("recurring invoices failed", "error", err)

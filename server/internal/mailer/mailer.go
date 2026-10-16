@@ -486,3 +486,27 @@ func (s *Service) SendTest(ctx context.Context, to string) error {
 	}
 	return nil
 }
+
+// SendNotice sends a plain message to one address, for notes to the owner themselves (not to customers).
+func (s *Service) SendNotice(ctx context.Context, to, subject, body string) error {
+	cfg, err := s.Load(ctx)
+	if err != nil {
+		return err
+	}
+	if !cfg.Enabled || cfg.Host == "" {
+		return ErrNotConfigured
+	}
+	addr, err := mail.ParseAddress(strings.TrimSpace(to))
+	if err != nil {
+		return fmt.Errorf("%w: %q is not an email address", ErrInvalid, to)
+	}
+	raw := buildMessage(cfg, addr, subject, body, "")
+	send := s.Send
+	if send == nil {
+		send = deliver
+	}
+	if err := send(cfg, s.password(cfg), []string{addr.Address}, raw); err != nil {
+		return fmt.Errorf("the email could not be sent: %w", err)
+	}
+	return nil
+}

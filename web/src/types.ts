@@ -352,6 +352,8 @@ export interface AutomationConfig {
   remindAfter: number[];
   quoteAcceptedMakesInvoice: boolean;
   publicUrl: string;
+  ownerEmail: string;
+  escalateAfterDays: number;
 }
 
 export interface Schedule {

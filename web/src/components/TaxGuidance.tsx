@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api';
 import type { Party, TaxExplanation, TaxRate } from '../types';
+import { TaxCheck } from './TaxCheck';
 
 /**
  * Explains which tax usually applies to this sale, from the facts Mavri has. It never applies a rate:
@@ -100,6 +101,7 @@ export function TaxGuidance({
           </ul>
         </div>
       )}
+      {customer && customer.taxId && <TaxCheck key={`${customer.id}-${customer.taxId}`} party={customer} />}
       {r.decisions.length > 0 && (
         <div className="g-decide">
           <strong>For you to decide</strong>

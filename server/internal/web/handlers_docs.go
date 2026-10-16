@@ -8,6 +8,7 @@ import (
 
 	"github.com/Raktim94/mavri/server/internal/activity"
 	"github.com/Raktim94/mavri/server/internal/einvoice"
+	"github.com/Raktim94/mavri/server/internal/irp"
 	"github.com/Raktim94/mavri/server/internal/model"
 	"github.com/Raktim94/mavri/server/internal/store"
 )
@@ -190,8 +191,26 @@ func (s *Server) einvoice(w http.ResponseWriter, r *http.Request) {
 		s.problem(w, r, err)
 		return
 	}
+	if format == "irp-json" {
+		out, err := irp.Generate(d)
+		var problems irp.Problems
+		if errors.As(err, &problems) {
+			writeJSON(w, http.StatusUnprocessableEntity, map[string]apiError{"error": {Code: "einvoice_incomplete",
+				Message: "this invoice is missing details the Indian e-invoice file needs", Problems: problems}})
+			return
+		}
+		if err != nil {
+			fail(w, http.StatusBadRequest, "validation", err.Error())
+			return
+		}
+		s.Hub.Record(r.Context(), activity.Event{Action: "exported", Entity: d.Kind, EntityID: d.ID, Label: d.FullNumber, Detail: "India e-invoice JSON (prepared for upload; not registered)"})
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="irp-%s.json"`, safeName(d.FullNumber)))
+		_, _ = w.Write(out)
+		return
+	}
 	if d.DocType == "credit" || d.DocType == "debit" || d.Status == model.StatusDraft {
-		fail(w, http.StatusBadRequest, "validation", "the e-invoice export is for issued invoices; credit and debit notes are not supported yet")
+		fail(w, http.StatusBadRequest, "validation", "the UBL and XRechnung export is for issued invoices; credit and debit notes are not supported there yet")
 		return
 	}
 	s.Hub.Record(r.Context(), activity.Event{Action: "exported", Entity: d.Kind, EntityID: d.ID, Label: d.FullNumber, Detail: format + " e-invoice"})

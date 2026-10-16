@@ -3394,3 +3394,30 @@ tr.picked {
   margin: 4px 0;
   padding-left: 18px;
 }
+
+.badge.recon-matched {
+  background: #2b8a3e;
+  color: #fff;
+}
+.badge.recon-ambiguous,
+.badge.recon-overpaid,
+.badge.recon-unmatched {
+  background: #e8590c;
+  color: #fff;
+}
+
+.badge.check-valid {
+  background: #2b8a3e;
+  color: #fff;
+}
+.badge.check-invalid {
+  background: var(--danger);
+  color: #fff;
+}
+.badge.check-unavailable {
+  background: var(--muted);
+  color: #fff;
+}
+.taxcheck p {
+  margin: 4px 0;
+}

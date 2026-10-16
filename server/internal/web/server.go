@@ -21,6 +21,7 @@ import (
 	"github.com/Raktim94/mavri/server/internal/share"
 	"github.com/Raktim94/mavri/server/internal/shop"
 	"github.com/Raktim94/mavri/server/internal/store"
+	"github.com/Raktim94/mavri/server/internal/vies"
 )
 
 // Version is set at build time with -ldflags "-X .../web.Version=1.2.3".
@@ -70,6 +71,7 @@ type Server struct {
 	Backups *backup.Service
 	Pay     *payments.Service
 	Coll    *collections.Service
+	Vies    *vies.Client
 	Errors  *ErrorLog // recent warnings and errors, for the health page
 	Started time.Time
 
@@ -96,6 +98,7 @@ func Build(cfg Config, log *slog.Logger, d *sql.DB, box *shop.Box) (http.Handler
 		c, _ := s.Auto.Load(ctx)
 		return strings.TrimRight(c.PublicURL, "/")
 	}
+	s.Vies = &vies.Client{}
 	s.Coll = &collections.Service{DB: d, Store: st, Hub: hub}
 	s.Pay = &payments.Service{DB: d, Box: box, Store: st, Hub: hub}
 	s.Backups = &backup.Service{DB: d, Box: box, Dir: filepath.Join(cfg.DataDir, "backups"), Hub: hub}
@@ -224,6 +227,13 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("PUT /api/users/{id}", ownerHuman(s.updateUser))
 	mux.HandleFunc("DELETE /api/users/{id}", ownerHuman(s.deleteUser))
 	mux.HandleFunc("POST /api/session/password", s.authRole(true, false, s.changePassword))
+
+	// matching a bank statement to unpaid invoices
+	mux.HandleFunc("POST /api/reconcile", human(s.reconcileCheck))
+	mux.HandleFunc("POST /api/reconcile/apply", human(s.reconcileApply))
+
+	mux.HandleFunc("GET /api/parties/{id}/tax-checks", user(s.listTaxChecks))
+	mux.HandleFunc("POST /api/parties/{id}/verify-tax", human(s.verifyTax))
 
 	// tax guidance
 	mux.HandleFunc("GET /api/tax/packs", user(s.taxPacks))

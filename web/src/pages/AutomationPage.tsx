@@ -185,6 +185,28 @@ export function AutomationPage() {
             Use {location.origin}
           </button>
         </div>
+        <h2>Tell me when an invoice is very late</h2>
+        <p className="muted">
+          Mavri sends you (never the customer) one short note when an unpaid invoice is this many days overdue and
+          nobody has recorded a dispute, a pause or a promise to pay for it. Leave at 0 to switch it off. It needs email
+          set up below.
+        </p>
+        <div className="row">
+          <label>
+            Days overdue
+            <input
+              type="number"
+              min="0"
+              max="365"
+              value={auto.escalateAfterDays}
+              onChange={e => setA({ escalateAfterDays: Number(e.target.value) })}
+            />
+          </label>
+          <label className="grow">
+            Your email
+            <input type="email" value={auto.ownerEmail} onChange={e => setA({ ownerEmail: e.target.value })} />
+          </label>
+        </div>
         <div className="row end">
           <button className="primary">Save</button>
         </div>

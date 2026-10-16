@@ -240,3 +240,67 @@ func TestConfigValidation(t *testing.T) {
 		t.Fatalf("normalised: %+v %v", c, err)
 	}
 }
+
+func TestQuietHoursHoldARemindUntilTheyEnd(t *testing.T) {
+	p := func(from, to, tz string) model.Party { return model.Party{QuietFrom: from, QuietTo: to, Timezone: tz} }
+	at := func(s string) time.Time { x, _ := time.Parse(time.RFC3339, s); return x }
+	cases := []struct {
+		name string
+		p    model.Party
+		now  string
+		want bool
+	}{
+		{"inside a daytime window", p("12:00", "14:00", ""), "2026-10-12T13:00:00Z", true},
+		{"outside it", p("12:00", "14:00", ""), "2026-10-12T15:00:00Z", false},
+		{"the end is open", p("12:00", "14:00", ""), "2026-10-12T14:00:00Z", false},
+		{"overnight, before midnight", p("22:00", "07:00", ""), "2026-10-12T23:30:00Z", true},
+		{"overnight, after midnight", p("22:00", "07:00", ""), "2026-10-12T03:00:00Z", true},
+		{"overnight, in the day", p("22:00", "07:00", ""), "2026-10-12T12:00:00Z", false},
+		{"their time zone, not ours", p("22:00", "07:00", "Asia/Kolkata"), "2026-10-12T17:00:00Z", true},       // 22:30 in India
+		{"their time zone, daytime there", p("22:00", "07:00", "Asia/Kolkata"), "2026-10-12T05:00:00Z", false}, // 10:30
+		{"no hours", p("", "", ""), "2026-10-12T03:00:00Z", false},
+		{"half set", p("22:00", "", ""), "2026-10-12T23:00:00Z", false},
+		{"unknown zone is never quiet", p("00:00", "23:59", "Mars/Olympus"), "2026-10-12T03:00:00Z", false},
+		{"nonsense hours", p("late", "early", ""), "2026-10-12T03:00:00Z", false},
+	}
+	for _, c := range cases {
+		if got := InQuietHours(c.p, at(c.now)); got != c.want {
+			t.Errorf("%s: got %v want %v", c.name, got, c.want)
+		}
+	}
+}
+
+func TestEscalationTellsTheOwnerOnceAndOnlyWhenNobodyIsHandlingIt(t *testing.T) {
+	e := setup(t, "2026-10-12")
+	ctx := context.Background()
+	old := e.invoice(t, "2026-08-01", "2026-09-01") // 41 days overdue
+	handled := e.invoice(t, "2026-08-01", "2026-09-02")
+	e.invoice(t, "2026-10-01", "2026-10-10") // only 2 days
+	if _, err := e.s.DB.ExecContext(ctx, `INSERT INTO follow_ups (document_id, kind, note, status, created_at) VALUES (?, 'dispute', 'disputed', 'open', '2026-10-01T00:00:00Z')`, handled.ID); err != nil {
+		t.Fatal(err)
+	}
+	cfg := DefaultConfig()
+	if _, err := e.s.Save(ctx, Config{EscalateAfterDays: 30}); err == nil {
+		t.Fatal("escalating needs someone to tell")
+	}
+	if _, err := e.s.Save(ctx, Config{OwnerEmail: "not an email"}); err == nil {
+		t.Fatal("a bad owner email was accepted")
+	}
+	cfg.OwnerEmail, cfg.EscalateAfterDays = "boss@x.co", 30
+	if _, err := e.s.Save(ctx, cfg); err != nil {
+		t.Fatal(err)
+	}
+	n, err := e.s.RunEscalations(ctx)
+	if err != nil || n != 1 {
+		t.Fatalf("one note for the one unhandled invoice: %d %v", n, err)
+	}
+	if len(*e.sent) != 1 || !strings.HasPrefix((*e.sent)[0], "boss@x.co|") || !strings.Contains((*e.sent)[0], old.FullNumber) {
+		t.Fatalf("what was sent: %v", *e.sent)
+	}
+	if n, _ := e.s.RunEscalations(ctx); n != 0 {
+		t.Fatalf("a second note for the same invoice: %d", n)
+	}
+	if strings.Contains((*e.sent)[0], "client@x.co") {
+		t.Fatal("the customer must never be written to by an escalation")
+	}
+}
