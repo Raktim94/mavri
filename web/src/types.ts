@@ -74,6 +74,7 @@ export interface Style {
   pageSize: string;
   headerStyle: string;
   rowStyle: string;
+  template: string;
   upperLabels: boolean;
   showNumbers: boolean;
   showUnit: boolean;

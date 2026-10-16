@@ -235,3 +235,21 @@ func TestSettingsAndChecks(t *testing.T) {
 		t.Fatal("checks should reject")
 	}
 }
+
+func TestCheckStyleTemplate(t *testing.T) {
+	ok := model.Style{Name: "a", Accent: "#112233", Template: "blue-wave"}
+	if err := CheckStyle(&ok); err != nil {
+		t.Fatalf("known template rejected: %v", err)
+	}
+	blank := model.Style{Name: "a", Accent: "#112233"}
+	if err := CheckStyle(&blank); err != nil {
+		t.Fatalf("empty template (original layout) rejected: %v", err)
+	}
+	bad := model.Style{Name: "a", Accent: "#112233", Template: "nope"}
+	if err := CheckStyle(&bad); err == nil {
+		t.Fatal("unknown template accepted")
+	}
+	if len(Templates) != 15 {
+		t.Fatalf("want 15 templates, have %d", len(Templates))
+	}
+}

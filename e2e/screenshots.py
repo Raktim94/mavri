@@ -23,20 +23,24 @@ def shot(pg, name):
     print("  wrote", name)
 
 
+def fill_header(pg, customer):
+    """Business, customer and currency in the one-page editor (the customer is a search box)."""
+    pg.locator("#sec-customer select").last.select_option(index=1)  # the preset picker, if any, comes first
+    pg.fill("#customer-search", customer)
+    pg.locator("#sec-payment select").first.select_option(label="USD $")
+
+
 def new_invoice(pg, number, customer, lines, status=None):
     pg.click("nav >> text=Invoices")
     pg.click("button.primary:text-is('New invoice')") if pg.locator("button.primary:text-is('New invoice')").count() else pg.click("button.primary")
-    sels = pg.locator("form.editor select")
-    sels.nth(0).select_option(index=1)
-    sels.nth(1).select_option(label=customer)
-    sels.nth(2).select_option(label="USD $")
+    fill_header(pg, customer)
     for i, (desc, qty, price) in enumerate(lines):
         if i:
             pg.click("button:text-is('Add line')")
-        pg.locator("input[aria-label=Description]").nth(i).fill(desc)
-        pg.locator("input[aria-label=Quantity]").nth(i).fill(str(qty))
-        pg.locator("input[aria-label=Price]").nth(i).fill(str(price))
-        pg.locator("input[aria-label='Tax rate']").nth(i).fill("10")
+        pg.locator("input[aria-label^='Description']").nth(i).fill(desc)
+        pg.locator("input[aria-label^='Quantity']").nth(i).fill(str(qty))
+        pg.locator("input[aria-label^='Price']").nth(i).fill(str(price))
+        pg.locator("input[aria-label^='Tax rate']").nth(i).fill("10")
     pg.locator("input[aria-label=Number]").fill(number)
     pg.click("button.primary:text-is('Save')")
     pg.wait_for_selector("article.paper")
@@ -188,19 +192,16 @@ with sync_playwright() as p:
     print("  wrote invoice-paid")
     pg.click("nav >> text=Invoices")
     pg.click("button.primary:text-is('New invoice')") if pg.locator("button.primary:text-is('New invoice')").count() else pg.click("button.primary")
-    sels = pg.locator("form.editor select")  # presets exist now, so the business, customer and currency are one position later
-    sels.nth(1).select_option(index=1)
-    sels.nth(2).select_option(label="Harbor & Pine Cafe")
-    sels.nth(3).select_option(label="USD $")
-    pg.locator("input[aria-label=Description]").nth(0).fill("Menu redesign")
-    pg.locator("input[aria-label=Quantity]").nth(0).fill("1")
-    pg.locator("input[aria-label=Price]").nth(0).fill("1800")
-    pg.locator("input[aria-label='Tax rate']").nth(0).fill("10")
+    fill_header(pg, "Harbor & Pine Cafe")
+    pg.locator("input[aria-label^='Description']").nth(0).fill("Menu redesign")
+    pg.locator("input[aria-label^='Quantity']").nth(0).fill("1")
+    pg.locator("input[aria-label^='Price']").nth(0).fill("1800")
+    pg.locator("input[aria-label^='Tax rate']").nth(0).fill("10")
     pg.click("button:text-is('Add line')")
-    pg.locator("input[aria-label=Description]").nth(1).fill("Print-ready files")
-    pg.locator("input[aria-label=Quantity]").nth(1).fill("2")
-    pg.locator("input[aria-label=Price]").nth(1).fill("150")
-    pg.locator("input[aria-label='Tax rate']").nth(1).fill("10")
+    pg.locator("input[aria-label^='Description']").nth(1).fill("Print-ready files")
+    pg.locator("input[aria-label^='Quantity']").nth(1).fill("2")
+    pg.locator("input[aria-label^='Price']").nth(1).fill("150")
+    pg.locator("input[aria-label^='Tax rate']").nth(1).fill("10")
     shot(pg, "invoice-editor")
     ctx.close()
 

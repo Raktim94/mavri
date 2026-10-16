@@ -99,6 +99,7 @@ type Style struct {
 	PageSize    string `db:"page_size" json:"pageSize"`
 	HeaderStyle string `db:"header_style" json:"headerStyle"`
 	RowStyle    string `db:"row_style" json:"rowStyle"`
+	Template    string `db:"template" json:"template"`
 	UpperLabels bool   `db:"upper_labels" json:"upperLabels"`
 	ShowNumbers bool   `db:"show_numbers" json:"showNumbers"`
 	ShowUnit    bool   `db:"show_unit" json:"showUnit"`

@@ -161,7 +161,19 @@ func CheckStyle(st *model.Style) error {
 	if len(st.Accent) != 7 || st.Accent[0] != '#' {
 		return invalid("accent must be a colour like #3b5bdb")
 	}
+	if st.Template != "" && !Templates[st.Template] {
+		return invalid("unknown template %q", st.Template)
+	}
 	return nil
+}
+
+// Templates lists the built-in print templates. They only change how a
+// document is presented; amounts and tax come from the document itself.
+var Templates = map[string]bool{
+	"ledger-classic": true, "blue-wave": true, "editorial-serif": true, "studio-signature": true,
+	"agency-services": true, "product-catalogue": true, "gst-india-detailed": true, "gst-india-compact": true,
+	"us-professional": true, "uk-vat-standard": true, "eu-cross-border": true, "uae-vat": true,
+	"intl-dual-currency": true, "milestone-deposit": true, "thermal-counter": true,
 }
 
 // CheckPreset validates a preset.

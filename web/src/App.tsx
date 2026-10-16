@@ -17,6 +17,7 @@ import { HealthPage } from './pages/HealthPage';
 import { IntegrationsPage } from './pages/IntegrationsPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { ResourcePage } from './pages/ResourcePage';
+import { TemplatesPage } from './pages/TemplatesPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { ShopsPage } from './pages/ShopsPage';
 import { resources } from './resources';
@@ -91,6 +92,9 @@ function Shell() {
               <Icon name={r.id} /> {r.title}
             </NavLink>
           ))}
+          <NavLink to="/templates">
+            <Icon name="styles" /> Templates
+          </NavLink>
           <p className="nav-label">Automate</p>
           <NavLink to="/automation">
             <Icon name="automate" /> Automation
@@ -134,6 +138,7 @@ function Shell() {
               {pages.map(r => (
                 <Route key={r.id} path={`/${r.id}`} element={<ResourcePage res={r} />} />
               ))}
+              <Route path="/templates" element={<TemplatesPage />} />
               <Route path="/reports" element={<ReportsPage />} />
               <Route path="/stores" element={<ShopsPage />} />
               <Route path="/automation" element={<AutomationPage />} />

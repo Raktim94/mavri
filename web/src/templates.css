@@ -1,0 +1,360 @@
+/* Print templates. They restyle .paper only; content and amounts come from the document. */
+.paper .tax-summary {
+  font-size: 0.9em;
+}
+.paper .tax-summary caption {
+  text-align: left;
+  font-size: 0.75em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  padding-bottom: 6px;
+}
+.paper .tpl-note {
+  font-size: 0.85em;
+}
+.paper .signature {
+  display: grid;
+  gap: 6px;
+  width: min(300px, 100%);
+  margin-top: 28px;
+  justify-self: end;
+  font-size: 0.8em;
+  color: var(--muted);
+}
+.paper .sig-line {
+  border-top: 1px solid var(--text);
+  height: 36px;
+}
+.paper .schedule dl {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 20px;
+  margin: 0;
+}
+.paper .schedule dt,
+.paper .schedule dd {
+  margin: 0;
+}
+.paper .schedule dd {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.paper .schedule .big {
+  font-weight: 800;
+  color: var(--accent);
+}
+
+/* 1 Ledger Classic: hard grid, no rounding, no tint */
+.paper.tpl-ledger-classic {
+  border-radius: 0;
+  border: 1px solid var(--text);
+}
+.paper.tpl-ledger-classic::before {
+  height: 2px;
+  background: var(--text);
+}
+.paper.tpl-ledger-classic .paper-card,
+.paper.tpl-ledger-classic table,
+.paper.tpl-ledger-classic .paper-meta,
+.paper.tpl-ledger-classic .totals {
+  border-radius: 0;
+  border-color: var(--text);
+  background: none;
+}
+.paper.tpl-ledger-classic th,
+.paper.tpl-ledger-classic td {
+  border: 1px solid var(--line);
+}
+.paper.tpl-ledger-classic .monogram {
+  border-radius: 0;
+  background: var(--text);
+  color: var(--panel);
+}
+.paper.tpl-ledger-classic h2,
+.paper.tpl-ledger-classic .totals .big,
+.paper.tpl-ledger-classic .paper-meta .amount dd {
+  color: var(--text);
+}
+
+/* 2 Blue Wave: a band across the top, title in the accent */
+.paper.tpl-blue-wave::before {
+  height: 92px;
+  border-radius: 0 0 50% 50% / 0 0 36px 36px;
+}
+.paper.tpl-blue-wave .paper-head {
+  padding-top: 84px;
+}
+.paper.tpl-blue-wave .paper-meta {
+  border-radius: 0;
+  border-width: 1px 0;
+}
+
+/* 3 Editorial Serif: type does the work */
+.paper.tpl-editorial-serif {
+  font-family: Georgia, 'Times New Roman', serif;
+  border-radius: 0;
+  border-width: 0;
+  border-top: 0;
+  padding: 44px 40px;
+}
+.paper.tpl-editorial-serif::before {
+  display: none;
+}
+.paper.tpl-editorial-serif h2 {
+  font-size: 3.2rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+.paper.tpl-editorial-serif .monogram {
+  background: none;
+  color: var(--text);
+  border: 1px solid var(--text);
+  border-radius: 50%;
+}
+.paper.tpl-editorial-serif .paper-meta,
+.paper.tpl-editorial-serif .paper-card,
+.paper.tpl-editorial-serif table,
+.paper.tpl-editorial-serif .totals {
+  border-radius: 0;
+  border-width: 1px 0;
+  background: none;
+}
+.paper.tpl-editorial-serif h3,
+.paper.tpl-editorial-serif .paper-meta dt,
+.paper.tpl-editorial-serif thead th {
+  font-family: system-ui, sans-serif;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  background: none;
+}
+.paper.tpl-editorial-serif .totals .big,
+.paper.tpl-editorial-serif .paper-meta .amount dd {
+  color: var(--text);
+}
+
+/* 4 Studio Signature: monochrome, centred lockup */
+.paper.tpl-studio-signature::before {
+  display: none;
+}
+.paper.tpl-studio-signature .paper-head {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 18px;
+  border-bottom: 1px solid var(--line);
+}
+.paper.tpl-studio-signature .paper-title {
+  justify-items: center;
+  text-align: center;
+}
+.paper.tpl-studio-signature h2 {
+  color: var(--text);
+  font-weight: 600;
+  font-size: 1.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.paper.tpl-studio-signature .monogram {
+  background: var(--text);
+  color: var(--panel);
+  border-radius: 50%;
+}
+.paper.tpl-studio-signature .totals .big,
+.paper.tpl-studio-signature .paper-meta .amount dd {
+  color: var(--text);
+}
+
+/* 5 Agency Services: roomy banded rows */
+.paper.tpl-agency-services td,
+.paper.tpl-agency-services th {
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+.paper.tpl-agency-services .paper-meta .amount {
+  background: var(--accent);
+}
+.paper.tpl-agency-services .paper-meta .amount dd,
+.paper.tpl-agency-services .paper-meta .amount dt {
+  color: var(--accent-text);
+}
+
+/* 6 Product Catalogue: dense and numeric */
+.paper.tpl-product-catalogue td,
+.paper.tpl-product-catalogue th {
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+.paper.tpl-product-catalogue .paper-head {
+  border-bottom: 3px solid var(--accent);
+}
+
+/* 7 and 8 GST India */
+.paper.tpl-gst-india-detailed,
+.paper.tpl-gst-india-compact {
+  border-radius: 0;
+}
+.paper.tpl-gst-india-detailed::before,
+.paper.tpl-gst-india-compact::before {
+  height: 3px;
+  background: var(--text);
+}
+.paper.tpl-gst-india-detailed h2,
+.paper.tpl-gst-india-compact h2 {
+  font-size: 1.5rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.paper.tpl-gst-india-detailed .paper-card,
+.paper.tpl-gst-india-detailed table,
+.paper.tpl-gst-india-detailed th,
+.paper.tpl-gst-india-detailed td {
+  border-radius: 0;
+  border: 1px solid var(--line);
+}
+.paper.tpl-gst-india-compact {
+  gap: 10px;
+  padding: 18px;
+  font-size: 0.92em;
+}
+.paper.tpl-gst-india-compact .paper-head {
+  padding-bottom: 8px;
+}
+.paper.tpl-gst-india-compact .paper-card {
+  padding: 8px 10px;
+  border-radius: 0;
+}
+.paper.tpl-gst-india-compact .totals,
+.paper.tpl-gst-india-compact .paper-meta,
+.paper.tpl-gst-india-compact table {
+  background: none;
+  border-radius: 0;
+}
+.paper.tpl-gst-india-compact .monogram {
+  width: 40px;
+  height: 40px;
+  font-size: 1.2rem;
+  border-radius: 0;
+  background: var(--text);
+  color: var(--panel);
+}
+
+/* 9 to 12 tax templates: calm, bordered, a small flag-neutral rule */
+.paper.tpl-us-professional,
+.paper.tpl-uk-vat-standard,
+.paper.tpl-eu-cross-border,
+.paper.tpl-uae-vat {
+  border-radius: 4px;
+}
+.paper.tpl-us-professional::before,
+.paper.tpl-uk-vat-standard::before,
+.paper.tpl-eu-cross-border::before,
+.paper.tpl-uae-vat::before {
+  height: 4px;
+}
+.paper.tpl-uk-vat-standard h2,
+.paper.tpl-uae-vat h2 {
+  font-size: 1.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.paper.tpl-uae-vat {
+  border-inline-start: 6px solid var(--accent);
+}
+.paper.tpl-eu-cross-border .paper-meta {
+  border-style: dashed;
+}
+
+/* 13 International: currency code stays visible next to the total */
+.paper.tpl-intl-dual-currency .totals dd.big::after {
+  content: ' ' attr(data-code);
+  font-size: 0.6em;
+  color: var(--muted);
+}
+.paper.tpl-intl-dual-currency .paper-card:last-of-type {
+  border-style: dashed;
+}
+
+/* 14 Milestone & Deposit: the amount due now leads */
+.paper.tpl-milestone-deposit .schedule {
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+  border-color: var(--accent);
+}
+
+/* 15 Thermal Counter: 80 mm roll */
+.paper.tpl-thermal-counter {
+  max-width: 302px;
+  padding: 12px;
+  gap: 8px;
+  border-radius: 0;
+  font-size: 12px;
+  margin-inline: auto;
+}
+.paper.tpl-thermal-counter::before {
+  display: none;
+}
+.paper.tpl-thermal-counter .paper-head {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0 0 8px;
+  border-bottom: 1px dashed var(--text);
+}
+.paper.tpl-thermal-counter .paper-title {
+  justify-items: center;
+  text-align: center;
+}
+.paper.tpl-thermal-counter h2 {
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.paper.tpl-thermal-counter .paper-brand {
+  flex-direction: column;
+  font-size: 1em;
+}
+.paper.tpl-thermal-counter .monogram {
+  display: none;
+}
+.paper.tpl-thermal-counter .grid2 {
+  grid-template-columns: 1fr;
+  gap: 6px;
+}
+.paper.tpl-thermal-counter .paper-card,
+.paper.tpl-thermal-counter .paper-meta,
+.paper.tpl-thermal-counter table,
+.paper.tpl-thermal-counter .totals {
+  border-radius: 0;
+  border: 0;
+  border-bottom: 1px dashed var(--text);
+  background: none;
+  padding-inline: 0;
+}
+.paper.tpl-thermal-counter thead th {
+  background: none;
+  border-bottom: 1px dashed var(--text);
+  padding: 4px 2px;
+}
+.paper.tpl-thermal-counter td {
+  padding: 3px 2px;
+  border: 0;
+}
+.paper.tpl-thermal-counter .paper-meta > div {
+  flex: 1 1 100%;
+  border: 0;
+  padding: 2px 0;
+}
+.paper.tpl-thermal-counter .paper-meta .amount {
+  background: none;
+}
+.paper.tpl-thermal-counter .totals .big,
+.paper.tpl-thermal-counter .paper-meta .amount dd {
+  color: var(--text);
+}
+@media print {
+  .paper.tpl-thermal-counter {
+    max-width: 80mm;
+  }
+}
