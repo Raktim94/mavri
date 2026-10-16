@@ -15,7 +15,7 @@ WORKDIR /src
 COPY server/go.mod server/go.sum ./
 RUN go mod download
 COPY server/ ./
-ARG VERSION=2.2.0
+ARG VERSION=2.3.0
 RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w -X github.com/Raktim94/mavri/server/internal/web.Version=${VERSION}" -o /mavri ./cmd/mavri \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w -X github.com/Raktim94/mavri/server/internal/web.Version=${VERSION}" -o /mavri-mcp ./cmd/mavri-mcp
 

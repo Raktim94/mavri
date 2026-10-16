@@ -9,6 +9,7 @@ import (
 
 	"github.com/Raktim94/mavri/server/internal/activity"
 	"github.com/Raktim94/mavri/server/internal/automation"
+	"github.com/Raktim94/mavri/server/internal/collections"
 	"github.com/Raktim94/mavri/server/internal/db"
 	"github.com/Raktim94/mavri/server/internal/mailer"
 	"github.com/Raktim94/mavri/server/internal/share"
@@ -43,7 +44,8 @@ func newServerEnv(t *testing.T) (*Server, *Env) {
 		}}
 	auto := &automation.Service{DB: d, Store: st, Mail: ml, Hub: hub}
 	auto.BaseURL = func(ctx context.Context) string { c, _ := auto.Load(ctx); return c.PublicURL }
-	env := &Env{Store: st, Shops: &shop.Service{Store: st, Box: box}, Hub: hub, Auto: auto, Mail: ml, Links: links}
+	env := &Env{Store: st, Shops: &shop.Service{Store: st, Box: box}, Hub: hub, Auto: auto, Mail: ml, Links: links,
+		Coll: &collections.Service{DB: d, Store: st, Hub: hub}}
 	return NewServer("mavri", "test", Tools(env)), env
 }
 
@@ -285,5 +287,59 @@ func TestOverdueSummaryGroupsByCustomer(t *testing.T) {
 	c := custs[0].(map[string]any)
 	if c["customer"] != "Slow Payer" || c["invoices"] != float64(2) || c["owedByCurrency"].(map[string]any)["USD"] != float64(100) {
 		t.Fatalf("customer row: %v", c)
+	}
+}
+
+func TestPreviewWritesNothing(t *testing.T) {
+	s, env := newServerEnv(t)
+	issuer := ok(t, s, "create_issuer", map[string]any{"name": "Northwind"})
+	args := map[string]any{"kind": "invoice", "issuerId": issuer["id"], "customer": map[string]any{"name": "Fresh Customer", "email": "new@x.co"},
+		"lines": []any{map[string]any{"name": "Work", "quantity": 2, "unitPrice": 50, "taxRate": 10}}}
+	got := ok(t, s, "preview_document", args)
+	if got["status"] != "preview" || got["changed"] != false || got["customerWillBeCreated"] != true || got["totalMajor"] != "110.00" {
+		t.Fatalf("preview: %v", got)
+	}
+	if n, _, _ := env.Store.ListDocuments(context.Background(), store.Filter{}); len(n) != 0 {
+		t.Fatalf("a preview saved a document: %v", n)
+	}
+	if ps, _ := store.Parties.Select(context.Background(), env.Store.DB, "WHERE kind = 'customer'"); len(ps) != 0 {
+		t.Fatalf("a preview created a customer: %v", ps)
+	}
+	if doc := ok(t, s, "create_document", args); doc["fullNumber"] == nil {
+		t.Fatalf("the same arguments then save: %v", doc)
+	}
+}
+
+func TestTaxGuidanceAndCollectionsTools(t *testing.T) {
+	s, _ := newServerEnv(t)
+	issuer := ok(t, s, "create_issuer", map[string]any{"name": "Northwind GmbH", "country": "DE", "taxId": "DE123456789"})
+	cust := ok(t, s, "create_customer", map[string]any{"name": "Client SARL", "country": "FR", "taxId": "FRAB123456789"})
+	g := ok(t, s, "tax_guidance", map[string]any{"issuerId": issuer["id"], "customerId": cust["id"], "date": "2026-10-16"})
+	if g["treatment"] != "reverse_charge" || g["confidence"] != "clear" {
+		t.Fatalf("guidance: %v", g)
+	}
+	doc := ok(t, s, "create_document", map[string]any{"kind": "invoice", "issuerId": issuer["id"], "customerId": cust["id"], "dueOn": "2020-01-01",
+		"lines": []any{map[string]any{"name": "Work", "unitPrice": 100}}})
+	if po := ok(t, s, "payment_options", map[string]any{"id": doc["id"]}); po["options"] == nil {
+		t.Fatalf("payment options: %v", po)
+	}
+	if a := ok(t, s, "needs_attention", map[string]any{}); len(a["items"].([]any)) != 1 {
+		t.Fatalf("attention: %v", a)
+	}
+	// Recording a follow-up changes whether reminders go out, so it asks first.
+	args := map[string]any{"id": doc["id"], "kind": "dispute", "note": "Disputes the hours"}
+	if got := ok(t, s, "add_follow_up", args); got["status"] != "approval_required" || got["changed"] != false {
+		t.Fatalf("no approval asked: %v", got)
+	}
+	if a := ok(t, s, "needs_attention", map[string]any{}); a["items"].([]any)[0].(map[string]any)["reason"] != "overdue" {
+		t.Fatalf("an unapproved follow-up changed the list: %v", a)
+	}
+	args["confirm"] = true
+	ok(t, s, "add_follow_up", args)
+	if a := ok(t, s, "needs_attention", map[string]any{}); a["items"].([]any)[0].(map[string]any)["reason"] != "disputed" {
+		t.Fatalf("after approval: %v", a)
+	}
+	if text, isErr := call(t, s, "add_follow_up", map[string]any{"id": doc["id"], "kind": "promise", "confirm": true}); !isErr || !strings.Contains(text, "choose a date") {
+		t.Fatalf("a promise needs a date: %v %s", isErr, text)
 	}
 }

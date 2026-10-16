@@ -7,6 +7,7 @@ import (
 
 	"github.com/Raktim94/mavri/server/internal/activity"
 	"github.com/Raktim94/mavri/server/internal/db"
+	"github.com/Raktim94/mavri/server/internal/model"
 )
 
 func pathID(r *http.Request) (int64, bool) {
@@ -42,7 +43,8 @@ func crud[T any](s *Server, mux *http.ServeMux, path string, t *db.Table[T], che
 			s.problem(w, r, err)
 			return
 		}
-		s.Hub.Record(r.Context(), activity.Event{Action: "created", Entity: entityOf(path), EntityID: t.ID(&v), Label: labelOf(v)})
+		name, data := eventFor(path, "created", v)
+		s.Hub.Record(r.Context(), activity.Event{Action: "created", Entity: entityOf(path), EntityID: t.ID(&v), Label: labelOf(v), Name: name, Data: data})
 		writeJSON(w, http.StatusCreated, v)
 	}))
 	mux.HandleFunc("GET "+path+"/{id}", user(func(w http.ResponseWriter, r *http.Request) {
@@ -77,7 +79,8 @@ func crud[T any](s *Server, mux *http.ServeMux, path string, t *db.Table[T], che
 			s.problem(w, r, err)
 			return
 		}
-		s.Hub.Record(r.Context(), activity.Event{Action: "updated", Entity: entityOf(path), EntityID: id, Label: labelOf(v)})
+		name, data := eventFor(path, "updated", v)
+		s.Hub.Record(r.Context(), activity.Event{Action: "updated", Entity: entityOf(path), EntityID: id, Label: labelOf(v), Name: name, Data: data})
 		writeJSON(w, http.StatusOK, v)
 	}))
 	mux.HandleFunc("DELETE "+path+"/{id}", user(func(w http.ResponseWriter, r *http.Request) {
@@ -131,4 +134,14 @@ func labelOf(v any) string {
 		}
 	}
 	return ""
+}
+
+// eventFor names the webhook event for a record change, when records of that kind have one.
+// Only customers do: business records, products and the like change too rarely to be worth a delivery.
+func eventFor(path, action string, v any) (string, any) {
+	if p, ok := v.(model.Party); ok && path == "/api/parties" && p.Kind == "customer" {
+		return "customer." + action, map[string]any{"customer": map[string]any{
+			"id": p.ID, "name": p.Name, "email": p.Email, "phone": p.Phone, "country": p.Country, "taxId": p.TaxID, "language": p.Language}}
+	}
+	return "", nil
 }

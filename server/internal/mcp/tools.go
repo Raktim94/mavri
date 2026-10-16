@@ -9,14 +9,17 @@ import (
 
 	"github.com/Raktim94/mavri/server/internal/activity"
 	"github.com/Raktim94/mavri/server/internal/automation"
+	"github.com/Raktim94/mavri/server/internal/collections"
 	"github.com/Raktim94/mavri/server/internal/db"
 	"github.com/Raktim94/mavri/server/internal/einvoice"
 	"github.com/Raktim94/mavri/server/internal/mailer"
 	"github.com/Raktim94/mavri/server/internal/model"
 	"github.com/Raktim94/mavri/server/internal/money"
+	"github.com/Raktim94/mavri/server/internal/paymentqr"
 	"github.com/Raktim94/mavri/server/internal/share"
 	"github.com/Raktim94/mavri/server/internal/shop"
 	"github.com/Raktim94/mavri/server/internal/store"
+	"github.com/Raktim94/mavri/server/internal/taxpack"
 )
 
 // Env is what the tools work on.
@@ -28,6 +31,7 @@ type Env struct {
 	Auto  *automation.Service
 	Mail  *mailer.Service
 	Links *share.Links
+	Coll  *collections.Service
 }
 
 // record writes what a tool changed to the history and queues webhooks (source: mcp).
@@ -139,7 +143,14 @@ func Tools(env *Env) []Tool {
 			"taxMode": oneOf("how the document tax applies", "add", "included", "withheld"), "shipping": num("shipping in major units"),
 			"discountPercent": num("percent discount"), "notes": str("note for the customer"), "bankId": intg("bank account to show")},
 			"kind", "issuerId", "lines"),
-		func(ctx context.Context, a map[string]any) (any, error) { return createDocument(ctx, env, a) })
+		func(ctx context.Context, a map[string]any) (any, error) { return createDocument(ctx, env, a, false) })
+	add("preview_document", "Work out an invoice or quote exactly as create_document would, and show the totals, without saving anything: no document, no customer. Use it to check numbers with the user before creating.",
+		obj(m{"kind": oneOf("invoice or quote", "invoice", "quote"), "issuerId": intg("who issues it"),
+			"customerId": intg("existing customer"), "customer": obj(m{"name": str("name"), "email": str("email")}, "name"),
+			"currency": str("currency code such as USD, default USD"), "lines": list(line, "at least one"), "taxRate": num("tax percent for the whole document"),
+			"taxMode": oneOf("how the document tax applies", "add", "included", "withheld"), "shipping": num("shipping in major units"),
+			"discountPercent": num("percent discount")}, "kind", "issuerId", "lines"),
+		func(ctx context.Context, a map[string]any) (any, error) { return createDocument(ctx, env, a, true) })
 	add("record_payment", "Record a payment against an invoice; the status updates by itself.",
 		obj(m{"documentId": intg("invoice id"), "amount": num("amount in major units"), "paidOn": str("YYYY-MM-DD, default today"),
 			"method": str("e.g. bank, cash, card"), "note": str("note"), "confirm": confirmField}, "documentId", "amount"),
@@ -483,10 +494,71 @@ func Tools(env *Env) []Tool {
 			id, dup, err := env.Shops.Ingest(ctx, sh, o)
 			return m{"documentId": id, "duplicate": dup}, err
 		})
+
+	// tax guidance, payment options and the collections list
+	add("tax_guidance", "Explain which tax usually applies to a sale between a business and a customer: the treatment, the facts it rests on, what is missing and what a person must decide, and the rates in force. It guides only; it never applies a rate and is not tax advice. Read-only.",
+		obj(m{"issuerId": intg("your business"), "customerId": intg("the customer"), "date": str("YYYY-MM-DD, default today")}, "issuerId"),
+		func(ctx context.Context, a map[string]any) (any, error) {
+			iss, err := store.Parties.Get(ctx, env.Store.DB, idArg(a, "issuerId"))
+			if err != nil {
+				return nil, notFound("business", err)
+			}
+			f := taxpack.Facts{IssuerCountry: iss.Country, IssuerTaxID: iss.TaxID, Date: strArg(a, "date")}
+			if f.Date == "" {
+				f.Date = env.Store.Today()
+			}
+			if cid := idArg(a, "customerId"); cid != 0 {
+				c, err := store.Parties.Get(ctx, env.Store.DB, cid)
+				if err != nil {
+					return nil, notFound("customer", err)
+				}
+				f.CustomerCountry, f.CustomerTaxID, f.CustomerTaxExempt = c.Country, c.TaxID, c.TaxExempt
+			}
+			return taxpack.Explain(f), nil
+		})
+	add("payment_options", "List how a client can pay what is still owed on an invoice (UPI, SEPA, bank transfer), with the QR payload text and the plain details. Scanning a code never marks anything paid. Read-only.",
+		obj(m{"id": intg("invoice id")}, "id"),
+		func(ctx context.Context, a map[string]any) (any, error) {
+			d, err := env.Store.GetDocument(ctx, env.Store.DB, idArg(a, "id"))
+			if err != nil {
+				return nil, notFound("document", err)
+			}
+			opts := paymentqr.For(d)
+			if opts == nil {
+				opts = []paymentqr.Option{}
+			}
+			return m{"options": opts}, nil
+		})
+	add("needs_attention", "The daily collections list: unpaid invoices that are disputed, past a promised date, overdue, due soon or part paid, most urgent first, with a suggested next step. Read-only.",
+		obj(m{}),
+		func(ctx context.Context, _ map[string]any) (any, error) {
+			if env.Coll == nil {
+				return nil, errors.New("this tool is not available here")
+			}
+			return env.Coll.Attention(ctx)
+		})
+	add("add_follow_up", "Record what a client said about an unpaid invoice: a promise to pay by a date, a dispute, a pause on automatic reminders, or a note. It changes whether reminders go out, so it needs the user's approval; without confirm=true it only shows what would be recorded. It never sends a message and never adds a fee.",
+		obj(m{"id": intg("invoice id"), "kind": oneOf("what happened", "promise", "dispute", "snooze", "note"), "dueOn": str("YYYY-MM-DD for a promise or a pause"),
+			"note": str("what was said"), "confirm": confirmField}, "id", "kind"),
+		func(ctx context.Context, a map[string]any) (any, error) {
+			if env.Coll == nil {
+				return nil, errors.New("this tool is not available here")
+			}
+			in := collections.Input{Kind: strArg(a, "kind"), DueOn: strArg(a, "dueOn"), Note: strArg(a, "note")}
+			id := idArg(a, "id")
+			if !confirmed(a) {
+				return approval("record a follow-up on the invoice", in)
+			}
+			f, err := env.Coll.Add(ctx, id, in)
+			if errors.Is(err, collections.ErrInvalid) || errors.Is(err, collections.ErrNotFound) {
+				return nil, err
+			}
+			return f, err
+		})
 	return tools
 }
 
-func createDocument(ctx context.Context, env *Env, a map[string]any) (any, error) {
+func createDocument(ctx context.Context, env *Env, a map[string]any, dry bool) (any, error) {
 	s := env.Store
 	code := strings.ToUpper(strArg(a, "currency"))
 	if code == "" {
@@ -533,8 +605,10 @@ func createDocument(ctx context.Context, env *Env, a map[string]any) (any, error
 			if err := store.CheckParty(&p); err != nil {
 				return nil, err
 			}
-			if err := store.Parties.Insert(ctx, s.DB, &p); err != nil {
-				return nil, err
+			if !dry {
+				if err := store.Parties.Insert(ctx, s.DB, &p); err != nil {
+					return nil, err
+				}
 			}
 		}
 		d.CustomerID = p.ID
@@ -552,6 +626,14 @@ func createDocument(ctx context.Context, env *Env, a map[string]any) (any, error
 			ln.TaxMode = "add"
 		}
 		d.Lines = append(d.Lines, ln)
+	}
+	if dry {
+		if len(d.Lines) == 0 {
+			return nil, errors.New("at least one line is needed")
+		}
+		t := money.Compute(&d)
+		return m{"status": "preview", "changed": false, "currency": cur.Code, "totals": t, "totalMajor": money.Major(t.TotalCents, cur.Decimals),
+			"customerWillBeCreated": d.CustomerID == 0, "message": "Nothing was saved. Call create_document with the same arguments to save it."}, nil
 	}
 	out, err := s.CreateDocument(ctx, d, store.SaveOptions{})
 	if err == nil {

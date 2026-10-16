@@ -1,7 +1,7 @@
 {
   "name": "mavri",
   "private": true,
-  "version": "2.2.0",
+  "version": "2.3.0",
   "type": "module",
   "description": "Invoicing and quoting application for freelancers and small businesses, run with Docker. Create, manage and export invoices and quotes with full data ownership.",
   "author": "Raktim Ranjit <mail@raktimranjit.com>",

@@ -35,7 +35,7 @@ function csvCell(v: string) {
 
 function CsvCard() {
   const { toast } = useUi();
-  const [kind, setKind] = useState<'customers' | 'products'>('customers');
+  const [kind, setKind] = useState<'customers' | 'products' | 'invoices'>('customers');
   const [file, setFile] = useState<File | null>(null);
   const [report, setReport] = useState<ImportReport | null>(null);
   const [error, setError] = useState('');
@@ -117,12 +117,16 @@ function CsvCard() {
       </div>
       <h3>Import</h3>
       <p className="muted">
-        Bring in customers or products from a spreadsheet. The first row names the columns:{' '}
+        Bring in customers, products or past invoices from a spreadsheet. The first row names the columns:{' '}
         <code>
           {kind === 'customers'
             ? 'name, email, phone, address, tax_id, country, note'
-            : 'name, description, price, category, unit'}
+            : kind === 'products'
+              ? 'name, description, price, category, unit'
+              : 'invoice number, customer, date, currency, description, qty, unit price, tax %'}
         </code>
+        {kind === 'invoices' &&
+          ' (one row per line item; rows with the same number are one invoice; optional: customer email, due date, total, paid, paid on, issuer)'}
         . Nothing is written until you check the file and confirm.
       </p>
       <div className="row wrap">
@@ -136,6 +140,7 @@ function CsvCard() {
         >
           <option value="customers">Customers</option>
           <option value="products">Products</option>
+          <option value="invoices">Invoices</option>
         </select>
         <input
           type="file"

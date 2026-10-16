@@ -30,16 +30,19 @@ Every list has _New_, _Edit_, _Archive_ and _Delete_. Archive hides a record wit
 
 ## 3. Make an invoice
 
-**Invoices → New invoice.**
+**Invoices → New invoice.** One page, in seven sections. A list on the left shows which still need something; a live preview of the finished document sits on the right (a button on narrow screens). Use the keyboard throughout: Tab between fields, **Enter** in the last line adds another, **Alt + ↑ / ↓** moves a line, **Ctrl + S** saves.
 
-1. Choose the business, customer and currency. The next number is filled in for you and can be changed.
-2. Set the date and the due date.
-3. Add lines. Pick a product or type a description, then set quantity, price and tax. Tax can be _Added_ on top or _Included_ in the price.
-4. Optionally add a discount, a surcharge, shipping, or a tax for the whole document (_Added_, _Included_ or _Withheld_).
-5. Record payments. The status becomes _Partly paid_ or _Paid_ by itself; **Void** on the invoice page cancels it.
-6. Add notes, terms or a thank-you line, then **Save**.
+1. **Customer.** Choose the business. Search your customers by typing, or press **+ Add customer** to add one without leaving the page; the invoice keeps everything you typed. A preset fills the business, customer, currency, bank and notes in one step.
+2. **Items.** Type a description, or start typing the name of a product from your catalogue to fill in its unit and price. Each line has quantity, price, tax rate, and whether the tax is _Added_ on top or _Included_ in the price. Lines can be moved up and down, duplicated and removed. Under _Discount, surcharge and shipping_ are the document-wide adjustments.
+3. **Tax.** Mavri reads your business's country, the customer's country, both tax numbers and the date, and tells you which treatment usually applies and why (for example same state or different state in India, or reverse charge between EU businesses). It lists facts that are missing and decisions that are yours, and offers the current rates as buttons. It never applies a rate for you. See [Tax guidance](#tax-guidance).
+4. **Dates and terms.** The invoice date and due date, with _Net 7 / 14 / 30 / 45 / 60_ shortcuts. The number is suggested from your numbering and becomes final when you save.
+5. **Payment.** The currency and the bank account. You see what the client will see. If the invoice is in INR and the bank account has a UPI ID, or it is in EUR and the account is an IBAN, the invoice also shows a payment QR code (see [Payment QR codes](#payment-qr-codes)). Payments already received can be added here too.
+6. **Brand and notes.** Pick a template and style (see [Templates](#templates)) and add the note, terms and thank-you line.
+7. **Review.** Three lists: _Required to save_, _Recommended_ and _Optional_. Each item links to where to fix it. **Save**, or **Save and share** to open the share dialog right away.
 
-If you have presets or styles, _Start from a preset_ fills the business, customer, currency, bank and notes in one step, and _Style_ copies a saved look.
+Your work is kept in this browser while you type ("Draft saved 14:32"), so a refresh or an accidental click away does not lose it. When you come back it is restored, with a button to discard it. It is a convenience of this browser only; the invoice exists once you press Save.
+
+After saving a new invoice you see a short confirmation with the number, customer, total and due date, and the usual next steps: share the link, send by email, download the PDF, record a payment, or create a similar invoice.
 
 ![Invoice editor](screenshots/invoice-editor.png)
 
@@ -67,6 +70,38 @@ Open an invoice or quote and choose **Share**. Mavri makes a secure link that on
 
 **Online payments.** In **Automation → Online payments (Stripe)** add a Stripe webhook that points at your Mavri, then paste Stripe's signing secret and your secret key. Clients then see a **Pay** button for the balance. They pay on Stripe's page (card details never reach Mavri) and Mavri adds the payment and marks the invoice paid when Stripe confirms. Test with Stripe's test keys first. The public address in Automation must be an HTTPS address Stripe can reach.
 
+## Templates
+
+**Templates** has fifteen print layouts: Ledger Classic, Blue Wave, Editorial Serif, Studio Signature, Agency Services, Product Catalogue, GST India Detailed, GST India Compact, US Professional, UK VAT Standard, EU Cross-border VAT, UAE VAT, International, Milestone & Deposit and Thermal Counter (80 mm). Filter by service, retail, GST/VAT, international, compact or minimal; star favourites; click a thumbnail for a full preview with sample data. **Use this template** adds a style that uses it; change its colour, font and logo size under **Styles**, and pick it on an invoice.
+
+A template changes only how a document looks. Amounts, tax and the saved details come from the document, and invoices you issued earlier keep the look they had. Labels such as GSTIN, VAT number or TRN are presentation: a template does not check or file anything. The GST templates show a tax summary by rate and, when both GSTINs are valid-looking, split it into CGST and SGST (same state) or IGST (different states).
+
+![Templates](screenshots/templates.png)
+
+## Tax guidance
+
+Under **Tax guidance** you can see what Mavri knows about India GST, UK VAT, EU VAT, UAE VAT and US sales tax: each pack's status (_beta_ means rates, number checks and explanations; _estimate_ means Mavri holds no rates because they depend on place and product), its official source, the rates in force with the date each began, and, plainly, what it does not cover. No pack has been reviewed by a person against its source yet, and every pack says so. You can also check a tax number there: the GSTIN and UK VAT checks catch typing mistakes, the others check the shape; none proves a number is registered.
+
+Mavri guides; it does not decide. It does not file returns, validate HSN/SAC codes, submit e-invoices (IRN) or e-way bills to a tax authority, or give tax advice.
+
+![Tax guidance](screenshots/tax-guidance.png)
+
+## Payment QR codes
+
+An invoice shows **How to pay**: a QR code where one exists, always with the same details as text. A UPI code (INR, with a UPI ID on the bank account) asks for the remaining balance and your invoice number; a SEPA code (EUR, with an IBAN) is the standard EPC credit-transfer code that European banking apps read. Everything else shows the bank details to copy. Scanning only opens the client's banking app with the details filled in; **it never marks an invoice paid**. When the money arrives, **Record payment** on the invoice. This QR code is a payment code, not the signed QR code some tax authorities require on an invoice, and Mavri does not make that one.
+
+## Needs attention
+
+**Needs attention** is the daily list of unpaid invoices that need a person, most urgent first: disputed, a promise to pay that was missed, an email that failed, overdue, due within a week, part paid, and promised. Each row says why and suggests a next step. Mavri sends nothing from this list and never adds late fees or interest.
+
+On an invoice, **Collections** records what the client said: a promise to pay by a date, a dispute, a pause on automatic reminders, or a note. A dispute, a pause, or a promise that is not yet due stops automatic reminders for that invoice; when a promise date passes unpaid it moves up the list. Clients can tell you too: the secure link has _I will pay by a date_ and _I need help or want to dispute this_, which land here. Record a payment from the invoice page with **Record payment**; it is always a manual entry.
+
+![Needs attention](screenshots/needs-attention.png)
+
+## Languages
+
+Under **Customers**, set _Language of documents sent to this customer_. The labels, dates and number formats on their documents follow it (the secure link too). French, German, Spanish, Italian, Portuguese, Dutch, Hindi and Arabic are available as **draft translations**: useful, but not reviewed by a professional translator, so read them before you send. Arabic documents are laid out right to left. English is the default. The app itself and the text you type (descriptions, notes) stay as they are. PDFs are your browser's print output, so the fonts that show a script are the ones on the device doing the printing.
+
 ## Reminders and recurring invoices
 
 In **Automation → Payment reminders** choose the days before and after the due date; Mavri emails the customer once for each invoice and day, and stops when the invoice is paid. Untick reminders on a customer's record to exclude them, or press **Remind** on an invoice to chase it by hand. Reminders need email and the public address.
@@ -93,11 +128,13 @@ In the invoice list, tick rows to **email**, **remind**, **mark paid** or **void
 
 ## Data and backups
 
-**Data & backups** exports customers, products, invoices and payments as CSV and imports customers and products. Choose the file, **Check file**, read what will happen (and download the list of rows with problems), then import.
+**Data & backups** exports customers, products, invoices and payments as CSV, and every invoice and quote as one JSON file (exactly as the API returns it, with the details each was saved with), so your records can leave Mavri without loss. It imports customers, products and past invoices. Choose the file, **Check file**, read what will happen (and download the list of rows with problems), then import.
+
+For invoices, use one row per line item: `invoice number, customer, date, currency, description, qty, unit price, tax %`, and optionally `customer email, due date, total, paid, paid on, issuer`. Rows with the same invoice number become one invoice. An invoice with any problem is skipped whole and each problem is listed with its line, so you can fix the file and import it again; invoices that already exist are skipped, so importing twice is safe. If the file has a `total` column, Mavri checks it against what the lines add up to, which catches wrongly mapped price or tax columns.
 
 Backups can run on a schedule, with a number of copies kept. Turn on **Encrypt** to protect them with a passphrase you keep elsewhere, and add an S3-compatible bucket (Amazon S3, Backblaze B2, Cloudflare R2, MinIO and others) for an off-site copy. Every backup is read back and checked right after it is made. The screen shows the last good backup and tells you if backups fall behind.
 
-A backup contains your invoices, quotes, payments, customers, businesses, products, banks, styles, presets, schedules, share links and history. It does **not** contain sign-in accounts, API keys, store connections, webhook endpoints, or the email, backup and payment settings and their passwords, and never the server's encryption key. After restoring on a new server, add those again. **Restore** is a guided check: pick a copy, enter the passphrase if it has one, see what it holds, confirm. A safety copy of your current data is made first.
+A backup contains your invoices, quotes, payments, customers, businesses, products, banks, styles, presets, schedules, share links, promises and disputes, and history. It does **not** contain sign-in accounts, API keys, store connections, webhook endpoints, or the email, backup and payment settings and their passwords, and never the server's encryption key. After restoring on a new server, add those again. **Restore** is a guided check: pick a copy, enter the passphrase if it has one, see what it holds, confirm. A safety copy of your current data is made first.
 
 ![Data and backups](screenshots/data.png)
 

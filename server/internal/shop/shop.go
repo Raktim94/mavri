@@ -234,3 +234,105 @@ func (s *Service) customerFor(ctx context.Context, c Customer) (model.Party, err
 	}
 	return p, nil
 }
+
+// Preview is what Ingest would do with an order, without doing it.
+type Preview struct {
+	DryRun     bool            `json:"dryRun"`
+	Duplicate  bool            `json:"duplicate"` // this order id was already turned into an invoice
+	DocumentID int64           `json:"documentId,omitempty"`
+	Customer   PreviewCustomer `json:"customer"`
+	Currency   string          `json:"currency"`
+	Lines      []PreviewLine   `json:"lines"`
+	Shipping   int64           `json:"shippingCents"`
+	TaxRate    float64         `json:"taxRate"`
+	Totals     model.Totals    `json:"totals"`
+	MarkPaid   bool            `json:"markPaid"`
+	Warnings   []string        `json:"warnings"`
+}
+
+// PreviewCustomer says whether the order's customer already exists.
+type PreviewCustomer struct {
+	ID         int64  `json:"id,omitempty"`
+	Name       string `json:"name"`
+	Email      string `json:"email"`
+	WillCreate bool   `json:"willCreate"`
+}
+
+// PreviewLine is one line as it would be stored.
+type PreviewLine struct {
+	Name      string  `json:"name"`
+	Quantity  float64 `json:"quantity"`
+	UnitCents int64   `json:"unitCents"`
+}
+
+// Preview shows the invoice an order would become and writes nothing: no customer, no invoice, no record of the order.
+func (s *Service) Preview(ctx context.Context, sh model.Shop, o Order) (Preview, error) {
+	p := Preview{DryRun: true, Warnings: []string{}, Lines: []PreviewLine{}}
+	if strings.TrimSpace(o.ExternalID) == "" || len(o.Lines) == 0 {
+		return p, fmt.Errorf("%w: an order id and at least one line are needed", ErrBadOrder)
+	}
+	var existing sql.NullInt64
+	err := s.db().QueryRowContext(ctx, `SELECT document_id FROM shop_orders WHERE shop_id = ? AND external_id = ?`, sh.ID, o.ExternalID).Scan(&existing)
+	if err == nil {
+		p.Duplicate, p.DocumentID = true, existing.Int64
+		p.Warnings = append(p.Warnings, "This order was already turned into an invoice, so sending it again changes nothing.")
+	} else if !errors.Is(err, sql.ErrNoRows) {
+		return p, err
+	}
+	cur, err := store.Currencies.Get(ctx, s.db(), sh.CurrencyID)
+	if err != nil {
+		return p, err
+	}
+	if o.Currency != "" && !strings.EqualFold(o.Currency, cur.Code) {
+		if cs, _ := store.Currencies.Select(ctx, s.db(), "WHERE code = ?", strings.ToUpper(o.Currency)); len(cs) == 1 {
+			cur = cs[0]
+		} else {
+			p.Warnings = append(p.Warnings, fmt.Sprintf("The order is in %s, which is not one of your currencies, so the store's currency %s is used.", strings.ToUpper(o.Currency), cur.Code))
+		}
+	}
+	p.Currency = cur.Code
+	p.Customer = PreviewCustomer{Name: strings.TrimSpace(o.Customer.Name), Email: o.Customer.Email, WillCreate: true}
+	if p.Customer.Name == "" {
+		p.Customer.Name = firstText(o.Customer.Email, "Online customer")
+	}
+	if o.Customer.Email != "" {
+		if ps, _ := store.Parties.Select(ctx, s.db(), "WHERE kind = 'customer' AND lower(email) = lower(?) ORDER BY id LIMIT 1", o.Customer.Email); len(ps) == 1 {
+			p.Customer.ID, p.Customer.WillCreate = ps[0].ID, false
+		}
+	} else if ps, _ := store.Parties.Select(ctx, s.db(), "WHERE kind = 'customer' AND name = ? ORDER BY id LIMIT 1", p.Customer.Name); len(ps) == 1 {
+		p.Customer.ID, p.Customer.WillCreate = ps[0].ID, false
+	}
+	rate := sh.DefaultTax
+	if o.TaxRatePercent != nil {
+		rate = *o.TaxRatePercent
+	}
+	p.TaxRate = rate
+	doc := model.Document{Kind: model.KindInvoice, ShippingCents: money.ToMinor(o.ShippingMajor, cur.Decimals)}
+	for _, l := range o.Lines {
+		line := model.Line{Name: l.Name, Quantity: l.Quantity, UnitCents: money.ToMinor(l.UnitPriceMajor, cur.Decimals)}
+		if rate > 0 {
+			line.TaxRate, line.TaxMode = rate, "add"
+		}
+		doc.Lines = append(doc.Lines, line)
+		p.Lines = append(p.Lines, PreviewLine{l.Name, l.Quantity, line.UnitCents})
+	}
+	p.Shipping = doc.ShippingCents
+	p.Totals = money.Compute(&doc)
+	p.MarkPaid = o.Paid && sh.MarkPaid
+	if rate > 0 {
+		p.Warnings = append(p.Warnings, fmt.Sprintf("%v%% tax will be added on top of the line prices. If the store's prices already include tax, or the store or marketplace collected the tax itself, set the store's default tax to 0 so it is not charged twice.", rate))
+	}
+	if o.Paid && !sh.MarkPaid {
+		p.Warnings = append(p.Warnings, "The order says it is paid, but this store connection does not record payments; the invoice will be unpaid.")
+	}
+	return p, nil
+}
+
+func firstText(vals ...string) string {
+	for _, v := range vals {
+		if strings.TrimSpace(v) != "" {
+			return strings.TrimSpace(v)
+		}
+	}
+	return ""
+}

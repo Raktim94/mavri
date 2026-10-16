@@ -3,6 +3,7 @@ package web
 import (
 	"bytes"
 	_ "embed"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -18,6 +19,7 @@ import (
 	"github.com/Raktim94/mavri/server/internal/einvoice"
 	"github.com/Raktim94/mavri/server/internal/model"
 	"github.com/Raktim94/mavri/server/internal/payments"
+	"github.com/Raktim94/mavri/server/internal/store"
 )
 
 //go:embed openapi.yaml
@@ -31,6 +33,10 @@ func (s *Server) openapi(w http.ResponseWriter, _ *http.Request) {
 // ---- CSV ---------------------------------------------------------------------
 
 func (s *Server) exportCSV(w http.ResponseWriter, r *http.Request) {
+	if r.PathValue("file") == "documents.json" {
+		s.exportDocumentsJSON(w, r)
+		return
+	}
 	kind := strings.TrimSuffix(r.PathValue("file"), ".csv")
 	known := false
 	for _, k := range csvio.Kinds {
@@ -71,7 +77,13 @@ func (s *Server) importCSV(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 	dry := r.URL.Query().Get("dryRun") == "1"
-	rep, err := csvio.Import(r.Context(), s.DB, kind, file, dry)
+	var rep csvio.Report
+	if kind == "invoices" {
+		ctx := activity.WithSource(r.Context(), activity.SourceUI, "CSV import")
+		rep, err = csvio.ImportInvoices(ctx, s.Store, file, dry)
+	} else {
+		rep, err = csvio.Import(r.Context(), s.DB, kind, file, dry)
+	}
 	switch {
 	case errors.Is(err, csvio.ErrInvalid), errors.Is(err, csvio.ErrUnknownKind):
 		fail(w, http.StatusBadRequest, "validation", strings.TrimPrefix(err.Error(), "invalid file: "))
@@ -556,4 +568,31 @@ func (s *Server) publicEInvoice(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/xml; charset=utf-8")
 	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s-%s.xml"`, format, safeName(d.FullNumber)))
 	_, _ = w.Write(x)
+}
+
+// exportDocumentsJSON writes every invoice and quote exactly as the API returns it (lines, payments, totals and the
+// business, customer, bank, currency and style as they were when each was saved), so records can leave Mavri without loss.
+func (s *Server) exportDocumentsJSON(w http.ResponseWriter, r *http.Request) {
+	items, _, err := s.Store.ListDocuments(r.Context(), store.Filter{})
+	if err != nil {
+		s.problem(w, r, err)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="mavri-documents-%s.json"`, time.Now().UTC().Format("2006-01-02")))
+	enc := json.NewEncoder(w)
+	_, _ = fmt.Fprintf(w, `{"app":"mavri","kind":"documents","exportedAt":%q,"count":%d,"documents":[`, time.Now().UTC().Format(time.RFC3339), len(items))
+	for i, it := range items {
+		d, err := s.Store.GetDocument(r.Context(), s.DB, it.ID)
+		if err != nil {
+			continue
+		}
+		d.Attachments = nil // files are large and have their own download; the export lists documents
+		if i > 0 {
+			_, _ = w.Write([]byte(","))
+		}
+		_ = enc.Encode(d)
+	}
+	_, _ = w.Write([]byte("]}\n"))
+	s.Hub.Record(r.Context(), activity.Event{Action: "exported", Entity: "documents", Label: "all documents (JSON)", Detail: fmt.Sprintf("%d documents", len(items))})
 }

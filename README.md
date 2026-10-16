@@ -102,21 +102,24 @@ On CasaOS (with the bundled updater container) open **Settings → Updates** and
 
 ## What Mavri can do
 
+- **A one-page invoice composer:** customer, items, tax, dates, payment and brand in one flow, a live preview, a review that says what is required, recommended or optional, keyboard shortcuts, add a customer without leaving the page, and a draft kept in your browser.
 - **Invoices and quotes:** line items from your catalog or typed freely, tax per line and per document (added, included or deducted), discount, surcharge, shipping, partial payments, status tracking, duplicate, and convert a quote to an invoice.
-- **Documents:** a printable page you can save as PDF from the browser, bank details, notes and terms, UBL 2.1 and XRechnung XML downloads.
+- **Fifteen templates:** from a plain ledger grid to GST, VAT and thermal layouts, with a gallery and sample previews. A template changes how a document looks, never its amounts.
+- **Documents:** a printable page you can save as PDF from the browser, bank details, notes and terms, UBL 2.1 and XRechnung XML downloads, and document languages per customer (draft translations for French, German, Spanish, Italian, Portuguese, Dutch, Hindi and right-to-left Arabic).
+- **Tax guidance:** India GST, UK VAT, EU VAT, UAE VAT and US sales tax: dated rates, tax number checks, a plain explanation of what usually applies with the missing facts and the decisions left to you, and a CGST/SGST/IGST split on the GST templates. It guides; it never applies a rate and files nothing. See [Tax guidance](docs/GUIDE.md#tax-guidance).
 - **Records:** clients, businesses, items, bank accounts, currencies, categories and units, with archive and restore. Presets and styles speed up new documents.
 - **Reports:** billed, paid and outstanding by month and by client.
-- **Sharing and email:** a secure link per document that clients open without an account to read, print or save as PDF (and to accept or decline a quote); a Share button with the system share sheet, WhatsApp and copy link; email through your own SMTP server with editable templates and a delivery log.
-- **Getting paid:** clients pay the balance on Stripe's own page and Mavri records the payment when Stripe confirms; automatic reminders before and after the due date, per-customer opt-out, and a Remind button.
+- **Sharing and email:** a secure link per document that clients open without an account to read, print or save as PDF (and to accept or decline a quote, or tell you they will pay by a date or need help with an invoice); a Share button with the system share sheet, WhatsApp and copy link; email through your own SMTP server with editable templates and a delivery log.
+- **Getting paid:** UPI and SEPA payment QR codes with the same details as text, Stripe Checkout for cards (Mavri records the payment when Stripe confirms), automatic reminders before and after the due date, a **Needs attention** list of unpaid invoices that need a person, and promises to pay, disputes and pauses recorded per invoice. Scanning a QR code never marks an invoice paid, and Mavri never adds late fees.
 - **Automation:** recurring invoices with a preview, "when a quote is accepted, draft an invoice", and bulk email, remind, mark paid and void.
 - **History:** who changed what, when and from where (app, API, AI assistant, client link, automatic), exportable as CSV.
-- **Data:** CSV import (with a check before anything is written) and export for customers, products, invoices and payments; scheduled, encrypted backups to this server and to S3-compatible storage with a guided restore.
+- **Data:** CSV import (customers, products and past invoices, with a check before anything is written) and export, a JSON export of every document, scheduled, encrypted backups to this server and to S3-compatible storage with a guided restore.
 - **Operations:** a health page (database check, storage, backup age, webhook and email failures, recent errors).
-- **Integrations:** versioned REST API described in OpenAPI, API keys, signed webhooks in from Shopify, WooCommerce or any sender and out for events such as `invoice.paid`, and an MCP server for AI clients that needs your approval before it sends, pays, voids or deletes.
+- **Integrations:** versioned REST API described in OpenAPI, API keys, signed webhooks in from Shopify, WooCommerce or any sender (with a dry run that shows the invoice an order would become) and out for events such as `invoice.paid`, `payment.promised` or `customer.created`, and an MCP server for AI clients that needs your approval before it sends, pays, voids, deletes or changes what reminders go out.
 
 Each invoice and quote stores a snapshot of its business, client, items, bank, currency and style. Later edits to those records do not change existing documents.
 
-The interface is in English. The database is SQLite only. Not included yet: multiple user accounts and roles, a payment provider other than Stripe, translations, custom fields, PDF attachments in email (the email carries a link; the client saves the PDF from the page), and importing invoices from CSV.
+The interface is in English. The database is SQLite only. Documents stay editable after saving (there is no locked "issued" state or separate credit notes yet). Not included yet: anything that talks to a tax authority (e-invoice IRN, e-way bills, VIES or GST portal look-ups, filing), multiple user accounts and roles, payment providers other than Stripe, an interface in other languages, custom fields, PDF attachments in email (the email carries a link; the client saves the PDF from the page), and server-made PDFs. The tax packs and the document translations have not been reviewed by a professional. See [the status list](docs/DESIGN.md#status-against-the-master-product-brief).
 
 ## API and integrations
 

@@ -13,6 +13,7 @@ import (
 	"github.com/Raktim94/mavri/server/internal/activity"
 	"github.com/Raktim94/mavri/server/internal/auth"
 	"github.com/Raktim94/mavri/server/internal/automation"
+	"github.com/Raktim94/mavri/server/internal/collections"
 	"github.com/Raktim94/mavri/server/internal/db"
 	"github.com/Raktim94/mavri/server/internal/mailer"
 	"github.com/Raktim94/mavri/server/internal/mcp"
@@ -45,7 +46,8 @@ func main() {
 		c, _ := auto.Load(ctx)
 		return c.PublicURL
 	}
-	env := &mcp.Env{Store: st, Shops: &shop.Service{Store: st, Box: box}, Hub: hub, Auto: auto, Mail: ml, Links: links}
+	env := &mcp.Env{Store: st, Shops: &shop.Service{Store: st, Box: box}, Hub: hub, Auto: auto, Mail: ml, Links: links,
+		Coll: &collections.Service{DB: d, Store: st, Hub: hub}}
 	srv := mcp.NewServer("mavri", web.Version, mcp.Tools(env))
 	// Everything this process changes is recorded as coming from an AI assistant over MCP.
 	ctx := activity.WithSource(context.Background(), activity.SourceMCP, "MCP client")

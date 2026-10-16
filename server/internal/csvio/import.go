@@ -123,9 +123,18 @@ func (t table) get(rec []string, name string) string {
 
 // ParsePrice reads "12.5", "1,234.50", "€12,50" or "12,50" as minor units with two decimals.
 func ParsePrice(s string) (int64, error) {
+	f, err := parseNumber(s, "price")
+	if err != nil {
+		return 0, err
+	}
+	return money.ToMinor(f, 2), nil
+}
+
+// parseNumber reads a non-negative decimal written with either separator convention.
+func parseNumber(s, what string) (float64, error) {
 	for i := 1; i+1 < len(s); i++ { // 1e5 is an exponent, not "15"
 		if (s[i] == 'e' || s[i] == 'E') && s[i-1] >= '0' && s[i-1] <= '9' && s[i+1] >= '0' && s[i+1] <= '9' {
-			return 0, fmt.Errorf("price %q is not a number", s)
+			return 0, fmt.Errorf("%s %q is not a number", what, s)
 		}
 	}
 	var b strings.Builder
@@ -136,7 +145,7 @@ func ParsePrice(s string) (int64, error) {
 	}
 	v := b.String()
 	if v == "" || v == "-" {
-		return 0, fmt.Errorf("price %q is not a number", s)
+		return 0, fmt.Errorf("%s %q is not a number", what, s)
 	}
 	switch {
 	case strings.Contains(v, ",") && strings.Contains(v, "."):
@@ -155,12 +164,12 @@ func ParsePrice(s string) (int64, error) {
 	}
 	f, err := strconv.ParseFloat(v, 64)
 	if err != nil || math.IsNaN(f) || math.IsInf(f, 0) || f > 1e12 {
-		return 0, fmt.Errorf("price %q is not a number", s)
+		return 0, fmt.Errorf("%s %q is not a number", what, s)
 	}
 	if f < 0 {
-		return 0, fmt.Errorf("price %q is negative", s)
+		return 0, fmt.Errorf("%s %q is negative", what, s)
 	}
-	return money.ToMinor(f, 2), nil
+	return f, nil
 }
 
 // Import reads a CSV of customers or products. With dryRun nothing is written; the report says what would be.

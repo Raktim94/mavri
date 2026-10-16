@@ -365,11 +365,22 @@ func TestShopsWebhooksAndV1(t *testing.T) {
 	api := &client{t: t, srv: c.srv, c: &http.Client{}, key: key}
 	api.json("POST", "/api/v1/orders", `{"externalOrderId":"V-1","lineItems":[{"name":"X","quantity":1,"unitPriceMajor":1}]}`, 400) // no shopId
 	v1 := `{"shopId":` + shopID + `,"externalOrderId":"V-1","customer":{"name":"Q"},"lineItems":[{"name":"X","quantity":1,"unitPriceMajor":1}]}`
+	before := len(c.json("GET", "/api/documents", nil, 200)["items"].([]any))
+	pv := api.json("POST", "/api/v1/orders?dryRun=1", v1, 200)
+	if pv["dryRun"] != true || pv["duplicate"] != false || pv["customer"].(map[string]any)["willCreate"] != true || pv["totals"].(map[string]any)["totalCents"] != float64(110) || len(pv["warnings"].([]any)) == 0 {
+		t.Fatalf("dry run: %v", pv)
+	}
+	if after := len(c.json("GET", "/api/documents", nil, 200)["items"].([]any)); after != before {
+		t.Fatalf("a dry run created an invoice: %d -> %d", before, after)
+	}
 	if out := api.json("POST", "/api/v1/orders", v1, 201); out["duplicate"] != false {
 		t.Fatalf("v1: %v", out)
 	}
 	if out := api.json("POST", "/api/v1/orders", v1, 200); out["duplicate"] != true {
 		t.Fatalf("v1 repeat: %v", out)
+	}
+	if pv := api.json("POST", "/api/v1/orders?dryRun=1", v1, 200); pv["duplicate"] != true || pv["customer"].(map[string]any)["willCreate"] != false {
+		t.Fatalf("dry run after the order exists: %v", pv)
 	}
 	// pause, then deliveries are refused
 	c.json("POST", "/api/shops/"+shopID+"/pause", nil, 204)

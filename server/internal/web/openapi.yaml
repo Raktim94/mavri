@@ -193,7 +193,10 @@ paths:
   /api/v1/orders:
     post:
       summary: Create an invoice from an order
+      description: Add `?dryRun=1` to see the invoice the order would become (customer found or created, lines, totals, warnings such as tax charged twice) without writing anything. The same order id is only ever turned into one invoice.
       tags: [Documents]
+      parameters:
+        - { name: dryRun, in: query, schema: { type: string, enum: ['1'] } }
       requestBody:
         required: true
         content:
@@ -336,7 +339,8 @@ paths:
         '404': { description: The link is wrong or revoked }
   /api/public/documents/{token}/respond:
     post:
-      summary: Accept or decline a quote (no sign-in)
+      summary: Accept or decline a quote, or tell the sender about an invoice (no sign-in)
+      description: For a quote, `accept` or `decline`. For an invoice, `dispute` (needs a `message`) or `promise` (needs a `date`) records a follow-up for the sender. It changes no amount and marks nothing paid.
       security: []
       tags: [Client link]
       parameters: [{ name: token, in: path, required: true, schema: { type: string } }]
@@ -348,11 +352,107 @@ paths:
               type: object
               required: [action]
               properties:
-                action: { type: string, enum: [accept, decline] }
+                action: { type: string, enum: [accept, decline, dispute, promise] }
                 message: { type: string, maxLength: 500 }
+                date: { type: string, description: 'YYYY-MM-DD, for a promise' }
       responses:
         '200': { description: The updated quote }
         '409': { description: Already answered }
+  /api/attention:
+    get:
+      summary: Unpaid invoices that need a person today
+      description: Most urgent first. Each item has a reason (`disputed`, `broken_promise`, `delivery_failed`, `overdue`, `due_soon`, `partial`, `promised`) and a suggested next step. Invoices whose reminders are paused are left out and counted in `snoozed`.
+      tags: [Collections]
+      responses:
+        '200': { description: '`{items, counts, snoozed}`' }
+  /api/documents/{id}/follow-ups:
+    get:
+      summary: What was agreed with the client about this invoice
+      tags: [Collections]
+      parameters: [{ $ref: '#/components/parameters/id' }]
+      responses:
+        '200': { description: Follow-ups, newest first }
+    post:
+      summary: Record a promise to pay, a dispute, a pause on reminders or a note
+      description: A dispute, a pause or a promise that is not yet due stops automatic reminders for the invoice. Nothing is sent and no fee is added. Emits `payment.promised` or `dispute.opened`.
+      tags: [Collections]
+      parameters: [{ $ref: '#/components/parameters/id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [kind]
+              properties:
+                kind: { type: string, enum: [promise, dispute, snooze, note] }
+                dueOn: { type: string, description: 'YYYY-MM-DD; required for promise and snooze' }
+                amountCents: { type: integer }
+                note: { type: string, description: Required for dispute and note }
+      responses:
+        '201': { description: Recorded }
+        '400': { $ref: '#/components/responses/Error' }
+  /api/follow-ups/{id}/resolve:
+    post:
+      summary: Close a follow-up (a dispute settled, a pause ended)
+      tags: [Collections]
+      parameters: [{ $ref: '#/components/parameters/id' }]
+      responses:
+        '200': { description: The follow-up, now resolved }
+  /api/documents/{id}/payment-options:
+    get:
+      summary: How the client can pay what is still owed
+      description: UPI (India, INR) and SEPA (EUR with an IBAN) options carry a QR `payload` to encode; a bank transfer is listed whenever bank details exist. A payment QR only opens the client's banking app; scanning it never marks an invoice paid, and it is not a tax authority's signed e-invoice code.
+      tags: [Payments]
+      parameters: [{ $ref: '#/components/parameters/id' }]
+      responses:
+        '200': { description: A list of options }
+  /api/public/documents/{token}/payment-options:
+    get:
+      summary: The same options, for the client link
+      security: []
+      tags: [Client link]
+      parameters: [{ name: token, in: path, required: true, schema: { type: string } }]
+      responses:
+        '200': { description: A list of options }
+  /api/tax/packs:
+    get:
+      summary: The tax guidance Mavri has
+      description: Each pack lists its status (`beta`, `estimate`), source, version, whether a person has reviewed it, what it covers and what it does not, and the rates in force on `?date=`.
+      tags: [Tax]
+      parameters: [{ name: date, in: query, schema: { type: string }, description: 'YYYY-MM-DD; default today' }]
+      responses:
+        '200': { description: Packs }
+  /api/tax/explain:
+    post:
+      summary: Which tax usually applies to a sale, and why
+      description: Guidance only. It decides nothing, applies no rate and stores nothing. The answer lists the facts it used, the facts missing, and what a person must decide.
+      tags: [Tax]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                issuerCountry: { type: string }
+                issuerTaxId: { type: string }
+                customerCountry: { type: string }
+                customerTaxId: { type: string }
+                customerTaxExempt: { type: boolean }
+                date: { type: string }
+      responses:
+        '200': { description: The explanation }
+  /api/tax/validate:
+    get:
+      summary: Read a tax registration number
+      description: Checks the shape (and the check characters for India and the UK). It does not prove the number is registered.
+      tags: [Tax]
+      parameters:
+        - { name: country, in: query, required: true, schema: { type: string } }
+        - { name: id, in: query, required: true, schema: { type: string } }
+      responses:
+        '200': { description: '`{valid, kind, level, message, state}`' }
   /api/documents/bulk:
     post:
       summary: Email, remind, mark paid or void many documents (person only)
@@ -589,7 +689,8 @@ paths:
         '202': { description: Queued as a new delivery with the same event id }
   /api/export/{file}:
     get:
-      summary: Export CSV (customers.csv, products.csv, invoices.csv, payments.csv)
+      summary: Export CSV (customers.csv, products.csv, invoices.csv, payments.csv) or every document as JSON (documents.json)
+      description: '`documents.json` holds every invoice and quote exactly as the API returns it, with the business, customer, bank, currency and style as they were when each was saved.'
       tags: [CSV]
       parameters:
         [
@@ -597,18 +698,18 @@ paths:
             name: file,
             in: path,
             required: true,
-            schema: { type: string, enum: [customers.csv, products.csv, invoices.csv, payments.csv] }
+            schema: { type: string, enum: [customers.csv, products.csv, invoices.csv, payments.csv, documents.json] }
           }
         ]
       responses:
-        '200': { description: CSV (UTF-8 with BOM), content: { text/csv: {} } }
+        '200': { description: CSV (UTF-8 with BOM) or JSON, content: { text/csv: {}, application/json: {} } }
   /api/import/{kind}:
     post:
-      summary: Import customers or products from CSV (person only)
+      summary: Import customers, products or invoices from CSV (person only)
       description: Send `multipart/form-data` with a `file`. Add `?dryRun=1` to validate without writing; the report lists every row with a problem, with its line number.
       tags: [CSV]
       parameters:
-        - { name: kind, in: path, required: true, schema: { type: string, enum: [customers, products] } }
+        - { name: kind, in: path, required: true, schema: { type: string, enum: [customers, products, invoices] } }
         - { name: dryRun, in: query, schema: { type: string, enum: ['1'] } }
       responses:
         '200':

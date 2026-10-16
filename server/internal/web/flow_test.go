@@ -736,3 +736,46 @@ func TestTaxGuidanceOverHTTP(t *testing.T) {
 		t.Fatalf("packs: %v", packs)
 	}
 }
+
+func TestCustomerEventsAndJSONExport(t *testing.T) {
+	c, _ := newFlow(t)
+	rcv := make(chan string, 4)
+	hook := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		b, _ := io.ReadAll(r.Body)
+		rcv <- string(b)
+		w.WriteHeader(200)
+	}))
+	defer hook.Close()
+	c.json("POST", "/api/webhooks", map[string]any{"url": hook.URL, "events": []string{"customer.created", "customer.updated"}}, 201)
+	cu := c.json("POST", "/api/parties", map[string]any{"kind": "customer", "name": "New Client", "email": "n@c.co", "language": "de"}, 201)
+	// a business is not a customer: it queues nothing
+	c.json("POST", "/api/parties", map[string]any{"kind": "issuer", "name": "Me"}, 201)
+	if items := c.list("/api/webhooks/deliveries"); len(items) != 1 {
+		t.Fatalf("one customer event, got %v", items)
+	}
+	c.json("PUT", "/api/parties/"+jsonNum(id(cu)), map[string]any{"kind": "customer", "name": "New Client", "email": "n@c.co"}, 200)
+	if items := c.list("/api/webhooks/deliveries"); len(items) != 2 {
+		t.Fatalf("created and updated: %v", items)
+	}
+
+	issuer, customer := setupParties(c)
+	c.invoice(issuer, customer, nil)
+	status, body := c.do("GET", "/api/export/documents.json", nil)
+	if status != 200 {
+		t.Fatalf("export: %d %s", status, body)
+	}
+	var out struct {
+		App       string `json:"app"`
+		Count     int    `json:"count"`
+		Documents []struct {
+			FullNumber string `json:"fullNumber"`
+			Customer   struct {
+				Name string `json:"name"`
+			} `json:"customer"`
+		} `json:"documents"`
+	}
+	if err := json.Unmarshal(body, &out); err != nil || out.App != "mavri" || out.Count != 1 || len(out.Documents) != 1 || out.Documents[0].Customer.Name != "Acme" {
+		t.Fatalf("export body: %v %s", err, body)
+	}
+	c.anonymous().json("GET", "/api/export/documents.json", nil, 401)
+}

@@ -231,6 +231,15 @@ func (s *Server) v1Order(w http.ResponseWriter, r *http.Request) {
 		s.orderResult(w, r, 0, false, fmt.Errorf("%w: %v", shop.ErrBadOrder, err))
 		return
 	}
+	if r.URL.Query().Get("dryRun") == "1" {
+		pv, err := s.Shops.Preview(r.Context(), sh, o)
+		if err != nil {
+			s.orderResult(w, r, 0, false, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, pv)
+		return
+	}
 	docID, dup, err := s.Shops.Ingest(r.Context(), sh, o)
 	s.orderResult(w, r, docID, dup, err)
 }

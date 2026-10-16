@@ -1,5 +1,29 @@
 # Changelog
 
+## 2.3.0
+
+### Added
+
+- **One-page invoice composer.** Customer, items, tax, dates and terms, payment, brand and notes, and a review, with a live preview, a checklist of what is required, recommended and optional, keyboard shortcuts (Enter adds a line, Alt + ↑ ↓ moves one, Ctrl + S saves), Net 7 / 14 / 30 / 45 / 60 shortcuts, and a browser-kept draft with a polite "Draft saved" status. Add a customer without leaving the page. After saving, a confirmation with the next steps.
+- **Fifteen templates** with a gallery (filters, favourites, full-size preview): Ledger Classic, Blue Wave, Editorial Serif, Studio Signature, Agency Services, Product Catalogue, GST India Detailed and Compact, US Professional, UK VAT Standard, EU Cross-border VAT, UAE VAT, International, Milestone & Deposit and Thermal Counter. A template only changes how a document looks.
+- **Needs attention.** A daily list of unpaid invoices that need a person, with a suggested next step. On an invoice, **Collections** records a promise to pay, a dispute, a pause on reminders or a note; those stop automatic reminders for that invoice. Clients can say "I will pay by…" or "I need help" from the secure link. Mavri never adds late fees.
+- **Payment QR codes.** UPI (INR) and SEPA (EUR with an IBAN) codes for the remaining balance, always with the same details as text. Scanning never marks an invoice paid.
+- **Record payment** from the invoice page, and **Create similar**.
+- **Tax guidance** for India GST, UK VAT, EU VAT, UAE VAT and US sales tax: effective-dated rates, tax number checks (GSTIN and UK VAT check digits, shape for the rest), a plain-language explanation with missing facts and decisions, and a CGST/SGST/IGST split on the GST templates. No pack has been reviewed by a person yet, and the app says so.
+- **Document languages.** Set a language per customer: French, German, Spanish, Italian, Portuguese, Dutch, Hindi and Arabic (right to left) as draft translations, English by default.
+- **Invoice CSV import** with a dry run (one row per line item; whole invoices skipped on any problem; re-import is safe), **JSON export** of every document, and `?dryRun=1` on `POST /api/v1/orders`.
+- New webhook events `payment.promised`, `dispute.opened`, `dispute.resolved`, `customer.created` and `customer.updated`.
+- MCP: `preview_document`, `tax_guidance`, `payment_options`, `needs_attention` and `add_follow_up` (behind approval).
+
+### Changed
+
+- The accent colour is a deeper blue (`#2459a6`).
+- `POST /api/public/documents/{token}/respond` also accepts `dispute` and `promise` for an invoice.
+
+### Upgrading
+
+Migrations `004` and `005` run on first start and keep your data. Existing styles keep the original layout until you pick a template. Backups now include follow-ups; older backups restore fine.
+
 ## 2.2.0
 
 ### Added

@@ -36,7 +36,7 @@ def new_invoice(pg, number, customer, lines, status=None):
     fill_header(pg, customer)
     for i, (desc, qty, price) in enumerate(lines):
         if i:
-            pg.click("button:text-is('Add line')")
+            pg.click("button:text-is('+ Add line')")
         pg.locator("input[aria-label^='Description']").nth(i).fill(desc)
         pg.locator("input[aria-label^='Quantity']").nth(i).fill(str(qty))
         pg.locator("input[aria-label^='Price']").nth(i).fill(str(price))
@@ -197,12 +197,22 @@ with sync_playwright() as p:
     pg.locator("input[aria-label^='Quantity']").nth(0).fill("1")
     pg.locator("input[aria-label^='Price']").nth(0).fill("1800")
     pg.locator("input[aria-label^='Tax rate']").nth(0).fill("10")
-    pg.click("button:text-is('Add line')")
+    pg.click("button:text-is('+ Add line')")
     pg.locator("input[aria-label^='Description']").nth(1).fill("Print-ready files")
     pg.locator("input[aria-label^='Quantity']").nth(1).fill("2")
     pg.locator("input[aria-label^='Price']").nth(1).fill("150")
     pg.locator("input[aria-label^='Tax rate']").nth(1).fill("10")
     shot(pg, "invoice-editor")
+    pg.evaluate("localStorage.clear()")  # the unsaved draft above must not leak into the other pictures
+    pg.goto(URL + "/templates")
+    pg.wait_for_selector(".tpl-card")
+    shot(pg, "templates")
+    pg.goto(URL + "/collections")
+    pg.wait_for_selector("text=Needs attention")
+    shot(pg, "needs-attention")
+    pg.goto(URL + "/tax")
+    pg.wait_for_selector(".pack")
+    shot(pg, "tax-guidance")
     ctx.close()
 
     dark = browser.new_context(viewport={"width": 1280, "height": 860}, color_scheme="dark")
