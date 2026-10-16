@@ -279,14 +279,18 @@ type Summary struct {
 
 // Settings are the app preferences.
 type Settings struct {
-	InvoicePrefix string   `json:"invoicePrefix"`
-	InvoiceSuffix string   `json:"invoiceSuffix"`
-	QuotePrefix   string   `json:"quotePrefix"`
-	CreditPrefix  string   `json:"creditPrefix"`
-	DebitPrefix   string   `json:"debitPrefix"`
-	DateFormat    string   `json:"dateFormat"`
-	NumberLocale  string   `json:"numberLocale"`
-	Features      Features `json:"features"`
+	InvoicePrefix string `json:"invoicePrefix"`
+	InvoiceSuffix string `json:"invoiceSuffix"`
+	QuotePrefix   string `json:"quotePrefix"`
+	CreditPrefix  string `json:"creditPrefix"`
+	DebitPrefix   string `json:"debitPrefix"`
+	// DefaultStyleID is the style (and so the template) new documents start with; 0 means none.
+	DefaultStyleID int64 `json:"defaultStyleId"`
+	// FavouriteTemplates are the template ids the organisation keeps at hand in the gallery.
+	FavouriteTemplates []string `json:"favouriteTemplates"`
+	DateFormat         string   `json:"dateFormat"`
+	NumberLocale       string   `json:"numberLocale"`
+	Features           Features `json:"features"`
 }
 
 // Features switch optional parts of the app on or off.

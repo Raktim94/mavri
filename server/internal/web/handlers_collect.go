@@ -137,3 +137,17 @@ func (s *Server) publicInvoiceResponse(w http.ResponseWriter, r *http.Request, d
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"ok": true, "kind": f.Kind})
 }
+
+// GET /api/parties/{id}/summary: a customer's money at a glance: what they owe by lateness, and when you last dealt with them.
+func (s *Server) customerSummary(w http.ResponseWriter, r *http.Request) {
+	id, ok := idOf(w, r)
+	if !ok {
+		return
+	}
+	v, err := s.Coll.Customer(r.Context(), id)
+	if err != nil {
+		s.problem(w, r, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, v)
+}

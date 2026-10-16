@@ -233,6 +233,8 @@ export interface Settings {
   quotePrefix: string;
   creditPrefix: string;
   debitPrefix: string;
+  defaultStyleId: number;
+  favouriteTemplates: string[];
   dateFormat: string;
   numberLocale: string;
   features: Features;

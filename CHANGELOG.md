@@ -1,5 +1,25 @@
 # Changelog
 
+## 2.5.0
+
+### Added
+
+- **Bank statement matching.** Under Data, upload a bank CSV and Mavri suggests which unpaid invoice each line of money received pays (the invoice number in the narration, or the exact amount owed with the customer's name). You confirm; nothing is recorded before that, ambiguous lines and overpayments are left to you, and a line already recorded is recognised.
+- **Customer pages** with what they owe by lateness, last invoice, payment and contact, open follow-ups and all their invoices; **VIES checks** of EU VAT numbers (an explicit action, answer kept with who gave it and when).
+- **India e-invoice JSON** prepared for upload to the government portal (schema 1.1, business-to-business), with every missing detail listed instead of guessed. Mavri does not register it or make the signed QR code.
+- **Quiet hours and time zones** per customer hold automatic reminders; an optional note to _you_ (never the customer) when an invoice is very late and nobody is handling it.
+- **Sales list filters** (dates, currency, type, channel) and Create estimate / Import sales buttons; **organisation defaults**: a default template for new invoices and shared favourite templates.
+- **Eleven more document languages** as draft translations (Japanese, Korean, Bengali, Tamil, Telugu, Marathi, Gujarati, Kannada, Malayalam, Punjabi, right-to-left Urdu), drag-to-reorder lines, and an automated accessibility check (`e2e/a11y.py`).
+
+### Changed
+
+- The printed page is always white, even in the dark theme, so that what you see is what prints.
+- Colours of badges and warning text were darkened to meet contrast requirements; scrollable tables and code blocks can be reached from the keyboard. The automated check now finds no violations on the main screens in light and dark, at desktop and phone width.
+
+### Upgrading
+
+Migration `008` runs on first start and keeps your data.
+
 ## 2.4.0
 
 ### Added

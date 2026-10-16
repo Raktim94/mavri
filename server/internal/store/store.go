@@ -76,6 +76,26 @@ func (s *Store) SaveSettings(ctx context.Context, set model.Settings) error {
 	if len(set.InvoicePrefix) > 20 || len(set.InvoiceSuffix) > 20 || len(set.QuotePrefix) > 20 {
 		return invalid("prefixes and suffixes are at most 20 characters")
 	}
+	if len(set.CreditPrefix) > 20 || len(set.DebitPrefix) > 20 {
+		return invalid("prefixes and suffixes are at most 20 characters")
+	}
+	if set.DefaultStyleID != 0 {
+		if _, err := Styles.Get(ctx, s.DB, set.DefaultStyleID); err != nil {
+			return invalid("the default style does not exist")
+		}
+	}
+	seen := map[string]bool{}
+	favs := []string{}
+	for _, f := range set.FavouriteTemplates {
+		if !Templates[f] {
+			return invalid("unknown template %q", f)
+		}
+		if !seen[f] {
+			seen[f] = true
+			favs = append(favs, f)
+		}
+	}
+	set.FavouriteTemplates = favs
 	raw, _ := json.Marshal(set)
 	_, err := s.DB.ExecContext(ctx, `INSERT INTO settings (key, value) VALUES ('app', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value`, string(raw))
 	return err
@@ -107,7 +127,8 @@ func CheckParty(p *model.Party) error {
 
 // DocumentLanguages are the languages a customer's documents can be printed in. Only the labels
 // change; the translations other than English are drafts that nobody has reviewed professionally.
-var DocumentLanguages = map[string]bool{"en": true, "fr": true, "de": true, "es": true, "it": true, "pt": true, "nl": true, "hi": true, "ar": true}
+var DocumentLanguages = map[string]bool{"en": true, "fr": true, "de": true, "es": true, "it": true, "pt": true, "nl": true, "hi": true, "ar": true,
+	"ja": true, "ko": true, "bn": true, "ta": true, "te": true, "mr": true, "gu": true, "kn": true, "ml": true, "pa": true, "ur": true}
 
 // CheckCurrency validates a currency.
 func CheckCurrency(c *model.Currency) error {

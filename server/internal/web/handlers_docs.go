@@ -34,7 +34,16 @@ func (s *Server) listDocuments(w http.ResponseWriter, r *http.Request) {
 		limit = 1000
 	}
 	f := store.Filter{Kind: kind, Status: q.Get("status"), Query: q.Get("q"), From: q.Get("from"), To: q.Get("to"),
-		CustomerID: int64(qint(r, "customerId", 0)), Limit: limit, Offset: qint(r, "offset", 0)}
+		CustomerID: int64(qint(r, "customerId", 0)), Currency: q.Get("currency"), DocType: q.Get("docType"), Limit: limit, Offset: qint(r, "offset", 0)}
+	switch ch := q.Get("channel"); ch {
+	case "", "all":
+	case "manual":
+		f.ShopID = -1
+	default:
+		if n, err := strconv.ParseInt(ch, 10, 64); err == nil && n > 0 {
+			f.ShopID = n
+		}
+	}
 	items, total, err := s.Store.ListDocuments(r.Context(), f)
 	if err != nil {
 		s.problem(w, r, err)

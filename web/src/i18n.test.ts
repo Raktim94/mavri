@@ -18,8 +18,10 @@ describe('i18n', () => {
     }
   });
 
-  it('only Arabic is right-to-left', () => {
+  it('Arabic and Urdu are right-to-left', () => {
     expect(isRtl('ar')).toBe(true);
+    expect(isRtl('ur')).toBe(true);
+    expect(isRtl('ja')).toBe(false);
     expect(isRtl('fr')).toBe(false);
     expect(isRtl('')).toBe(false);
   });

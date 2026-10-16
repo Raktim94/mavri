@@ -268,3 +268,28 @@ func TestCheckPartyLanguage(t *testing.T) {
 		t.Fatal("an unknown language was accepted")
 	}
 }
+
+func TestSettingsKeepTheDefaultTemplateAndFavourites(t *testing.T) {
+	f, ctx := newFixture(t), context.Background()
+	st := model.Style{Name: "Blue", Accent: "#112233", Template: "blue-wave"}
+	if err := Styles.Insert(ctx, f.s.DB, &st); err != nil {
+		t.Fatal(err)
+	}
+	set := model.DefaultSettings()
+	set.DefaultStyleID, set.FavouriteTemplates = st.ID, []string{"blue-wave", "thermal-counter", "blue-wave"}
+	if err := f.s.SaveSettings(ctx, set); err != nil {
+		t.Fatal(err)
+	}
+	got, _ := f.s.GetSettings(ctx, f.s.DB)
+	if got.DefaultStyleID != st.ID || len(got.FavouriteTemplates) != 2 {
+		t.Fatalf("saved: %+v", got)
+	}
+	set.DefaultStyleID = 999
+	if err := f.s.SaveSettings(ctx, set); err == nil {
+		t.Fatal("a default style that does not exist")
+	}
+	set.DefaultStyleID, set.FavouriteTemplates = 0, []string{"nope"}
+	if err := f.s.SaveSettings(ctx, set); err == nil {
+		t.Fatal("an unknown favourite")
+	}
+}

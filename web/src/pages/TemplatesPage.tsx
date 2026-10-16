@@ -6,22 +6,17 @@ import { useUi } from '../components/ui';
 import { api, errorText } from '../api';
 import { sampleDoc } from '../sample';
 import { TAG_LABEL, TEMPLATES, type Template, type TemplateTag } from '../templates';
-import type { Style } from '../types';
-
-const FAV_KEY = 'mavri.favTemplates';
-const loadFavs = (): string[] => {
-  try {
-    return JSON.parse(localStorage.getItem(FAV_KEY) ?? '[]');
-  } catch {
-    return [];
-  }
-};
+import { useAuth } from '../auth';
+import type { Settings, Style } from '../types';
 
 export function TemplatesPage() {
   const { toast } = useUi();
   const [styles, setStyles] = useState<Style[]>([]);
   const [tag, setTag] = useState<TemplateTag | 'all' | 'favourites'>('all');
-  const [favs, setFavs] = useState<string[]>(loadFavs);
+  const [settings, setSettings] = useState<Settings | null>(null);
+  const { user } = useAuth();
+  const isOwner = user?.role === 'owner';
+  const favs = settings?.favouriteTemplates ?? [];
   const [busy, setBusy] = useState('');
   const [preview, setPreview] = useState<Template | null>(null);
 
@@ -30,17 +25,26 @@ export function TemplatesPage() {
       .get<Style[]>('/api/styles')
       .then(setStyles)
       .catch(() => undefined);
+    api
+      .get<Settings>('/api/settings')
+      .then(setSettings)
+      .catch(() => undefined);
   }, []);
 
-  const toggleFav = (id: string) => {
-    const next = favs.includes(id) ? favs.filter(f => f !== id) : [...favs, id];
-    setFavs(next);
+  // Favourites and the default are the organisation's, kept on the server, so everyone sees the same ones.
+  async function saveSettings(patch: Partial<Settings>, done?: string) {
+    if (!settings) return;
     try {
-      localStorage.setItem(FAV_KEY, JSON.stringify(next));
-    } catch {
-      // private mode: favourites last for this visit only
+      setSettings(await api.put<Settings>('/api/settings', { ...settings, ...patch }));
+      if (done) toast(done);
+    } catch (e) {
+      toast(errorText(e, 'Could not save.'), 'error');
     }
-  };
+  }
+  const toggleFav = (id: string) =>
+    isOwner
+      ? saveSettings({ favouriteTemplates: favs.includes(id) ? favs.filter(f => f !== id) : [...favs, id] })
+      : toast('Only an owner can change the organisation’s favourites.', 'error');
 
   async function use(t: Template) {
     setBusy(t.id);
@@ -144,9 +148,27 @@ export function TemplatesPage() {
                   </button>
                 </div>
                 <p className="muted">{t.blurb}</p>
-                <button type="button" className={used ? '' : 'primary'} disabled={busy === t.id} onClick={() => use(t)}>
-                  {used ? 'In your styles' : 'Use this template'}
-                </button>
+                <div className="row">
+                  <button
+                    type="button"
+                    className={used ? '' : 'primary'}
+                    disabled={busy === t.id}
+                    onClick={() => use(t)}
+                  >
+                    {used ? 'In your styles' : 'Use this template'}
+                  </button>
+                  {used && isOwner && (
+                    <button
+                      type="button"
+                      disabled={settings?.defaultStyleId === used.id}
+                      onClick={() =>
+                        saveSettings({ defaultStyleId: used.id }, `New documents will start with ${t.name}.`)
+                      }
+                    >
+                      {settings?.defaultStyleId === used.id ? 'Default for new invoices' : 'Make the default'}
+                    </button>
+                  )}
+                </div>
               </div>
             </li>
           );

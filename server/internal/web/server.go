@@ -232,6 +232,7 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/reconcile", human(s.reconcileCheck))
 	mux.HandleFunc("POST /api/reconcile/apply", human(s.reconcileApply))
 
+	mux.HandleFunc("GET /api/parties/{id}/summary", user(s.customerSummary))
 	mux.HandleFunc("GET /api/parties/{id}/tax-checks", user(s.listTaxChecks))
 	mux.HandleFunc("POST /api/parties/{id}/verify-tax", human(s.verifyTax))
 

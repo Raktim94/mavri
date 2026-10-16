@@ -170,3 +170,29 @@ func TestValidation(t *testing.T) {
 		t.Errorf("unknown invoice: %v", err)
 	}
 }
+
+func TestCustomerViewAgesWhatIsOwed(t *testing.T) {
+	e := setup(t, "2026-10-12")
+	ctx := context.Background()
+	e.invoice(t, "2026-10-20", 0) // not yet due: 10000
+	e.invoice(t, "2026-10-01", 0) // 11 days late
+	e.invoice(t, "2026-08-01", 0) // 72 days late
+	e.invoice(t, "2026-07-01", 3000)
+	paid := e.invoice(t, "2026-09-01", 10000)
+	_ = paid
+	e.s.Add(ctx, 3, Input{Kind: Note, Note: "called"})
+	v, err := e.s.Customer(ctx, e.cust.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if v.Invoices != 5 || len(v.Ageing) != 1 {
+		t.Fatalf("view: %+v", v)
+	}
+	a := v.Ageing[0]
+	if a.Owed != 10000+10000+10000+7000 || a.Buckets[0].Cents != 10000 || a.Buckets[1].Cents != 10000 || a.Buckets[3].Cents != 10000 || a.Buckets[4].Cents != 7000 {
+		t.Fatalf("ageing: %+v", a)
+	}
+	if v.LastPayment != "2026-09-02" || v.LastInvoice != "2026-09-01" || v.LastContact == "" {
+		t.Fatalf("last dealings: %+v", v)
+	}
+}

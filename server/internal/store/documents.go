@@ -184,6 +184,9 @@ type Filter struct {
 	Status     string
 	Query      string // number or customer name
 	CustomerID int64
+	Currency   string // a currency code such as EUR
+	DocType    string // "ordinary", "credit" or "debit"
+	ShopID     int64  // documents that came from this store connection; -1 for those made by hand
 	From, To   string // issue dates, inclusive
 	Limit      int    // 0 means no limit
 	Offset     int
@@ -202,6 +205,21 @@ func (s *Store) ListDocuments(ctx context.Context, f Filter) ([]model.Summary, i
 	}
 	if f.CustomerID != 0 {
 		add("d.customer_id = ?", f.CustomerID)
+	}
+	if f.Currency != "" {
+		add("json_extract(d.currency_snap, '$.code') = ?", strings.ToUpper(f.Currency))
+	}
+	switch f.DocType {
+	case "ordinary":
+		add("d.doc_type = ''")
+	case "credit", "debit":
+		add("d.doc_type = ?", f.DocType)
+	}
+	switch {
+	case f.ShopID > 0:
+		add("d.id IN (SELECT document_id FROM shop_orders WHERE shop_id = ?)", f.ShopID)
+	case f.ShopID < 0:
+		add("d.id NOT IN (SELECT document_id FROM shop_orders WHERE document_id IS NOT NULL)")
 	}
 	if f.From != "" {
 		add("d.issued_on >= ?", f.From)

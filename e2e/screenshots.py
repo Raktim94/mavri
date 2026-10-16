@@ -42,7 +42,7 @@ def new_invoice(pg, number, customer, lines, status=None):
         pg.locator("input[aria-label^='Price']").nth(i).fill(str(price))
         pg.locator("input[aria-label^='Tax rate']").nth(i).fill("10")
     pg.locator("input[aria-label=Number]").fill(number)
-    pg.click("button.primary:text-is('Save')")
+    pg.click("button.primary:text-is('Issue invoice')")
     pg.wait_for_selector("article.paper")
 
 
@@ -210,6 +210,9 @@ with sync_playwright() as p:
     pg.goto(URL + "/collections")
     pg.wait_for_selector("text=Needs attention")
     shot(pg, "needs-attention")
+    pg.goto(URL + "/customers/2")
+    pg.wait_for_selector("text=What they owe")
+    shot(pg, "customer")
     pg.goto(URL + "/tax")
     pg.wait_for_selector(".pack")
     shot(pg, "tax-guidance")

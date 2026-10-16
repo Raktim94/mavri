@@ -555,6 +555,44 @@ paths:
                 password: { type: string }
       responses:
         '204': { description: Changed; your other sessions end }
+  /api/reconcile:
+    post:
+      summary: Check a bank statement against unpaid invoices (person only)
+      description: Send `multipart/form-data` with a CSV `file` (columns for the date, the narration and the amount received or credited). Mavri suggests, for each line of money received, the unpaid invoice it pays (the invoice number in the narration, or the exact amount owed with the customer's name), and flags lines that are ambiguous, unmatched, more than owed or already recorded. Nothing is recorded.
+      tags: [Payments]
+      responses:
+        '200': { description: '`{rows, matched, needsAttention, duplicate}`' }
+  /api/reconcile/apply:
+    post:
+      summary: Record confirmed statement lines as payments (person only)
+      description: Body `{matches: [{key, invoiceId, date, amountCents, note}]}` from the check. A line already recorded, or more than is owed, is refused and reported; the rest are recorded as payments of method `bank (statement)`.
+      tags: [Payments]
+      responses:
+        '200': { description: '`{results, recorded}`' }
+  /api/parties/{id}/summary:
+    get:
+      summary: A customer's money at a glance
+      description: What they owe by lateness (not yet due, 1–30, 31–60, 61–90, over 90 days) per currency, billed totals, and the last invoice, payment and contact.
+      tags: [Collections]
+      parameters: [{ $ref: '#/components/parameters/id' }]
+      responses:
+        '200': { description: The summary }
+  /api/parties/{id}/tax-checks:
+    get:
+      summary: What official services said about a party's tax number
+      tags: [Tax]
+      parameters: [{ $ref: '#/components/parameters/id' }]
+      responses:
+        '200': { description: Checks, newest first, each with provider, result and time }
+  /api/parties/{id}/verify-tax:
+    post:
+      summary: Ask VIES whether an EU VAT number is active (person only)
+      description: An explicit action: the number is sent to the European Commission's VIES service. The answer (`valid`, `invalid` or `unavailable`), who gave it and when are kept. Other countries have no service Mavri can ask without credentials.
+      tags: [Tax]
+      parameters: [{ $ref: '#/components/parameters/id' }]
+      responses:
+        '200': { description: The check }
+        '400': { $ref: '#/components/responses/Error' }
   /api/documents/bulk:
     post:
       summary: Email, remind, mark paid or void many documents (person only)

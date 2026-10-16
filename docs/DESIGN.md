@@ -71,6 +71,8 @@ docker rm -f mavri-shots
 
 The invoicing brief (`docs`-level, kept by the maintainers) asks for far more than one release can honestly claim. This is what 2.3.0 does and does not do.
 
+**Built since 2.4.** Bank statement matching, customer pages, VIES checks, India e-invoice JSON, quiet hours and owner escalation, sales filters, organisation default template and favourites, eleven more draft languages, drag-to-reorder, an automated accessibility check.
+
 **Built since 2.3.** Drafts, issuing with a lock, credit and debit notes, refunds, line codes and tax reasons, settlement currency, owner/staff/viewer roles, idempotency keys, journal and lines exports.
 
 **Built in 2.3.** One-page invoice composer with inline customer add, live preview, review checklist and browser draft; fifteen templates with a gallery; collections list, promises, disputes and pauses; UPI and SEPA payment QR with text fallback; manual payment recording from the invoice; client page questions (dispute, promise to pay); tax guidance packs for India, the UK, the EU, the UAE and the US with effective-dated rates and number checks; CGST/SGST/IGST split on the GST templates; document languages (eight draft translations, right to left for Arabic); invoice CSV import with a dry run; JSON export of all documents; order dry run; customer events; MCP tools to preview, read guidance and record follow-ups behind approval.
@@ -78,13 +80,13 @@ The invoicing brief (`docs`-level, kept by the maintainers) asks for far more th
 **Not built, on purpose or for lack of a source of truth.**
 
 - Locked numbers before issuing: a draft already has its number, which only becomes final when the invoice is issued.
-- Anything that talks to a tax authority: e-invoice IRN and its signed QR, e-way bills, VIES or GST portal look-ups, MTD, filing.
+- Anything that talks to a tax authority with credentials: registering an e-invoice (IRN and its signed QR code), e-way bills, GST portal look-ups, MTD, filing. Mavri prepares the India e-invoice JSON and can ask the EU's public VIES service whether a VAT number is active, but it submits nothing.
 - Payment providers other than Stripe Checkout, open banking, Aani, ACH, partial-payment links, refunds and chargebacks.
 - Bundles and product thumbnails on templates; camera barcode scanning (a keyboard-style scanner works, since it types the code into a line); drag-to-reorder (buttons move lines instead).
-- Server-side PDFs with embedded fonts. PDF is the browser's print output, so Arabic, Indian and CJK scripts depend on the fonts on that device. Korean, Japanese, Bengali, Tamil, Telugu and the other languages in the brief are not included.
+- Server-side PDFs with embedded fonts. PDF is the browser's print output, so Arabic, Indian and CJK scripts depend on the fonts on that device. Nineteen document languages exist as unreviewed drafts; none has been checked by a professional translator, and the app's own interface is English only.
 - The app interface in other languages (only the words printed on documents are translated).
 - Organisation-level template defaults and sharing (favourites live in the browser); a template marketplace.
 - AI-written reminders, per-customer quiet hours and time zones, escalation owners, and "delivered" or "opened" tracking beyond the first view of the secure link.
 - Amazon and other marketplace adapters (they need seller credentials), and exports in the formats of specific accounting tools (the journal CSV is generic).
-- An accessibility audit against WCAG 2.2 AA. Keyboard use, labels, status announcements, reduced motion and contrast were designed in, but no one has audited the result.
+- A human accessibility audit. An automated axe-core run (WCAG 2.0 to 2.2, A and AA) over the 19 main screens in light and dark, at desktop and phone width, finds no violations (`e2e/a11y.py`), but tools find only part of what matters; nobody has tested with a screen reader or other assistive technology.
 - Professional review of the tax packs and the translations. Both are labelled as unreviewed in the app.

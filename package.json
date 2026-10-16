@@ -1,7 +1,7 @@
 {
   "name": "mavri",
   "private": true,
-  "version": "2.4.0",
+  "version": "2.5.0",
   "type": "module",
   "description": "Invoicing and quoting application for freelancers and small businesses, run with Docker. Create, manage and export invoices and quotes with full data ownership.",
   "author": "Raktim Ranjit <mail@raktimranjit.com>",
@@ -55,6 +55,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.5",
+    "axe-core": "^4.10.2",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",

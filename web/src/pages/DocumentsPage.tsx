@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth';
 import { Modal } from '../components/Modal';
 import { Skeleton } from '../components/Icon';
 import { EmptyState, useUi } from '../components/ui';
@@ -18,6 +19,14 @@ export function DocumentsPage({ kind }: { kind: Kind }) {
   const [status, setStatus] = useState('');
   const [query, setQuery] = useState('');
   const [error, setError] = useState('');
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
+  const [currency, setCurrency] = useState('');
+  const [docType, setDocType] = useState('');
+  const [channel, setChannel] = useState('');
+  const [shops, setShops] = useState<Array<{ id: number; name: string }>>([]);
+  const [currencies, setCurrencies] = useState<string[]>([]);
+  const { user } = useAuth();
   const [picked, setPicked] = useState<Set<number>>(new Set());
   const [busy, setBusy] = useState(false);
   const [report, setReport] = useState<{ title: string; data: BulkResult } | null>(null);
@@ -25,6 +34,11 @@ export function DocumentsPage({ kind }: { kind: Kind }) {
   const load = useCallback(async () => {
     const params = new URLSearchParams({ kind });
     if (query.trim()) params.set('q', query.trim());
+    if (from) params.set('from', from);
+    if (to) params.set('to', to);
+    if (currency) params.set('currency', currency);
+    if (docType) params.set('docType', docType);
+    if (channel) params.set('channel', channel);
     try {
       const res = await api.get<{ items: Summary[]; total: number }>(`/api/documents?${params}`);
       setRows(res.items);
@@ -32,7 +46,19 @@ export function DocumentsPage({ kind }: { kind: Kind }) {
     } catch (e) {
       setError(errorText(e, 'Could not load the list.'));
     }
-  }, [kind, query]);
+  }, [kind, query, from, to, currency, docType, channel]);
+
+  useEffect(() => {
+    api
+      .get<Array<{ code: string }>>('/api/currencies')
+      .then(c => setCurrencies(c.map(x => x.code)))
+      .catch(() => undefined);
+    if (user?.role === 'owner')
+      api
+        .get<Array<{ id: number; name: string }>>('/api/shops')
+        .then(setShops)
+        .catch(() => undefined);
+  }, [user?.role]);
 
   // Search as you type, but not on every keystroke.
   useEffect(() => {
@@ -104,6 +130,12 @@ export function DocumentsPage({ kind }: { kind: Kind }) {
     <section>
       <header className="bar">
         <h1>{kind === 'invoice' ? 'Invoices' : 'Quotes'}</h1>
+        {kind === 'invoice' && <button onClick={() => nav('/quotes/new')}>Create estimate</button>}
+        {kind === 'invoice' && (
+          <button title="Bring in past invoices from a CSV, or connect a store" onClick={() => nav('/data')}>
+            Import sales
+          </button>
+        )}
         <button className="primary" onClick={() => nav(`${base}/new`)}>
           New {noun}
         </button>
@@ -130,6 +162,65 @@ export function DocumentsPage({ kind }: { kind: Kind }) {
           onChange={e => setQuery(e.target.value)}
           aria-label="Search"
         />
+      </div>
+      <div className="filters row wrap" role="group" aria-label="Filters">
+        <label>
+          From
+          <input type="date" value={from} onChange={e => setFrom(e.target.value)} />
+        </label>
+        <label>
+          To
+          <input type="date" value={to} onChange={e => setTo(e.target.value)} />
+        </label>
+        <label>
+          Currency
+          <select value={currency} onChange={e => setCurrency(e.target.value)}>
+            <option value="">Any</option>
+            {currencies.map(c => (
+              <option key={c}>{c}</option>
+            ))}
+          </select>
+        </label>
+        {kind === 'invoice' && (
+          <label>
+            Type
+            <select value={docType} onChange={e => setDocType(e.target.value)}>
+              <option value="">Any</option>
+              <option value="ordinary">Ordinary invoices</option>
+              <option value="credit">Credit notes</option>
+              <option value="debit">Debit notes</option>
+            </select>
+          </label>
+        )}
+        {kind === 'invoice' && (
+          <label>
+            Channel
+            <select value={channel} onChange={e => setChannel(e.target.value)}>
+              <option value="">Any</option>
+              <option value="manual">Made by hand</option>
+              {shops.map(sh => (
+                <option key={sh.id} value={sh.id}>
+                  {sh.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+        {(from || to || currency || docType || channel) && (
+          <button
+            type="button"
+            className="link"
+            onClick={() => {
+              setFrom('');
+              setTo('');
+              setCurrency('');
+              setDocType('');
+              setChannel('');
+            }}
+          >
+            Clear filters
+          </button>
+        )}
       </div>
       {error && (
         <p className="error" role="alert">

@@ -78,7 +78,7 @@ Open an invoice or quote and choose **Share**. Mavri makes a secure link that on
 
 ## Templates
 
-**Templates** has fifteen print layouts: Ledger Classic, Blue Wave, Editorial Serif, Studio Signature, Agency Services, Product Catalogue, GST India Detailed, GST India Compact, US Professional, UK VAT Standard, EU Cross-border VAT, UAE VAT, International, Milestone & Deposit and Thermal Counter (80 mm). Filter by service, retail, GST/VAT, international, compact or minimal; star favourites; click a thumbnail for a full preview with sample data. **Use this template** adds a style that uses it; change its colour, font and logo size under **Styles**, and pick it on an invoice.
+**Templates** has fifteen print layouts: Ledger Classic, Blue Wave, Editorial Serif, Studio Signature, Agency Services, Product Catalogue, GST India Detailed, GST India Compact, US Professional, UK VAT Standard, EU Cross-border VAT, UAE VAT, International, Milestone & Deposit and Thermal Counter (80 mm). Filter by service, retail, GST/VAT, international, compact or minimal; star favourites; click a thumbnail for a full preview with sample data. **Use this template** adds a style that uses it (an owner can then make it the default for new invoices, and star favourites that everyone sees); change its colour, font and logo size under **Styles**, and pick it on an invoice.
 
 A template changes only how a document looks. Amounts, tax and the saved details come from the document, and invoices you issued earlier keep the look they had. Labels such as GSTIN, VAT number or TRN are presentation: a template does not check or file anything. The GST templates show a tax summary by rate and, when both GSTINs are valid-looking, split it into CGST and SGST (same state) or IGST (different states).
 
@@ -106,7 +106,7 @@ On an invoice, **Collections** records what the client said: a promise to pay by
 
 ## Languages
 
-Under **Customers**, set _Language of documents sent to this customer_. The labels, dates and number formats on their documents follow it (the secure link too). French, German, Spanish, Italian, Portuguese, Dutch, Hindi and Arabic are available as **draft translations**: useful, but not reviewed by a professional translator, so read them before you send. Arabic documents are laid out right to left. English is the default. The app itself and the text you type (descriptions, notes) stay as they are. PDFs are your browser's print output, so the fonts that show a script are the ones on the device doing the printing.
+Under **Customers**, set _Language of documents sent to this customer_. The labels, dates and number formats on their documents follow it (the secure link too). French, German, Spanish, Italian, Portuguese, Dutch, Hindi, Arabic, Japanese, Korean, Bengali, Tamil, Telugu, Marathi, Gujarati, Kannada, Malayalam, Punjabi and Urdu are available as **draft translations**: useful, but not reviewed by a professional translator, so read them before you send. Arabic and Urdu documents are laid out right to left. English is the default. The app itself and the text you type (descriptions, notes) stay as they are. PDFs are your browser's print output, so the fonts that show a script are the ones on the device doing the printing.
 
 ## Reminders and recurring invoices
 
@@ -131,6 +131,14 @@ In the invoice list, tick rows to **email**, **remind**, **mark paid** or **void
 **Integrations** adds webhooks: Mavri sends a signed message to your URL for events such as `invoice.created`, `invoice.paid`, `quote.accepted` or `payment.failed`. Failed deliveries are retried (after 1 minute, 5 minutes, 30 minutes, 2 hours and 6 hours), every delivery is logged, and **Replay** sends one again. The page also has copy-ready examples, including how to check a signature. The whole API is in `/api/openapi.yaml`.
 
 ![Integrations](screenshots/integrations.png)
+
+## Bank statements
+
+Under **Data**, **Match a bank statement** reads a CSV from your bank (a date column, a narration column and an amount received or credit column) and suggests which unpaid invoice each line of money received pays. A line matches when the invoice number is in the narration, or when the amount is exactly what the customer owes and their name is in it. You see every line with the reason, tick the ones to record, and press **Record payments**. Nothing is recorded before that; lines that are ambiguous, unmatched or more than owed are left for you; and a line already recorded is recognised, so checking the same statement twice is safe.
+
+## Customers
+
+Click a customer's name in the list for their page: what they owe by how late it is (not yet due, 1–30, 31–60, 61–90 and over 90 days), billed totals, last invoice, payment and contact, open follow-ups, all their invoices, and their details. For an EU customer, **Check with VIES** asks the European Commission's service whether the VAT number is active; it sends that number to the service when you press it, and keeps the answer with who gave it and when. Mavri can only ask VIES; for other countries check the number on the tax authority's own site. Customer records also carry payment terms (used for the due date), a time zone and quiet hours (reminders are held until they end) and how they like to be contacted.
 
 ## People
 

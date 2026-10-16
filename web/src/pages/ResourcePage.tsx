@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 import { Skeleton } from '../components/Icon';
 import { EmptyState, useUi } from '../components/ui';
 import { api, errorText } from '../api';
@@ -212,7 +213,13 @@ export function ResourcePage({ res }: { res: Resource }) {
               {visible.map(r => (
                 <tr key={String(r.id)} className={r.archived ? 'dim' : undefined}>
                   {columns.map(c => (
-                    <td key={c.name}>{cell(c, r)}</td>
+                    <td key={c.name}>
+                      {res.id === 'customers' && c.name === 'name' && r.id ? (
+                        <Link to={`/customers/${r.id}`}>{cell(c, r)}</Link>
+                      ) : (
+                        cell(c, r)
+                      )}
+                    </td>
                   ))}
                   <td className="actions">
                     <button onClick={() => setEditing(r)}>Edit</button>

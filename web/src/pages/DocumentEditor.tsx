@@ -88,6 +88,8 @@ export function DocumentEditor({ kind }: { kind: Kind }) {
   const [restored, setRestored] = useState('');
   const [customerText, setCustomerText] = useState('');
   const [focusLine, setFocusLine] = useState<number | null>(null);
+  const [dragFrom, setDragFrom] = useState<number | null>(null);
+  const [dragOver, setDragOver] = useState<number | null>(null);
   const [guidance, setGuidance] = useState<TaxExplanation | null>(null);
   const linesRef = useRef<HTMLTableSectionElement>(null);
   const { toast } = useUi();
@@ -130,6 +132,10 @@ export function DocumentEditor({ kind }: { kind: Kind }) {
         d.currencyId = usd?.id ?? 0;
         if (live(issuers).length === 1) d.issuerId = live(issuers)[0].id;
         if (live(banks).length === 1) d.bankId = live(banks)[0].id;
+        const set = await api
+          .get<{ defaultStyleId?: number }>('/api/settings')
+          .catch(() => ({}) as { defaultStyleId?: number });
+        if (set.defaultStyleId && live(styles).some(x => x.id === set.defaultStyleId)) d.styleId = set.defaultStyleId;
         setDoc(d);
       }
     })().catch(e => setError(errorText(e, 'Could not load.')));
@@ -581,7 +587,27 @@ export function DocumentEditor({ kind }: { kind: Kind }) {
                 </thead>
                 <tbody ref={linesRef}>
                   {doc.lines.map((l, i) => (
-                    <tr key={i} onKeyDown={e => onLineKey(e, i)}>
+                    <tr
+                      key={i}
+                      onKeyDown={e => onLineKey(e, i)}
+                      className={dragOver === i && dragFrom !== null && dragFrom !== i ? 'drop-here' : undefined}
+                      onDragOver={e => {
+                        if (dragFrom === null) return;
+                        e.preventDefault();
+                        setDragOver(i);
+                      }}
+                      onDrop={e => {
+                        e.preventDefault();
+                        if (dragFrom !== null && dragFrom !== i) {
+                          const lines = [...doc.lines];
+                          const [moved] = lines.splice(dragFrom, 1);
+                          lines.splice(i, 0, moved);
+                          set({ lines });
+                        }
+                        setDragFrom(null);
+                        setDragOver(null);
+                      }}
+                    >
                       <td data-label="Description">
                         <input
                           value={l.name}
@@ -706,6 +732,23 @@ export function DocumentEditor({ kind }: { kind: Kind }) {
                         </details>
                       </td>
                       <td className="line-actions" data-label="">
+                        <span
+                          className="drag-handle"
+                          draggable
+                          title="Drag to reorder (the arrow buttons do the same from the keyboard)"
+                          aria-hidden="true"
+                          onDragStart={e => {
+                            e.dataTransfer.effectAllowed = 'move';
+                            e.dataTransfer.setData('text/plain', String(i));
+                            setDragFrom(i);
+                          }}
+                          onDragEnd={() => {
+                            setDragFrom(null);
+                            setDragOver(null);
+                          }}
+                        >
+                          ⠿
+                        </span>
                         <button
                           type="button"
                           onClick={() => moveLine(i, -1)}

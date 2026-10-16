@@ -9,6 +9,7 @@ import { SignIn } from './components/SignIn';
 import { ActivityPage } from './pages/ActivityPage';
 import { AutomationPage } from './pages/AutomationPage';
 import { CollectionsPage } from './pages/CollectionsPage';
+import { CustomerPage } from './pages/CustomerPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { DataPage } from './pages/DataPage';
 import { DocumentEditor } from './pages/DocumentEditor';
@@ -55,6 +56,22 @@ function Shell() {
   const { features } = settings;
   const { pathname } = useLocation();
   useEffect(() => setMenu(false), [pathname]);
+
+  // A region that scrolls sideways must be reachable from the keyboard, or its contents cannot be read without a mouse.
+  useEffect(() => {
+    const mark = () =>
+      document.querySelectorAll<HTMLElement>('.scroll, pre, .licensebox, table').forEach(el => {
+        if (el.closest('[aria-hidden="true"]')) return; // template thumbnails are pictures, not content to tab into
+        if (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1) el.tabIndex = 0;
+        else el.removeAttribute('tabindex');
+      });
+    const t = setTimeout(mark, 400);
+    window.addEventListener('resize', mark);
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener('resize', mark);
+    };
+  }, [pathname]);
 
   return (
     <SettingsContext.Provider value={settings}>
@@ -152,6 +169,7 @@ function Shell() {
               <Route path="/quotes/new" element={<DocumentEditor kind="quote" />} />
               <Route path="/quotes/:id" element={<DocumentView kind="quote" />} />
               <Route path="/quotes/:id/edit" element={<DocumentEditor kind="quote" />} />
+              <Route path="/customers/:id" element={<CustomerPage />} />
               {pages.map(r => (
                 <Route key={r.id} path={`/${r.id}`} element={<ResourcePage res={r} />} />
               ))}

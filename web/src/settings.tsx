@@ -7,6 +7,8 @@ export const defaultSettings: Settings = {
   quotePrefix: 'Q-',
   creditPrefix: 'CN-',
   debitPrefix: 'DN-',
+  defaultStyleId: 0,
+  favouriteTemplates: [],
   dateFormat: 'yyyy-MM-dd',
   numberLocale: 'en-US',
   features: { quotes: true, presets: true, styles: true, reports: true, ubl: true, xrechnung: true }
