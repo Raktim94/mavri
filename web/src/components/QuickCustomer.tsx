@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Modal } from './Modal';
+import { CountryPicker } from './CountryPicker';
 import { api, errorText } from '../api';
 import type { Party } from '../types';
 
@@ -62,8 +63,8 @@ export function QuickCustomer({ onSaved, onClose }: { onSaved: (p: Party) => voi
             <input value={v.taxId} onChange={e => set({ taxId: e.target.value })} />
           </label>
           <label>
-            Country code (e.g. DE)
-            <input value={v.country} onChange={e => set({ country: e.target.value })} />
+            Country
+            <CountryPicker value={v.country} onChange={country => set({ country })} />
           </label>
         </div>
         <div className="row">

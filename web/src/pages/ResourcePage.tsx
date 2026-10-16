@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Skeleton } from '../components/Icon';
 import { EmptyState, useUi } from '../components/ui';
 import { api, errorText } from '../api';
+import { CountryPicker } from '../components/CountryPicker';
 import { LogoPicker } from '../components/LogoPicker';
 import { toMajor, toMinor } from '../money';
 import type { Field, Resource } from '../resources';
@@ -102,6 +103,8 @@ export function ResourcePage({ res }: { res: Resource }) {
             onChange={(logo, logoType) => setEditing(cur => (cur ? { ...cur, logo, logoType } : cur))}
           />
         );
+      case 'country':
+        return <CountryPicker value={text(value)} onChange={set} />;
       case 'textarea':
         return <textarea rows={3} value={text(value)} onChange={e => set(e.target.value)} />;
       case 'checkbox':

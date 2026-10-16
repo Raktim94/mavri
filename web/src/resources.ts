@@ -2,7 +2,7 @@
 // the columns, the form fields and where the data lives.
 import type { Features } from './types';
 
-export type FieldKind = 'text' | 'logo' | 'textarea' | 'number' | 'checkbox' | 'select' | 'color' | 'price';
+export type FieldKind = 'text' | 'country' | 'logo' | 'textarea' | 'number' | 'checkbox' | 'select' | 'color' | 'price';
 
 export interface Field {
   name: string;
@@ -36,7 +36,7 @@ const partyFields = [
   f('phone', 'Phone', { list: true }),
   f('address', 'Address (street first, then postcode and city)', { kind: 'textarea' }),
   f('taxId', 'Tax ID'),
-  f('country', 'Country code (e.g. DE)'),
+  f('country', 'Country', { kind: 'country' }),
   f('eScheme', 'E-invoice address scheme (e.g. 0204)'),
   f('eAddress', 'E-invoice address')
 ];
