@@ -199,6 +199,9 @@ func (s *Service) render(ctx context.Context, r Request, create bool) (Result, s
 	if err != nil {
 		return Result{}, "", err
 	}
+	if doc.Status == model.StatusDraft {
+		return Result{}, "", fmt.Errorf("%w: this invoice is a draft; issue it before sending it", ErrInvalid)
+	}
 	var link share.Link
 	var found bool
 	if create {

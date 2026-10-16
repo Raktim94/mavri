@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { blankDoc } from '../docs';
+import { blankDoc, blankLine } from '../docs';
 import { reviewDoc } from './review';
 
 describe('reviewDoc', () => {
@@ -14,7 +14,7 @@ describe('reviewDoc', () => {
     d.issuerId = 1;
     d.customerId = 2;
     d.currencyId = 3;
-    d.lines = [{ productId: null, name: 'Work', unit: '', quantity: 1, unitCents: 1000, taxRate: 0, taxMode: '' }];
+    d.lines = [{ ...blankLine(), name: 'Work', unitCents: 1000 }];
     expect(reviewDoc(d, { kind: 'invoice' }).ready).toBe(true);
   });
 

@@ -49,7 +49,7 @@ export function DashboardPage() {
       .catch(() => undefined);
   }, []);
 
-  const live = (docs ?? []).filter(d => d.status !== 'void');
+  const live = (docs ?? []).filter(d => d.status !== 'void' && d.status !== 'draft');
   // Money is only added up within one currency: the one used most.
   const used = live.reduce<Record<string, number>>(
     (m, d) => ({ ...m, [d.currencyCode]: (m[d.currencyCode] ?? 0) + 1 }),
@@ -138,7 +138,7 @@ export function DashboardPage() {
             <div className="kpi">
               <span className="kpi-label">Billed this month</span>
               <strong>
-                <CountUp cents={sum(billed, d => d.totalCents)} format={m} />
+                <CountUp cents={sum(billed, d => (d.docType === 'credit' ? -d.totalCents : d.totalCents))} format={m} />
               </strong>
               <span className="muted">
                 {billed.length} invoice{billed.length === 1 ? '' : 's'}

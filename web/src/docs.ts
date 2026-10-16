@@ -1,23 +1,41 @@
-import type { Doc, Kind } from './types';
+import type { Doc, Kind, Line } from './types';
 
 export const statusLabel: Record<string, string> = {
   unpaid: 'Unpaid',
   partial: 'Partly paid',
   paid: 'Paid',
   void: 'Void',
+  draft: 'Draft',
+  credited: 'Credited',
+  credit: 'Credit note',
   open: 'Open',
   accepted: 'Accepted',
   declined: 'Declined'
 };
 
 export const statusesOf: Record<Kind, string[]> = {
-  invoice: ['unpaid', 'partial', 'paid', 'void'],
+  invoice: ['draft', 'unpaid', 'partial', 'paid', 'credited', 'void'],
   quote: ['open', 'accepted', 'declined']
 };
 
 export const today = () => new Date().toISOString().slice(0, 10);
 
 export const routeOf = (kind: Kind) => (kind === 'invoice' ? '/invoices' : '/quotes');
+
+export const blankLine = (): Line => ({
+  productId: null,
+  name: '',
+  unit: '',
+  quantity: 1,
+  unitCents: 0,
+  taxRate: 0,
+  taxMode: '',
+  code: '',
+  taxCode: '',
+  period: '',
+  lineType: '',
+  taxCategory: ''
+});
 
 export function blankDoc(kind: Kind): Doc {
   return {
@@ -43,8 +61,17 @@ export function blankDoc(kind: Kind): Doc {
     noteCustomer: '',
     noteTerms: '',
     noteThanks: '',
-    lines: [{ productId: null, name: '', unit: '', quantity: 1, unitCents: 0, taxRate: 0, taxMode: '' }],
-    payments: []
+    lines: [blankLine()],
+    payments: [],
+    docType: '',
+    corrects: null,
+    locked: false,
+    supplyDate: '',
+    poRef: '',
+    projectRef: '',
+    settlementCurrency: '',
+    exchangeRate: 0,
+    exchangeDate: ''
   } as unknown as Doc;
 }
 

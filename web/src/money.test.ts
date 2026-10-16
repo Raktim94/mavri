@@ -10,7 +10,12 @@ const line = (quantity: number, unitCents: number, taxRate = 0, taxMode: Line['t
   quantity,
   unitCents,
   taxRate,
-  taxMode
+  taxMode,
+  code: '',
+  taxCode: '',
+  period: '',
+  lineType: '',
+  taxCategory: ''
 });
 const doc = (over: Partial<Parameters<typeof computeTotals>[0]> & { lines: Line[] }) => ({
   discount: none,

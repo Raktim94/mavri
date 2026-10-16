@@ -779,3 +779,100 @@ func TestCustomerEventsAndJSONExport(t *testing.T) {
 	}
 	c.anonymous().json("GET", "/api/export/documents.json", nil, 401)
 }
+
+func TestDraftIssueAndCorrectionsOverHTTP(t *testing.T) {
+	c, _ := newFlow(t)
+	issuer, customer := setupParties(c)
+	draft := c.invoice(issuer, customer, map[string]any{"status": "draft"})
+	did := jsonNum(id(draft))
+	if draft["status"] != "draft" || draft["locked"] != false {
+		t.Fatalf("draft: %v", draft)
+	}
+	// A draft cannot be shared or emailed, and has no e-invoice yet.
+	c.json("POST", "/api/documents/"+did+"/share", nil, 400)
+	c.json("POST", "/api/documents/"+did+"/email", map[string]any{"kind": "send", "to": "a@b.co"}, 400)
+	c.json("GET", "/api/documents/"+did+"/einvoice", nil, 400)
+
+	issued := c.json("POST", "/api/documents/"+did+"/issue", nil, 200)
+	if issued["locked"] != true || issued["status"] != "unpaid" || issued["issuedAt"] == "" {
+		t.Fatalf("issued: %v", issued)
+	}
+	c.json("POST", "/api/documents/"+did+"/issue", nil, 400)
+	// The lock holds against edits and deletion, over the API too.
+	edit := c.json("GET", "/api/documents/"+did, nil, 200)
+	edit["lines"] = []any{map[string]any{"name": "Cheaper", "quantity": 1, "unitCents": 1}}
+	c.json("PUT", "/api/documents/"+did, edit, 409)
+	c.json("DELETE", "/api/documents/"+did, nil, 409)
+
+	// A credit note settles it; the list and the report agree.
+	cn := c.json("POST", "/api/documents/"+did+"/corrections", map[string]any{"kind": "credit", "full": true, "reason": "Cancelled"}, 201)
+	if cn["docType"] != "credit" || cn["status"] != "credit" || cn["fullNumber"] != "CN-1" {
+		t.Fatalf("credit note: %v", cn)
+	}
+	after := c.json("GET", "/api/documents/"+did, nil, 200)
+	if after["status"] != "credited" || after["creditedCents"] != cn["totals"].(map[string]any)["totalCents"] {
+		t.Fatalf("original after credit: %v", after)
+	}
+	if rows := c.list("/api/documents/" + did + "/corrections"); len(rows) != 1 {
+		t.Fatalf("corrections: %v", rows)
+	}
+	c.json("POST", "/api/documents/"+did+"/corrections", map[string]any{"kind": "credit", "full": true}, 400) // already fully credited
+	c.json("POST", "/api/documents/"+did+"/corrections", map[string]any{"kind": "debit", "lines": []any{map[string]any{"name": "Fee", "quantity": 1, "unitCents": 500}}}, 201)
+	rep := c.json("GET", "/api/reports/year?year=2026", nil, 200)
+	months := rep["byMonth"].([]any)
+	if len(months) == 0 {
+		t.Fatalf("report: %v", rep)
+	}
+	seen := map[string]bool{}
+	for _, it := range c.json("GET", "/api/activity?entity=invoice&limit=20", nil, 200)["items"].([]any) {
+		seen[it.(map[string]any)["action"].(string)] = true
+	}
+	for _, want := range []string{"issued", "issued a credit note", "issued a debit note"} {
+		if !seen[want] {
+			t.Errorf("the history is missing %q: %v", want, seen)
+		}
+	}
+}
+
+func TestRolesLimitWhatPeopleCanDo(t *testing.T) {
+	owner, _ := newFlow(t)
+	owner.json("POST", "/api/users", map[string]any{"email": "staff@x.co", "password": "password1", "role": "staff"}, 201)
+	owner.json("POST", "/api/users", map[string]any{"email": "view@x.co", "password": "password1", "role": "viewer"}, 201)
+	owner.json("POST", "/api/users", map[string]any{"email": "view@x.co", "password": "password1", "role": "viewer"}, 409)
+	owner.json("POST", "/api/users", map[string]any{"email": "bad@x.co", "password": "weak", "role": "staff"}, 400)
+	if len(owner.list("/api/users")) != 3 {
+		t.Fatal("three people")
+	}
+	signIn := func(email string) *client {
+		jar, _ := cookiejar.New(nil)
+		c := &client{t: t, srv: owner.srv, c: &http.Client{Jar: jar, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}}
+		c.json("POST", "/api/session", map[string]string{"email": email, "password": "password1"}, 200)
+		return c
+	}
+	staff, viewer := signIn("staff@x.co"), signIn("view@x.co")
+
+	// Staff work with records and documents, but not with settings, keys, people, backups or payments.
+	issuer, customer := setupParties(staff)
+	staff.invoice(issuer, customer, nil)
+	staff.json("GET", "/api/settings", nil, 200)
+	for _, call := range []struct{ method, path string }{
+		{"PUT", "/api/settings"}, {"GET", "/api/keys"}, {"POST", "/api/keys"}, {"GET", "/api/users"}, {"POST", "/api/users"},
+		{"GET", "/api/backups"}, {"PUT", "/api/payments/config"}, {"POST", "/api/webhooks"}, {"PUT", "/api/automation"}, {"POST", "/api/shops"},
+	} {
+		if code, _ := staff.do(call.method, call.path, map[string]any{}); code != 403 {
+			t.Errorf("staff %s %s: %d, want 403", call.method, call.path, code)
+		}
+	}
+	// A viewer can read everything they are shown and change nothing.
+	viewer.json("GET", "/api/documents", nil, 200)
+	viewer.json("POST", "/api/parties", map[string]any{"kind": "customer", "name": "X"}, 403)
+	viewer.json("POST", "/api/documents/1/issue", nil, 403)
+	// People change their own password with the current one.
+	staff.json("POST", "/api/session/password", map[string]any{"current": "nope", "password": "another123"}, 400)
+	staff.do("POST", "/api/session/password", map[string]any{"current": "password1", "password": "another123"})
+	staff.json("GET", "/api/session", nil, 200)
+	// The owner cannot remove the only owner or themselves.
+	me := owner.json("GET", "/api/session", nil, 200)
+	owner.json("DELETE", "/api/users/"+jsonNum(id(me)), nil, 400)
+	owner.json("PUT", "/api/users/"+jsonNum(id(me)), map[string]any{"role": "staff"}, 400)
+}

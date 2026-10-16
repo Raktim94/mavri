@@ -28,6 +28,7 @@ import type { Party, Settings } from './types';
 
 function Shell() {
   const { user, signOut } = useAuth();
+  const owner = user?.role === 'owner';
   const [settings, setSettings] = useState<Settings>(defaultSettings);
   useEffect(() => {
     api
@@ -88,9 +89,11 @@ function Shell() {
               <Icon name="reports" /> Reports
             </NavLink>
           )}
-          <NavLink to="/stores">
-            <Icon name="stores" /> Stores
-          </NavLink>
+          {owner && (
+            <NavLink to="/stores">
+              <Icon name="stores" /> Stores
+            </NavLink>
+          )}
           <p className="nav-label">Records</p>
           {pages.map(r => (
             <NavLink key={r.id} to={`/${r.id}`}>
@@ -103,23 +106,29 @@ function Shell() {
           <NavLink to="/templates">
             <Icon name="styles" /> Templates
           </NavLink>
-          <p className="nav-label">Automate</p>
-          <NavLink to="/automation">
-            <Icon name="automate" /> Automation
-          </NavLink>
-          <NavLink to="/integrations">
-            <Icon name="bolt" /> Integrations
-          </NavLink>
+          {owner && (
+            <>
+              <p className="nav-label">Automate</p>
+              <NavLink to="/automation">
+                <Icon name="automate" /> Automation
+              </NavLink>
+              <NavLink to="/integrations">
+                <Icon name="bolt" /> Integrations
+              </NavLink>
+            </>
+          )}
           <p className="nav-label">System</p>
           <NavLink to="/activity">
             <Icon name="activity" /> Activity
           </NavLink>
           <NavLink to="/data">
-            <Icon name="data" /> Data & backups
+            <Icon name="data" /> Data
           </NavLink>
-          <NavLink to="/health">
-            <Icon name="health" /> Health
-          </NavLink>
+          {owner && (
+            <NavLink to="/health">
+              <Icon name="health" /> Health
+            </NavLink>
+          )}
           <NavLink to="/settings">
             <Icon name="settings" /> Settings
           </NavLink>

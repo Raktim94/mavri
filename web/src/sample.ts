@@ -1,3 +1,4 @@
+import { blankLine } from './docs';
 import { computeTotals } from './money';
 import type { Doc, Style } from './types';
 
@@ -5,7 +6,7 @@ import type { Doc, Style } from './types';
 export function sampleDoc(style: Partial<Style>, kind: 'invoice' | 'quote' = 'invoice'): Doc {
   const lines = [
     {
-      productId: null,
+      ...blankLine(),
       name: 'Brand identity workshop',
       unit: 'day',
       quantity: 2,
@@ -14,7 +15,7 @@ export function sampleDoc(style: Partial<Style>, kind: 'invoice' | 'quote' = 'in
       taxMode: 'add' as const
     },
     {
-      productId: null,
+      ...blankLine(),
       name: 'Website design',
       unit: 'item',
       quantity: 1,
@@ -23,7 +24,7 @@ export function sampleDoc(style: Partial<Style>, kind: 'invoice' | 'quote' = 'in
       taxMode: 'add' as const
     },
     {
-      productId: null,
+      ...blankLine(),
       name: 'Hosting, first year',
       unit: 'item',
       quantity: 1,

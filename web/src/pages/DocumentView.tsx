@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { CorrectionDialog } from '../components/CorrectionDialog';
 import { EmailDialog } from '../components/EmailDialog';
 import { FollowUps } from '../components/FollowUps';
 import { RecordPayment } from '../components/RecordPayment';
@@ -13,9 +14,9 @@ import { api, ApiError, download, errorText } from '../api';
 import { isOverdue, routeOf, statusLabel } from '../docs';
 import { useSettings } from '../settings';
 import { formatMoney } from '../money';
-import type { ActivityEntry, Doc, Kind, MailLogRow, PaymentOption } from '../types';
+import type { ActivityEntry, Doc, Kind, MailLogRow, PaymentOption, Summary } from '../types';
 
-type Dialog = '' | 'share' | 'email' | 'remind' | 'repeat' | 'payment';
+type Dialog = '' | 'share' | 'email' | 'remind' | 'repeat' | 'payment' | 'credit' | 'debit';
 
 export function DocumentView({ kind }: { kind: Kind }) {
   const { id } = useParams();
@@ -30,6 +31,7 @@ export function DocumentView({ kind }: { kind: Kind }) {
   const [history, setHistory] = useState<ActivityEntry[]>([]);
   const [mail, setMail] = useState<MailLogRow[]>([]);
   const [pay, setPay] = useState<PaymentOption[]>([]);
+  const [notes, setNotes] = useState<Summary[]>([]);
   const [params, setParams] = useSearchParams();
   const location = useLocation();
   const [justSaved, setJustSaved] = useState(Boolean((location.state as { justSaved?: boolean } | null)?.justSaved));
@@ -50,6 +52,11 @@ export function DocumentView({ kind }: { kind: Kind }) {
       .get<Doc>(`/api/documents/${id}`)
       .then(setDoc)
       .catch(e => setError(errorText(e, 'Could not load.')));
+    if (kind === 'invoice')
+      api
+        .get<Summary[]>(`/api/documents/${id}/corrections`)
+        .then(setNotes)
+        .catch(() => setNotes([]));
     if (kind === 'invoice')
       api
         .get<PaymentOption[]>(`/api/documents/${id}/payment-options`)
@@ -105,9 +112,28 @@ export function DocumentView({ kind }: { kind: Kind }) {
     }
   }
 
-  const owed = kind === 'invoice' && (doc.status === 'unpaid' || doc.status === 'partial');
+  const isNote = doc.docType === 'credit' || doc.docType === 'debit';
+  const draft = doc.status === 'draft';
+  const canCorrect = kind === 'invoice' && !isNote && doc.locked && doc.status !== 'void';
+  const owed = kind === 'invoice' && doc.docType !== 'credit' && (doc.status === 'unpaid' || doc.status === 'partial');
   const late = isOverdue({ kind, status: doc.status, dueOn: doc.dueOn });
   const balance = Math.max(doc.totals.totalCents - doc.paidCents, 0);
+
+  async function issue() {
+    const ok = await confirm({
+      title: 'Issue this invoice?',
+      body: 'Once issued, the figures and details can no longer be changed. Mistakes are fixed with a credit note or a debit note. You can still record payments and void it.',
+      confirm: 'Issue invoice'
+    });
+    if (!ok) return;
+    try {
+      setDoc(await api.post<Doc>(`/api/documents/${id}/issue`));
+      toast('Invoice issued');
+      loadDoc();
+    } catch (e) {
+      setError(errorText(e, 'Could not issue it.'));
+    }
+  }
 
   async function duplicate() {
     try {
@@ -124,11 +150,18 @@ export function DocumentView({ kind }: { kind: Kind }) {
       <header className="bar noprint">
         <h1>{doc.fullNumber}</h1>
         <Link to={base}>Back</Link>
-        <Link to={`${base}/${id}/edit`}>Edit</Link>
-        <button className="primary" onClick={() => setDialog('share')}>
+        {!doc.locked && <Link to={`${base}/${id}/edit`}>Edit</Link>}
+        {draft && (
+          <button className="primary" onClick={issue}>
+            Issue invoice
+          </button>
+        )}
+        {canCorrect && <button onClick={() => setDialog('credit')}>Credit note</button>}
+        {canCorrect && <button onClick={() => setDialog('debit')}>Debit note</button>}
+        <button className={draft ? undefined : 'primary'} disabled={draft} onClick={() => setDialog('share')}>
           <Icon name="share" /> Share
         </button>
-        <button onClick={() => setDialog('email')}>
+        <button disabled={draft} onClick={() => setDialog('email')}>
           <Icon name="mail" /> Email
         </button>
         {owed && (
@@ -136,13 +169,15 @@ export function DocumentView({ kind }: { kind: Kind }) {
             <Icon name="bell" /> Remind
           </button>
         )}
-        {kind === 'invoice' && doc.status !== 'void' && (
+        {kind === 'invoice' && !isNote && doc.status !== 'void' && (
           <button onClick={() => setDialog('repeat')}>
             <Icon name="repeat" /> Repeat
           </button>
         )}
-        {kind === 'invoice' && features.ubl && <button onClick={() => exportXml('ubl')}>UBL XML</button>}
-        {kind === 'invoice' && features.xrechnung && (
+        {kind === 'invoice' && !isNote && !draft && features.ubl && (
+          <button onClick={() => exportXml('ubl')}>UBL XML</button>
+        )}
+        {kind === 'invoice' && !isNote && !draft && features.xrechnung && (
           <button onClick={() => exportXml('xrechnung')}>XRechnung XML</button>
         )}
         {kind === 'quote' && doc.status !== 'declined' && !doc.convertedFrom && (
@@ -151,7 +186,7 @@ export function DocumentView({ kind }: { kind: Kind }) {
         {kind === 'quote' && doc.status === 'open' && (
           <button onClick={() => setStatus('declined')}>Mark declined</button>
         )}
-        {kind === 'invoice' && doc.status !== 'void' && (
+        {kind === 'invoice' && !isNote && doc.status !== 'void' && (
           <button
             onClick={async () =>
               (await confirm({
@@ -178,6 +213,23 @@ export function DocumentView({ kind }: { kind: Kind }) {
             </ul>
           )}
         </div>
+      )}
+      {doc.locked && !isNote && (
+        <p className="notice noprint" role="note">
+          Issued {doc.issuedAt.slice(0, 10)}: the figures and details are locked. To correct them, issue a credit note
+          or a debit note; payments and voiding still work.
+        </p>
+      )}
+      {draft && (
+        <p className="notice noprint" role="note">
+          This is a draft. It does not count as owed, and cannot be shared or emailed, until you issue it.
+        </p>
+      )}
+      {isNote && doc.corrects && (
+        <p className="notice noprint" role="note">
+          This {doc.docType === 'credit' ? 'credit' : 'debit'} note corrects{' '}
+          <Link to={`/invoices/${doc.corrects}`}>{doc.correctsNumber}</Link>.
+        </p>
       )}
       {justSaved && (
         <div className="card receipt noprint" role="status">
@@ -233,6 +285,20 @@ export function DocumentView({ kind }: { kind: Kind }) {
           <button onClick={duplicate}>Create similar</button>
         </div>
       </div>
+      {notes.length > 0 && (
+        <div className="card noprint">
+          <h2>Credit and debit notes</h2>
+          <ul className="notelist">
+            {notes.map(n => (
+              <li key={n.id}>
+                <Link to={`/invoices/${n.id}`}>{n.fullNumber}</Link> ·{' '}
+                {n.docType === 'credit' ? 'credit note' : 'debit note'} · {n.issuedOn} ·{' '}
+                {formatMoney(n.totalCents, doc.currency)}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <Paper doc={doc} pay={pay} />
       {kind === 'invoice' && doc.status !== 'void' && <FollowUps docId={doc.id!} onChange={loadHistory} />}
 
@@ -305,6 +371,18 @@ export function DocumentView({ kind }: { kind: Kind }) {
             setDialog('');
             toast('Payment recorded');
             loadDoc();
+          }}
+        />
+      )}
+      {(dialog === 'credit' || dialog === 'debit') && (
+        <CorrectionDialog
+          doc={doc}
+          kind={dialog}
+          onClose={() => setDialog('')}
+          onDone={created => {
+            setDialog('');
+            toast(`${created.fullNumber} issued`);
+            nav(`/invoices/${created.id}`);
           }}
         />
       )}

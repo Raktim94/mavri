@@ -190,6 +190,10 @@ func (s *Server) einvoice(w http.ResponseWriter, r *http.Request) {
 		s.problem(w, r, err)
 		return
 	}
+	if d.DocType == "credit" || d.DocType == "debit" || d.Status == model.StatusDraft {
+		fail(w, http.StatusBadRequest, "validation", "the e-invoice export is for issued invoices; credit and debit notes are not supported yet")
+		return
+	}
 	s.Hub.Record(r.Context(), activity.Event{Action: "exported", Entity: d.Kind, EntityID: d.ID, Label: d.FullNumber, Detail: format + " e-invoice"})
 	xml, err := einvoice.Generate(d, format)
 	var problems einvoice.Problems

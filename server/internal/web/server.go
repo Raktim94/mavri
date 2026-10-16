@@ -115,6 +115,9 @@ func (s *Server) Start(ctx context.Context) {
 func (s *Server) routes(mux *http.ServeMux) {
 	user := func(h http.HandlerFunc) http.HandlerFunc { return s.auth(false, h) }
 	human := func(h http.HandlerFunc) http.HandlerFunc { return s.auth(true, h) }
+	// ownerHuman is for what only a signed-in owner may do: settings, keys, payments, backups, webhooks and people.
+	ownerHuman := func(h http.HandlerFunc) http.HandlerFunc { return s.authRole(true, true, h) }
+	owner := func(h http.HandlerFunc) http.HandlerFunc { return s.authRole(false, true, h) }
 
 	mux.HandleFunc("GET /api/health", func(w http.ResponseWriter, r *http.Request) {
 		if err := s.DB.PingContext(r.Context()); err != nil {
@@ -130,7 +133,7 @@ func (s *Server) routes(mux *http.ServeMux) {
 	// updates
 	mux.HandleFunc("GET /api/update/status", user(s.updateStatusHandler))
 	mux.HandleFunc("GET /api/update/progress", user(s.updateProgress))
-	mux.HandleFunc("POST /api/update", human(s.applyUpdate))
+	mux.HandleFunc("POST /api/update", ownerHuman(s.applyUpdate))
 
 	// sign-in
 	mux.HandleFunc("GET /api/setup", s.setupStatus)
@@ -138,9 +141,9 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/session", s.limited(s.loginLimit, s.clientIP, s.login))
 	mux.HandleFunc("GET /api/session", user(s.me))
 	mux.HandleFunc("DELETE /api/session", s.logout)
-	mux.HandleFunc("GET /api/keys", human(s.listKeys))
-	mux.HandleFunc("POST /api/keys", human(s.createKey))
-	mux.HandleFunc("DELETE /api/keys/{id}", human(s.revokeKey))
+	mux.HandleFunc("GET /api/keys", ownerHuman(s.listKeys))
+	mux.HandleFunc("POST /api/keys", ownerHuman(s.createKey))
+	mux.HandleFunc("DELETE /api/keys/{id}", ownerHuman(s.revokeKey))
 
 	// records
 	order := func(col string) func(*http.Request) (string, []any) {
@@ -175,13 +178,16 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/documents/{id}/duplicate", user(s.duplicateDocument))
 	mux.HandleFunc("POST /api/documents/{id}/convert", user(s.convertDocument))
 	mux.HandleFunc("GET /api/documents/{id}/einvoice", user(s.einvoice))
+	mux.HandleFunc("POST /api/documents/{id}/issue", user(s.issueDocument))
+	mux.HandleFunc("GET /api/documents/{id}/corrections", user(s.listCorrections))
+	mux.HandleFunc("POST /api/documents/{id}/corrections", user(s.createCorrection))
 	mux.HandleFunc("GET /api/reports/year", user(s.yearReport))
 
 	// settings and backup
 	mux.HandleFunc("GET /api/settings", user(s.getSettings))
-	mux.HandleFunc("PUT /api/settings", user(s.putSettings))
+	mux.HandleFunc("PUT /api/settings", owner(s.putSettings))
 	mux.HandleFunc("GET /api/backup", user(s.exportBackup))
-	mux.HandleFunc("POST /api/backup", human(s.importBackup))
+	mux.HandleFunc("POST /api/backup", ownerHuman(s.importBackup))
 
 	// share links, email, reminders
 	mux.HandleFunc("GET /api/documents/{id}/share", user(s.getShare))
@@ -191,11 +197,11 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/documents/{id}/email", human(s.emailSend))
 	mux.HandleFunc("GET /api/documents/{id}/mail", user(s.documentMail))
 	mux.HandleFunc("GET /api/mail/log", user(s.mailLog))
-	mux.HandleFunc("GET /api/mail/config", human(s.getMailConfig))
-	mux.HandleFunc("PUT /api/mail/config", human(s.putMailConfig))
-	mux.HandleFunc("POST /api/mail/test", human(s.mailTest))
+	mux.HandleFunc("GET /api/mail/config", ownerHuman(s.getMailConfig))
+	mux.HandleFunc("PUT /api/mail/config", ownerHuman(s.putMailConfig))
+	mux.HandleFunc("POST /api/mail/test", ownerHuman(s.mailTest))
 	mux.HandleFunc("GET /api/automation", user(s.getAutomation))
-	mux.HandleFunc("PUT /api/automation", human(s.putAutomation))
+	mux.HandleFunc("PUT /api/automation", ownerHuman(s.putAutomation))
 	mux.HandleFunc("GET /api/overdue", user(s.overdue))
 	mux.HandleFunc("GET /api/recurring", user(s.listRecurring))
 	mux.HandleFunc("POST /api/recurring", user(s.createRecurring))
@@ -212,6 +218,13 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/documents/{id}/payment-options", user(s.paymentOptions))
 	mux.HandleFunc("GET /api/public/documents/{token}/payment-options", s.limited(s.publicLimit, s.clientIP, s.publicPaymentOptions))
 
+	// people
+	mux.HandleFunc("GET /api/users", ownerHuman(s.listUsers))
+	mux.HandleFunc("POST /api/users", ownerHuman(s.createUser))
+	mux.HandleFunc("PUT /api/users/{id}", ownerHuman(s.updateUser))
+	mux.HandleFunc("DELETE /api/users/{id}", ownerHuman(s.deleteUser))
+	mux.HandleFunc("POST /api/session/password", s.authRole(true, false, s.changePassword))
+
 	// tax guidance
 	mux.HandleFunc("GET /api/tax/packs", user(s.taxPacks))
 	mux.HandleFunc("POST /api/tax/explain", user(s.taxExplain))
@@ -222,30 +235,30 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/activity.csv", human(s.activityCSV))
 
 	// webhooks
-	mux.HandleFunc("GET /api/webhooks", human(s.listWebhooks))
-	mux.HandleFunc("POST /api/webhooks", human(s.createWebhook))
-	mux.HandleFunc("GET /api/webhooks/deliveries", human(s.listDeliveries))
-	mux.HandleFunc("POST /api/webhooks/deliveries/{id}/replay", human(s.replayDelivery))
-	mux.HandleFunc("PUT /api/webhooks/{id}", human(s.updateWebhook))
-	mux.HandleFunc("DELETE /api/webhooks/{id}", human(s.deleteWebhook))
-	mux.HandleFunc("POST /api/webhooks/{id}/test", human(s.testWebhook))
+	mux.HandleFunc("GET /api/webhooks", ownerHuman(s.listWebhooks))
+	mux.HandleFunc("POST /api/webhooks", ownerHuman(s.createWebhook))
+	mux.HandleFunc("GET /api/webhooks/deliveries", ownerHuman(s.listDeliveries))
+	mux.HandleFunc("POST /api/webhooks/deliveries/{id}/replay", ownerHuman(s.replayDelivery))
+	mux.HandleFunc("PUT /api/webhooks/{id}", ownerHuman(s.updateWebhook))
+	mux.HandleFunc("DELETE /api/webhooks/{id}", ownerHuman(s.deleteWebhook))
+	mux.HandleFunc("POST /api/webhooks/{id}/test", ownerHuman(s.testWebhook))
 
 	// CSV
 	mux.HandleFunc("GET /api/export/{file}", user(s.exportCSV))
 	mux.HandleFunc("POST /api/import/{kind}", human(s.importCSV))
 
 	// backups
-	mux.HandleFunc("GET /api/backups", human(s.backupStatus))
-	mux.HandleFunc("PUT /api/backups/config", human(s.putBackupConfig))
-	mux.HandleFunc("POST /api/backups/run", human(s.runBackup))
-	mux.HandleFunc("POST /api/backups/test-s3", human(s.testS3))
-	mux.HandleFunc("GET /api/backups/s3", human(s.listS3Backups))
-	mux.HandleFunc("GET /api/backups/files/{name}", human(s.downloadBackupFile))
-	mux.HandleFunc("POST /api/backups/verify", human(s.verifyBackup))
-	mux.HandleFunc("POST /api/backups/restore", human(s.restoreBackup))
+	mux.HandleFunc("GET /api/backups", ownerHuman(s.backupStatus))
+	mux.HandleFunc("PUT /api/backups/config", ownerHuman(s.putBackupConfig))
+	mux.HandleFunc("POST /api/backups/run", ownerHuman(s.runBackup))
+	mux.HandleFunc("POST /api/backups/test-s3", ownerHuman(s.testS3))
+	mux.HandleFunc("GET /api/backups/s3", ownerHuman(s.listS3Backups))
+	mux.HandleFunc("GET /api/backups/files/{name}", ownerHuman(s.downloadBackupFile))
+	mux.HandleFunc("POST /api/backups/verify", ownerHuman(s.verifyBackup))
+	mux.HandleFunc("POST /api/backups/restore", ownerHuman(s.restoreBackup))
 
 	// health and the API description
-	mux.HandleFunc("GET /api/admin/health", human(s.health))
+	mux.HandleFunc("GET /api/admin/health", ownerHuman(s.health))
 	mux.HandleFunc("GET /api/openapi.yaml", s.openapi)
 
 	// what a client sees through a secure link (no sign-in)
@@ -253,8 +266,8 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/public/documents/{token}/respond", s.limited(s.publicLimit, s.clientIP, s.publicRespond))
 
 	// online payments
-	mux.HandleFunc("GET /api/payments/config", human(s.getPayConfig))
-	mux.HandleFunc("PUT /api/payments/config", human(s.putPayConfig))
+	mux.HandleFunc("GET /api/payments/config", ownerHuman(s.getPayConfig))
+	mux.HandleFunc("PUT /api/payments/config", ownerHuman(s.putPayConfig))
 	mux.HandleFunc("GET /api/public/documents/{token}/options", s.limited(s.publicLimit, s.clientIP, s.publicOptions))
 	mux.HandleFunc("GET /api/public/documents/{token}/einvoice", s.limited(s.publicLimit, s.clientIP, s.publicEInvoice))
 	mux.HandleFunc("POST /api/public/documents/{token}/pay", s.limited(s.publicLimit, s.clientIP, s.publicPay))
@@ -262,9 +275,9 @@ func (s *Server) routes(mux *http.ServeMux) {
 
 	// stores
 	mux.HandleFunc("GET /api/shops", user(s.listShops))
-	mux.HandleFunc("POST /api/shops", user(s.createShop))
-	mux.HandleFunc("POST /api/shops/{id}/pause", user(s.pauseShop))
-	mux.HandleFunc("DELETE /api/shops/{id}", user(s.deleteShop))
+	mux.HandleFunc("POST /api/shops", owner(s.createShop))
+	mux.HandleFunc("POST /api/shops/{id}/pause", owner(s.pauseShop))
+	mux.HandleFunc("DELETE /api/shops/{id}", owner(s.deleteShop))
 	mux.HandleFunc("POST /api/hooks/{platform}/{id}", s.limited(s.hookLimit, func(r *http.Request) string { return r.PathValue("id") }, s.webhook))
 
 	// public API for other systems (same handlers, stable paths)

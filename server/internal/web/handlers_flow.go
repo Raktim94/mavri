@@ -97,6 +97,10 @@ func (s *Server) createShare(w http.ResponseWriter, r *http.Request) {
 		s.problem(w, r, err)
 		return
 	}
+	if d.Status == model.StatusDraft {
+		fail(w, http.StatusBadRequest, "validation", "this invoice is a draft; issue it before sharing it")
+		return
+	}
 	k, created, err := s.Links.Ensure(r.Context(), id)
 	if err != nil {
 		s.problem(w, r, err)
@@ -168,6 +172,10 @@ func (s *Server) emailSend(w http.ResponseWriter, r *http.Request) {
 	}
 	var in emailIn
 	if !readJSON(w, r, &in) {
+		return
+	}
+	if d, err := s.Store.GetDocument(r.Context(), s.DB, id); err == nil && d.Status == model.StatusDraft {
+		fail(w, http.StatusBadRequest, "validation", "this invoice is a draft; issue it before sending it")
 		return
 	}
 	// The user reviewed the preview, so the texts they send are final: render placeholders only once.

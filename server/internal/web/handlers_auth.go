@@ -138,3 +138,123 @@ func (s *Server) revokeKey(w http.ResponseWriter, r *http.Request) {
 	s.Hub.Record(r.Context(), activity.Event{Action: "revoked", Entity: "API key", EntityID: id})
 	w.WriteHeader(http.StatusNoContent)
 }
+
+// ---- team ----------------------------------------------------------------------
+
+func (s *Server) teamProblem(w http.ResponseWriter, r *http.Request, err error) {
+	switch {
+	case errors.Is(err, auth.ErrEmail), errors.Is(err, auth.ErrRole), errors.Is(err, auth.ErrLastOwner), errors.Is(err, auth.ErrBadOld):
+		fail(w, http.StatusBadRequest, "validation", err.Error())
+	case errors.Is(err, auth.ErrWeak):
+		fail(w, http.StatusBadRequest, "validation", "use at least 8 characters with letters and numbers")
+	case errors.Is(err, auth.ErrEmailTaken):
+		fail(w, http.StatusConflict, "conflict", err.Error())
+	case errors.Is(err, auth.ErrNoUser):
+		fail(w, http.StatusNotFound, "not_found", "no such account")
+	default:
+		s.problem(w, r, err)
+	}
+}
+
+func (s *Server) listUsers(w http.ResponseWriter, r *http.Request) {
+	rows, err := s.Auth.ListUsers(r.Context())
+	if err != nil {
+		s.problem(w, r, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, rows)
+}
+
+func (s *Server) createUser(w http.ResponseWriter, r *http.Request) {
+	var in struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+		Role     string `json:"role"`
+	}
+	if !readJSON(w, r, &in) {
+		return
+	}
+	m, err := s.Auth.CreateUser(r.Context(), in.Email, in.Password, in.Role)
+	if err != nil {
+		s.teamProblem(w, r, err)
+		return
+	}
+	s.Hub.Record(r.Context(), activity.Event{Action: "added", Entity: "person", EntityID: m.ID, Label: m.Email, Detail: "role " + m.Role})
+	writeJSON(w, http.StatusCreated, m)
+}
+
+func (s *Server) updateUser(w http.ResponseWriter, r *http.Request) {
+	id, ok := idOf(w, r)
+	if !ok {
+		return
+	}
+	var in struct {
+		Role     *string `json:"role"`
+		Password *string `json:"password"`
+	}
+	if !readJSON(w, r, &in) {
+		return
+	}
+	if in.Role != nil {
+		if err := s.Auth.SetRole(r.Context(), id, *in.Role); err != nil {
+			s.teamProblem(w, r, err)
+			return
+		}
+		s.Hub.Record(r.Context(), activity.Event{Action: "changed role", Entity: "person", EntityID: id, Detail: "role " + *in.Role})
+	}
+	if in.Password != nil {
+		if err := s.Auth.ResetPassword(r.Context(), id, *in.Password); err != nil {
+			s.teamProblem(w, r, err)
+			return
+		}
+		s.Hub.Record(r.Context(), activity.Event{Action: "reset password", Entity: "person", EntityID: id})
+	}
+	rows, _ := s.Auth.ListUsers(r.Context())
+	for _, m := range rows {
+		if m.ID == id {
+			writeJSON(w, http.StatusOK, m)
+			return
+		}
+	}
+	fail(w, http.StatusNotFound, "not_found", "no such account")
+}
+
+func (s *Server) deleteUser(w http.ResponseWriter, r *http.Request) {
+	id, ok := idOf(w, r)
+	if !ok {
+		return
+	}
+	if p, _ := r.Context().Value(principalKey).(principal); p.UserID == id {
+		fail(w, http.StatusBadRequest, "validation", "you cannot remove your own account here; ask another owner")
+		return
+	}
+	if err := s.Auth.DeleteUser(r.Context(), id); err != nil {
+		s.teamProblem(w, r, err)
+		return
+	}
+	s.Hub.Record(r.Context(), activity.Event{Action: "removed", Entity: "person", EntityID: id})
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// POST /api/session/password changes the signed-in person's own password.
+func (s *Server) changePassword(w http.ResponseWriter, r *http.Request) {
+	var in struct {
+		Current  string `json:"current"`
+		Password string `json:"password"`
+	}
+	if !readJSON(w, r, &in) {
+		return
+	}
+	p, _ := r.Context().Value(principalKey).(principal)
+	c, err := r.Cookie(sessionCookie)
+	if err != nil || p.UserID == 0 {
+		fail(w, http.StatusUnauthorized, "unauthorized", "sign in first")
+		return
+	}
+	if err := s.Auth.ChangePassword(r.Context(), p.UserID, in.Current, in.Password, c.Value); err != nil {
+		s.teamProblem(w, r, err)
+		return
+	}
+	s.Hub.Record(r.Context(), activity.Event{Action: "changed password", Entity: "person", EntityID: p.UserID})
+	w.WriteHeader(http.StatusNoContent)
+}

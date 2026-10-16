@@ -5,7 +5,7 @@ import { useUi } from '../components/ui';
 import { QuickCustomer } from '../components/QuickCustomer';
 import { TaxGuidance } from '../components/TaxGuidance';
 import { api, errorText } from '../api';
-import { blankDoc, routeOf, today } from '../docs';
+import { blankDoc, blankLine, routeOf, today } from '../docs';
 import { clearDraft, loadDraft, useDraft } from '../lib/draft';
 import { reviewDoc, type Check, type Section } from '../lib/review';
 import { formatMoney, computeTotals, lineTax, gross, toMajor, toMinor } from '../money';
@@ -37,15 +37,8 @@ interface Catalog {
 }
 
 const live = <T extends { archived: boolean }>(rows: T[]) => rows.filter(r => !r.archived);
-const blankLine = (): Line => ({
-  productId: null,
-  name: '',
-  unit: '',
-  quantity: 1,
-  unitCents: 0,
-  taxRate: 0,
-  taxMode: ''
-});
+
+type SaveMode = 'draft' | 'issue' | 'save';
 
 const SECTIONS: Array<{ id: Section; label: string }> = [
   { id: 'customer', label: 'Customer' },
@@ -184,7 +177,10 @@ export function DocumentEditor({ kind }: { kind: Kind }) {
           ...doc,
           fullNumber: `${doc.numberPrefix}${doc.number}${doc.numberSuffix}` || 'Number set on save',
           status:
-            doc.status || (kind === 'invoice' ? (paid >= totals.totalCents && paid > 0 ? 'paid' : 'unpaid') : 'open'),
+            kind === 'invoice' && (!id || doc.status === 'draft')
+              ? 'draft'
+              : doc.status ||
+                (kind === 'invoice' ? (paid >= totals.totalCents && paid > 0 ? 'paid' : 'unpaid') : 'open'),
           issuer: issuer ?? blankParty('Your business'),
           customer: customer ?? blankParty('Customer'),
           currency,
@@ -197,6 +193,20 @@ export function DocumentEditor({ kind }: { kind: Kind }) {
 
   if (!doc || !cat || !totals || !review)
     return error ? <p className="error">{error}</p> : <p className="muted">Loading…</p>;
+
+  if (doc.locked)
+    return (
+      <section className="card">
+        <h1>{doc.fullNumber} is issued</h1>
+        <p className="muted">
+          An issued invoice cannot be edited: the figures and details are locked. To correct it, open it and issue a
+          credit note or a debit note.
+        </p>
+        <Link className="btn primary" to={`${base}/${doc.id}`}>
+          Open the invoice
+        </Link>
+      </section>
+    );
 
   const set = (patch: Partial<Doc>) => setDoc({ ...doc, ...patch });
   const setLine = (i: number, patch: Partial<Line>) =>
@@ -223,10 +233,22 @@ export function DocumentEditor({ kind }: { kind: Kind }) {
     setFocusLine(i + 1);
   }
   function describe(i: number, text: string) {
-    const p = cat!.products.find(x => x.name.toLowerCase() === text.trim().toLowerCase());
+    // A name, an item code or a barcode picks the product. A barcode scanner types the code and presses Enter.
+    const q = text.trim().toLowerCase();
+    const p = cat!.products.find(
+      x =>
+        x.name.toLowerCase() === q || (x.sku && x.sku.toLowerCase() === q) || (x.barcode && x.barcode === text.trim())
+    );
     if (!p) return setLine(i, { name: text, productId: null });
     const unit = cat!.units.find(u => u.id === p.unitId)?.name ?? '';
-    setLine(i, { productId: p.id, name: p.name, unit, unitCents: Math.round((p.priceCents / 100) * 10 ** dec) });
+    setLine(i, {
+      productId: p.id,
+      name: p.name,
+      unit,
+      unitCents: Math.round((p.priceCents / 100) * 10 ** dec),
+      code: p.sku,
+      taxCode: p.taxCode
+    });
   }
   function onLineKey(e: KeyboardEvent, i: number) {
     if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
@@ -267,8 +289,13 @@ export function DocumentEditor({ kind }: { kind: Kind }) {
     set({ payments: [...doc!.payments, { amountCents: due, paidOn: today(), method: 'bank', note: '' }] });
   }
 
-  async function save(e?: FormEvent, then?: 'share') {
+  // A new invoice starts as a draft; issuing it is a separate, deliberate step that locks it.
+  const defaultMode: SaveMode = kind === 'invoice' && (!id || doc.status === 'draft') ? 'draft' : 'save';
+
+  async function save(e?: FormEvent, o: { then?: 'share'; mode?: SaveMode } = {}) {
     e?.preventDefault();
+    const mode = o.mode ?? defaultMode;
+    const then = o.then;
     if (!review!.ready) {
       setError('A few things are needed before this can be saved. They are listed under “Review” at the bottom.');
       document.getElementById('sec-review')?.scrollIntoView({ behavior: 'smooth' });
@@ -277,14 +304,28 @@ export function DocumentEditor({ kind }: { kind: Kind }) {
     setSaving(true);
     setError('');
     try {
-      const body = { ...doc, status: doc!.status };
-      const saved = id
+      let status = doc!.status;
+      if (kind === 'invoice') {
+        if (mode === 'draft') status = 'draft';
+        else if (status === 'draft') status = ''; // issuing: the server works out unpaid, partial or paid
+      }
+      const body = { ...doc, status };
+      let saved = id
         ? await api.put<Doc>(`/api/documents/${id}${refresh ? '?refresh=1' : ''}`, body)
         : await api.post<Doc>('/api/documents', body);
+      if (mode === 'issue') saved = await api.post<Doc>(`/api/documents/${saved.id}/issue`);
       clearDraft(draftKey);
       if (doc!.customerId) remember(doc!.customerId);
-      toast(`${kind === 'invoice' ? 'Invoice' : 'Quote'} saved`);
-      nav(`${base}/${saved.id}${then === 'share' ? '?share=1' : ''}`, { state: { justSaved: !id } });
+      toast(
+        mode === 'issue'
+          ? 'Invoice issued'
+          : mode === 'draft'
+            ? 'Draft saved'
+            : `${kind === 'invoice' ? 'Invoice' : 'Quote'} saved`
+      );
+      nav(`${base}/${saved.id}${then === 'share' ? '?share=1' : ''}`, {
+        state: { justSaved: !id || mode === 'issue' }
+      });
     } catch (err) {
       setError(errorText(err, 'Could not save.'));
     } finally {
@@ -516,9 +557,11 @@ export function DocumentEditor({ kind }: { kind: Kind }) {
           <section id="sec-items" className="sect">
             <h2>2 · Items and work</h2>
             <datalist id="product-list">
-              {cat.products.map(p => (
-                <option key={p.id} value={p.name} />
-              ))}
+              {cat.products.flatMap(p => [
+                <option key={p.id} value={p.name} label={p.sku || undefined} />,
+                ...(p.sku ? [<option key={`${p.id}-s`} value={p.sku} label={p.name} />] : []),
+                ...(p.barcode ? [<option key={`${p.id}-b`} value={p.barcode} label={p.name} />] : [])
+              ])}
             </datalist>
             <div className="scroll">
               <table className="lines stack">
@@ -608,6 +651,59 @@ export function DocumentEditor({ kind }: { kind: Kind }) {
                       </td>
                       <td className="num amount-cell" data-label="Amount">
                         {money(gross(l))}
+                      </td>
+                      <td className="line-more" data-label="">
+                        <details>
+                          <summary>Code, period and tax reason</summary>
+                          <div className="line-fields">
+                            <label>
+                              Item code (SKU)
+                              <input value={l.code} onChange={e => setLine(i, { code: e.target.value })} />
+                            </label>
+                            <label>
+                              Tax code (HSN, SAC)
+                              <input value={l.taxCode} onChange={e => setLine(i, { taxCode: e.target.value })} />
+                            </label>
+                            <label>
+                              Service period
+                              <input
+                                value={l.period}
+                                placeholder="e.g. Oct 2026"
+                                onChange={e => setLine(i, { period: e.target.value })}
+                              />
+                            </label>
+                            <label>
+                              Kind of line
+                              <select
+                                value={l.lineType}
+                                onChange={e => setLine(i, { lineType: e.target.value as Line['lineType'] })}
+                              >
+                                <option value="">Not specified</option>
+                                <option value="service">Service</option>
+                                <option value="product">Product</option>
+                                <option value="time">Time and project</option>
+                                <option value="expense">Expense to reimburse</option>
+                                <option value="shipping">Shipping</option>
+                              </select>
+                            </label>
+                            <label>
+                              Why no tax is charged
+                              <select
+                                value={l.taxCategory}
+                                onChange={e => {
+                                  const c = e.target.value as Line['taxCategory'];
+                                  setLine(i, c ? { taxCategory: c, taxRate: 0, taxMode: '' } : { taxCategory: c });
+                                }}
+                              >
+                                <option value="">Tax applies as set above</option>
+                                <option value="exempt">Exempt</option>
+                                <option value="zero">Zero-rated</option>
+                                <option value="reverse_charge">Reverse charge</option>
+                                <option value="export">Export</option>
+                              </select>
+                            </label>
+                          </div>
+                        </details>
                       </td>
                       <td className="line-actions" data-label="">
                         <button
@@ -754,7 +850,32 @@ export function DocumentEditor({ kind }: { kind: Kind }) {
                 <input type="date" value={doc.dueOn} onChange={e => set({ dueOn: e.target.value })} />
               </label>
             </div>
+            <div className="grid2">
+              <label>
+                Date of supply (if different)
+                <input type="date" value={doc.supplyDate} onChange={e => set({ supplyDate: e.target.value })} />
+              </label>
+              <label>
+                Purchase order or reference
+                <input value={doc.poRef} onChange={e => set({ poRef: e.target.value })} />
+              </label>
+              <label>
+                Project or order
+                <input value={doc.projectRef} onChange={e => set({ projectRef: e.target.value })} />
+              </label>
+            </div>
             <div className="row terms" role="group" aria-label="Payment terms">
+              {customer && customer.paymentTermsDays > 0 && (
+                <button
+                  type="button"
+                  className={
+                    doc.dueOn && doc.dueOn === addDays(doc.issuedOn, customer.paymentTermsDays) ? 'chip on' : 'chip'
+                  }
+                  onClick={() => set({ dueOn: addDays(doc.issuedOn, customer.paymentTermsDays) })}
+                >
+                  {customer.name}: Net {customer.paymentTermsDays}
+                </button>
+              )}
               {[7, 14, 30, 45, 60].map(n => (
                 <button
                   type="button"
@@ -847,7 +968,62 @@ export function DocumentEditor({ kind }: { kind: Kind }) {
             ) : (
               <p className="muted">Without a bank account the invoice shows no payment details.</p>
             )}
-            {kind === 'invoice' && (
+            <details className="more">
+              <summary>Show the total in another currency</summary>
+              <div className="grid2">
+                <label>
+                  Settlement currency
+                  <select
+                    value={doc.settlementCurrency}
+                    onChange={e =>
+                      set({
+                        settlementCurrency: e.target.value,
+                        ...(e.target.value ? {} : { exchangeRate: 0, exchangeDate: '' })
+                      })
+                    }
+                  >
+                    <option value="">None</option>
+                    {cat.currencies
+                      .filter(c => c.id !== doc.currencyId)
+                      .map(c => (
+                        <option key={c.id} value={c.code}>
+                          {c.code} {c.symbol}
+                        </option>
+                      ))}
+                  </select>
+                </label>
+                {doc.settlementCurrency && (
+                  <>
+                    <label>
+                      Exchange rate (1 {currency?.code} = ? {doc.settlementCurrency})
+                      <input
+                        type="number"
+                        step="any"
+                        min="0"
+                        value={doc.exchangeRate || ''}
+                        onChange={e => set({ exchangeRate: Number(e.target.value) })}
+                      />
+                    </label>
+                    <label>
+                      Rate date
+                      <input
+                        type="date"
+                        value={doc.exchangeDate}
+                        onChange={e => set({ exchangeDate: e.target.value })}
+                      />
+                    </label>
+                  </>
+                )}
+              </div>
+              <p className="muted">
+                The invoice stays in {currency?.code}. The other amount is shown for information, at the rate you enter;
+                Mavri does not look rates up.
+              </p>
+            </details>
+            {kind === 'invoice' && defaultMode === 'draft' && (
+              <p className="muted">Payments can be recorded once the invoice is issued.</p>
+            )}
+            {kind === 'invoice' && defaultMode !== 'draft' && (
               <>
                 <h3>Payments received</h3>
                 {doc.payments.length === 0 && (
@@ -976,12 +1152,34 @@ export function DocumentEditor({ kind }: { kind: Kind }) {
               <button type="button" onClick={() => nav(id ? `${base}/${id}` : base)}>
                 Cancel
               </button>
-              <button type="button" disabled={saving} onClick={e => save(e as unknown as FormEvent, 'share')}>
-                Save and share
-              </button>
-              <button className="primary" disabled={saving}>
-                {saving ? 'Saving…' : 'Save'}
-              </button>
+              {kind === 'invoice' ? (
+                <>
+                  <button className={defaultMode === 'draft' ? '' : ''} disabled={saving}>
+                    {saving ? 'Saving…' : defaultMode === 'draft' ? 'Save draft' : 'Save'}
+                  </button>
+                  <button
+                    type="button"
+                    className="primary"
+                    disabled={saving}
+                    onClick={e => save(e as unknown as FormEvent, { mode: 'issue' })}
+                  >
+                    Issue invoice
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    disabled={saving}
+                    onClick={e => save(e as unknown as FormEvent, { then: 'share' })}
+                  >
+                    Save and share
+                  </button>
+                  <button className="primary" disabled={saving}>
+                    {saving ? 'Saving…' : 'Save'}
+                  </button>
+                </>
+              )}
             </div>
           </section>
         </div>
@@ -1004,7 +1202,7 @@ export function DocumentEditor({ kind }: { kind: Kind }) {
           <small className="muted">Total</small> <strong>{money(totals.totalCents)}</strong>
         </span>
         <button className="primary" disabled={saving}>
-          {saving ? 'Saving…' : 'Save'}
+          {saving ? 'Saving…' : kind === 'invoice' && defaultMode === 'draft' ? 'Save draft' : 'Save'}
         </button>
       </div>
 

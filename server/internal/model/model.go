@@ -13,6 +13,9 @@ const (
 	StatusPartial  = "partial"
 	StatusPaid     = "paid"
 	StatusVoid     = "void"
+	StatusDraft    = "draft"    // an invoice not yet issued
+	StatusCredited = "credited" // an invoice settled by credit notes
+	StatusCredit   = "credit"   // a credit note
 	StatusOpen     = "open"
 	StatusAccepted = "accepted"
 	StatusDeclined = "declined"
@@ -20,26 +23,31 @@ const (
 
 // Party is a company or person: kind "issuer" sends documents, "customer" receives them.
 type Party struct {
-	ID             int64  `db:"id" json:"id"`
-	Kind           string `db:"kind" json:"kind"`
-	Name           string `db:"name" json:"name"`
-	Email          string `db:"email" json:"email"`
-	Phone          string `db:"phone" json:"phone"`
-	Address        string `db:"address" json:"address"`
-	TaxID          string `db:"tax_id" json:"taxId"`
-	Country        string `db:"country" json:"country"`
-	EScheme        string `db:"e_scheme" json:"eScheme"`
-	EAddress       string `db:"e_address" json:"eAddress"`
-	BuyerReference string `db:"buyer_reference" json:"buyerReference"`
-	TaxExempt      bool   `db:"tax_exempt" json:"taxExempt"`
-	Note           string `db:"note" json:"note"`
-	Logo           []byte `db:"logo" json:"logo,omitempty"`
-	LogoType       string `db:"logo_type" json:"logoType"`
-	NoReminders    bool   `db:"no_reminders" json:"noReminders"`
-	Language       string `db:"language" json:"language"`
-	Archived       bool   `db:"archived" json:"archived"`
-	CreatedAt      string `db:"created_at" json:"createdAt"`
-	UpdatedAt      string `db:"updated_at" json:"updatedAt"`
+	ID                int64  `db:"id" json:"id"`
+	Kind              string `db:"kind" json:"kind"`
+	Name              string `db:"name" json:"name"`
+	Email             string `db:"email" json:"email"`
+	Phone             string `db:"phone" json:"phone"`
+	Address           string `db:"address" json:"address"`
+	TaxID             string `db:"tax_id" json:"taxId"`
+	Country           string `db:"country" json:"country"`
+	EScheme           string `db:"e_scheme" json:"eScheme"`
+	EAddress          string `db:"e_address" json:"eAddress"`
+	BuyerReference    string `db:"buyer_reference" json:"buyerReference"`
+	TaxExempt         bool   `db:"tax_exempt" json:"taxExempt"`
+	Note              string `db:"note" json:"note"`
+	Logo              []byte `db:"logo" json:"logo,omitempty"`
+	LogoType          string `db:"logo_type" json:"logoType"`
+	NoReminders       bool   `db:"no_reminders" json:"noReminders"`
+	Language          string `db:"language" json:"language"`
+	PaymentTermsDays  int    `db:"payment_terms_days" json:"paymentTermsDays"`
+	Timezone          string `db:"timezone" json:"timezone"`
+	QuietFrom         string `db:"quiet_from" json:"quietFrom"`
+	QuietTo           string `db:"quiet_to" json:"quietTo"`
+	ContactPreference string `db:"contact_preference" json:"contactPreference"`
+	Archived          bool   `db:"archived" json:"archived"`
+	CreatedAt         string `db:"created_at" json:"createdAt"`
+	UpdatedAt         string `db:"updated_at" json:"updatedAt"`
 }
 
 // Currency describes how amounts in one currency are shown.
@@ -86,6 +94,9 @@ type Product struct {
 	PriceCents  int64  `db:"price_cents" json:"priceCents"`
 	CategoryID  *int64 `db:"category_id" json:"categoryId"`
 	UnitID      *int64 `db:"unit_id" json:"unitId"`
+	SKU         string `db:"sku" json:"sku"`
+	TaxCode     string `db:"tax_code" json:"taxCode"`
+	Barcode     string `db:"barcode" json:"barcode"`
 	Archived    bool   `db:"archived" json:"archived"`
 }
 
@@ -140,6 +151,14 @@ type Line struct {
 	UnitCents int64   `json:"unitCents"`
 	TaxRate   float64 `json:"taxRate"`
 	TaxMode   string  `json:"taxMode"`
+	// Code is the SKU or item code, TaxCode the HSN, SAC or commodity code, Period the service period (free text).
+	Code    string `json:"code"`
+	TaxCode string `json:"taxCode"`
+	Period  string `json:"period"`
+	// LineType is "", "service", "product", "shipping", "expense" or "time".
+	LineType string `json:"lineType"`
+	// TaxCategory is "", "exempt", "zero", "reverse_charge" or "export": why no tax is charged. It forces the rate to zero.
+	TaxCategory string `json:"taxCategory"`
 }
 
 // Payment is money received against an invoice.
@@ -147,6 +166,7 @@ type Payment struct {
 	ID          int64  `db:"id" json:"id,omitempty"`
 	DocumentID  int64  `db:"document_id" json:"-"`
 	AmountCents int64  `db:"amount_cents" json:"amountCents"`
+	Kind        string `db:"kind" json:"kind"` // "payment" (default) or "refund"
 	PaidOn      string `db:"paid_on" json:"paidOn"`
 	Method      string `db:"method" json:"method"`
 	Note        string `db:"note" json:"note"`
@@ -186,6 +206,24 @@ type Document struct {
 	NoteCustomer  string     `json:"noteCustomer"`
 	NoteTerms     string     `json:"noteTerms"`
 	NoteThanks    string     `json:"noteThanks"`
+
+	// DocType is "" for an ordinary invoice or quote, "credit" or "debit" for a correction of Corrects.
+	DocType        string `json:"docType"`
+	Corrects       *int64 `json:"corrects"`
+	CorrectsNumber string `json:"correctsNumber"` // the number of the invoice a credit or debit note corrects
+	// Locked is true once an invoice is issued: its figures and details can no longer change.
+	Locked   bool   `json:"locked"`
+	IssuedAt string `json:"issuedAt"`
+	// CreditedCents is the total of credit notes against this invoice; it counts as settled in PaidCents.
+	CreditedCents int64  `json:"creditedCents"`
+	ReceivedCents int64  `json:"receivedCents"` // money actually received, net of refunds
+	SupplyDate    string `json:"supplyDate"`
+	PORef         string `json:"poRef"`
+	ProjectRef    string `json:"projectRef"`
+	// SettlementCurrency, ExchangeRate and ExchangeDate show the total in a second currency (1 unit of the document currency = ExchangeRate units of it).
+	SettlementCurrency string  `json:"settlementCurrency"`
+	ExchangeRate       float64 `json:"exchangeRate"`
+	ExchangeDate       string  `json:"exchangeDate"`
 
 	// Copies taken when the document was saved.
 	Issuer   Party       `json:"issuer"`
@@ -231,7 +269,12 @@ type Summary struct {
 	CurrencyPat   string `json:"currencyPattern"`
 	CurrencyScale int    `json:"currencyDecimals"`
 	TotalCents    int64  `json:"totalCents"`
-	PaidCents     int64  `json:"paidCents"`
+	PaidCents     int64  `json:"paidCents"` // received plus credited
+	ReceivedCents int64  `json:"receivedCents"`
+	CreditedCents int64  `json:"creditedCents"`
+	DocType       string `json:"docType"`
+	Locked        bool   `json:"locked"`
+	Corrects      int64  `json:"corrects"`
 }
 
 // Settings are the app preferences.
@@ -239,6 +282,8 @@ type Settings struct {
 	InvoicePrefix string   `json:"invoicePrefix"`
 	InvoiceSuffix string   `json:"invoiceSuffix"`
 	QuotePrefix   string   `json:"quotePrefix"`
+	CreditPrefix  string   `json:"creditPrefix"`
+	DebitPrefix   string   `json:"debitPrefix"`
 	DateFormat    string   `json:"dateFormat"`
 	NumberLocale  string   `json:"numberLocale"`
 	Features      Features `json:"features"`
@@ -256,7 +301,7 @@ type Features struct {
 
 // DefaultSettings are used until the owner saves their own.
 func DefaultSettings() Settings {
-	return Settings{DateFormat: "yyyy-MM-dd", NumberLocale: "en-US", QuotePrefix: "Q-",
+	return Settings{DateFormat: "yyyy-MM-dd", NumberLocale: "en-US", QuotePrefix: "Q-", CreditPrefix: "CN-", DebitPrefix: "DN-",
 		Features: Features{true, true, true, true, true, true}}
 }
 

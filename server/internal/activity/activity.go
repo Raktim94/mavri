@@ -55,7 +55,7 @@ var Events = []string{
 	"invoice.created", "invoice.updated", "invoice.paid", "invoice.voided", "invoice.deleted",
 	"quote.created", "quote.updated", "quote.accepted", "quote.declined", "quote.deleted",
 	"payment.recorded", "payment.failed", "document.shared", "document.viewed", "document.emailed",
-	"reminder.sent", "email.failed", "payment.promised", "dispute.opened", "dispute.resolved", "customer.created", "customer.updated", "backup.completed", "backup.failed",
+	"reminder.sent", "email.failed", "payment.promised", "dispute.opened", "dispute.resolved", "customer.created", "customer.updated", "invoice.issued", "credit_note.created", "debit_note.created", "payment.refunded", "backup.completed", "backup.failed",
 }
 
 // Hub records history and queues webhook deliveries.
@@ -241,6 +241,8 @@ func DocEvents(old *model.Document, cur model.Document) []Event {
 		switch cur.Status {
 		case model.StatusPaid:
 			out = append(out, ev("paid", "invoice.paid", "status "+old.Status+" → paid"))
+		case model.StatusCredited:
+			out = append(out, ev("credited", "", "settled by credit notes"))
 		case model.StatusVoid:
 			out = append(out, ev("voided", "invoice.voided", ""))
 		case model.StatusAccepted:
@@ -253,11 +255,15 @@ func DocEvents(old *model.Document, cur model.Document) []Event {
 	}
 	if n := len(cur.Payments) - len(old.Payments); n > 0 {
 		p := cur.Payments[len(cur.Payments)-1]
-		detail := money.Format(p.AmountCents, cur.Currency) + " received on " + p.PaidOn
-		if n > 1 {
-			detail = strconv.Itoa(n) + " payments added, the last " + detail
+		if p.Kind == "refund" {
+			out = append(out, Event{Action: "refund recorded", Entity: kind, EntityID: cur.ID, Label: cur.FullNumber, Detail: money.Format(p.AmountCents, cur.Currency) + " refunded on " + p.PaidOn, Name: "payment.refunded", Data: data})
+		} else {
+			detail := money.Format(p.AmountCents, cur.Currency) + " received on " + p.PaidOn
+			if n > 1 {
+				detail = strconv.Itoa(n) + " payments added, the last " + detail
+			}
+			out = append(out, Event{Action: "payment recorded", Entity: kind, EntityID: cur.ID, Label: cur.FullNumber, Detail: detail, Name: "payment.recorded", Data: data})
 		}
-		out = append(out, Event{Action: "payment recorded", Entity: kind, EntityID: cur.ID, Label: cur.FullNumber, Detail: detail, Name: "payment.recorded", Data: data})
 	}
 	if len(out) == 0 || changedContent(*old, cur) {
 		out = append(out, ev("updated", kind+".updated", ""))

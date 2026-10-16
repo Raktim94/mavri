@@ -54,6 +54,19 @@ export const resources: Resource[] = [
     defaults: { kind: 'customer' },
     fields: [
       ...partyFields,
+      f('paymentTermsDays', 'Payment terms (days until due, 0 for none)', { kind: 'number' }),
+      f('contactPreference', 'How this customer likes to be contacted', {
+        kind: 'select',
+        choices: [
+          { value: '', label: 'No preference' },
+          { value: 'email', label: 'Email' },
+          { value: 'whatsapp', label: 'WhatsApp' },
+          { value: 'phone', label: 'Phone' }
+        ]
+      }),
+      f('timezone', 'Time zone for reminders (for example Asia/Kolkata)'),
+      f('quietFrom', 'No reminders from (HH:MM)'),
+      f('quietTo', 'No reminders until (HH:MM)'),
       f('language', 'Language of documents sent to this customer', {
         kind: 'select',
         choices: LANGUAGES.map(l => ({
@@ -84,6 +97,9 @@ export const resources: Resource[] = [
     fields: [
       f('name', 'Name', { required: true, list: true }),
       f('priceCents', 'Price', { kind: 'price', list: true }),
+      f('sku', 'Item code (SKU)', { list: true }),
+      f('barcode', 'Barcode (a scanner can type it into an invoice line)'),
+      f('taxCode', 'Tax code (HSN, SAC)'),
       f('categoryId', 'Category', { kind: 'select', options: { from: '/api/groups?kind=category', label: 'name' } }),
       f('unitId', 'Unit', { kind: 'select', options: { from: '/api/groups?kind=unit', label: 'name' } }),
       f('description', 'Description', { kind: 'textarea' })

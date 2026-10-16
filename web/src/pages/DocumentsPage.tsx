@@ -261,6 +261,9 @@ export function DocumentsPage({ kind }: { kind: Kind }) {
                     </td>
                     <td>
                       <Link to={`${base}/${r.id}`}>{r.fullNumber}</Link>
+                      {r.docType && (
+                        <small className="muted"> {r.docType === 'credit' ? 'credit note' : 'debit note'}</small>
+                      )}
                     </td>
                     <td>{r.customerName}</td>
                     <td>{r.issuedOn}</td>
@@ -283,9 +286,11 @@ export function DocumentsPage({ kind }: { kind: Kind }) {
                     <td className="actions">
                       <button onClick={() => nav(`${base}/${r.id}/edit`)}>Edit</button>
                       <button onClick={() => duplicate(r)}>Duplicate</button>
-                      <button className="danger" onClick={() => remove(r)}>
-                        Delete
-                      </button>
+                      {!r.locked && (
+                        <button className="danger" onClick={() => remove(r)}>
+                          Delete
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}

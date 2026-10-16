@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"sort"
 	"strconv"
 	"strings"
@@ -48,6 +49,17 @@ type docRow struct {
 	CurrencySnap     string  `db:"currency_snap"`
 	BankSnap         string  `db:"bank_snap"`
 	StyleSnap        string  `db:"style_snap"`
+	DocType          string  `db:"doc_type"`
+	Corrects         *int64  `db:"corrects"`
+	Locked           bool    `db:"locked"`
+	IssuedAt         string  `db:"issued_at"`
+	CreditedCents    int64   `db:"credited_cents"`
+	SupplyDate       string  `db:"supply_date"`
+	PORef            string  `db:"po_ref"`
+	ProjectRef       string  `db:"project_ref"`
+	SettlementCur    string  `db:"settlement_currency"`
+	ExchangeRate     float64 `db:"exchange_rate"`
+	ExchangeDate     string  `db:"exchange_date"`
 	CreatedAt        string  `db:"created_at"`
 	UpdatedAt        string  `db:"updated_at"`
 }
@@ -66,6 +78,9 @@ func (r docRow) toDocument() model.Document {
 		ShippingCents: r.ShippingCents, TaxRate: r.TaxRate, TaxMode: r.TaxMode,
 		NoteCustomer: r.NoteCustomer, NoteTerms: r.NoteTerms, NoteThanks: r.NoteThanks,
 		CreatedAt: r.CreatedAt, UpdatedAt: r.UpdatedAt,
+		DocType: r.DocType, Corrects: r.Corrects, Locked: r.Locked, IssuedAt: r.IssuedAt, CreditedCents: r.CreditedCents,
+		SupplyDate: r.SupplyDate, PORef: r.PORef, ProjectRef: r.ProjectRef,
+		SettlementCurrency: r.SettlementCur, ExchangeRate: r.ExchangeRate, ExchangeDate: r.ExchangeDate,
 		Lines: []model.Line{}, Payments: []model.Payment{}, Attachments: []model.Attachment{},
 	}
 	_ = json.Unmarshal([]byte(r.IssuerSnap), &d.Issuer)
@@ -86,6 +101,9 @@ func toRow(d model.Document) docRow {
 		ShippingCents: d.ShippingCents, TaxRate: d.TaxRate, TaxMode: d.TaxMode,
 		NoteCustomer: d.NoteCustomer, NoteTerms: d.NoteTerms, NoteThanks: d.NoteThanks,
 		CreatedAt: d.CreatedAt,
+		DocType:   d.DocType, Corrects: d.Corrects, Locked: d.Locked, IssuedAt: d.IssuedAt, CreditedCents: d.CreditedCents,
+		SupplyDate: d.SupplyDate, PORef: d.PORef, ProjectRef: d.ProjectRef,
+		SettlementCur: d.SettlementCurrency, ExchangeRate: d.ExchangeRate, ExchangeDate: d.ExchangeDate,
 	}
 }
 
@@ -102,28 +120,35 @@ func validDate(s string) bool {
 // ---- reading ---------------------------------------------------------------
 
 type lineRow struct {
-	ID         int64   `db:"id"`
-	DocumentID int64   `db:"document_id"`
-	Position   int     `db:"position"`
-	ProductID  *int64  `db:"product_id"`
-	Name       string  `db:"name"`
-	Unit       string  `db:"unit"`
-	Quantity   float64 `db:"quantity"`
-	UnitCents  int64   `db:"unit_cents"`
-	TaxRate    float64 `db:"tax_rate"`
-	TaxMode    string  `db:"tax_mode"`
+	ID          int64   `db:"id"`
+	DocumentID  int64   `db:"document_id"`
+	Position    int     `db:"position"`
+	ProductID   *int64  `db:"product_id"`
+	Name        string  `db:"name"`
+	Unit        string  `db:"unit"`
+	Quantity    float64 `db:"quantity"`
+	UnitCents   int64   `db:"unit_cents"`
+	TaxRate     float64 `db:"tax_rate"`
+	TaxMode     string  `db:"tax_mode"`
+	Code        string  `db:"code"`
+	TaxCode     string  `db:"tax_code"`
+	Period      string  `db:"period"`
+	LineType    string  `db:"line_type"`
+	TaxCategory string  `db:"tax_category"`
 }
 
 var linesTable = db.NewTable[lineRow]("document_lines")
 
 func (r lineRow) toLine() model.Line {
 	return model.Line{ID: r.ID, ProductID: r.ProductID, Name: r.Name, Unit: r.Unit, Quantity: r.Quantity,
-		UnitCents: r.UnitCents, TaxRate: r.TaxRate, TaxMode: r.TaxMode}
+		UnitCents: r.UnitCents, TaxRate: r.TaxRate, TaxMode: r.TaxMode, Code: r.Code, TaxCode: r.TaxCode, Period: r.Period,
+		LineType: r.LineType, TaxCategory: r.TaxCategory}
 }
 
 func (s *Store) finish(d *model.Document) {
 	d.Totals = money.Compute(d)
 	d.PaidCents = money.Paid(d)
+	d.ReceivedCents = money.Received(d)
 }
 
 // GetDocument loads a document with its lines, payments and attachments.
@@ -145,6 +170,9 @@ func (s *Store) GetDocument(ctx context.Context, q db.Queryer, id int64) (model.
 	}
 	if d.Attachments, err = attachmentsTable.Select(ctx, q, "WHERE document_id = ? ORDER BY id", id); err != nil {
 		return d, err
+	}
+	if d.Corrects != nil {
+		_ = q.QueryRowContext(ctx, `SELECT number_prefix || number || number_suffix FROM documents WHERE id = ?`, *d.Corrects).Scan(&d.CorrectsNumber)
 	}
 	s.finish(&d)
 	return d, nil
@@ -204,7 +232,7 @@ func (s *Store) ListDocuments(ctx context.Context, f Filter) ([]model.Summary, i
 		COALESCE(json_extract(d.currency_snap, '$.code'), ''), COALESCE(json_extract(d.currency_snap, '$.symbol'), ''),
 		COALESCE(json_extract(d.currency_snap, '$.pattern'), ''), COALESCE(json_extract(d.currency_snap, '$.decimals'), 2),
 		d.discount_mode, d.discount_cents, d.discount_percent, d.surcharge_mode, d.surcharge_cents, d.surcharge_percent,
-		d.shipping_cents, d.tax_rate, d.tax_mode FROM documents d `+cond+" "+tail, qargs...)
+		d.shipping_cents, d.tax_rate, d.tax_mode, d.doc_type, d.locked, d.credited_cents, COALESCE(d.corrects, 0) FROM documents d `+cond+" "+tail, qargs...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -216,7 +244,7 @@ func (s *Store) ListDocuments(ctx context.Context, f Filter) ([]model.Summary, i
 		var d model.Document
 		if err := rows.Scan(&sm.ID, &sm.Kind, &sm.FullNumber, &sm.CustomerID, &sm.CustomerName, &sm.IssuedOn, &sm.DueOn, &sm.Status,
 			&sm.CurrencyCode, &sm.CurrencySym, &sm.CurrencyPat, &sm.CurrencyScale, &d.Discount.Mode, &d.Discount.Cents, &d.Discount.Percent,
-			&d.Surcharge.Mode, &d.Surcharge.Cents, &d.Surcharge.Percent, &d.ShippingCents, &d.TaxRate, &d.TaxMode); err != nil {
+			&d.Surcharge.Mode, &d.Surcharge.Cents, &d.Surcharge.Percent, &d.ShippingCents, &d.TaxRate, &d.TaxMode, &sm.DocType, &sm.Locked, &sm.CreditedCents, &sm.Corrects); err != nil {
 			return nil, 0, err
 		}
 		out = append(out, sm)
@@ -244,7 +272,7 @@ func (s *Store) ListDocuments(ctx context.Context, f Filter) ([]model.Summary, i
 		i := idx[l.DocumentID]
 		shells[i].Lines = append(shells[i].Lines, l.toLine())
 	}
-	prows, err := s.DB.QueryContext(ctx, "SELECT document_id, amount_cents FROM payments WHERE document_id IN "+in, ids...)
+	prows, err := s.DB.QueryContext(ctx, "SELECT document_id, CASE WHEN kind = 'refund' THEN -amount_cents ELSE amount_cents END FROM payments WHERE document_id IN "+in, ids...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -258,6 +286,8 @@ func (s *Store) ListDocuments(ctx context.Context, f Filter) ([]model.Summary, i
 	}
 	for i := range out {
 		out[i].TotalCents = money.Compute(&shells[i]).TotalCents
+		out[i].ReceivedCents = out[i].PaidCents
+		out[i].PaidCents += out[i].CreditedCents
 	}
 	return out, total, prows.Err()
 }
@@ -320,6 +350,9 @@ type SaveOptions struct {
 	// RefreshDetails re-copies the issuer, customer, bank, currency and style
 	// from the live records even when they did not change.
 	RefreshDetails bool
+	// Internal lets the caller set the fields only the store controls (document type, lock, credits). Used by
+	// corrections and issuing, never by what arrives over the API.
+	Internal bool
 }
 
 func party(ctx context.Context, q db.Queryer, id int64, kind string) (model.Party, error) {
@@ -339,6 +372,39 @@ func (s *Store) prepare(ctx context.Context, q db.Queryer, d *model.Document, ol
 	if old != nil && old.Kind != d.Kind {
 		return docRow{}, invalid("a document cannot change kind")
 	}
+	if !opt.Internal {
+		// These belong to the store. A new document starts unlocked and uncorrected; an existing one keeps what it has.
+		d.DocType, d.Corrects, d.Locked, d.IssuedAt, d.CreditedCents = "", nil, false, "", 0
+		if old != nil {
+			d.DocType, d.Corrects, d.Locked, d.IssuedAt, d.CreditedCents = old.DocType, old.Corrects, old.Locked, old.IssuedAt, old.CreditedCents
+		}
+	}
+	if old != nil && old.Locked && !opt.Internal {
+		if err := lockedChange(*old, *d); err != nil {
+			return docRow{}, err
+		}
+		opt.RefreshDetails = false
+	}
+	if d.DocType != "" && d.DocType != "credit" && d.DocType != "debit" {
+		return docRow{}, invalid("unknown document type")
+	}
+	if d.SupplyDate != "" && !validDate(d.SupplyDate) {
+		return docRow{}, invalid("supplyDate must be a date like 2026-10-12")
+	}
+	d.SettlementCurrency = strings.ToUpper(strings.TrimSpace(d.SettlementCurrency))
+	if d.SettlementCurrency != "" {
+		if len(d.SettlementCurrency) != 3 {
+			return docRow{}, invalid("the settlement currency must be a three-letter code")
+		}
+		if d.ExchangeRate <= 0 {
+			return docRow{}, invalid("give the exchange rate for the settlement currency")
+		}
+		if d.ExchangeDate != "" && !validDate(d.ExchangeDate) {
+			return docRow{}, invalid("exchangeDate must be a date like 2026-10-12")
+		}
+	} else {
+		d.ExchangeRate, d.ExchangeDate = 0, ""
+	}
 	if !validDate(d.IssuedOn) {
 		return docRow{}, invalid("issuedOn must be a date like 2026-10-12")
 	}
@@ -357,6 +423,19 @@ func (s *Store) prepare(ctx context.Context, q db.Queryer, d *model.Document, ol
 		}
 		if l.TaxMode != "" && l.TaxMode != "add" && l.TaxMode != "included" {
 			return docRow{}, invalid("line %d: tax mode must be add or included", i+1)
+		}
+		switch l.TaxCategory {
+		case "":
+		case "exempt", "zero", "reverse_charge", "export":
+			// A line that is exempt, zero-rated, reverse-charged or exported charges no tax, whatever rate was typed.
+			d.Lines[i].TaxRate, d.Lines[i].TaxMode = 0, ""
+		default:
+			return docRow{}, invalid("line %d: tax category must be exempt, zero, reverse_charge or export", i+1)
+		}
+		switch l.LineType {
+		case "", "service", "product", "shipping", "expense", "time":
+		default:
+			return docRow{}, invalid("line %d: unknown line type", i+1)
 		}
 	}
 	for _, a := range []struct {
@@ -383,9 +462,30 @@ func (s *Store) prepare(ctx context.Context, q db.Queryer, d *model.Document, ol
 	if d.Kind == model.KindQuote && len(d.Payments) > 0 {
 		return docRow{}, invalid("quotes cannot have payments")
 	}
-	for _, p := range d.Payments {
+	for i, p := range d.Payments {
 		if p.AmountCents <= 0 || !validDate(p.PaidOn) {
 			return docRow{}, invalid("each payment needs a positive amount and a date")
+		}
+		switch p.Kind {
+		case "":
+			d.Payments[i].Kind = "payment"
+		case "payment", "refund":
+		default:
+			return docRow{}, invalid("a payment is a payment or a refund")
+		}
+	}
+	if money.Received(d) < 0 {
+		return docRow{}, invalid("refunds cannot be more than the payments received")
+	}
+	if d.Status == model.StatusDraft {
+		if d.Kind != model.KindInvoice || d.DocType != "" {
+			return docRow{}, invalid("only an ordinary invoice can be a draft")
+		}
+		if len(d.Payments) > 0 {
+			return docRow{}, invalid("a draft cannot have payments; issue it first")
+		}
+		if d.Locked {
+			return docRow{}, invalid("an issued invoice cannot go back to draft")
 		}
 	}
 
@@ -451,11 +551,19 @@ func (s *Store) prepare(ctx context.Context, q db.Queryer, d *model.Document, ol
 
 	// Status follows the payments for invoices; quotes are set by hand.
 	if d.Kind == model.KindInvoice {
-		if d.Status != "" && d.Status != model.StatusVoid && d.Status != model.StatusUnpaid && d.Status != model.StatusPartial && d.Status != model.StatusPaid {
-			return row, invalid("invoice status must be unpaid, partial, paid or void")
+		if d.Status != "" && d.Status != model.StatusVoid && d.Status != model.StatusUnpaid && d.Status != model.StatusPartial && d.Status != model.StatusPaid &&
+			d.Status != model.StatusDraft && d.Status != model.StatusCredited && d.Status != model.StatusCredit {
+			return row, invalid("invoice status must be draft, unpaid, partial, paid or void")
 		}
 		tmp := *d
-		row.Status = money.InvoiceStatus(d.Status, money.Compute(&tmp).TotalCents, money.Paid(&tmp))
+		switch {
+		case d.DocType == "credit":
+			row.Status = model.StatusCredit
+		case d.Status == model.StatusDraft:
+			row.Status = model.StatusDraft
+		default:
+			row.Status = money.InvoiceStatusFull(d.Status, money.Compute(&tmp).TotalCents, money.Paid(&tmp), tmp.CreditedCents)
+		}
 	} else {
 		switch d.Status {
 		case "":
@@ -486,7 +594,8 @@ func (s *Store) writeChildren(ctx context.Context, tx *sql.Tx, id int64, d *mode
 	}
 	for i, l := range d.Lines {
 		r := lineRow{DocumentID: id, Position: i + 1, ProductID: l.ProductID, Name: strings.TrimSpace(l.Name), Unit: l.Unit,
-			Quantity: l.Quantity, UnitCents: l.UnitCents, TaxRate: l.TaxRate, TaxMode: l.TaxMode}
+			Quantity: l.Quantity, UnitCents: l.UnitCents, TaxRate: l.TaxRate, TaxMode: l.TaxMode,
+			Code: strings.TrimSpace(l.Code), TaxCode: strings.TrimSpace(l.TaxCode), Period: strings.TrimSpace(l.Period), LineType: l.LineType, TaxCategory: l.TaxCategory}
 		if err := linesTable.Insert(ctx, tx, &r); err != nil {
 			return err
 		}
@@ -575,6 +684,9 @@ func wrapDup(err error) error {
 
 // DeleteDocument removes a document and, through cascades, its lines and payments.
 func (s *Store) DeleteDocument(ctx context.Context, id int64) error {
+	if row, err := docs.Get(ctx, s.DB, id); err == nil && row.Locked {
+		return fmt.Errorf("%w: an issued invoice cannot be deleted; void it, or issue a credit note", ErrLocked)
+	}
 	return docs.Delete(ctx, s.DB, id)
 }
 
@@ -687,9 +799,14 @@ func (s *Store) YearReport(ctx context.Context, year string) (Report, error) {
 		r.PaidCents += sm.PaidCents
 	}
 	for _, sm := range list {
-		if sm.Status == model.StatusVoid || len(sm.IssuedOn) < 7 {
+		if sm.Status == model.StatusVoid || sm.Status == model.StatusDraft || len(sm.IssuedOn) < 7 {
 			continue
 		}
+		// A credit note takes away from what was billed; "paid" means money actually received, not credits.
+		if sm.DocType == "credit" {
+			sm.TotalCents = -sm.TotalCents
+		}
+		sm.PaidCents = sm.ReceivedCents
 		yrs[sm.IssuedOn[:4]] = true
 		if sm.IssuedOn[:4] != year {
 			continue

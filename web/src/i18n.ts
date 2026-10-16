@@ -46,7 +46,25 @@ export type Key =
   | 'void'
   | 'open'
   | 'accepted'
-  | 'declined';
+  | 'declined'
+  | 'creditNote'
+  | 'debitNote'
+  | 'corrects'
+  | 'credits'
+  | 'refund'
+  | 'settlementTotal'
+  | 'exchangeRate'
+  | 'poRef'
+  | 'project'
+  | 'supplyDate'
+  | 'taxExempt'
+  | 'taxZero'
+  | 'reverseCharge'
+  | 'taxExport'
+  | 'creditTotal'
+  | 'draft'
+  | 'credited'
+  | 'credit';
 
 const en: Record<Key, string> = {
   invoice: 'Invoice',
@@ -91,7 +109,25 @@ const en: Record<Key, string> = {
   void: 'Void',
   open: 'Open',
   accepted: 'Accepted',
-  declined: 'Declined'
+  declined: 'Declined',
+  creditNote: 'Credit note',
+  debitNote: 'Debit note',
+  corrects: 'Corrects',
+  credits: 'Credit notes',
+  refund: 'Refund',
+  settlementTotal: 'Total in',
+  exchangeRate: 'Exchange rate',
+  poRef: 'Purchase order',
+  project: 'Project',
+  supplyDate: 'Date of supply',
+  taxExempt: 'Exempt',
+  taxZero: 'Zero-rated',
+  reverseCharge: 'Reverse charge',
+  taxExport: 'Export',
+  creditTotal: 'Credit total',
+  draft: 'Draft',
+  credited: 'Credited',
+  credit: 'Credit note'
 };
 
 type Draft = Partial<Record<Key, string>>;
@@ -140,7 +176,25 @@ const drafts: Record<string, Draft> = {
     void: 'Annulée',
     open: 'Ouvert',
     accepted: 'Accepté',
-    declined: 'Refusé'
+    declined: 'Refusé',
+    creditNote: 'Avoir',
+    debitNote: 'Note de débit',
+    corrects: 'Rectifie',
+    credits: 'Avoirs',
+    refund: 'Remboursement',
+    settlementTotal: 'Total en',
+    exchangeRate: 'Taux de change',
+    poRef: 'Bon de commande',
+    project: 'Projet',
+    supplyDate: 'Date de livraison',
+    taxExempt: 'Exonéré',
+    taxZero: 'Taux zéro',
+    reverseCharge: 'Autoliquidation',
+    taxExport: 'Export',
+    creditTotal: 'Total de l’avoir',
+    draft: 'Brouillon',
+    credited: 'Crédité',
+    credit: 'Avoir'
   },
   de: {
     invoice: 'Rechnung',
@@ -185,7 +239,25 @@ const drafts: Record<string, Draft> = {
     void: 'Storniert',
     open: 'Offen',
     accepted: 'Angenommen',
-    declined: 'Abgelehnt'
+    declined: 'Abgelehnt',
+    creditNote: 'Gutschrift',
+    debitNote: 'Belastungsanzeige',
+    corrects: 'Korrigiert',
+    credits: 'Gutschriften',
+    refund: 'Erstattung',
+    settlementTotal: 'Gesamt in',
+    exchangeRate: 'Wechselkurs',
+    poRef: 'Bestellnummer',
+    project: 'Projekt',
+    supplyDate: 'Leistungsdatum',
+    taxExempt: 'Steuerfrei',
+    taxZero: 'Nullsatz',
+    reverseCharge: 'Reverse Charge',
+    taxExport: 'Ausfuhr',
+    creditTotal: 'Gutschriftsbetrag',
+    draft: 'Entwurf',
+    credited: 'Gutgeschrieben',
+    credit: 'Gutschrift'
   },
   es: {
     invoice: 'Factura',
@@ -230,7 +302,25 @@ const drafts: Record<string, Draft> = {
     void: 'Anulada',
     open: 'Abierto',
     accepted: 'Aceptado',
-    declined: 'Rechazado'
+    declined: 'Rechazado',
+    creditNote: 'Nota de crédito',
+    debitNote: 'Nota de débito',
+    corrects: 'Rectifica',
+    credits: 'Notas de crédito',
+    refund: 'Reembolso',
+    settlementTotal: 'Total en',
+    exchangeRate: 'Tipo de cambio',
+    poRef: 'Orden de compra',
+    project: 'Proyecto',
+    supplyDate: 'Fecha de operación',
+    taxExempt: 'Exento',
+    taxZero: 'Tipo cero',
+    reverseCharge: 'Inversión del sujeto pasivo',
+    taxExport: 'Exportación',
+    creditTotal: 'Total del abono',
+    draft: 'Borrador',
+    credited: 'Abonada',
+    credit: 'Nota de crédito'
   },
   it: {
     invoice: 'Fattura',
@@ -275,7 +365,25 @@ const drafts: Record<string, Draft> = {
     void: 'Annullata',
     open: 'Aperto',
     accepted: 'Accettato',
-    declined: 'Rifiutato'
+    declined: 'Rifiutato',
+    creditNote: 'Nota di credito',
+    debitNote: 'Nota di debito',
+    corrects: 'Rettifica',
+    credits: 'Note di credito',
+    refund: 'Rimborso',
+    settlementTotal: 'Totale in',
+    exchangeRate: 'Tasso di cambio',
+    poRef: 'Ordine di acquisto',
+    project: 'Progetto',
+    supplyDate: 'Data di effettuazione',
+    taxExempt: 'Esente',
+    taxZero: 'Aliquota zero',
+    reverseCharge: 'Inversione contabile',
+    taxExport: 'Esportazione',
+    creditTotal: 'Totale della nota',
+    draft: 'Bozza',
+    credited: 'Stornata',
+    credit: 'Nota di credito'
   },
   pt: {
     invoice: 'Fatura',
@@ -320,7 +428,25 @@ const drafts: Record<string, Draft> = {
     void: 'Anulada',
     open: 'Aberto',
     accepted: 'Aceite',
-    declined: 'Recusado'
+    declined: 'Recusado',
+    creditNote: 'Nota de crédito',
+    debitNote: 'Nota de débito',
+    corrects: 'Retifica',
+    credits: 'Notas de crédito',
+    refund: 'Reembolso',
+    settlementTotal: 'Total em',
+    exchangeRate: 'Taxa de câmbio',
+    poRef: 'Nota de encomenda',
+    project: 'Projeto',
+    supplyDate: 'Data da operação',
+    taxExempt: 'Isento',
+    taxZero: 'Taxa zero',
+    reverseCharge: 'Autoliquidação',
+    taxExport: 'Exportação',
+    creditTotal: 'Total do crédito',
+    draft: 'Rascunho',
+    credited: 'Creditada',
+    credit: 'Nota de crédito'
   },
   nl: {
     invoice: 'Factuur',
@@ -365,7 +491,25 @@ const drafts: Record<string, Draft> = {
     void: 'Vervallen',
     open: 'Open',
     accepted: 'Geaccepteerd',
-    declined: 'Afgewezen'
+    declined: 'Afgewezen',
+    creditNote: 'Creditnota',
+    debitNote: 'Debetnota',
+    corrects: 'Corrigeert',
+    credits: 'Creditnota’s',
+    refund: 'Terugbetaling',
+    settlementTotal: 'Totaal in',
+    exchangeRate: 'Wisselkoers',
+    poRef: 'Inkoopordernummer',
+    project: 'Project',
+    supplyDate: 'Datum levering',
+    taxExempt: 'Vrijgesteld',
+    taxZero: 'Nultarief',
+    reverseCharge: 'Verlegd',
+    taxExport: 'Uitvoer',
+    creditTotal: 'Totaal creditnota',
+    draft: 'Concept',
+    credited: 'Gecrediteerd',
+    credit: 'Creditnota'
   },
   hi: {
     invoice: 'इनवॉइस',
@@ -410,7 +554,25 @@ const drafts: Record<string, Draft> = {
     void: 'रद्द',
     open: 'खुला',
     accepted: 'स्वीकृत',
-    declined: 'अस्वीकृत'
+    declined: 'अस्वीकृत',
+    creditNote: 'क्रेडिट नोट',
+    debitNote: 'डेबिट नोट',
+    corrects: 'सुधार',
+    credits: 'क्रेडिट नोट',
+    refund: 'वापसी',
+    settlementTotal: 'में कुल',
+    exchangeRate: 'विनिमय दर',
+    poRef: 'खरीद आदेश',
+    project: 'परियोजना',
+    supplyDate: 'आपूर्ति की तिथि',
+    taxExempt: 'छूट प्राप्त',
+    taxZero: 'शून्य दर',
+    reverseCharge: 'रिवर्स चार्ज',
+    taxExport: 'निर्यात',
+    creditTotal: 'क्रेडिट कुल',
+    draft: 'मसौदा',
+    credited: 'क्रेडिट किया गया',
+    credit: 'क्रेडिट नोट'
   },
   ar: {
     invoice: 'فاتورة',
@@ -455,7 +617,25 @@ const drafts: Record<string, Draft> = {
     void: 'ملغاة',
     open: 'مفتوح',
     accepted: 'مقبول',
-    declined: 'مرفوض'
+    declined: 'مرفوض',
+    creditNote: 'إشعار دائن',
+    debitNote: 'إشعار مدين',
+    corrects: 'يصحح',
+    credits: 'إشعارات دائنة',
+    refund: 'استرداد',
+    settlementTotal: 'الإجمالي بـ',
+    exchangeRate: 'سعر الصرف',
+    poRef: 'أمر الشراء',
+    project: 'المشروع',
+    supplyDate: 'تاريخ التوريد',
+    taxExempt: 'معفى',
+    taxZero: 'نسبة صفرية',
+    reverseCharge: 'الاحتساب العكسي',
+    taxExport: 'تصدير',
+    creditTotal: 'إجمالي الإشعار',
+    draft: 'مسودة',
+    credited: 'مُسدَّدة بإشعار دائن',
+    credit: 'إشعار دائن'
   }
 };
 

@@ -18,6 +18,11 @@ export interface Party {
   taxExempt: boolean;
   note: string;
   noReminders: boolean;
+  paymentTermsDays: number;
+  timezone: string;
+  quietFrom: string;
+  quietTo: string;
+  contactPreference: string;
   logo?: string;
   logoType: string;
   language: string;
@@ -62,6 +67,9 @@ export interface Product {
   priceCents: number;
   categoryId: number | null;
   unitId: number | null;
+  sku: string;
+  taxCode: string;
+  barcode: string;
   archived: boolean;
 }
 
@@ -103,6 +111,9 @@ export interface Adjustment {
   percent: number;
 }
 
+export type TaxCategory = '' | 'exempt' | 'zero' | 'reverse_charge' | 'export';
+export type LineType = '' | 'service' | 'product' | 'shipping' | 'expense' | 'time';
+
 export interface Line {
   id?: number;
   productId: number | null;
@@ -112,11 +123,17 @@ export interface Line {
   unitCents: number;
   taxRate: number;
   taxMode: TaxMode;
+  code: string;
+  taxCode: string;
+  period: string;
+  lineType: LineType;
+  taxCategory: TaxCategory;
 }
 
 export interface Payment {
   id?: number;
   amountCents: number;
+  kind?: 'payment' | 'refund';
   paidOn: string;
   method: string;
   note: string;
@@ -155,6 +172,19 @@ export interface Doc {
   noteCustomer: string;
   noteTerms: string;
   noteThanks: string;
+  docType: '' | 'credit' | 'debit';
+  corrects: number | null;
+  correctsNumber: string;
+  locked: boolean;
+  issuedAt: string;
+  creditedCents: number;
+  receivedCents: number;
+  supplyDate: string;
+  poRef: string;
+  projectRef: string;
+  settlementCurrency: string;
+  exchangeRate: number;
+  exchangeDate: string;
   issuer: Party;
   customer: Party;
   currency: Currency;
@@ -181,6 +211,11 @@ export interface Summary {
   currencyDecimals: number;
   totalCents: number;
   paidCents: number;
+  receivedCents: number;
+  creditedCents: number;
+  docType: '' | 'credit' | 'debit';
+  locked: boolean;
+  corrects: number;
 }
 
 export interface Features {
@@ -196,6 +231,8 @@ export interface Settings {
   invoicePrefix: string;
   invoiceSuffix: string;
   quotePrefix: string;
+  creditPrefix: string;
+  debitPrefix: string;
   dateFormat: string;
   numberLocale: string;
   features: Features;

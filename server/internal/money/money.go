@@ -87,19 +87,34 @@ func Compute(d *model.Document) model.Totals {
 }
 
 // Paid sums the payments of a document.
-func Paid(d *model.Document) int64 {
+func Paid(d *model.Document) int64 { return Received(d) + d.CreditedCents }
+
+// Received is the money actually received: payments minus refunds.
+func Received(d *model.Document) int64 {
 	var s int64
 	for _, p := range d.Payments {
-		s += p.AmountCents
+		if p.Kind == "refund" {
+			s -= p.AmountCents
+		} else {
+			s += p.AmountCents
+		}
 	}
 	return s
 }
 
 // InvoiceStatus is the status an invoice has given its payments, unless it is void.
 func InvoiceStatus(current string, total, paid int64) string {
+	return InvoiceStatusFull(current, total, paid, 0)
+}
+
+// InvoiceStatusFull is InvoiceStatus when credit notes are involved: paid counts payments and credits, and an invoice
+// settled by credit notes alone is "credited".
+func InvoiceStatusFull(current string, total, paid, credited int64) string {
 	switch {
 	case current == model.StatusVoid:
 		return model.StatusVoid
+	case credited > 0 && total > 0 && paid >= total && paid-credited <= 0:
+		return model.StatusCredited
 	case total > 0 && paid >= total:
 		return model.StatusPaid
 	case paid > 0:

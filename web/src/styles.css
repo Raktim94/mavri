@@ -3352,3 +3352,45 @@ tr.picked {
   margin: 0;
   padding-left: 18px;
 }
+
+.paper-refs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 22px;
+  font-size: 0.85em;
+  color: var(--muted);
+}
+.paper-refs strong {
+  color: var(--text);
+}
+.line-extra {
+  display: block;
+  color: var(--muted);
+  font-size: 0.8em;
+}
+
+.lines.stack td.line-more {
+  grid-column: 1 / -1;
+}
+.lines.stack td.line-more::before {
+  content: none;
+}
+.line-more details {
+  border: 0;
+  padding: 0;
+}
+.line-more summary {
+  font-size: 0.85rem;
+  padding: 2px 0;
+  min-height: 0;
+}
+.line-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px 10px;
+  margin-top: 6px;
+}
+.notelist {
+  margin: 4px 0;
+  padding-left: 18px;
+}

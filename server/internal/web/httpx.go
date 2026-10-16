@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/Raktim94/mavri/server/internal/activity"
+	"github.com/Raktim94/mavri/server/internal/auth"
 	"github.com/Raktim94/mavri/server/internal/db"
 	"github.com/Raktim94/mavri/server/internal/store"
 )
@@ -42,6 +43,8 @@ func (s *Server) problem(w http.ResponseWriter, r *http.Request, err error) {
 	switch {
 	case errors.As(err, &v):
 		fail(w, http.StatusBadRequest, "validation", v.Msg)
+	case errors.Is(err, store.ErrLocked):
+		fail(w, http.StatusConflict, "conflict", strings.TrimPrefix(err.Error(), "locked: "))
 	case errors.Is(err, db.ErrNotFound):
 		fail(w, http.StatusNotFound, "not_found", "not found")
 	case errors.Is(err, db.ErrConflict):
@@ -181,6 +184,7 @@ const principalKey ctxKey = 1
 type principal struct {
 	UserID int64 // 0 for an API key
 	KeyID  int64
+	Role   string
 }
 
 func principalFrom(ctx context.Context) principal {
@@ -202,6 +206,12 @@ func sameOrigin(r *http.Request) bool {
 // auth lets a request through with a valid session cookie or API key.
 // humanOnly additionally refuses API keys.
 func (s *Server) auth(humanOnly bool, h http.HandlerFunc) http.HandlerFunc {
+	return s.authRole(humanOnly, false, h)
+}
+
+// authRole is auth that can also require the owner role. Signed-in people have a role: a viewer can only read,
+// staff cannot use the routes marked owner-only. An API key is made by the owner and keeps the access it always had.
+func (s *Server) authRole(humanOnly, ownerOnly bool, h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		if hdr := r.Header.Get("Authorization"); strings.HasPrefix(hdr, "Bearer ") {
@@ -231,7 +241,15 @@ func (s *Server) auth(humanOnly bool, h http.HandlerFunc) http.HandlerFunc {
 			fail(w, http.StatusForbidden, "forbidden", "cross-site request refused")
 			return
 		}
+		if ownerOnly && u.Role != auth.RoleOwner {
+			fail(w, http.StatusForbidden, "forbidden", "only an owner can do this")
+			return
+		}
+		if u.Role == auth.RoleViewer && r.Method != http.MethodGet && r.Method != http.MethodHead {
+			fail(w, http.StatusForbidden, "forbidden", "your account can only look, not change anything")
+			return
+		}
 		ctx = activity.WithSource(ctx, activity.SourceUI, u.Email)
-		h(w, r.WithContext(context.WithValue(ctx, principalKey, principal{UserID: u.ID})))
+		h(w, r.WithContext(context.WithValue(ctx, principalKey, principal{UserID: u.ID, Role: u.Role})))
 	}
 }

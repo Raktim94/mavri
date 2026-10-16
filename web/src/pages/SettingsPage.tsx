@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { useUi } from '../components/ui';
 import { api, download, errorText } from '../api';
 import { UpdatePanel } from '../components/Updates';
+import { PasswordForm, TeamPanel } from '../components/TeamPanel';
+import { useAuth } from '../auth';
 import type { ApiKey, Features, Settings } from '../types';
 
 const features: [keyof Features, string][] = [
@@ -21,6 +23,8 @@ export function SettingsPage({ onSaved }: { onSaved: (s: Settings) => void }) {
   const [label, setLabel] = useState('');
   const [secret, setSecret] = useState('');
   const { confirm, toast } = useUi();
+  const { user } = useAuth();
+  const isOwner = user?.role === 'owner';
 
   const loadKeys = () =>
     api
@@ -87,6 +91,8 @@ export function SettingsPage({ onSaved }: { onSaved: (s: Settings) => void }) {
         <h1>Settings</h1>
       </header>
       {msg && <p role="status">{msg}</p>}
+      <PasswordForm />
+      {isOwner && <TeamPanel />}
       <UpdatePanel />
       <form className="card" onSubmit={save}>
         <h2>Numbering</h2>
@@ -102,6 +108,14 @@ export function SettingsPage({ onSaved }: { onSaved: (s: Settings) => void }) {
           <label>
             Quote prefix
             <input value={s.quotePrefix} onChange={e => set({ quotePrefix: e.target.value })} />
+          </label>
+          <label>
+            Credit note prefix
+            <input value={s.creditPrefix} placeholder="CN-" onChange={e => set({ creditPrefix: e.target.value })} />
+          </label>
+          <label>
+            Debit note prefix
+            <input value={s.debitPrefix} placeholder="DN-" onChange={e => set({ debitPrefix: e.target.value })} />
           </label>
         </div>
         <h2>Features</h2>

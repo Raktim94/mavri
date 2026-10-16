@@ -5,6 +5,8 @@ export const defaultSettings: Settings = {
   invoicePrefix: '',
   invoiceSuffix: '',
   quotePrefix: 'Q-',
+  creditPrefix: 'CN-',
+  debitPrefix: 'DN-',
   dateFormat: 'yyyy-MM-dd',
   numberLocale: 'en-US',
   features: { quotes: true, presets: true, styles: true, reports: true, ubl: true, xrechnung: true }

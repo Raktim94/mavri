@@ -42,7 +42,30 @@ export function Paper({ doc, pay }: { doc: Doc; pay?: PaymentOption[] }) {
     formatMoneyIn(c, doc.currency.decimals, doc.currency.code, lang) ?? formatMoney(c, doc.currency);
   const day = (iso: string) => formatDate(iso, lang);
   const status = (k: string) =>
-    ['unpaid', 'partial', 'paid', 'void', 'open', 'accepted', 'declined'].includes(k) ? t(k as Key) : k;
+    ['unpaid', 'partial', 'paid', 'void', 'open', 'accepted', 'declined', 'draft', 'credited', 'credit'].includes(k)
+      ? t(k as Key)
+      : k;
+  const isCredit = doc.docType === 'credit';
+  const taxReason: Record<string, Key> = {
+    exempt: 'taxExempt',
+    zero: 'taxZero',
+    reverse_charge: 'reverseCharge',
+    export: 'taxExport'
+  };
+  const received = doc.receivedCents ?? doc.paidCents;
+  const settle =
+    doc.settlementCurrency && doc.exchangeRate > 0
+      ? (() => {
+          try {
+            return new Intl.NumberFormat(lang || undefined, {
+              style: 'currency',
+              currency: doc.settlementCurrency
+            }).format((totals.totalCents / 10 ** doc.currency.decimals) * doc.exchangeRate);
+          } catch {
+            return null;
+          }
+        })()
+      : null;
   const titleKey: Record<string, Key> = {
     Invoice: 'invoice',
     'Tax invoice': 'taxInvoice',
@@ -87,7 +110,13 @@ export function Paper({ doc, pay }: { doc: Doc; pay?: PaymentOption[] }) {
         </div>
         <div className="paper-title">
           <h2 style={style?.upperLabels ? { textTransform: 'uppercase' } : undefined}>
-            {kind === 'invoice' ? t(titleKey[tpl?.title ?? 'Invoice'] ?? 'invoice') : t('quote')}
+            {doc.docType === 'credit'
+              ? t('creditNote')
+              : doc.docType === 'debit'
+                ? t('debitNote')
+                : kind === 'invoice'
+                  ? t(titleKey[tpl?.title ?? 'Invoice'] ?? 'invoice')
+                  : t('quote')}
           </h2>
           <p className="paper-number">{doc.fullNumber}</p>
           <span className={`badge ${doc.status}`}>{status(doc.status)}</span>
@@ -105,10 +134,38 @@ export function Paper({ doc, pay }: { doc: Doc; pay?: PaymentOption[] }) {
           </div>
         )}
         <div className="amount">
-          <dt>{kind === 'invoice' ? t('amountDue') : t('total')}</dt>
-          <dd>{money(kind === 'invoice' ? Math.max(totals.totalCents - doc.paidCents, 0) : totals.totalCents)}</dd>
+          <dt>{kind === 'invoice' && !isCredit ? t('amountDue') : isCredit ? t('creditTotal') : t('total')}</dt>
+          <dd>
+            {money(
+              kind === 'invoice' && !isCredit ? Math.max(totals.totalCents - doc.paidCents, 0) : totals.totalCents
+            )}
+          </dd>
         </div>
       </dl>
+      {(doc.correctsNumber || doc.poRef || doc.projectRef || doc.supplyDate) && (
+        <p className="paper-refs">
+          {doc.correctsNumber && (
+            <span>
+              {t('corrects')} <strong>{doc.correctsNumber}</strong>
+            </span>
+          )}
+          {doc.poRef && (
+            <span>
+              {t('poRef')} <strong>{doc.poRef}</strong>
+            </span>
+          )}
+          {doc.projectRef && (
+            <span>
+              {t('project')} <strong>{doc.projectRef}</strong>
+            </span>
+          )}
+          {doc.supplyDate && (
+            <span>
+              {t('supplyDate')} <strong>{day(doc.supplyDate)}</strong>
+            </span>
+          )}
+        </p>
+      )}
       <div className="grid2">
         <div className="paper-card">
           <h3>{t('from')}</h3>
@@ -156,7 +213,12 @@ export function Paper({ doc, pay }: { doc: Doc; pay?: PaymentOption[] }) {
           {doc.lines.map((l, i) => (
             <tr key={i}>
               {showNumbers && <td>{i + 1}</td>}
-              <td>{l.name}</td>
+              <td>
+                {l.name}
+                {[l.code, l.taxCode, l.period].some(Boolean) && (
+                  <small className="line-extra">{[l.code, l.taxCode, l.period].filter(Boolean).join(' · ')}</small>
+                )}
+              </td>
               {showQty && (
                 <td className="num">
                   {l.quantity}
@@ -164,7 +226,9 @@ export function Paper({ doc, pay }: { doc: Doc; pay?: PaymentOption[] }) {
                 </td>
               )}
               <td className="num">{money(l.unitCents)}</td>
-              <td className="num">{l.taxRate && l.taxMode ? `${l.taxRate}%` : ''}</td>
+              <td className="num">
+                {l.taxCategory ? t(taxReason[l.taxCategory]) : l.taxRate && l.taxMode ? `${l.taxRate}%` : ''}
+              </td>
               <td className="num">{money(gross(l))}</td>
             </tr>
           ))}
@@ -193,14 +257,37 @@ export function Paper({ doc, pay }: { doc: Doc; pay?: PaymentOption[] }) {
         )}
         <dt>{t('tax')}</dt>
         <dd>{money(totals.taxCents)}</dd>
-        <dt className="big">{t('total')}</dt>
+        <dt className="big">{isCredit ? t('creditTotal') : t('total')}</dt>
         <dd className="big" data-code={doc.currency.code}>
           {money(totals.totalCents)}
         </dd>
-        {doc.payments.length > 0 && (
+        {settle && (
           <>
-            <dt>{t('paid')}</dt>
-            <dd>{money(doc.paidCents)}</dd>
+            <dt>
+              {t('settlementTotal')} {doc.settlementCurrency}
+            </dt>
+            <dd>{settle}</dd>
+            <dt>{t('exchangeRate')}</dt>
+            <dd>
+              1 {doc.currency.code} = {doc.exchangeRate} {doc.settlementCurrency}
+              {doc.exchangeDate ? ` (${day(doc.exchangeDate)})` : ''}
+            </dd>
+          </>
+        )}
+        {!isCredit && doc.creditedCents > 0 && (
+          <>
+            <dt>{t('credits')}</dt>
+            <dd>−{money(doc.creditedCents)}</dd>
+          </>
+        )}
+        {!isCredit && (doc.payments.length > 0 || doc.creditedCents > 0) && (
+          <>
+            {doc.payments.length > 0 && (
+              <>
+                <dt>{t('paid')}</dt>
+                <dd>{money(received)}</dd>
+              </>
+            )}
             <dt className="big">{t('balanceDue')}</dt>
             <dd className="big">{money(Math.max(totals.totalCents - doc.paidCents, 0))}</dd>
           </>
@@ -271,8 +358,8 @@ export function Paper({ doc, pay }: { doc: Doc; pay?: PaymentOption[] }) {
             {doc.payments.map((p, i) => (
               <li key={i}>
                 <span>{day(p.paidOn)}</span>
-                <span className="muted">{p.method}</span>
-                <strong>{money(p.amountCents)}</strong>
+                <span className="muted">{p.kind === 'refund' ? `${t('refund')} · ${p.method}` : p.method}</span>
+                <strong>{p.kind === 'refund' ? `−${money(p.amountCents)}` : money(p.amountCents)}</strong>
               </li>
             ))}
           </ul>

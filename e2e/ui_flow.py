@@ -76,7 +76,7 @@ with sync_playwright() as p:
         pg.fill("input[aria-label^='Price']", "100")
         pg.fill("input[aria-label^='Tax rate']", "10")
         pg.locator("input[aria-label=Number]").fill(number)
-        pg.click("button.primary:text-is('Save')")
+        pg.click("button.primary:text-is('Issue invoice')" if kind == "Invoices" else "button.primary:text-is('Save')")
         pg.wait_for_selector("article.paper")
 
     new_doc("Invoices", "1001")
