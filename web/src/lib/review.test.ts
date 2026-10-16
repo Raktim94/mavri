@@ -33,4 +33,14 @@ describe('reviewDoc', () => {
     d.lines[0].taxMode = 'add';
     expect(reviewDoc(d, { kind: 'invoice', issuer }).recommended.find(c => c.id === 'issuer-tax')?.ok).toBe(false);
   });
+
+  it('lists missing tax facts from the guidance', () => {
+    const r = reviewDoc(blankDoc('invoice'), { kind: 'invoice', taxMissing: ['Your GSTIN'] });
+    expect(r.recommended.find(c => c.id === 'tax-facts')).toMatchObject({ ok: false, why: 'Your GSTIN.' });
+    expect(r.ready).toBe(false); // still driven by the required list only
+    expect(
+      reviewDoc(blankDoc('invoice'), { kind: 'invoice', taxMissing: [] }).recommended.find(c => c.id === 'tax-facts')
+        ?.ok
+    ).toBe(true);
+  });
 });

@@ -212,6 +212,11 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/documents/{id}/payment-options", user(s.paymentOptions))
 	mux.HandleFunc("GET /api/public/documents/{token}/payment-options", s.limited(s.publicLimit, s.clientIP, s.publicPaymentOptions))
 
+	// tax guidance
+	mux.HandleFunc("GET /api/tax/packs", user(s.taxPacks))
+	mux.HandleFunc("POST /api/tax/explain", user(s.taxExplain))
+	mux.HandleFunc("GET /api/tax/validate", user(s.taxValidate))
+
 	// activity history
 	mux.HandleFunc("GET /api/activity", user(s.listActivity))
 	mux.HandleFunc("GET /api/activity.csv", human(s.activityCSV))

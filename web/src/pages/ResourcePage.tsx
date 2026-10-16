@@ -131,6 +131,17 @@ export function ResourcePage({ res }: { res: Resource }) {
           />
         );
       case 'select': {
+        if (f.choices) {
+          return (
+            <select value={text(value)} onChange={e => set(e.target.value)}>
+              {f.choices.map(c => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+          );
+        }
         const fixed = Array.isArray(f.options);
         const list = fixed ? [] : (choices[(f.options as { from: string }).from] ?? []);
         const labelKey = !fixed && f.options ? (f.options as { label: string }).label : 'name';

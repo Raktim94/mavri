@@ -3,13 +3,27 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { Paper } from '../components/Paper';
 import { useUi } from '../components/ui';
 import { QuickCustomer } from '../components/QuickCustomer';
+import { TaxGuidance } from '../components/TaxGuidance';
 import { api, errorText } from '../api';
 import { blankDoc, routeOf, today } from '../docs';
 import { clearDraft, loadDraft, useDraft } from '../lib/draft';
 import { reviewDoc, type Check, type Section } from '../lib/review';
 import { formatMoney, computeTotals, lineTax, gross, toMajor, toMinor } from '../money';
 import { templateOf } from '../templates';
-import type { Bank, Currency, Doc, Group, Kind, Line, Party, Payment, Preset, Product, Style } from '../types';
+import type {
+  Bank,
+  Currency,
+  Doc,
+  Group,
+  Kind,
+  Line,
+  Party,
+  Payment,
+  Preset,
+  Product,
+  Style,
+  TaxExplanation
+} from '../types';
 
 interface Catalog {
   issuers: Party[];
@@ -81,6 +95,7 @@ export function DocumentEditor({ kind }: { kind: Kind }) {
   const [restored, setRestored] = useState('');
   const [customerText, setCustomerText] = useState('');
   const [focusLine, setFocusLine] = useState<number | null>(null);
+  const [guidance, setGuidance] = useState<TaxExplanation | null>(null);
   const linesRef = useRef<HTMLTableSectionElement>(null);
   const { toast } = useUi();
   const draft = useDraft(draftKey, doc, !!doc && !saving);
@@ -136,8 +151,8 @@ export function DocumentEditor({ kind }: { kind: Kind }) {
   const style = cat?.styles.find(s => s.id === doc?.styleId);
 
   const review = useMemo(
-    () => (doc ? reviewDoc(doc, { issuer, customer, bank, kind }) : null),
-    [doc, issuer, customer, bank, kind]
+    () => (doc ? reviewDoc(doc, { issuer, customer, bank, kind, taxMissing: guidance?.missing }) : null),
+    [doc, issuer, customer, bank, kind, guidance]
   );
 
   // Suggest the next number when the business changes on a new document.
@@ -362,13 +377,6 @@ export function DocumentEditor({ kind }: { kind: Kind }) {
     if (!l.taxMode || !l.taxRate) continue;
     const k = `${l.taxRate}% ${l.taxMode === 'included' ? 'included in the price' : 'added'}`;
     rates.set(k, (rates.get(k) ?? 0) + 1);
-  }
-  const taxFacts: string[] = [];
-  if (issuer) taxFacts.push(issuer.taxId ? `Your tax ID: ${issuer.taxId}` : 'Your business has no tax ID on record');
-  if (customer) {
-    taxFacts.push(customer.taxId ? `Customer tax ID: ${customer.taxId}` : 'The customer has no tax ID on record');
-    if (customer.country) taxFacts.push(`Customer country: ${customer.country}`);
-    if (customer.taxExempt) taxFacts.push('The customer is marked tax-exempt');
   }
   const taxedLines = doc.lines.filter(l => l.taxMode && l.taxRate > 0).length;
 
@@ -670,17 +678,21 @@ export function DocumentEditor({ kind }: { kind: Kind }) {
                     : `Tax charged on ${taxedLines} of ${doc.lines.length} line${doc.lines.length === 1 ? '' : 's'}: ${[...rates.keys()].join(', ')}.`}
                 </strong>
               </p>
-              <p className="muted">
-                Mavri applies the rates you enter on each line. It does not look up rates or decide which tax applies,
-                so confirm the rate for your country and this customer.
-              </p>
-              {taxFacts.length > 0 && (
-                <ul className="muted facts">
-                  {taxFacts.map(f => (
-                    <li key={f}>{f}</li>
-                  ))}
-                </ul>
-              )}
+              <TaxGuidance
+                issuer={issuer}
+                customer={customer}
+                date={doc.issuedOn}
+                onResult={setGuidance}
+                onPick={r =>
+                  set({
+                    lines: doc.lines.map(l => ({
+                      ...l,
+                      taxRate: r.percent,
+                      taxMode: r.percent > 0 ? l.taxMode || 'add' : ''
+                    }))
+                  })
+                }
+              />
               {customer?.taxExempt && taxedLines > 0 && (
                 <p className="error" role="alert">
                   This customer is marked tax-exempt, but lines on this document charge tax. Check the rates or the

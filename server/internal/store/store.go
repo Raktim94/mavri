@@ -98,8 +98,16 @@ func CheckParty(p *model.Party) error {
 		return invalid("country must be a two-letter code")
 	}
 	p.Country = strings.ToUpper(p.Country)
+	p.Language = strings.ToLower(strings.TrimSpace(p.Language))
+	if p.Language != "" && !DocumentLanguages[p.Language] {
+		return invalid("language %q is not one of the document languages", p.Language)
+	}
 	return nil
 }
+
+// DocumentLanguages are the languages a customer's documents can be printed in. Only the labels
+// change; the translations other than English are drafts that nobody has reviewed professionally.
+var DocumentLanguages = map[string]bool{"en": true, "fr": true, "de": true, "es": true, "it": true, "pt": true, "nl": true, "hi": true, "ar": true}
 
 // CheckCurrency validates a currency.
 func CheckCurrency(c *model.Currency) error {

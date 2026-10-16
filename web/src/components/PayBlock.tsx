@@ -6,11 +6,19 @@ import { QrCode } from './QrCode';
  * How to pay what is owed: a QR code where one exists, always the same details as text. A payment
  * QR code is not the signed e-invoice code some tax authorities require, and scanning it never marks anything paid.
  */
-export function PayBlock({ options, currency }: { options: PaymentOption[]; currency: Currency }) {
+export function PayBlock({
+  options,
+  currency,
+  title = 'How to pay'
+}: {
+  options: PaymentOption[];
+  currency: Currency;
+  title?: string;
+}) {
   if (options.length === 0) return null;
   return (
     <div className="paper-card payblock">
-      <h3>How to pay</h3>
+      <h3>{title}</h3>
       <div className="pay-options">
         {options.map(o => (
           <section key={o.kind} className="pay-option">

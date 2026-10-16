@@ -517,3 +517,52 @@ export interface Attention {
   counts: Record<string, number>;
   snoozed: number;
 }
+
+export interface TaxRate {
+  code: string;
+  label: string;
+  percent: number;
+  use: string;
+  from: string;
+  to?: string;
+}
+
+export interface TaxPack {
+  id: string;
+  name: string;
+  country: string;
+  status: 'beta' | 'estimate' | 'planned';
+  currency: string;
+  taxName: string;
+  idName: string;
+  source: string;
+  reviewedOn: string;
+  version: string;
+  owner: string;
+  covers: string[];
+  excludes: string[];
+  rates: TaxRate[];
+}
+
+export interface IdCheck {
+  country: string;
+  kind: string;
+  valid: boolean;
+  level: string;
+  message: string;
+  state?: string;
+}
+
+export interface TaxExplanation {
+  pack?: { id: string; name: string; status: string; version: string; source: string; reviewedOn: string };
+  treatment: string;
+  title: string;
+  confidence: 'clear' | 'needs_decision' | 'no_pack';
+  trace: string[];
+  missing: string[];
+  decisions: string[];
+  warnings: string[];
+  suggested: TaxRate[];
+  split?: Array<{ name: string; share: number }>;
+  ids: IdCheck[];
+}

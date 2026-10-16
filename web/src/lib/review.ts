@@ -22,6 +22,8 @@ interface Context {
   customer?: Party;
   bank?: Bank;
   kind: Doc['kind'];
+  /** Facts the tax guidance says are missing, if it has run. */
+  taxMissing?: string[];
 }
 
 /** Explains what is missing before a document is saved. Pure, so it is easy to test. */
@@ -73,6 +75,13 @@ export function reviewDoc(d: Doc, c: Context): Review {
       ok: !taxed || !c.issuer || !!c.issuer.taxId,
       text: 'Your business has a tax ID, since this document charges tax',
       why: 'Most countries require your registration number on a tax invoice.',
+      section: 'tax'
+    },
+    {
+      id: 'tax-facts',
+      ok: !c.taxMissing || c.taxMissing.length === 0,
+      text: 'The tax facts are complete',
+      why: c.taxMissing && c.taxMissing.length > 0 ? c.taxMissing.join('; ') + '.' : undefined,
       section: 'tax'
     },
     {

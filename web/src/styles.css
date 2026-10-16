@@ -3260,3 +3260,95 @@ tr.picked {
   background: var(--accent);
   color: var(--accent-text);
 }
+
+/* Tax guidance */
+.guidance {
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--accent);
+  border-radius: 10px;
+}
+.guidance.needs_decision {
+  border-left-color: #f08c00;
+}
+.guidance.no_pack {
+  border-left-color: var(--muted);
+}
+.guidance p,
+.guidance ul {
+  margin: 0;
+}
+.guidance ul {
+  padding-left: 18px;
+}
+.g-title {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.g-rates {
+  align-items: center;
+}
+.g-rates .chip {
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--text);
+}
+.g-source {
+  font-size: 0.8rem;
+}
+.badge.pack-beta {
+  background: #f08c00;
+  color: #fff;
+}
+.badge.pack-estimate {
+  background: var(--muted);
+  color: #fff;
+}
+
+/* Right-to-left documents (Arabic): mirror the layout, keep numbers and codes reading left to right */
+.paper[dir='rtl'] .paper-title {
+  text-align: left;
+  justify-items: start;
+}
+.paper[dir='rtl'] .num,
+.paper[dir='rtl'] .totals dd,
+.paper[dir='rtl'] .paper-meta dd,
+.paper[dir='rtl'] .paper-number {
+  unicode-bidi: plaintext;
+  text-align: left;
+}
+.paper[dir='rtl'] .totals {
+  margin-left: 0;
+  margin-right: auto;
+}
+.paper[dir='rtl'] .signature {
+  justify-self: start;
+}
+
+.packs {
+  display: grid;
+  gap: 14px;
+  margin-top: 14px;
+}
+.pack header {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.pack h2 {
+  margin: 0;
+}
+.pack h3 {
+  font-size: 0.9rem;
+  margin: 8px 0 4px;
+}
+.pack ul {
+  margin: 0;
+  padding-left: 18px;
+}

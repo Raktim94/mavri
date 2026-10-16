@@ -253,3 +253,18 @@ func TestCheckStyleTemplate(t *testing.T) {
 		t.Fatalf("want 15 templates, have %d", len(Templates))
 	}
 }
+
+func TestCheckPartyLanguage(t *testing.T) {
+	ok := model.Party{Kind: "customer", Name: "A", Language: " FR "}
+	if err := CheckParty(&ok); err != nil || ok.Language != "fr" {
+		t.Fatalf("a known language is kept in lower case: %v %q", err, ok.Language)
+	}
+	empty := model.Party{Kind: "customer", Name: "A"}
+	if err := CheckParty(&empty); err != nil {
+		t.Fatalf("no language means the default: %v", err)
+	}
+	bad := model.Party{Kind: "customer", Name: "A", Language: "xx"}
+	if err := CheckParty(&bad); err == nil {
+		t.Fatal("an unknown language was accepted")
+	}
+}

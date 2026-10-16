@@ -18,6 +18,7 @@ import { HealthPage } from './pages/HealthPage';
 import { IntegrationsPage } from './pages/IntegrationsPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { ResourcePage } from './pages/ResourcePage';
+import { TaxPage } from './pages/TaxPage';
 import { TemplatesPage } from './pages/TemplatesPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { ShopsPage } from './pages/ShopsPage';
@@ -96,6 +97,9 @@ function Shell() {
               <Icon name={r.id} /> {r.title}
             </NavLink>
           ))}
+          <NavLink to="/tax">
+            <Icon name="currencies" /> Tax guidance
+          </NavLink>
           <NavLink to="/templates">
             <Icon name="styles" /> Templates
           </NavLink>
@@ -144,6 +148,7 @@ function Shell() {
               ))}
               <Route path="/collections" element={<CollectionsPage />} />
               <Route path="/templates" element={<TemplatesPage />} />
+              <Route path="/tax" element={<TaxPage />} />
               <Route path="/reports" element={<ReportsPage />} />
               <Route path="/stores" element={<ShopsPage />} />
               <Route path="/automation" element={<AutomationPage />} />

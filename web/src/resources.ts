@@ -1,5 +1,6 @@
 // What each record page lists and edits. The server validates; this decides
 // the columns, the form fields and where the data lives.
+import { LANGUAGES } from './i18n';
 import type { Features } from './types';
 
 export type FieldKind = 'text' | 'country' | 'logo' | 'textarea' | 'number' | 'checkbox' | 'select' | 'color' | 'price';
@@ -13,6 +14,8 @@ export interface Field {
   list?: boolean;
   /** fixed choices, or a list endpoint whose rows are the choices */
   options?: string[] | { from: string; label: string };
+  /** fixed choices where the stored value differs from what is shown */
+  choices?: Array<{ value: string; label: string }>;
 }
 
 export interface Resource {
@@ -51,6 +54,13 @@ export const resources: Resource[] = [
     defaults: { kind: 'customer' },
     fields: [
       ...partyFields,
+      f('language', 'Language of documents sent to this customer', {
+        kind: 'select',
+        choices: LANGUAGES.map(l => ({
+          value: l.code,
+          label: l.status === 'draft' ? `${l.name} (draft translation)` : l.name
+        }))
+      }),
       f('buyerReference', 'Buyer reference'),
       f('taxExempt', 'Tax exempt', { kind: 'checkbox' }),
       f('noReminders', 'Never send this customer automatic payment reminders', { kind: 'checkbox' }),

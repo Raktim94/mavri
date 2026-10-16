@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
-import { statusLabel } from '../docs';
+import { formatDate, formatMoneyIn, isRtl, labelsFor, type Key } from '../i18n';
+import { gstSplit } from '../lib/gst';
 import { formatMoney, gross, lineTax } from '../money';
 import { templateOf } from '../templates';
 import type { Doc, PaymentOption } from '../types';
@@ -32,8 +33,22 @@ const lines = (v: string) => v.split('\n').filter(Boolean);
 /** The document as printed: used by the editor view and by the client link. */
 export function Paper({ doc, pay }: { doc: Doc; pay?: PaymentOption[] }) {
   const kind = doc.kind;
-  const money = (c: number) => formatMoney(c, doc.currency);
   const { issuer, customer, bank, style, totals } = doc;
+  // The language is the customer's. A document written before languages existed has none and prints as before.
+  const lang = customer?.language ?? '';
+  const t = labelsFor(lang);
+  const rtl = isRtl(lang);
+  const money = (c: number) =>
+    formatMoneyIn(c, doc.currency.decimals, doc.currency.code, lang) ?? formatMoney(c, doc.currency);
+  const day = (iso: string) => formatDate(iso, lang);
+  const status = (k: string) =>
+    ['unpaid', 'partial', 'paid', 'void', 'open', 'accepted', 'declined'].includes(k) ? t(k as Key) : k;
+  const titleKey: Record<string, Key> = {
+    Invoice: 'invoice',
+    'Tax invoice': 'taxInvoice',
+    'VAT invoice': 'vatInvoice',
+    Receipt: 'receipt'
+  };
   const hasStyle = Boolean(style?.accent);
   const paper: CSSProperties = {
     ['--accent' as string]: hasStyle ? style.accent : undefined,
@@ -41,7 +56,8 @@ export function Paper({ doc, pay }: { doc: Doc; pay?: PaymentOption[] }) {
     fontSize: sizes[style?.textSize] ?? undefined
   };
   const tpl = templateOf(style?.template);
-  const taxIdLabel = tpl?.taxIdLabel ?? 'Tax ID';
+  const taxIdLabel = !tpl || tpl.taxIdLabel === 'Tax ID' ? t('taxId') : tpl.taxIdLabel;
+  const gst = tpl?.id.startsWith('gst-india') ? gstSplit(issuer.taxId, customer.taxId) : null;
   const taxByRate = tpl?.taxSummary ? summarise(doc) : [];
   const showNumbers = !hasStyle || style.showNumbers;
   const showUnit = !hasStyle || style.showUnit;
@@ -50,6 +66,8 @@ export function Paper({ doc, pay }: { doc: Doc; pay?: PaymentOption[] }) {
     <article
       className={`paper ${tpl ? `tpl tpl-${tpl.id}` : ''} ${style?.headerStyle === 'dark' ? 'dark-head' : ''} ${style?.rowStyle === 'striped' ? 'striped' : ''}`}
       style={paper}
+      dir={rtl ? 'rtl' : undefined}
+      lang={lang || undefined}
     >
       <div className="paper-head">
         <div className="paper-brand">
@@ -69,31 +87,31 @@ export function Paper({ doc, pay }: { doc: Doc; pay?: PaymentOption[] }) {
         </div>
         <div className="paper-title">
           <h2 style={style?.upperLabels ? { textTransform: 'uppercase' } : undefined}>
-            {kind === 'invoice' ? (tpl?.title ?? 'Invoice') : 'Quote'}
+            {kind === 'invoice' ? t(titleKey[tpl?.title ?? 'Invoice'] ?? 'invoice') : t('quote')}
           </h2>
           <p className="paper-number">{doc.fullNumber}</p>
-          <span className={`badge ${doc.status}`}>{statusLabel[doc.status] ?? doc.status}</span>
+          <span className={`badge ${doc.status}`}>{status(doc.status)}</span>
         </div>
       </div>
       <dl className="paper-meta">
         <div>
-          <dt>Issued</dt>
-          <dd>{doc.issuedOn}</dd>
+          <dt>{t('issued')}</dt>
+          <dd>{day(doc.issuedOn)}</dd>
         </div>
         {doc.dueOn && (
           <div>
-            <dt>{kind === 'invoice' ? 'Due' : 'Valid until'}</dt>
-            <dd>{doc.dueOn}</dd>
+            <dt>{kind === 'invoice' ? t('due') : t('validUntil')}</dt>
+            <dd>{day(doc.dueOn)}</dd>
           </div>
         )}
         <div className="amount">
-          <dt>{kind === 'invoice' ? 'Amount due' : 'Total'}</dt>
+          <dt>{kind === 'invoice' ? t('amountDue') : t('total')}</dt>
           <dd>{money(kind === 'invoice' ? Math.max(totals.totalCents - doc.paidCents, 0) : totals.totalCents)}</dd>
         </div>
       </dl>
       <div className="grid2">
         <div className="paper-card">
-          <h3>From</h3>
+          <h3>{t('from')}</h3>
           <p>
             <strong>{issuer.name}</strong>
           </p>
@@ -108,7 +126,7 @@ export function Paper({ doc, pay }: { doc: Doc; pay?: PaymentOption[] }) {
           )}
         </div>
         <div className="paper-card">
-          <h3>Bill to</h3>
+          <h3>{t('billTo')}</h3>
           <p>
             <strong>{customer.name}</strong>
           </p>
@@ -127,11 +145,11 @@ export function Paper({ doc, pay }: { doc: Doc; pay?: PaymentOption[] }) {
         <thead>
           <tr>
             {showNumbers && <th>#</th>}
-            <th>Item</th>
-            {showQty && <th className="num">Qty</th>}
-            <th className="num">Price</th>
-            <th className="num">{tpl?.taxLabel ?? 'Tax'}</th>
-            <th className="num">Amount</th>
+            <th>{t('item')}</th>
+            {showQty && <th className="num">{t('qty')}</th>}
+            <th className="num">{t('price')}</th>
+            <th className="num">{tpl?.taxLabel && tpl.taxLabel !== 'Tax' ? tpl.taxLabel : t('tax')}</th>
+            <th className="num">{t('amount')}</th>
           </tr>
         </thead>
         <tbody>
@@ -153,85 +171,106 @@ export function Paper({ doc, pay }: { doc: Doc; pay?: PaymentOption[] }) {
         </tbody>
       </table>
       <dl className="totals">
-        <dt>Subtotal</dt>
+        <dt>{t('subtotal')}</dt>
         <dd>{money(totals.subtotalCents)}</dd>
         {totals.discountCents > 0 && (
           <>
-            <dt>Discount</dt>
+            <dt>{t('discount')}</dt>
             <dd>−{money(totals.discountCents)}</dd>
           </>
         )}
         {totals.surchargeCents > 0 && (
           <>
-            <dt>Surcharge</dt>
+            <dt>{t('surcharge')}</dt>
             <dd>{money(totals.surchargeCents)}</dd>
           </>
         )}
         {totals.shippingCents > 0 && (
           <>
-            <dt>Shipping</dt>
+            <dt>{t('shipping')}</dt>
             <dd>{money(totals.shippingCents)}</dd>
           </>
         )}
-        <dt>Tax</dt>
+        <dt>{t('tax')}</dt>
         <dd>{money(totals.taxCents)}</dd>
-        <dt className="big">Total</dt>
+        <dt className="big">{t('total')}</dt>
         <dd className="big" data-code={doc.currency.code}>
           {money(totals.totalCents)}
         </dd>
         {doc.payments.length > 0 && (
           <>
-            <dt>Paid</dt>
+            <dt>{t('paid')}</dt>
             <dd>{money(doc.paidCents)}</dd>
-            <dt className="big">Balance due</dt>
+            <dt className="big">{t('balanceDue')}</dt>
             <dd className="big">{money(Math.max(totals.totalCents - doc.paidCents, 0))}</dd>
           </>
         )}
       </dl>
       {taxByRate.length > 0 && (
         <table className="tax-summary">
-          <caption>{tpl?.taxLabel ?? 'Tax'} by rate</caption>
+          <caption>
+            {tpl?.taxLabel ?? t('tax')} {t('byRate')}
+          </caption>
           <thead>
             <tr>
-              <th>Rate</th>
-              <th className="num">Net</th>
-              <th className="num">{tpl?.taxLabel ?? 'Tax'}</th>
-              <th className="num">Gross</th>
+              <th>{t('rate')}</th>
+              <th className="num">{t('net')}</th>
+              {gst === 'intra' ? (
+                <>
+                  <th className="num">CGST</th>
+                  <th className="num">SGST</th>
+                </>
+              ) : gst === 'inter' ? (
+                <th className="num">IGST</th>
+              ) : (
+                <th className="num">{tpl?.taxLabel ?? t('tax')}</th>
+              )}
+              <th className="num">{t('gross')}</th>
             </tr>
           </thead>
           <tbody>
-            {taxByRate.map(r => (
-              <tr key={r.rate}>
-                <td>{r.rate}%</td>
-                <td className="num">{money(r.net)}</td>
-                <td className="num">{money(r.tax)}</td>
-                <td className="num">{money(r.net + r.tax)}</td>
-              </tr>
-            ))}
+            {taxByRate.map(r => {
+              const half = Math.floor(r.tax / 2);
+              return (
+                <tr key={r.rate}>
+                  <td>{gst === 'intra' ? `${r.rate / 2}% + ${r.rate / 2}%` : `${r.rate}%`}</td>
+                  <td className="num">{money(r.net)}</td>
+                  {gst === 'intra' ? (
+                    <>
+                      <td className="num">{money(half)}</td>
+                      <td className="num">{money(r.tax - half)}</td>
+                    </>
+                  ) : (
+                    <td className="num">{money(r.tax)}</td>
+                  )}
+                  <td className="num">{money(r.net + r.tax)}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       )}
       {tpl?.note && kind === 'invoice' && <p className="muted tpl-note">{tpl.note}</p>}
       {tpl?.schedule && kind === 'invoice' && (
         <div className="paper-card schedule">
-          <h3>Payment schedule</h3>
+          <h3>{t('schedule')}</h3>
           <dl>
-            <dt>Invoice total</dt>
+            <dt>{t('invoiceTotal')}</dt>
             <dd>{money(totals.totalCents)}</dd>
-            <dt>Received so far</dt>
+            <dt>{t('receivedSoFar')}</dt>
             <dd>{money(doc.paidCents)}</dd>
-            <dt className="big">Due now</dt>
+            <dt className="big">{t('dueNow')}</dt>
             <dd className="big">{money(Math.max(totals.totalCents - doc.paidCents, 0))}</dd>
           </dl>
         </div>
       )}
       {doc.payments.length > 0 && (
         <div className="paper-card pay-history">
-          <h3>Payments received</h3>
+          <h3>{t('paymentsReceived')}</h3>
           <ul>
             {doc.payments.map((p, i) => (
               <li key={i}>
-                <span>{p.paidOn}</span>
+                <span>{day(p.paidOn)}</span>
                 <span className="muted">{p.method}</span>
                 <strong>{money(p.amountCents)}</strong>
               </li>
@@ -241,23 +280,25 @@ export function Paper({ doc, pay }: { doc: Doc; pay?: PaymentOption[] }) {
       )}
       {bank?.label && !(pay && pay.length > 0) && (
         <div className="paper-card">
-          <h3>Payment details</h3>
+          <h3>{t('paymentDetails')}</h3>
           <p>{[bank.bankName, bank.holder, bank.accountNumber, bank.swift].filter(Boolean).join(' · ')}</p>
         </div>
       )}
-      {pay && pay.length > 0 && <PayBlock options={pay} currency={doc.currency} />}
+      {pay && pay.length > 0 && <PayBlock options={pay} currency={doc.currency} title={t('howToPay')} />}
       {doc.noteCustomer && <p>{doc.noteCustomer}</p>}
       {doc.noteTerms && <p className="muted">{doc.noteTerms}</p>}
       {doc.noteThanks && <p className="paper-thanks">{doc.noteThanks}</p>}
       {tpl?.signature && (
         <div className="signature">
           <span className="sig-line" />
-          <span>Authorised signatory, {issuer.name}</span>
+          <span>
+            {t('signatory')}, {issuer.name}
+          </span>
         </div>
       )}
       <footer className="paper-foot">
         <img src="/mavri-logo.png" alt="" width={16} height={16} />
-        Made with Mavri
+        {t('madeWith')}
       </footer>
     </article>
   );

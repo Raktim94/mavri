@@ -716,3 +716,23 @@ func TestPaymentOptionsOverHTTP(t *testing.T) {
 	}
 	c.anonymous().json("GET", "/api/public/documents/nope-nope-nope-nope/payment-options", nil, 404)
 }
+
+func TestTaxGuidanceOverHTTP(t *testing.T) {
+	c, _ := newFlow(t)
+	c.anonymous().json("POST", "/api/tax/explain", map[string]any{}, 401)
+	got := c.json("POST", "/api/tax/explain", map[string]any{"issuerCountry": "DE", "issuerTaxId": "DE123456789", "customerCountry": "DE", "date": "2026-10-16"}, 200)
+	if got["treatment"] != "domestic" || got["confidence"] != "clear" {
+		t.Fatalf("explain: %v", got)
+	}
+	if got["pack"].(map[string]any)["reviewedOn"] != "" {
+		t.Fatalf("no pack has been reviewed by a person yet: %v", got["pack"])
+	}
+	v := c.json("GET", "/api/tax/validate?country=GB&id=GB980780684", nil, 200)
+	if v["valid"] != true || v["level"] != "checksum" {
+		t.Fatalf("validate: %v", v)
+	}
+	packs := c.list("/api/tax/packs?date=2025-06-01")
+	if len(packs) != 5 {
+		t.Fatalf("packs: %v", packs)
+	}
+}

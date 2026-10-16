@@ -60,7 +60,9 @@ type Service struct {
 	Hub   *activity.Hub
 }
 
-func invalid(format string, a ...any) error { return fmt.Errorf("%w: %s", ErrInvalid, fmt.Sprintf(format, a...)) }
+func invalid(format string, a ...any) error {
+	return fmt.Errorf("%w: %s", ErrInvalid, fmt.Sprintf(format, a...))
+}
 
 func validDay(s string) bool {
 	_, err := time.Parse("2006-01-02", s)
