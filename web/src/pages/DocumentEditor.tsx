@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useUi } from '../components/ui';
+import { QuickCustomer } from '../components/QuickCustomer';
 import { api, errorText } from '../api';
 import { blankDoc, routeOf, today } from '../docs';
 import { formatMoney, computeTotals, toMajor, toMinor } from '../money';
@@ -37,6 +38,7 @@ export function DocumentEditor({ kind }: { kind: Kind }) {
   const [refresh, setRefresh] = useState(false);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [addingCustomer, setAddingCustomer] = useState(false);
   const { toast } = useUi();
 
   useEffect(() => {
@@ -226,10 +228,12 @@ export function DocumentEditor({ kind }: { kind: Kind }) {
           {cat.customers.length === 0 && (
             <>
               {cat.issuers.length === 0 ? '' : 'add '}
-              <Link to="/customers">a customer</Link>
+              <button type="button" className="link" onClick={() => setAddingCustomer(true)}>
+                a customer
+              </button>
             </>
           )}
-          . Then come back and pick them below.
+          . Then pick them below.
         </div>
       )}
       {!id && cat.presets.length > 0 && (
@@ -250,12 +254,17 @@ export function DocumentEditor({ kind }: { kind: Kind }) {
         </label>
         <label>
           Customer
-          {pick(
-            doc.customerId || null,
-            cat.customers,
-            p => p.name,
-            v => set({ customerId: Number(v) })
-          )}
+          <span className="row">
+            {pick(
+              doc.customerId || null,
+              cat.customers,
+              p => p.name,
+              v => set({ customerId: Number(v) })
+            )}
+            <button type="button" onClick={() => setAddingCustomer(true)}>
+              + Add customer
+            </button>
+          </span>
         </label>
         <label>
           Currency
@@ -566,6 +575,17 @@ export function DocumentEditor({ kind }: { kind: Kind }) {
           {saving ? 'Saving…' : 'Save'}
         </button>
       </div>
+      {addingCustomer && (
+        <QuickCustomer
+          onClose={() => setAddingCustomer(false)}
+          onSaved={p => {
+            setCat({ ...cat, customers: [...cat.customers, p].sort((a, b) => a.name.localeCompare(b.name)) });
+            set({ customerId: p.id });
+            setAddingCustomer(false);
+            toast(`Added ${p.name}.`);
+          }}
+        />
+      )}
     </form>
   );
 }
