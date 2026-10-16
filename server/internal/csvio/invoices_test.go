@@ -107,3 +107,63 @@ func countDocs(st *store.Store) (int, error) {
 	err := st.DB.QueryRow(`SELECT COUNT(*) FROM documents`).Scan(&n)
 	return n, err
 }
+
+func TestJournalBalancesAndSkipsDraftsAndVoids(t *testing.T) {
+	st, ctx := invoiceEnv(t)
+	issuer, _ := store.Parties.Select(ctx, st.DB, "WHERE kind = 'issuer'")
+	cust, _ := store.Parties.Select(ctx, st.DB, "WHERE name = 'Acme'")
+	cur, _ := store.Currencies.Select(ctx, st.DB, "WHERE code = 'USD'")
+	mk := func(status string, pay []model.Payment) model.Document {
+		d, err := st.CreateDocument(ctx, model.Document{Kind: "invoice", IssuerID: issuer[0].ID, CustomerID: cust[0].ID, CurrencyID: cur[0].ID, IssuedOn: "2026-10-01", Status: status,
+			Lines: []model.Line{{Name: "Work", Quantity: 3, UnitCents: 10000, TaxRate: 10, TaxMode: "add"}}, Payments: pay}, store.SaveOptions{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		return d
+	}
+	mk("draft", nil)      // left out
+	voided := mk("", nil) // left out once voided
+	voided.Status = "void"
+	st.UpdateDocument(ctx, voided.ID, voided, store.SaveOptions{})
+	paid := mk("", []model.Payment{{AmountCents: 33000, PaidOn: "2026-10-05", Method: "bank"}})
+	issuedInv, _ := st.IssueDocument(ctx, mk("draft", nil).ID)
+	if _, err := st.Correct(ctx, issuedInv.ID, store.Correction{Kind: "credit", Credit: []store.CreditLine{{Index: 0, Quantity: 1}}}); err != nil {
+		t.Fatal(err)
+	}
+	var buf strings.Builder
+	if err := Export(ctx, st.DB, st, "journal", &buf); err != nil {
+		t.Fatal(err)
+	}
+	rows := strings.Split(strings.TrimSpace(buf.String()), "\n")
+	if rows[0] != "date,reference,account,debit,credit,currency,memo,customer" {
+		t.Fatalf("header: %s", rows[0])
+	}
+	var debit, credit float64
+	for _, line := range rows[1:] {
+		f := strings.Split(line, ",")
+		if f[3] != "" {
+			v, _ := parseNumber(f[3], "debit")
+			debit += v
+		}
+		if f[4] != "" {
+			v, _ := parseNumber(f[4], "credit")
+			credit += v
+		}
+	}
+	if debit != credit || debit == 0 {
+		t.Fatalf("a journal must balance: debits %v credits %v\n%s", debit, credit, buf.String())
+	}
+	out := buf.String()
+	for _, want := range []string{"Accounts receivable", "Sales", "Tax payable", "Bank or cash received", "Credit note for", "Payment received"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("missing %q:\n%s", want, out)
+		}
+	}
+	if strings.Count(out, paid.FullNumber+",") == 0 {
+		t.Errorf("the paid invoice is missing")
+	}
+	var lines strings.Builder
+	if err := Export(ctx, st.DB, st, "lines", &lines); err != nil || !strings.Contains(lines.String(), "item_code") {
+		t.Fatalf("lines export: %v", err)
+	}
+}

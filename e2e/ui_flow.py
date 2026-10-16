@@ -193,7 +193,7 @@ with sync_playwright() as p:
     pg.wait_for_selector("td:has-text('ping')")
     check(True, "webhook added with a one-time secret; a test event is queued")
 
-    pg.click("nav >> text=Data & backups")
+    pg.click("nav >> text=Data")
     pg.wait_for_selector("h2:text-is('Backups')")
     with pg.expect_download() as dl2:
         pg.click("button:text-is('Customers')")

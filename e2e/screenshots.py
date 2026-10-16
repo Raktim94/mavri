@@ -178,7 +178,7 @@ with sync_playwright() as p:
     shot(client, "client-link")
     client.close()
     for label, name in [("Automation", "automation"), ("Integrations", "integrations"), ("Activity", "activity"),
-                        ("Data & backups", "data"), ("Health", "health")]:
+                        ("Data", "data"), ("Health", "health")]:
         pg.click(f"nav >> text={label}")
         pg.wait_for_timeout(700)
         shot(pg, name)

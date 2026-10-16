@@ -876,3 +876,62 @@ func TestRolesLimitWhatPeopleCanDo(t *testing.T) {
 	owner.json("DELETE", "/api/users/"+jsonNum(id(me)), nil, 400)
 	owner.json("PUT", "/api/users/"+jsonNum(id(me)), map[string]any{"role": "staff"}, 400)
 }
+
+func TestIdempotencyKeysMakeWritesReplaySafe(t *testing.T) {
+	c, _ := newFlow(t)
+	issuer, customer := setupParties(c)
+	doc := map[string]any{"kind": "invoice", "issuerId": issuer, "customerId": customer, "currencyId": 2, "issuedOn": "2026-10-01",
+		"lines": []any{map[string]any{"name": "Work", "quantity": 1, "unitCents": 10000}}}
+	post := func(key string, body any) (int, map[string]any) {
+		code, raw := c.do("POST", "/api/documents", body, "Idempotency-Key", key)
+		var out map[string]any
+		_ = json.Unmarshal(raw, &out)
+		return code, out
+	}
+	code, first := post("order-1001", doc)
+	if code != 201 {
+		t.Fatalf("first: %d %v", code, first)
+	}
+	code, again := post("order-1001", doc)
+	if code != 201 || again["id"] != first["id"] {
+		t.Fatalf("the replay returns the first answer: %d %v", code, again)
+	}
+	if n := c.json("GET", "/api/documents", nil, 200)["total"]; n != float64(1) {
+		t.Fatalf("the replay created a second invoice: %v", n)
+	}
+	// The same key with a different request is a mistake, and says so.
+	other := map[string]any{"kind": "invoice", "issuerId": issuer, "customerId": customer, "currencyId": 2, "issuedOn": "2026-10-02",
+		"lines": []any{map[string]any{"name": "Other", "quantity": 1, "unitCents": 5}}}
+	if code, _ := post("order-1001", other); code != 422 {
+		t.Fatalf("a different request under the same key: %d", code)
+	}
+	// A new key is a new request; no key means no replay protection, as before.
+	if code, _ := post("order-1002", other); code != 201 {
+		t.Fatalf("new key: %d", code)
+	}
+	if n := c.json("GET", "/api/documents", nil, 200)["total"]; n != float64(2) {
+		t.Fatalf("total: %v", n)
+	}
+	// An error is replayed too: the caller learns the same thing.
+	bad := map[string]any{"kind": "invoice"}
+	c1, _ := post("bad-1", bad)
+	c2, _ := post("bad-1", bad)
+	if c1 != 400 || c2 != 400 {
+		t.Fatalf("errors replay: %d %d", c1, c2)
+	}
+}
+
+func TestAPIKeysSeeTheirRateLimit(t *testing.T) {
+	c, _ := newFlow(t)
+	key := c.json("POST", "/api/keys", map[string]string{"label": "x"}, 201)["secret"].(string)
+	req, _ := http.NewRequest("GET", c.srv.URL+"/api/v1/documents", nil)
+	req.Header.Set("Authorization", "Bearer "+key)
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	res.Body.Close()
+	if res.Header.Get("X-RateLimit-Limit") != "600" || res.Header.Get("X-RateLimit-Remaining") != "599" {
+		t.Fatalf("headers: %v", res.Header)
+	}
+}

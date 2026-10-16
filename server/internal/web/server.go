@@ -73,7 +73,7 @@ type Server struct {
 	Errors  *ErrorLog // recent warnings and errors, for the health page
 	Started time.Time
 
-	loginLimit, setupLimit, hookLimit, publicLimit *limiter
+	loginLimit, setupLimit, hookLimit, publicLimit, apiLimit *limiter
 }
 
 // New builds the HTTP handler.
@@ -90,7 +90,7 @@ func Build(cfg Config, log *slog.Logger, d *sql.DB, box *shop.Box) (http.Handler
 	ml := &mailer.Service{DB: d, Box: box, Store: st, Links: links, Hub: hub}
 	s := &Server{Cfg: cfg, Log: log, DB: d, Store: st, Auth: &auth.Service{DB: d}, Shops: &shop.Service{Store: st, Box: box},
 		Hub: hub, Links: links, Mail: ml, Started: time.Now(), Errors: errorLogFrom(log),
-		loginLimit: newLimiter(time.Minute, 10), setupLimit: newLimiter(time.Minute, 5), hookLimit: newLimiter(time.Minute, 120), publicLimit: newLimiter(time.Minute, 60)}
+		loginLimit: newLimiter(time.Minute, 10), setupLimit: newLimiter(time.Minute, 5), hookLimit: newLimiter(time.Minute, 120), publicLimit: newLimiter(time.Minute, 60), apiLimit: newLimiter(time.Minute, 600)}
 	s.Auto = &automation.Service{DB: d, Store: st, Mail: ml, Hub: hub}
 	s.Auto.BaseURL = func(ctx context.Context) string {
 		c, _ := s.Auto.Load(ctx)
@@ -170,7 +170,7 @@ func (s *Server) routes(mux *http.ServeMux) {
 	// documents
 	mux.HandleFunc("GET /api/documents", user(s.listDocuments))
 	mux.HandleFunc("GET /api/documents/next-number", user(s.nextNumber))
-	mux.HandleFunc("POST /api/documents", user(s.createDocument))
+	mux.HandleFunc("POST /api/documents", user(s.idempotent(s.createDocument)))
 	mux.HandleFunc("POST /api/documents/bulk", human(s.bulkDocuments))
 	mux.HandleFunc("GET /api/documents/{id}", user(s.getDocument))
 	mux.HandleFunc("PUT /api/documents/{id}", user(s.updateDocument))
@@ -178,9 +178,9 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/documents/{id}/duplicate", user(s.duplicateDocument))
 	mux.HandleFunc("POST /api/documents/{id}/convert", user(s.convertDocument))
 	mux.HandleFunc("GET /api/documents/{id}/einvoice", user(s.einvoice))
-	mux.HandleFunc("POST /api/documents/{id}/issue", user(s.issueDocument))
+	mux.HandleFunc("POST /api/documents/{id}/issue", user(s.idempotent(s.issueDocument)))
 	mux.HandleFunc("GET /api/documents/{id}/corrections", user(s.listCorrections))
-	mux.HandleFunc("POST /api/documents/{id}/corrections", user(s.createCorrection))
+	mux.HandleFunc("POST /api/documents/{id}/corrections", user(s.idempotent(s.createCorrection)))
 	mux.HandleFunc("GET /api/reports/year", user(s.yearReport))
 
 	// settings and backup
@@ -213,7 +213,7 @@ func (s *Server) routes(mux *http.ServeMux) {
 	// collections: promises, disputes, pauses and the daily list
 	mux.HandleFunc("GET /api/attention", user(s.attention))
 	mux.HandleFunc("GET /api/documents/{id}/follow-ups", user(s.listFollowUps))
-	mux.HandleFunc("POST /api/documents/{id}/follow-ups", user(s.addFollowUp))
+	mux.HandleFunc("POST /api/documents/{id}/follow-ups", user(s.idempotent(s.addFollowUp)))
 	mux.HandleFunc("POST /api/follow-ups/{id}/resolve", user(s.resolveFollowUp))
 	mux.HandleFunc("GET /api/documents/{id}/payment-options", user(s.paymentOptions))
 	mux.HandleFunc("GET /api/public/documents/{token}/payment-options", s.limited(s.publicLimit, s.clientIP, s.publicPaymentOptions))
@@ -281,7 +281,7 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/hooks/{platform}/{id}", s.limited(s.hookLimit, func(r *http.Request) string { return r.PathValue("id") }, s.webhook))
 
 	// public API for other systems (same handlers, stable paths)
-	mux.HandleFunc("POST /api/v1/orders", user(s.v1Order))
+	mux.HandleFunc("POST /api/v1/orders", user(s.idempotent(s.v1Order)))
 	mux.HandleFunc("GET /api/v1/documents", user(s.listDocuments))
 	mux.HandleFunc("GET /api/v1/documents/{id}", user(s.getDocument))
 

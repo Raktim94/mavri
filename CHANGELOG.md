@@ -1,5 +1,27 @@
 # Changelog
 
+## 2.4.0
+
+### Added
+
+- **Drafts, issuing and a lock.** An invoice starts as a draft; **Issue invoice** locks it (figures, parties, dates, number, notes and look), after which only payments, refunds and voiding change it, and it cannot be deleted. Existing invoices are unaffected.
+- **Credit notes and debit notes** against an issued invoice, with their own numbers (`CN-`, `DN-`), linked to it and immutable; a credit note that covers the invoice marks it _Credited_. Credit notes reduce billed totals in reports and the dashboard.
+- **Refunds** recorded as payments of kind refund; `receivedCents` and `creditedCents` on documents.
+- **Richer lines and documents:** item code, tax code (HSN/SAC), service period, kind of line, and a tax reason (exempt, zero-rated, reverse charge, export); date of supply, purchase order and project references; a settlement currency with an exchange rate you enter; product SKU, barcode and tax code, picked by typing or scanning into a line; customer payment terms, time zone, quiet hours and contact preference.
+- **People and roles:** owner, staff and viewer accounts, a Team panel in Settings, and changing your own password.
+- **Replay-safe writes** with an `Idempotency-Key` header, and `X-RateLimit-*` headers (600 calls a minute per API key).
+- **Accounting exports:** a balanced double-entry journal and a one-row-per-line CSV.
+- Webhook events `invoice.issued`, `credit_note.created`, `debit_note.created` and `payment.refunded`.
+
+### Changed
+
+- New invoices from the composer are saved as drafts by default; issue them when ready.
+- The invoice list has _Draft_ and _Credited_ tabs, and drafts are left out of the dashboard, reports, reminders and the needs-attention list.
+
+### Upgrading
+
+Migrations `006` and `007` run on first start and keep your data. Staff and viewer accounts cannot reach settings, payments, backups, webhooks, keys or people.
+
 ## 2.3.0
 
 ### Added

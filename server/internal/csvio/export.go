@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"encoding/csv"
 	"io"
+	"strconv"
 	"strings"
 
 	"github.com/Raktim94/mavri/server/internal/model"
@@ -14,7 +15,7 @@ import (
 )
 
 // Kinds that can be exported.
-var Kinds = []string{"customers", "products", "invoices", "payments"}
+var Kinds = []string{"customers", "products", "invoices", "payments", "lines", "journal"}
 
 // SafeCell stops a spreadsheet from running a cell that starts like a formula.
 func SafeCell(s string) string {
@@ -46,7 +47,7 @@ func Export(ctx context.Context, d *sql.DB, st *store.Store, kind string, w io.W
 			row(cw, SafeCell(p.Name), SafeCell(p.Email), SafeCell(p.Phone), SafeCell(p.Address), SafeCell(p.TaxID), p.Country, SafeCell(p.Note))
 		}
 	case "products":
-		row(cw, "name", "description", "price", "category", "unit")
+		row(cw, "name", "description", "price", "category", "unit", "sku", "barcode", "tax_code")
 		ps, err := store.Products.Select(ctx, d, "WHERE archived = 0 ORDER BY name COLLATE NOCASE")
 		if err != nil {
 			return err
@@ -67,10 +68,10 @@ func Export(ctx context.Context, d *sql.DB, st *store.Store, kind string, w io.W
 			if p.UnitID != nil {
 				unit = names[*p.UnitID]
 			}
-			row(cw, SafeCell(p.Name), SafeCell(p.Description), money.Major(p.PriceCents, 2), SafeCell(cat), SafeCell(unit))
+			row(cw, SafeCell(p.Name), SafeCell(p.Description), money.Major(p.PriceCents, 2), SafeCell(cat), SafeCell(unit), SafeCell(p.SKU), SafeCell(p.Barcode), SafeCell(p.TaxCode))
 		}
 	case "invoices":
-		row(cw, "number", "type", "customer", "customer_email", "issued_on", "due_on", "status", "currency", "total", "paid", "balance")
+		row(cw, "number", "type", "document_type", "corrects", "customer", "customer_email", "issued_on", "due_on", "status", "currency", "total", "paid", "balance")
 		items, _, err := st.ListDocuments(ctx, store.Filter{Limit: 100000})
 		if err != nil {
 			return err
@@ -84,11 +85,20 @@ func Export(ctx context.Context, d *sql.DB, st *store.Store, kind string, w io.W
 				return err
 			}
 			dec := doc.Currency.Decimals
-			row(cw, SafeCell(doc.FullNumber), doc.Kind, SafeCell(doc.Customer.Name), SafeCell(doc.Customer.Email), doc.IssuedOn, doc.DueOn, doc.Status, doc.Currency.Code,
+			kindName := "invoice"
+			switch {
+			case doc.Kind == model.KindQuote:
+				kindName = "quote"
+			case doc.DocType == "credit":
+				kindName = "credit note"
+			case doc.DocType == "debit":
+				kindName = "debit note"
+			}
+			row(cw, SafeCell(doc.FullNumber), doc.Kind, kindName, SafeCell(doc.CorrectsNumber), SafeCell(doc.Customer.Name), SafeCell(doc.Customer.Email), doc.IssuedOn, doc.DueOn, doc.Status, doc.Currency.Code,
 				money.Major(doc.Totals.TotalCents, dec), money.Major(doc.PaidCents, dec), money.Major(doc.Totals.TotalCents-doc.PaidCents, dec))
 		}
 	case "payments":
-		row(cw, "invoice", "customer", "paid_on", "amount", "currency", "method", "note")
+		row(cw, "invoice", "customer", "paid_on", "amount", "currency", "method", "note", "type")
 		items, _, err := st.ListDocuments(ctx, store.Filter{Kind: model.KindInvoice, Limit: 100000})
 		if err != nil {
 			return err
@@ -102,9 +112,36 @@ func Export(ctx context.Context, d *sql.DB, st *store.Store, kind string, w io.W
 				return err
 			}
 			for _, p := range doc.Payments {
-				row(cw, SafeCell(doc.FullNumber), SafeCell(doc.Customer.Name), p.PaidOn, money.Major(p.AmountCents, doc.Currency.Decimals), doc.Currency.Code, SafeCell(p.Method), SafeCell(p.Note))
+				kind := p.Kind
+				if kind == "" {
+					kind = "payment"
+				}
+				row(cw, SafeCell(doc.FullNumber), SafeCell(doc.Customer.Name), p.PaidOn, money.Major(p.AmountCents, doc.Currency.Decimals), doc.Currency.Code, SafeCell(p.Method), SafeCell(p.Note), kind)
 			}
 		}
+	case "lines":
+		row(cw, "number", "line", "item_code", "tax_code", "description", "service_period", "quantity", "unit", "unit_price", "tax_rate", "tax_reason", "amount", "currency")
+		items, _, err := st.ListDocuments(ctx, store.Filter{Limit: 100000})
+		if err != nil {
+			return err
+		}
+		for _, it := range items {
+			if !pick(it.ID) {
+				continue
+			}
+			doc, err := st.GetDocument(ctx, d, it.ID)
+			if err != nil {
+				return err
+			}
+			dec := doc.Currency.Decimals
+			for i, l := range doc.Lines {
+				row(cw, SafeCell(doc.FullNumber), strconv.Itoa(i+1), SafeCell(l.Code), SafeCell(l.TaxCode), SafeCell(l.Name), SafeCell(l.Period),
+					strconv.FormatFloat(l.Quantity, 'f', -1, 64), SafeCell(l.Unit), money.Major(l.UnitCents, dec), strconv.FormatFloat(l.TaxRate, 'f', -1, 64), l.TaxCategory,
+					money.Major(money.Gross(l), dec), doc.Currency.Code)
+			}
+		}
+	case "journal":
+		return writeJournal(ctx, d, st, cw, pick)
 	default:
 		return ErrUnknownKind
 	}

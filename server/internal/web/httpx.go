@@ -87,6 +87,12 @@ func newLimiter(window time.Duration, max int) *limiter {
 
 // allow records an attempt and reports whether it is within the limit.
 func (l *limiter) allow(key string) bool {
+	ok, _ := l.take(key)
+	return ok
+}
+
+// take is allow that also says how many attempts are left in the window.
+func (l *limiter) take(key string) (bool, int) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	now := l.now()
@@ -98,9 +104,10 @@ func (l *limiter) allow(key string) bool {
 	}
 	if len(keep) >= l.max {
 		l.hits[key] = keep
-		return false
+		return false, 0
 	}
 	l.hits[key] = append(keep, now)
+	left := l.max - len(l.hits[key])
 	if len(l.hits) > 10000 { // drop idle keys so the map cannot grow without bound
 		for k, v := range l.hits {
 			if len(v) == 0 || now.Sub(v[len(v)-1]) > l.window {
@@ -108,7 +115,7 @@ func (l *limiter) allow(key string) bool {
 			}
 		}
 	}
-	return true
+	return true, left
 }
 
 // clientIP is the caller's address; behind a trusted proxy it is the entry
@@ -220,6 +227,15 @@ func (s *Server) authRole(humanOnly, ownerOnly bool, h http.HandlerFunc) http.Ha
 				return
 			}
 			if id, ok := s.Auth.VerifyKey(ctx, strings.TrimPrefix(hdr, "Bearer ")); ok {
+				// Every API key may make a generous number of calls a minute; the headers say where it stands.
+				allowed, left := s.apiLimit.take(strconv.FormatInt(id, 10))
+				w.Header().Set("X-RateLimit-Limit", strconv.Itoa(s.apiLimit.max))
+				w.Header().Set("X-RateLimit-Remaining", strconv.Itoa(left))
+				if !allowed {
+					w.Header().Set("Retry-After", "60")
+					fail(w, http.StatusTooManyRequests, "rate_limited", "too many requests for this API key, try again in a minute")
+					return
+				}
 				ctx = activity.WithSource(ctx, activity.SourceAPI, "API key #"+strconv.FormatInt(id, 10))
 				h(w, r.WithContext(context.WithValue(ctx, principalKey, principal{KeyID: id})))
 				return

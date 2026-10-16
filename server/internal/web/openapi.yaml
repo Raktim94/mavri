@@ -12,6 +12,10 @@ info:
     **Errors** always look like `{"error": {"code": "validation", "message": "…", "problems": []}}` with codes
     `validation`, `unauthorized`, `forbidden`, `not_found`, `conflict`, `rate_limited`, `internal`.
 
+    **Idempotency.** Send an `Idempotency-Key` header on `POST /api/v1/orders`, `POST /api/documents`, `POST /api/documents/{id}/issue`, `POST /api/documents/{id}/corrections` and `POST /api/documents/{id}/follow-ups`: the request is carried out once, and sending it again with the same key returns the first answer with `Idempotent-Replay: true`. The same key with a different request answers `422`. Keys are kept for a day.
+
+    **Rate limits.** Each API key may make 600 calls a minute. Every answer carries `X-RateLimit-Limit` and `X-RateLimit-Remaining`; beyond the limit the answer is `429` with `Retry-After`.
+
     **Lists** are paged with `limit` (max 1000) and `offset` and answer `{items, total, limit, offset}`.
 
     **Versioning.** `/api/v1/*` paths are stable: fields are only added, never removed or renamed. Other paths
@@ -453,6 +457,104 @@ paths:
         - { name: id, in: query, required: true, schema: { type: string } }
       responses:
         '200': { description: '`{valid, kind, level, message, state}`' }
+  /api/documents/{id}/issue:
+    post:
+      summary: Issue a draft invoice (locks it)
+      description: Once issued, an invoice's figures, parties, dates, number, notes and look can no longer change; only payments and voiding can. Drafts are created with `status` `draft`. Emits `invoice.issued`. Safe to retry with an `Idempotency-Key`.
+      tags: [Lifecycle]
+      parameters: [{ $ref: '#/components/parameters/id' }]
+      responses:
+        '200': { description: The issued invoice }
+        '400': { $ref: '#/components/responses/Error' }
+  /api/documents/{id}/corrections:
+    get:
+      summary: The credit and debit notes against an invoice
+      tags: [Lifecycle]
+      parameters: [{ $ref: '#/components/parameters/id' }]
+      responses:
+        '200': { description: Summaries of the notes }
+    post:
+      summary: Issue a credit note or a debit note against an issued invoice
+      description: A credit note (`kind` `credit`, with `full` true or `credit` as a list of `{index, quantity}`) reduces what the invoice is owed and settles it when it covers it; the invoice itself is not changed. A debit note (`kind` `debit`, with `lines`) is a further invoice for extra charges. Both are issued at once and cannot be edited or deleted. Emits `credit_note.created` or `debit_note.created`.
+      tags: [Lifecycle]
+      parameters: [{ $ref: '#/components/parameters/id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [kind]
+              properties:
+                kind: { type: string, enum: [credit, debit] }
+                full: { type: boolean }
+                credit: { type: array, items: { type: object, properties: { index: { type: integer }, quantity: { type: number } } } }
+                lines: { type: array, items: { $ref: '#/components/schemas/Line' } }
+                reason: { type: string }
+      responses:
+        '201': { description: The note }
+        '400': { $ref: '#/components/responses/Error' }
+  /api/users:
+    get:
+      summary: People with an account (owner only, person only)
+      tags: [People]
+      responses:
+        '200': { description: Members with their role }
+    post:
+      summary: Add a person (owner only, person only)
+      description: Roles are `owner` (everything), `staff` (records and documents; not settings, payments, backups, API keys or people) and `viewer` (read only).
+      tags: [People]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, role]
+              properties:
+                email: { type: string }
+                password: { type: string }
+                role: { type: string, enum: [owner, staff, viewer] }
+      responses:
+        '201': { description: Added }
+  /api/users/{id}:
+    put:
+      summary: Change a role or reset a password (owner only, person only)
+      description: A reset signs the person out everywhere. The last owner cannot be demoted or removed.
+      tags: [People]
+      parameters: [{ $ref: '#/components/parameters/id' }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role: { type: string, enum: [owner, staff, viewer] }
+                password: { type: string }
+      responses:
+        '200': { description: The member }
+    delete:
+      summary: Remove a person (owner only, person only)
+      tags: [People]
+      parameters: [{ $ref: '#/components/parameters/id' }]
+      responses:
+        '204': { description: Removed }
+  /api/session/password:
+    post:
+      summary: Change your own password (person only)
+      tags: [People]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [current, password]
+              properties:
+                current: { type: string }
+                password: { type: string }
+      responses:
+        '204': { description: Changed; your other sessions end }
   /api/documents/bulk:
     post:
       summary: Email, remind, mark paid or void many documents (person only)
@@ -689,7 +791,7 @@ paths:
         '202': { description: Queued as a new delivery with the same event id }
   /api/export/{file}:
     get:
-      summary: Export CSV (customers.csv, products.csv, invoices.csv, payments.csv) or every document as JSON (documents.json)
+      summary: Export CSV (customers, products, invoices, payments, lines, journal) or every document as JSON (documents.json)
       description: '`documents.json` holds every invoice and quote exactly as the API returns it, with the business, customer, bank, currency and style as they were when each was saved.'
       tags: [CSV]
       parameters:
@@ -698,7 +800,7 @@ paths:
             name: file,
             in: path,
             required: true,
-            schema: { type: string, enum: [customers.csv, products.csv, invoices.csv, payments.csv, documents.json] }
+            schema: { type: string, enum: [customers.csv, products.csv, invoices.csv, payments.csv, lines.csv, journal.csv, documents.json] }
           }
         ]
       responses:

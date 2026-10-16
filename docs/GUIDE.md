@@ -46,6 +46,12 @@ After saving a new invoice you see a short confirmation with the number, custome
 
 ![Invoice editor](screenshots/invoice-editor.png)
 
+### Drafts, issuing and corrections
+
+A new invoice starts as a **draft**: you can change anything, it does not count as owed, and it cannot be shared or emailed. **Issue invoice** locks it. From then on the figures, details, number and look cannot change, and it cannot be deleted; you can still record payments, record a refund, or void it. Mistakes are corrected with a **Credit note** (takes money off the invoice: everything, or some lines and quantities) or a **Debit note** (a further invoice for extra charges), both from the invoice page. They are numbered `CN-` and `DN-` (change the prefixes under Settings), issued at once, linked to the invoice, and cannot be edited. A credit note that covers the invoice marks it _Credited_. Invoices you made before this existed keep working as before: they stay editable.
+
+Each line has a _Code, period and tax reason_ section: item code (SKU), tax code (HSN or SAC), service period, kind of line, and why no tax is charged (exempt, zero-rated, reverse charge, export). Products can carry a SKU, a barcode and a tax code, and typing or scanning either into a line picks the product. The Dates section has date of supply, purchase order and project fields and the customer's payment terms; the Payment section can show the total in a second currency at a rate you enter.
+
 ## 4. Send it
 
 Open the invoice. Changes to a business or customer record do not change documents you already made; tick _Update details from their records_ when editing to copy them again. **Print / save as PDF** uses your browser's print dialog, so choose _Save as PDF_ as the printer. **UBL XML** and **XRechnung XML** download an electronic invoice; if a required field is missing, Mavri says which one.
@@ -126,9 +132,13 @@ In the invoice list, tick rows to **email**, **remind**, **mark paid** or **void
 
 ![Integrations](screenshots/integrations.png)
 
+## People
+
+Under **Settings → People** an owner adds the people who sign in: **Owner** (everything), **Staff** (invoices, quotes, records, CSV and email; not settings, payments, backups, API keys or people) and **Viewer** (read only). Give a new person a first password and tell them; they can change it under **Settings → Your password**. Resetting a password signs that person out everywhere. There is always at least one owner.
+
 ## Data and backups
 
-**Data & backups** exports customers, products, invoices and payments as CSV, and every invoice and quote as one JSON file (exactly as the API returns it, with the details each was saved with), so your records can leave Mavri without loss. It imports customers, products and past invoices. Choose the file, **Check file**, read what will happen (and download the list of rows with problems), then import.
+**Data & backups** exports customers, products, invoices and payments as CSV, and every invoice and quote as one JSON file (exactly as the API returns it, with the details each was saved with), so your records can leave Mavri without loss. **Lines** exports one row per document line, and **Journal** exports a balanced double-entry journal of what was issued and received (accounts receivable, sales, tax and bank, with plain account names to map in your accounting software; drafts, quotes and void invoices are left out). Mavri is not an accounting system; these are the way into yours. It imports customers, products and past invoices. Choose the file, **Check file**, read what will happen (and download the list of rows with problems), then import.
 
 For invoices, use one row per line item: `invoice number, customer, date, currency, description, qty, unit price, tax %`, and optionally `customer email, due date, total, paid, paid on, issuer`. Rows with the same invoice number become one invoice. An invoice with any problem is skipped whole and each problem is listed with its line, so you can fix the file and import it again; invoices that already exist are skipped, so importing twice is safe. If the file has a `total` column, Mavri checks it against what the lines add up to, which catches wrongly mapped price or tax columns.
 

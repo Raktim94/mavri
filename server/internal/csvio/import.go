@@ -52,6 +52,8 @@ var aliases = map[string]string{
 	"company": "name", "customer": "name", "full name": "name", "e-mail": "email", "mail": "email", "telephone": "phone", "mobile": "phone",
 	"vat": "tax_id", "vat id": "tax_id", "tax id": "tax_id", "taxid": "tax_id", "gstin": "tax_id", "tax number": "tax_id",
 	"notes": "note", "comment": "note", "price": "price", "unit price": "price", "rate": "price", "amount": "price",
+	"sku": "sku", "item code": "sku", "product code": "sku", "code": "sku", "hsn": "tax_code", "sac": "tax_code", "hsn/sac": "tax_code", "hsn code": "tax_code",
+	"tax code": "tax_code", "barcode": "barcode", "ean": "barcode", "upc": "barcode", "gtin": "barcode",
 	"title": "name", "product": "name", "item": "name", "details": "description", "category": "category", "unit": "unit",
 }
 
@@ -275,7 +277,7 @@ func importProducts(ctx context.Context, d *sql.DB, t table, rep *Report, dryRun
 	}
 	var toAdd []item
 	for i, rec := range t.rows {
-		p := model.Product{Name: t.get(rec, "name"), Description: t.get(rec, "description")}
+		p := model.Product{Name: t.get(rec, "name"), Description: t.get(rec, "description"), SKU: t.get(rec, "sku"), Barcode: t.get(rec, "barcode"), TaxCode: t.get(rec, "tax_code")}
 		if s := t.get(rec, "price"); s != "" {
 			c, err := ParsePrice(s)
 			if err != nil {
