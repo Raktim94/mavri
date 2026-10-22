@@ -34,7 +34,7 @@ Section: web
 Priority: optional
 Architecture: all
 Installed-Size: $size
-Depends: docker.io | docker-ce, docker-compose-v2 | docker-compose-plugin | docker-ce-cli, systemd
+Depends: docker.io | docker-ce, docker-compose-v2 | docker-compose-plugin, systemd
 Maintainer: Raktim Ranjit <ranjitraktim5@gmail.com>
 Homepage: https://mavri.nodedr.com/
 Description: Self-hosted invoicing and quotes (runs in Docker)

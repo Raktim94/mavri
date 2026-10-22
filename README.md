@@ -98,7 +98,7 @@ Then follow the [guide](docs/GUIDE.md): the setup wizard adds your business, and
 
 ### Debian and Ubuntu (.deb)
 
-Download `mavri_<version>_all.deb` from the [latest release](https://github.com/Raktim94/mavri/releases/latest) and install it. It needs Docker with the Compose plugin (`docker.io` and `docker-compose-v2` on Debian 12+ and Ubuntu 22.04+):
+Download `mavri_<version>_all.deb` from the [latest release](https://github.com/Raktim94/mavri/releases/latest) and install it. It needs Docker with the Compose plugin (`docker.io` and `docker-compose-v2` on Ubuntu 24.04 and Debian 13, or Docker's own `docker-ce` and `docker-compose-plugin` elsewhere):
 
 ```sh
 sudo apt install ./mavri_2.5.0_all.deb
