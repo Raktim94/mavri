@@ -1,0 +1,16 @@
+[Unit]
+Description=Mavri self-hosted invoicing (Docker Compose)
+Documentation=https://mavri.nodedr.com/docs/
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+TimeoutStartSec=600
+ExecStart=/usr/bin/docker compose --project-name mavri --env-file /etc/mavri/mavri.env -f /usr/lib/mavri/docker-compose.yml up -d --remove-orphans
+ExecStop=/usr/bin/docker compose --project-name mavri --env-file /etc/mavri/mavri.env -f /usr/lib/mavri/docker-compose.yml down
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,8 @@
+#!/bin/sh
+# Pull the Mavri image this package pins and restart the service.
+# Back up first: Mavri > Settings > Backup.
+set -eu
+[ "$(id -u)" -eq 0 ] || { echo "Run as root: sudo mavri-update" >&2; exit 1; }
+docker compose --project-name mavri --env-file /etc/mavri/mavri.env -f /usr/lib/mavri/docker-compose.yml pull
+systemctl restart mavri
+echo "Mavri updated. Open http://localhost:${HOST_PORT:-3001}"

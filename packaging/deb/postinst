@@ -1,0 +1,13 @@
+#!/bin/sh
+set -e
+if [ "$1" = configure ]; then
+  systemctl daemon-reload >/dev/null 2>&1 || true
+  systemctl enable mavri.service >/dev/null 2>&1 || true
+  if [ -d /run/systemd/system ]; then
+    # Starting pulls the image; do not fail the install if Docker is not ready.
+    systemctl start mavri.service >/dev/null 2>&1 || \
+      echo "mavri: could not start yet; check Docker, then run: sudo systemctl start mavri" >&2
+  fi
+  echo "Mavri is installed. Open http://localhost:3001"
+fi
+exit 0

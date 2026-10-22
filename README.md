@@ -96,6 +96,16 @@ Import [`casaos/docker-compose.yml`](casaos/docker-compose.yml) through **App St
 
 Then follow the [guide](docs/GUIDE.md): the setup wizard adds your business, and you can create your first invoice straight away.
 
+### Debian and Ubuntu (.deb)
+
+Download `mavri_<version>_all.deb` from the [latest release](https://github.com/Raktim94/mavri/releases/latest) and install it. It needs Docker with the Compose plugin (`docker.io` and `docker-compose-v2` on Debian 12+ and Ubuntu 22.04+):
+
+```sh
+sudo apt install ./mavri_2.5.0_all.deb
+```
+
+The package adds a `mavri` systemd service that runs the published image and keeps data in the `mavri_mavri-data` Docker volume. Open `http://localhost:3001`. Settings live in `/etc/mavri/mavri.env`; `sudo mavri-update` pulls the image the package pins. Removing the package leaves your data volume in place. Build it yourself with `packaging/deb/build.sh`.
+
 ### Updating
 
 On CasaOS (with the bundled updater container) open **Settings → Updates** and press **Update now**; Mavri downloads the new image, restarts in a few seconds and keeps your data. Anywhere else, pull the newest image and recreate the container. Version checks contact only GitHub and can be turned off with `UPDATE_CHECK=off`; see the [privacy policy](PRIVACY-POLICY.md).

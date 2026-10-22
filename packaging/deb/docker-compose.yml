@@ -1,0 +1,18 @@
+# Installed by the mavri .deb. Edit /etc/mavri/mavri.env, not this file.
+services:
+  app:
+    image: ghcr.io/raktim94/mavri:@VERSION@
+    container_name: mavri
+    ports:
+      - '${HOST_PORT:-3001}:3001'
+    environment:
+      - COOKIE_SECURE=${COOKIE_SECURE:-false}
+      - TRUST_PROXY=${TRUST_PROXY:-0}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-}
+      - UPDATE_CHECK=${UPDATE_CHECK:-on}
+    volumes:
+      - mavri-data:/data
+    restart: unless-stopped
+
+volumes:
+  mavri-data:

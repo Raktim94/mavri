@@ -1,0 +1,7 @@
+#!/bin/sh
+set -e
+systemctl daemon-reload >/dev/null 2>&1 || true
+if [ "$1" = purge ]; then
+  echo "mavri: your invoices stay in the Docker volume mavri_mavri-data. Remove it only if you are sure: docker volume rm mavri_mavri-data" >&2
+fi
+exit 0
