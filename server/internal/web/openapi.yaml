@@ -565,7 +565,7 @@ paths:
   /api/reconcile/apply:
     post:
       summary: Record confirmed statement lines as payments (person only)
-      description: Body `{matches: [{key, invoiceId, date, amountCents, note}]}` from the check. A line already recorded, or more than is owed, is refused and reported; the rest are recorded as payments of method `bank (statement)`.
+      description: "Body `{matches: [{key, invoiceId, date, amountCents, note}]}` from the check. A line already recorded, or more than is owed, is refused and reported; the rest are recorded as payments of method `bank (statement)`."
       tags: [Payments]
       responses:
         '200': { description: '`{results, recorded}`' }
@@ -587,7 +587,7 @@ paths:
   /api/parties/{id}/verify-tax:
     post:
       summary: Ask VIES whether an EU VAT number is active (person only)
-      description: An explicit action: the number is sent to the European Commission's VIES service. The answer (`valid`, `invalid` or `unavailable`), who gave it and when are kept. Other countries have no service Mavri can ask without credentials.
+      description: "An explicit action: the number is sent to the European Commission's VIES service. The answer (`valid`, `invalid` or `unavailable`), who gave it and when are kept. Other countries have no service Mavri can ask without credentials."
       tags: [Tax]
       parameters: [{ $ref: '#/components/parameters/id' }]
       responses:
