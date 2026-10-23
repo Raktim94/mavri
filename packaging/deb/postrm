@@ -2,6 +2,6 @@
 set -e
 systemctl daemon-reload >/dev/null 2>&1 || true
 if [ "$1" = purge ]; then
-  echo "mavri: your invoices stay in the Docker volume mavri_mavri-data. Remove it only if you are sure: docker volume rm mavri_mavri-data" >&2
+  echo "mavri: your data stays in Docker volumes (mavri_mavri-data) and your settings and generated passwords in /etc/mavri/mavri.env, so a later reinstall picks up where you left off. To delete everything for good: sudo docker compose --project-name mavri down -v ; sudo rm -rf /etc/mavri" >&2
 fi
 exit 0

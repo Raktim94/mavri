@@ -1,52 +1,42 @@
-#!/bin/sh
-# Build the Mavri .deb for Debian and Ubuntu (architecture: all).
-# The package installs a systemd service that runs the published Mavri image
-# with Docker Compose; it does not bundle the app itself.
-# Usage: packaging/deb/build.sh [version]   (default: version in package.json)
-set -eu
+#!/usr/bin/env bash
 umask 022
-here=$(cd "$(dirname "$0")" && pwd)
-root=$(cd "$here/../.." && pwd)
-ver=${1:-$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' "$root/package.json" | head -1)}
-out=${OUT_DIR:-$root/dist}
-stage=$(mktemp -d)
-trap 'rm -rf "$stage"' EXIT
-
-pkg="$stage/mavri_${ver}_all"
-mkdir -p "$pkg/DEBIAN" "$pkg/usr/lib/mavri" "$pkg/etc/mavri" \
-  "$pkg/lib/systemd/system" "$pkg/usr/share/doc/mavri" "$pkg/usr/bin"
-
-sed "s/@VERSION@/$ver/g" "$here/docker-compose.yml" > "$pkg/usr/lib/mavri/docker-compose.yml"
-install -m 0644 "$here/mavri.env" "$pkg/etc/mavri/mavri.env"
-install -m 0644 "$here/mavri.service" "$pkg/lib/systemd/system/mavri.service"
-install -m 0755 "$here/mavri-update" "$pkg/usr/bin/mavri-update"
-install -m 0644 "$root/LICENSE" "$pkg/usr/share/doc/mavri/copyright"
-printf 'mavri (%s) stable; urgency=medium\n\n  * Mavri %s. See https://github.com/Raktim94/mavri/blob/main/CHANGELOG.md\n\n -- Raktim Ranjit <ranjitraktim5@gmail.com>  %s\n' \
-  "$ver" "$ver" "$(date -R)" | gzip -9n > "$pkg/usr/share/doc/mavri/changelog.Debian.gz"
-echo /etc/mavri/mavri.env > "$pkg/DEBIAN/conffiles"
-for s in postinst prerm postrm; do install -m 0755 "$here/$s" "$pkg/DEBIAN/$s"; done
-
-size=$(du -sk "$pkg" | cut -f1)
-cat > "$pkg/DEBIAN/control" <<EOF
-Package: mavri
+# Builds <pkg>_<version>_<arch>.deb for amd64 and arm64 (or one arch). The package installs a systemd service that
+# runs the published, version-pinned container images with Docker Compose; it does not bundle the app itself.
+# Usage: packaging/deb/build.sh <version> [amd64|arm64]     Output: dist/ (override with OUT_DIR)
+set -euo pipefail
+here=$(cd "$(dirname "$0")" && pwd); root=$(cd "$here/../.." && pwd)
+. "$here/product.conf"
+ver="${1:?version, e.g. 1.2.3}"; ver="${ver#v}"
+archs="${2:-amd64 arm64}"; out="${OUT_DIR:-$root/dist}"; mkdir -p "$out"
+for arch in $archs; do
+  stage=$(mktemp -d); pkg="$stage/p"
+  mkdir -p "$pkg/DEBIAN" "$pkg/usr/lib/$PKG" "$pkg/usr/share/$PKG" "$pkg/lib/systemd/system" "$pkg/usr/share/doc/$PKG"
+  sed "s/@VERSION@/$ver/g" "$here/docker-compose.yml" > "$pkg/usr/lib/$PKG/docker-compose.yml"
+  # Shipped as an example; postinst creates /etc/$PKG/$PKG.env from it once, so the settings and generated secrets
+  # (which match the data volumes) survive remove, purge and upgrades.
+  sed "s/@VERSION@/$ver/g" "$here/$PKG.env" > "$pkg/usr/share/$PKG/$PKG.env.example"
+  install -m 0644 "$here/$PKG.service" "$pkg/lib/systemd/system/$PKG.service"
+  if [ -d "$here/bin" ]; then mkdir -p "$pkg/usr/bin"; install -m 0755 "$here"/bin/* "$pkg/usr/bin/"; fi
+  install -m 0644 "$root/LICENSE" "$pkg/usr/share/doc/$PKG/copyright"
+  printf '%s (%s) stable; urgency=medium\n\n  * %s %s. See %s\n\n -- Raktim Ranjit <ranjitraktim5@gmail.com>  %s\n' "$PKG" "$ver" "$TITLE" "$ver" "$DOCS" "$(date -R)" | gzip -9n > "$pkg/usr/share/doc/$PKG/changelog.Debian.gz"
+  for s in postinst prerm postrm; do install -m 0755 "$here/$s" "$pkg/DEBIAN/$s"; done
+  find "$pkg" -type d -exec chmod 0755 {} +
+  size=$(du -sk "$pkg" | cut -f1)
+  cat > "$pkg/DEBIAN/control" <<CTL
+Package: $PKG
 Version: $ver
 Section: web
 Priority: optional
-Architecture: all
+Architecture: $arch
 Installed-Size: $size
-Depends: docker.io | docker-ce, docker-compose-v2 | docker-compose-plugin, systemd
+Depends: docker.io | docker-ce, docker-compose-v2 | docker-compose-plugin, systemd, curl
 Maintainer: Raktim Ranjit <ranjitraktim5@gmail.com>
-Homepage: https://mavri.nodedr.com/
-Description: Self-hosted invoicing and quotes (runs in Docker)
- Mavri is free, open-source invoice and quote software. This package installs a
- systemd service that runs the published Mavri container with Docker Compose,
- keeping all records in a Docker volume on this machine. Open
- http://localhost:3001 after installing.
- .
- Settings are in /etc/mavri/mavri.env. Run "sudo mavri-update" to move to the
- version this package pins, and back up your data before upgrading.
-EOF
-
-mkdir -p "$out"
-fakeroot dpkg-deb --root-owner-group -Zxz --build "$pkg" "$out/mavri_${ver}_all.deb" >/dev/null
-echo "$out/mavri_${ver}_all.deb"
+Homepage: $HOMEPAGE
+Description: $SHORTDESC
+$LONGDESC
+CTL
+  f="$out/${PKG}_${ver}_${arch}.deb"
+  dpkg-deb --root-owner-group -Zxz --build "$pkg" "$f" >/dev/null
+  ( cd "$out" && sha256sum "$(basename "$f")" > "$(basename "$f").sha256" )
+  rm -rf "$stage"; echo "$f"
+done

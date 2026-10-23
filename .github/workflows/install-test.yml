@@ -20,13 +20,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build the package
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq fakeroot && packaging/deb/build.sh
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq fakeroot && packaging/deb/build.sh "$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' package.json | head -1)" amd64
       - name: Dependencies resolve on a clean Ubuntu 24.04
         run: |
           docker run --rm -v "$PWD/dist:/d:ro" ubuntu:24.04 sh -c \
-            'apt-get update -qq && apt-get install -s -y /d/mavri_*_all.deb | grep -E "^Inst (docker.io|docker-compose-v2|mavri)"'
+            'apt-get update -qq && apt-get install -s -y /d/mavri_*_amd64.deb | grep -E "^Inst (docker.io|docker-compose-v2|mavri)"'
       - name: Install (Docker is already on the runner)
-        run: sudo dpkg -i --force-depends dist/mavri_*_all.deb
+        run: sudo dpkg -i --force-depends dist/mavri_*_amd64.deb
       - name: Service is enabled and serves Mavri
         run: |
           systemctl is-enabled mavri
@@ -48,18 +48,18 @@ jobs:
           test ! -e /lib/systemd/system/mavri.service
           sudo docker volume inspect mavri_mavri-data >/dev/null
           test -e /etc/mavri/mavri.env
-      - name: Purge removes the settings file
+      - name: Purge removes the package files but keeps your settings
         run: |
           sudo apt-get purge -y mavri
-          test ! -e /etc/mavri/mavri.env
+          test -e /etc/mavri/mavri.env
           test ! -e /usr/lib/mavri
       - name: Reinstall works after purge
         run: |
-          sudo dpkg -i --force-depends dist/mavri_*_all.deb
+          sudo dpkg -i --force-depends dist/mavri_*_amd64.deb
           for i in $(seq 1 60); do curl -fsS -o /dev/null http://127.0.0.1:3001/ && exit 0; sleep 3; done
           exit 1
       - name: Final clean-up
-        run: sudo apt-get purge -y mavri && sudo docker volume rm mavri_mavri-data
+        run: sudo apt-get purge -y mavri && sudo docker volume rm mavri_mavri-data && sudo rm -rf /etc/mavri
 
   one-line-installer:
     name: One-line installer (scripts/quickstart.sh)

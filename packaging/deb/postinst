@@ -1,13 +1,31 @@
 #!/bin/sh
 set -e
+ENVF=/etc/mavri/mavri.env
 if [ "$1" = configure ]; then
+  # First install: create the settings file from the shipped example. It is never overwritten or removed by apt.
+  if [ ! -f "$ENVF" ]; then
+    install -d -m 0755 /etc/mavri
+    install -m 0600 /usr/share/mavri/mavri.env.example "$ENVF"
+  fi
+  # Replace every @SECRET@ with a fresh random value (only a new file has any).
+  if grep -q '@SECRET@' "$ENVF" 2>/dev/null; then
+    tmp=$(mktemp)
+    while IFS= read -r line; do
+      case "$line" in
+        *@SECRET@*) s=$(head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n'); printf '%s\n' "${line%%@SECRET@*}$s${line#*@SECRET@}" ;;
+        *) printf '%s\n' "$line" ;;
+      esac
+    done < "$ENVF" > "$tmp"
+    cat "$tmp" > "$ENVF"; rm -f "$tmp"
+  fi
+  chmod 0600 "$ENVF"
   systemctl daemon-reload >/dev/null 2>&1 || true
   systemctl enable mavri.service >/dev/null 2>&1 || true
   if [ -d /run/systemd/system ]; then
-    # Starting pulls the image; do not fail the install if Docker is not ready.
-    systemctl start mavri.service >/dev/null 2>&1 || \
+    # Starting pulls the images; do not fail the install if Docker is not ready.
+    systemctl restart mavri.service >/dev/null 2>&1 || \
       echo "mavri: could not start yet; check Docker, then run: sudo systemctl start mavri" >&2
   fi
-  echo "Mavri is installed. Open http://localhost:3001"
+  echo "Mavri is installed. Open http://localhost:3001 (first start pulls the images and can take a few minutes)."
 fi
 exit 0
