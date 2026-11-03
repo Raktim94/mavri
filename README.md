@@ -177,3 +177,7 @@ The stack is TypeScript and React for the interface, Go and SQLite for the backe
 **Created and led by [Raktim Ranjit](https://raktimranjit.com)** ([@Raktim94](https://github.com/Raktim94)) at [NodeDR Infotech Private Limited](https://nodedr.com). Raktim is the lead maintainer; see [MAINTAINERS.md](MAINTAINERS.md) for contact details. You can support the project through [GitHub Sponsors](https://github.com/sponsors/Raktim94).
 
 Mavri is licensed under the [GNU Affero General Public License v3.0](LICENSE). Contributions are welcome under the same license. The third-party components Mavri ships with, all under permissive MIT or BSD licenses, are listed in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+
+## Commercial licence
+
+Licensed under the AGPL-3.0. A [commercial licence](COMMERCIAL-LICENSE.md) is available on request for use without the AGPL obligations. The Mavri name and logo are not covered by the AGPL.
