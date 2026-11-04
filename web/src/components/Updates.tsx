@@ -56,7 +56,7 @@ export function UpdatePanel() {
     let sawDown = false;
     const stop = () => timer.current && clearInterval(timer.current);
     timer.current = setInterval(async () => {
-      let version = '';
+      let version: string;
       try {
         version = (await api.get<{ version: string }>('/api/version')).version;
       } catch {
