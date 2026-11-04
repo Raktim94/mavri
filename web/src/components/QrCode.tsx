@@ -5,8 +5,8 @@ qrcode.stringToBytes = qrcode.stringToBytesFuncs['UTF-8'];
 
 /** A QR code drawn as SVG squares, with the quiet zone the scanners need. */
 export function QrCode({ text, size = 168, label }: { text: string; size?: number; label: string }) {
-  let n = 0;
-  let dark: boolean[] = [];
+  let n: number;
+  let dark: boolean[];
   try {
     const q = qrcode(0, 'M');
     q.addData(text);
