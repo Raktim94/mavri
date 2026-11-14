@@ -34,6 +34,10 @@ Mavri helps freelancers and small businesses create invoices and quotes without 
   <img src="docs/screenshots/dashboard.png" alt="Mavri dashboard with setup checklist, totals and recent invoices (fictional demo data)" width="100%">
 </p>
 
+## Integrate with AI Coding Agents
+
+Use [`prompts/AI_INTEGRATION_PROMPT.md`](prompts/AI_INTEGRATION_PROMPT.md) to have a coding agent turn store orders into Mavri invoices or drive Mavri through MCP. See [`AGENTS.md`](AGENTS.md) and [`llms.txt`](llms.txt).
+
 ## Why Mavri
 
 |                            |                                                                                                                                                                                          |

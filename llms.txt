@@ -1,0 +1,13 @@
+# Mavri
+
+> Self-hosted invoicing and quotes by NodeDR (Go, SQLite): document currencies, payments, PDF and XML e-invoice exports, reminders, recurring invoices, store-order import, REST API with OpenAPI, signed webhooks and an MCP server with approval gates. Requires running your own instance. Not a tax filing service.
+
+## Integrate
+- [AI integration prompt](https://github.com/Raktim94/mavri/blob/main/prompts/AI_INTEGRATION_PROMPT.md)
+- [API and MCP reference](https://github.com/Raktim94/mavri/blob/main/docs/API.md)
+- [OpenAPI](https://github.com/Raktim94/mavri/blob/main/server/internal/web/openapi.yaml)
+
+## Product
+- [Product site](https://mavri.nodedr.com/)
+- [Repository](https://github.com/Raktim94/mavri)
+- [NodeDR AI integration catalog](https://www.nodedr.com/ai-integrations)
